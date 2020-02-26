@@ -22,6 +22,9 @@ PlayerFSM.cs
 PlayerPara.cs
 플레이어의 스텟
 
+SkeletonAni.cs
+스켈레톤(몬스터)의 animation을 조작
+
 SkeletonFSM.cs
 스켈레톤(몬스터)의 행동양식
 
