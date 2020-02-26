@@ -123,7 +123,7 @@ public class PlayerFSM : MonoBehaviour
         }
     }
 
-    void IdleState()
+    public void IdleState()
     {
         ChangeState(State.Idle, PlayerAni.ANI_IDLE);
     }
