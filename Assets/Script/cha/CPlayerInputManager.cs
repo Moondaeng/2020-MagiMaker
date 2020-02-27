@@ -12,6 +12,7 @@ public class CPlayerInputManager : MonoBehaviour
 
     private CSkillUIManager _skillUIManager;
     private CComboSelector _comboSelector;
+    private Network.CTcpClient _networkClient;
 
     private List<CSkillFacade> _baseSkillList;
     private List<CSkillFacade> _comboSkillList;
@@ -23,6 +24,7 @@ public class CPlayerInputManager : MonoBehaviour
         _baseSkillList = new List<CSkillFacade>();
         _comboSkillList = new List<CSkillFacade>();
         _skillUIManager = GameObject.Find("SkillScript").GetComponent<CSkillUIManager>();
+        _networkClient = GameObject.Find("Network").GetComponent<Network.CTcpClient>();
         _comboSelector = new CComboSelector();
 
         _isCombo = false;
@@ -142,6 +144,7 @@ public class CPlayerInputManager : MonoBehaviour
         if(Physics.Raycast(ray, out hit))
         {
             Debug.LogFormat("Click Position : {0}, {1}, {2}", hit.point.x, hit.point.y, hit.point.z);
+            _networkClient.SendMoveStop(hit.point.x, hit.point.z);
         }
     }
 
