@@ -84,7 +84,7 @@ BOOL MoveStart(Session *session, Packet &p)
 
 	MakePacketMoveStart(sendPacket, session->sessionID, nowX, nowY, destX, destY);
 	
-	SendPacketBroadcast(session,sendPacket);
+	SendPacketBroadcast(session,sendPacket,FALSE);
 
 	return TRUE;
 }
@@ -105,7 +105,7 @@ BOOL MoveStop(Session *session, Packet &p)
 
 	MakePacketMoveStop(sendPacket, session->sessionID, nowX, nowY);
 
-	SendPacketBroadcast(session,sendPacket);
+	SendPacketBroadcast(session,sendPacket,FALSE);
 
 	return TRUE;
 }
