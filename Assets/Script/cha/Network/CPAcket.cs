@@ -11,6 +11,8 @@ namespace Network
      */
     public class CPacket
     {
+        private static CLogComponent logger = new CLogComponent(ELogType.Network);
+
         private const byte _header_code = 0x86;
         private const int headerSize = 8;
 
@@ -54,7 +56,6 @@ namespace Network
             byte temp = 0x00;
             Int32 checkSum = -1;
             Write(_header_code).Write(payLoad_size).Write(type).Write(temp).Write(checkSum);
-            Console.WriteLine("make header");
         }
 
         // 메세지 헤더 읽기

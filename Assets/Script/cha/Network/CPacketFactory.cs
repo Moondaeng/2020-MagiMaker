@@ -9,8 +9,8 @@ namespace Network
     public static class CPacketFactory
     {
         private const int _cmdShutdownCode = 99;
-        private const int _cmdMoveStartCode = 1;
-        private const int _cmdMoveStopCode = 2;
+        private const int _cmdMoveStartCode = 100;
+        private const int _cmdMoveStopCode = 101;
 
         public static CPacket CreateMoveStartPacket(float now_x, float now_y, float dest_x, float dest_y)
         {

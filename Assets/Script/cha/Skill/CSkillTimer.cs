@@ -14,6 +14,8 @@ public class CSkillTimer : MonoBehaviour
         public bool isNotifyed;
     }
 
+    private static CLogComponent _logger;
+
     private CSkillUIManager skillUIManager;
 
     private List<CCooldown> _cooldownList = new List<CCooldown>();
@@ -23,6 +25,7 @@ public class CSkillTimer : MonoBehaviour
 
     private void Awake()
     {
+        _logger = new CLogComponent(ELogType.Skill);
         skillUIManager = GameObject.Find("SkillScript").GetComponent<CSkillUIManager>();
         _updateThreshold = (int)(_updateTime / Time.fixedDeltaTime);
         _updateCount = 0;
@@ -100,7 +103,7 @@ public class CSkillTimer : MonoBehaviour
 
         _cooldownList.Add(newSkill);
 
-        Debug.LogFormat("skill registerd : {0}", _cooldownList.Count);
+        _logger.Log("skill registerd : {0}", _cooldownList.Count);
 
         return _cooldownList.Count - 1;
     }

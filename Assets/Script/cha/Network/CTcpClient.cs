@@ -19,6 +19,8 @@ namespace Network
 
     public sealed class CTcpClient : MonoBehaviour
     {
+        private static CLogComponent logger;
+
         // The port number for the remote device.  
         public Int32 port = 9000;
         public string ipString = "127.0.0.1";
@@ -31,6 +33,7 @@ namespace Network
 
         private void Start()
         {
+            logger = new CLogComponent(ELogType.Network);
             StartClient();
         }
 
@@ -83,7 +86,7 @@ namespace Network
 
                 // Complete the connection.  
                 client.EndConnect(ar);
-
+                
                 Debug.LogFormat("Socket connected to {0}",
                     client.RemoteEndPoint.ToString());
                 _isConnected = true;

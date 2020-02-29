@@ -34,6 +34,8 @@ public class CComboSelector
     private static Array _comboSubjectArray = Enum.GetValues(typeof(ComboSubject));
     private static Array _comboTargetArray = Enum.GetValues(typeof(ComboTarget));
 
+    private static CLogComponent _logger = new CLogComponent(ELogType.Skill);
+
     private const int _comboRegisteredNumberStart = 4;
 
     public const int skillCount = 36;
@@ -70,7 +72,7 @@ public class CComboSelector
         // 이상한 케이스 인풋 차단
         if(_currentState != ComboState.cSubject && index == 3)
         {
-            Debug.Log("wrong case");
+            _logger.Log("wrong case");
             return;
         }
 
@@ -78,7 +80,7 @@ public class CComboSelector
         if (!IsExistLearnedSkill(BitSelector.GetSequence(GetSkillListSize(),
                 GetSkillListPosition() + index * GetSkillListSize())))
         {
-            Debug.Log("not learned");
+            _logger.Log("not learned");
             return;
         }
 
@@ -86,7 +88,7 @@ public class CComboSelector
         Select(index);
 
         // 선택 상황 출력
-        Debug.Log(ToStringCurrentState());
+        _logger.Log(ToStringCurrentState());
 
         // 선택이 끝난 상황
         if (_currentState == ComboState.cSelect)
@@ -187,13 +189,11 @@ public class CComboSelector
     {
         _currentState = ComboState.cClass;
         _skillUIManager.DeactivateAll();
-        Debug.Log("End Combo");
     }
 
     // 현재 배운 콤보 스킬들 목록을 출력한다
     public void PrintLearnedSkillList()
     {
-        Console.WriteLine("Skill Learned");
         UInt64 learned = _learnedSkillList;
         for (int learnSkillNumber = 0; learnSkillNumber < skillCount; learnSkillNumber++)
         {
