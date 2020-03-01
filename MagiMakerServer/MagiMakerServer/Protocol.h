@@ -1,0 +1,12 @@
+#pragma once
+
+#define CS_MOVE_START 100
+#define CS_MOVE_STOP 101
+
+#define SC_MOVE_START 110
+#define SC_MOVE_STOP 111
+#define SC_MOVE_SYNC 112
+
+#define SC_CREATE_PLAYER 210
+#define SC_CREATE_OTHER_PLAYER 211
+#define SC_REMOVE_PLAYER 212

@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class CSkillFacade
 {
+    private static CLogComponent _logger = new CLogComponent(ELogType.Skill);
+
     public CSkillTimer _timer;
     private CSkillUIManager _skillUIManager;
 
@@ -25,7 +27,7 @@ public class CSkillFacade
         _timer = GameObject.Find("SkillScript").GetComponent<CSkillTimer>();
         _isCooldown = false;
         _timerRegisterNumber = _timer.RegisterSkill(cooldown, EndCooldown);
-        Debug.LogFormat("register number = {0}", _timerRegisterNumber);
+        _logger.Log("register number = {0}", _timerRegisterNumber);
         _skillUIManager.Preempt(eUIName, _timerRegisterNumber);
     }
 
@@ -34,7 +36,7 @@ public class CSkillFacade
         if(_isCooldown)
         {
             // 실행 거부
-            Debug.Log("Skill is Cooldown!");
+            _logger.Log("Skill is Cooldown!");
         }
         else
         {
