@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 [System.Serializable]
 
 public class Cntl : MonoBehaviour
@@ -48,5 +49,10 @@ public class Cntl : MonoBehaviour
     void Update()
     {
         CheckClick();
+
+        if (Input.GetKeyDown(KeyCode.Escape))  //esc 입력 시 옵션 메뉴 열기
+        {
+            SceneManager.LoadScene("Option");
+        }
     }
 }
