@@ -39,8 +39,16 @@ public class CSkillUIManager : MonoBehaviour
 
     private CSkillTimer _timer;
 
+    // 갱신 시간 조절
+    protected const float _updateTime = 0.1f;
+    protected int _updateThreshold;
+    protected int _updateCount;
+
     private void Awake()
     {
+        _updateThreshold = (int)(_updateTime / Time.fixedDeltaTime);
+        _updateCount = 0;
+
         //AddSprite(_comboClassSprites, "Sprite/skill_attack.png");
         //AddSprite(_comboClassSprites, "Sprite/skill_defence.png");
         //AddSprite(_comboClassSprites, "Sprite/skill_support.png");
@@ -77,8 +85,17 @@ public class CSkillUIManager : MonoBehaviour
         DeactivateAll();
     }
 
-    private void Update()
+    // ui 갱신
+    protected void FixedUpdate()
     {
+        _updateCount++;
+
+        // 업데이트 작동 횟수 조절
+        if (_updateCount % _updateThreshold != 1)
+        {
+            return;
+        }
+
         Draw();
     }
 
@@ -86,8 +103,8 @@ public class CSkillUIManager : MonoBehaviour
     public void RegisterTimer(string parentName)
     {
         _timer = GameObject.Find(parentName).GetComponent<CSkillTimer>();
-        _timer.CooldownStart += CooldownEnable;
-        _timer.CooldownEnd += CooldownDisable;
+        _timer.TimerStart += CooldownEnable;
+        _timer.TimerEnd += CooldownDisable;
     }
 
     // 스킬 UI 등록

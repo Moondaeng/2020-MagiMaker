@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// 스킬을 등록해서 실행하는 포맷
 public class CSkillFacade
 {
     private static CLogComponent _logger = new CLogComponent(ELogType.Skill);
@@ -11,23 +12,26 @@ public class CSkillFacade
 
     public bool _isCooldown;
     private int _timerRegisterNumber;
+    private float _cooldown;
 
-    public CSkillFacade(float cooldown)
+    // 인터페이스 변경 필요 - Unit이 모두 Timer를 가지므로 자기 자신의 Timer를 추적하게 만들어야 함
+    public CSkillFacade(int registerNumber, float cooldown)
     {
         _skillUIManager = GameObject.Find("SkillScript").GetComponent<CSkillUIManager>();
         _timer = GameObject.Find("SkillScript").GetComponent<CSkillTimer>();
         _isCooldown = false;
-        _timerRegisterNumber = _timer.RegisterSkill(cooldown, EndCooldown);
+        _timerRegisterNumber = registerNumber;
+        _cooldown = cooldown;
     }
 
     // 스킬 등록
-    public CSkillFacade(float cooldown, CSkillUIManager.EUIName eUIName)
+    public CSkillFacade(int registerNumber, float cooldown, CSkillUIManager.EUIName eUIName)
     {
         _skillUIManager = GameObject.Find("SkillScript").GetComponent<CSkillUIManager>();
         _timer = GameObject.Find("SkillScript").GetComponent<CSkillTimer>();
         _isCooldown = false;
-        _timerRegisterNumber = _timer.RegisterSkill(cooldown, EndCooldown);
-        _logger.Log("register number = {0}", _timerRegisterNumber);
+        _timerRegisterNumber = registerNumber;
+        _cooldown = cooldown;
         _skillUIManager.Preempt(eUIName, _timerRegisterNumber);
     }
 
@@ -42,7 +46,7 @@ public class CSkillFacade
         {
             _isCooldown = true;
             // 스킬 실행
-            _timer.TimerStart(_timerRegisterNumber);
+            _timer.Register(_timerRegisterNumber, _cooldown, EndCooldown);
         }
     }
 

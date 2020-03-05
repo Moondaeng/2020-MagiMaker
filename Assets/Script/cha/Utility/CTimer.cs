@@ -91,8 +91,7 @@ public class CTimer : MonoBehaviour
         var observed = FindByRegisterNumber(registeredNumber);
         if (observed == null)
         {
-            Debug.Log("Error - GetCurrentCooldown Can't Find registered number");
-            return -1;
+            return 0;
         }
         else
         {
@@ -105,7 +104,6 @@ public class CTimer : MonoBehaviour
         var observed = FindByRegisterNumber(registeredNumber);
         if (observed == null)
         {
-            Debug.Log("Error - GetMaxCooldown Can't Find registered number");
             return -1;
         }
         else
