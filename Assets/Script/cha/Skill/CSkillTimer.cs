@@ -5,6 +5,7 @@ using UnityEngine;
 public class CSkillTimer : MonoBehaviour
 {
     public delegate void Callback();
+    public delegate void CooldownCallback(int registerdNumber);
 
     class CCooldown
     {
@@ -15,9 +16,10 @@ public class CSkillTimer : MonoBehaviour
     }
 
     private static CLogComponent _logger;
-
-    private CSkillUIManager skillUIManager;
-
+    
+    public CooldownCallback CooldownStart;
+    public CooldownCallback CooldownEnd;
+    
     private List<CCooldown> _cooldownList = new List<CCooldown>();
     private const float _updateTime = 0.1f;
     private int _updateThreshold;
@@ -26,7 +28,6 @@ public class CSkillTimer : MonoBehaviour
     private void Awake()
     {
         _logger = new CLogComponent(ELogType.Skill);
-        skillUIManager = GameObject.Find("SkillScript").GetComponent<CSkillUIManager>();
         _updateThreshold = (int)(_updateTime / Time.fixedDeltaTime);
         _updateCount = 0;
     }
@@ -54,7 +55,6 @@ public class CSkillTimer : MonoBehaviour
                 TimerEnd(registerNumber);
             }
         }
-        skillUIManager.Draw();
     }
 
     // 타이머 시간 설정 및 쿨타임 그리기 활성화
@@ -65,7 +65,7 @@ public class CSkillTimer : MonoBehaviour
         cooldown.current = cooldown.max;
         cooldown.isNotifyed = false;
 
-        skillUIManager.CooldownEnable(registeredNumber);
+        CooldownStart(registeredNumber);
     }
 
     private void TimerRun(int registeredNumber, float ranTime)
@@ -88,7 +88,7 @@ public class CSkillTimer : MonoBehaviour
         cooldown.notify();
         cooldown.isNotifyed = true;
 
-        skillUIManager.CooldownDisable(registeredNumber);
+        CooldownEnd(registeredNumber);
     }
 
     public int RegisterSkill(float cooldownMax, Callback cooldownNotify)

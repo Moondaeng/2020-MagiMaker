@@ -20,7 +20,7 @@ public class CSkillUIManager : MonoBehaviour
     {
         public GameObject ui;
         public Image image;
-        public CSkillCooldownDrawer drawer;
+        public CTimerDrawer drawer;
         public int preemptSkillNumber;
     }
 
@@ -41,8 +41,6 @@ public class CSkillUIManager : MonoBehaviour
 
     private void Awake()
     {
-        _timer = GameObject.Find("SkillScript").GetComponent<CSkillTimer>();
-
         //AddSprite(_comboClassSprites, "Sprite/skill_attack.png");
         //AddSprite(_comboClassSprites, "Sprite/skill_defence.png");
         //AddSprite(_comboClassSprites, "Sprite/skill_support.png");
@@ -77,6 +75,19 @@ public class CSkillUIManager : MonoBehaviour
     {
         // 시작 시 콤보는 꺼져있는 상태이므로 UI를 끔
         DeactivateAll();
+    }
+
+    private void Update()
+    {
+        Draw();
+    }
+
+    // ParentName : 부모로 CSkillTimer를 들고 있는 Object
+    public void RegisterTimer(string parentName)
+    {
+        _timer = GameObject.Find(parentName).GetComponent<CSkillTimer>();
+        _timer.CooldownStart += CooldownEnable;
+        _timer.CooldownEnd += CooldownDisable;
     }
 
     // 스킬 UI 등록
@@ -240,7 +251,7 @@ public class CSkillUIManager : MonoBehaviour
         CSkillIUI skillUI = new CSkillIUI();
         skillUI.ui = GameObject.Find(uiName);
         skillUI.image = skillUI.ui.GetComponent<Image>();
-        skillUI.drawer = skillUI.ui.GetComponent<CSkillCooldownDrawer>();
+        skillUI.drawer = skillUI.ui.GetComponent<CTimerDrawer>();
         skillUI.preemptSkillNumber = -1;
         list.Add(skillUI);
     }

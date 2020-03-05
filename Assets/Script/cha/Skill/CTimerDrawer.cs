@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CSkillCooldownDrawer : MonoBehaviour
+public class CTimerDrawer : MonoBehaviour
 {
     public Image cooldownImage;
     public Text cooldownText;
