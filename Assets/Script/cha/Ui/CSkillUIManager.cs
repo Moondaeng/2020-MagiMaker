@@ -273,6 +273,7 @@ public class CSkillUIManager : MonoBehaviour
         list.Add(skillUI);
     }
 
+    // 등록된 번호가 사용 중인 ui 파악
     private CSkillIUI FindPreemptNumber(int registeredNumber)
     {
         foreach (var skillUI in _baseList)

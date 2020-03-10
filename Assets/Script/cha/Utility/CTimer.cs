@@ -75,6 +75,13 @@ public class CTimer : MonoBehaviour
     // 번호가 등록되어 있는 경우, 시간에 맞춰 갱신
     public void Register(int regNum, float time, Callback callback)
     {
+        // 이미 등록된 경우
+        if(FindByRegisterNumber(regNum) != null)
+        {
+            Renew(regNum, time);
+        }
+
+        // 아직 등록되지 않은 번호인 경우
         CObserved observed = new CObserved()
         {
             registerNumber = regNum,

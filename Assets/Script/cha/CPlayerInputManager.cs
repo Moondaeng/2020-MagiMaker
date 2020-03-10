@@ -39,14 +39,14 @@ public class CPlayerInputManager : MonoBehaviour
         _timerUiList.RegisterTimer("SkillScript");
 
         // 스킬은 나중에 플레이어 관련 클래스에서 처리하도록 변경
-        _baseSkillList.Add(new CSkillFacade(5.0f, CSkillUIManager.EUIName.Base0));
-        _baseSkillList.Add(new CSkillFacade(7.0f, CSkillUIManager.EUIName.Base1));
-        _baseSkillList.Add(new CSkillFacade(9.0f, CSkillUIManager.EUIName.Base2));
-        _baseSkillList.Add(new CSkillFacade(10.0f, CSkillUIManager.EUIName.Base3));
+        _baseSkillList.Add(new CSkillFacade(0, 5.0f, CSkillUIManager.EUIName.Base0));
+        _baseSkillList.Add(new CSkillFacade(1, 7.0f, CSkillUIManager.EUIName.Base1));
+        _baseSkillList.Add(new CSkillFacade(2, 9.0f, CSkillUIManager.EUIName.Base2));
+        _baseSkillList.Add(new CSkillFacade(3, 10.0f, CSkillUIManager.EUIName.Base3));
 
         for(int i = 0; i < 36; i++)
         {
-            _comboSkillList.Add(new CSkillFacade(10.5f + 1.0f * i));
+            _comboSkillList.Add(new CSkillFacade(4 + i, 10.5f + 1.0f * i));
         }
 
         _comboSelector.LearnSkill(0);

@@ -7,6 +7,11 @@ public class CSkillFacade
 {
     private static CLogComponent _logger = new CLogComponent(ELogType.Skill);
 
+    // 스킬 사용 횟수
+    public int skillUseCount;
+    // 스킬 발동 조건 횟수
+    // 스킬 발동 횟수 충족 시 발동할 효과
+
     public CSkillTimer _timer;
     private CSkillUIManager _skillUIManager;
 
@@ -50,8 +55,5 @@ public class CSkillFacade
         }
     }
 
-    private void EndCooldown()
-    {
-        _isCooldown = false;
-    }
+    private void EndCooldown() => _isCooldown = false;
 }
