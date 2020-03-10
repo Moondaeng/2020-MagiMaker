@@ -665,7 +665,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3364e084cd667dc4bb7299545e3d7188, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  telepotationCheck: 0
+  telepotationCheck: 1
   spell:
   - {fileID: 968757935}
 --- !u!114 &788855906

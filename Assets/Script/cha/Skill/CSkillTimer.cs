@@ -11,26 +11,6 @@ public class CSkillTimer : CTimer
         base.Awake();
         _logger = new CLogComponent(ELogType.Skill);
     }
-    
-    // 현재 쿨다운 추가
-    // 타이머 상에 존재하는 번호만 적용됨
-    public void AddCooldown(int registeredNumber, float addTime)
-    {
-        var timer = FindByRegisterNumber(registeredNumber);
-        if (timer == null) return;
-
-        timer.Value.current += addTime;
-    }
-
-    // 현재 쿨다운 감소
-    // 타이머 상에 존재하는 번호만 적용됨
-    public void SubtractCooldown(int registeredNumber, float subTime)
-    {
-        var timer = FindByRegisterNumber(registeredNumber);
-        if (timer == null) return;
-        
-        timer.Value.current += subTime;
-    }
 
     // 등록 번호들 중 가장 쿨타임이 적게 남은 번호를 순차 리스트 범위에서 찾는다
     // 만약 타이머에 없는 번호인 경우 쿨다운 중에 있지 않은 상태이므로 해당 번호를 리턴한다

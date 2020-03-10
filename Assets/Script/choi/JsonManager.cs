@@ -62,7 +62,7 @@ public class JsonManager : MonoBehaviour
             try
             {
                 json = r.ReadToEnd();
-
+                
                 //ReadMonsterJson(json, name);
             }
             finally

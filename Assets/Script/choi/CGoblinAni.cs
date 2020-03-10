@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CGoblinAni : MonoBehaviour
+public class GoblinAni : MonoBehaviour
 {
     public const string IDLE = "idle";
     public const string ATTACK1 = "attack1";
