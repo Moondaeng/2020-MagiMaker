@@ -30,17 +30,17 @@ public class UsePortal : MonoBehaviour
             {
                 case "PORTAL":                                     
                     ParentTransform.position += new Vector3(0, 0, CConstants.PORTAL_DISTANCE_Z);
-                    player.GetComponent<PlayerFSM>().IdleState();
+                    player.GetComponent<CPlayerFSM>().IdleState();
                     break;
 
                 case "RIGHT_PORTAL":                                   
                     ParentTransform.position += new Vector3(CConstants.PORTAL_DISTANCE_X, 0, CConstants.PORTAL_DISTANCE_Z);
-                    player.GetComponent<PlayerFSM>().IdleState();
+                    player.GetComponent<CPlayerFSM>().IdleState();
                     break;
 
                 case "LEFT_PORTAL":
                     ParentTransform.position += new Vector3(-CConstants.PORTAL_DISTANCE_X, 0, CConstants.PORTAL_DISTANCE_Z);
-                    player.GetComponent<PlayerFSM>().IdleState();
+                    player.GetComponent<CPlayerFSM>().IdleState();
                     break;
 
             }
