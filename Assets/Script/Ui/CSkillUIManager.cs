@@ -77,6 +77,11 @@ public class CSkillUIManager : MonoBehaviour
         AddSkillUI("Skill 2", _baseList);
         AddSkillUI("Skill 3", _baseList);
         AddSkillUI("Skill 4", _baseList);
+
+        Preempt(EUIName.Base0, 0);
+        Preempt(EUIName.Base1, 1);
+        Preempt(EUIName.Base2, 2);
+        Preempt(EUIName.Base3, 3);
     }
 
     private void Start()

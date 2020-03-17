@@ -44,7 +44,7 @@ public class CTimerListUiManager : MonoBehaviour
 
     protected void Start()
     {
-        _uiCanvas = GameObject.Find("Ui").transform;
+        _uiCanvas = GameObject.Find("Canvas").transform;
     }
 
     // ui 갱신

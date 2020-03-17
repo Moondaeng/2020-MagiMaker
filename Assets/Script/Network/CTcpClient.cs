@@ -20,6 +20,7 @@ namespace Network
     public sealed class CTcpClient : MonoBehaviour
     {
         private static CLogComponent logger;
+        private static CGameEvent gameEvent;
 
         // The port number for the remote device.  
         public Int32 port = 9000;
@@ -90,6 +91,8 @@ namespace Network
                 Debug.LogFormat("Socket connected to {0}",
                     client.RemoteEndPoint.ToString());
                 _isConnected = true;
+                
+
 
                 // Signal that the connection has been made.  
                 //connectDone.Set();

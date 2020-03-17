@@ -8,7 +8,6 @@ public class CSkillFacade
     private static CLogComponent _logger = new CLogComponent(ELogType.Skill);
 
     public CSkillTimer _timer;
-    private CSkillUIManager _skillUIManager;
 
     public bool _isCooldown;
     private int _timerRegisterNumber;
@@ -17,7 +16,6 @@ public class CSkillFacade
     // 인터페이스 변경 필요 - Unit이 모두 Timer를 가지므로 자기 자신의 Timer를 추적하게 만들어야 함
     public CSkillFacade(int registerNumber, float cooldown)
     {
-        _skillUIManager = GameObject.Find("SkillScript").GetComponent<CSkillUIManager>();
         _timer = GameObject.Find("SkillScript").GetComponent<CSkillTimer>();
         _isCooldown = false;
         _timerRegisterNumber = registerNumber;
@@ -27,12 +25,10 @@ public class CSkillFacade
     // 스킬 등록
     public CSkillFacade(int registerNumber, float cooldown, CSkillUIManager.EUIName eUIName)
     {
-        _skillUIManager = GameObject.Find("SkillScript").GetComponent<CSkillUIManager>();
         _timer = GameObject.Find("SkillScript").GetComponent<CSkillTimer>();
         _isCooldown = false;
         _timerRegisterNumber = registerNumber;
         _cooldown = cooldown;
-        _skillUIManager.Preempt(eUIName, _timerRegisterNumber);
     }
 
     public void Use()
@@ -50,8 +46,5 @@ public class CSkillFacade
         }
     }
 
-    private void EndCooldown()
-    {
-        _isCooldown = false;
-    }
+    private void EndCooldown() =>_isCooldown = false;
 }

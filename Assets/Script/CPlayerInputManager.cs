@@ -13,7 +13,7 @@ public class CPlayerInputManager : MonoBehaviour
     private CSkillUIManager _skillUIManager;
     private CTimerListUiManager _timerUiList;
     private CComboSelector _comboSelector;
-    private Network.CTcpClient _networkClient;
+    private CGameEvent _gameEvent;
 
     private List<CSkillFacade> _baseSkillList;
     private List<CSkillFacade> _comboSkillList;
@@ -26,7 +26,7 @@ public class CPlayerInputManager : MonoBehaviour
         _comboSkillList = new List<CSkillFacade>();
         _skillUIManager = GameObject.Find("SkillScript").GetComponent<CSkillUIManager>();
         _timerUiList = GameObject.Find("SkillScript").GetComponent<CTimerListUiManager>();
-        _networkClient = GameObject.Find("Network").GetComponent<Network.CTcpClient>();
+        _gameEvent = GameObject.Find("GameEvent").GetComponent<CGameEvent>();
         _comboSelector = new CComboSelector();
 
         _isCombo = false;
@@ -38,16 +38,16 @@ public class CPlayerInputManager : MonoBehaviour
         _skillUIManager.RegisterTimer("SkillScript");
         _timerUiList.RegisterTimer("SkillScript");
 
-        //// 스킬은 나중에 플레이어 관련 클래스에서 처리하도록 변경
-        //_baseSkillList.Add(new CSkillFacade(5.0f, CSkillUIManager.EUIName.Base0));
-        //_baseSkillList.Add(new CSkillFacade(7.0f, CSkillUIManager.EUIName.Base1));
-        //_baseSkillList.Add(new CSkillFacade(9.0f, CSkillUIManager.EUIName.Base2));
-        //_baseSkillList.Add(new CSkillFacade(10.0f, CSkillUIManager.EUIName.Base3));
+        // 스킬은 나중에 플레이어 관련 클래스에서 처리하도록 변경
+        _baseSkillList.Add(new CSkillFacade(0, 5.0f, CSkillUIManager.EUIName.Base0));
+        _baseSkillList.Add(new CSkillFacade(1, 7.0f, CSkillUIManager.EUIName.Base1));
+        _baseSkillList.Add(new CSkillFacade(2, 9.0f, CSkillUIManager.EUIName.Base2));
+        _baseSkillList.Add(new CSkillFacade(3, 10.0f, CSkillUIManager.EUIName.Base3));
 
-        //for(int i = 0; i < 36; i++)
-        //{
-        //    _comboSkillList.Add(new CSkillFacade(10.5f + 1.0f * i));
-        //}
+        for (int i = 0; i < 36; i++)
+        {
+            _comboSkillList.Add(new CSkillFacade(4 + i, 10.5f + 1.0f * i));
+        }
 
         _comboSelector.LearnSkill(0);
         _comboSelector.LearnSkill(1);
@@ -145,11 +145,11 @@ public class CPlayerInputManager : MonoBehaviour
     {
         Debug.Log("Pressed Mouse Left");
         RaycastHit hit;
+
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if(Physics.Raycast(ray, out hit))
         {
             Debug.LogFormat("Click Position : {0}, {1}, {2}", hit.point.x, hit.point.y, hit.point.z);
-            _networkClient.SendMoveStop(hit.point.x, hit.point.z);
         }
     }
 

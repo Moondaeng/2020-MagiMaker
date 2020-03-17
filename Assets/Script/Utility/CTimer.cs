@@ -73,8 +73,14 @@ public class CTimer : MonoBehaviour
 
     // 타이머에 등록
     // 번호가 등록되어 있는 경우, 시간에 맞춰 갱신
+    // 콜백이 다른 경우 문제가 생길 수 있음. 버프 같은 경우는 조심해야 함
     public void Register(int regNum, float time, Callback callback)
     {
+        if(FindByRegisterNumber(regNum) != null)
+        {
+            Renew(regNum, time);
+        }
+
         CObserved observed = new CObserved()
         {
             registerNumber = regNum,
