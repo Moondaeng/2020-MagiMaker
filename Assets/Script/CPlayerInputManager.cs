@@ -14,6 +14,7 @@ public class CPlayerInputManager : MonoBehaviour
     private CTimerListUiManager _timerUiList;
     private CComboSelector _comboSelector;
     private CGameEvent _gameEvent;
+    private CProjectileSkill _projectileSkill;
 
     private List<CSkillFacade> _baseSkillList;
     private List<CSkillFacade> _comboSkillList;
@@ -26,6 +27,7 @@ public class CPlayerInputManager : MonoBehaviour
         _comboSkillList = new List<CSkillFacade>();
         _skillUIManager = GameObject.Find("SkillScript").GetComponent<CSkillUIManager>();
         _timerUiList = GameObject.Find("SkillScript").GetComponent<CTimerListUiManager>();
+        _projectileSkill = GameObject.Find("SkillScript").GetComponent<CProjectileSkill>();
         _gameEvent = GameObject.Find("GameEvent").GetComponent<CGameEvent>();
         _comboSelector = new CComboSelector();
 
@@ -39,10 +41,12 @@ public class CPlayerInputManager : MonoBehaviour
         _timerUiList.RegisterTimer("SkillScript");
 
         // 스킬은 나중에 플레이어 관련 클래스에서 처리하도록 변경
-        _baseSkillList.Add(new CSkillFacade(0, 5.0f, CSkillUIManager.EUIName.Base0));
-        _baseSkillList.Add(new CSkillFacade(1, 7.0f, CSkillUIManager.EUIName.Base1));
-        _baseSkillList.Add(new CSkillFacade(2, 9.0f, CSkillUIManager.EUIName.Base2));
-        _baseSkillList.Add(new CSkillFacade(3, 10.0f, CSkillUIManager.EUIName.Base3));
+        _baseSkillList.Add(new CSkillFacade(0, 5.0f));
+        _baseSkillList.Add(new CSkillFacade(1, 7.0f));
+        _baseSkillList.Add(new CSkillFacade(2, 9.0f));
+        _baseSkillList.Add(new CSkillFacade(3, 10.0f));
+
+        _baseSkillList[0].RegisterSkill(_projectileSkill.Fireball);
 
         for (int i = 0; i < 36; i++)
         {
@@ -100,7 +104,7 @@ public class CPlayerInputManager : MonoBehaviour
         }
         else
         {
-            _baseSkillList[0].Use();
+            UseSkillToMousePos(_baseSkillList[0]);
         }
     }
 
@@ -116,7 +120,7 @@ public class CPlayerInputManager : MonoBehaviour
         }
         else
         {
-            _baseSkillList[1].Use();
+            UseSkillToMousePos(_baseSkillList[1]);
         }
     }
 
@@ -131,14 +135,14 @@ public class CPlayerInputManager : MonoBehaviour
         }
         else
         {
-            _baseSkillList[2].Use();
+            UseSkillToMousePos(_baseSkillList[2]);
         }
     }
 
     private void CallCombo(int skillNumber)
     {
         _isCombo = false;
-        _comboSkillList[skillNumber].Use();
+        UseSkillToMousePos(_comboSkillList[skillNumber]);
     }
 
     private void KeyDownMouseLeft()
@@ -171,5 +175,15 @@ public class CPlayerInputManager : MonoBehaviour
         Debug.Log("Pressed BackQuote");
         _isCombo = false;
         _comboSelector.EndCombo();
+    }
+
+    private void UseSkillToMousePos(CSkillFacade skillFormat)
+    {
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out hit))
+        {
+            skillFormat.Use(hit.point);
+        }
     }
 }

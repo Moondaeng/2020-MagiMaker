@@ -6,9 +6,12 @@ using UnityEngine;
 public class CSkillFacade
 {
     private static CLogComponent _logger = new CLogComponent(ELogType.Skill);
+    public delegate void RetentionSkill(GameObject user, Vector3 targetPos);
 
     public CSkillTimer _timer;
 
+    private GameObject _userObject;
+    private RetentionSkill _usingSkill;
     public bool _isCooldown;
     private int _timerRegisterNumber;
     private float _cooldown;
@@ -17,21 +20,18 @@ public class CSkillFacade
     public CSkillFacade(int registerNumber, float cooldown)
     {
         _timer = GameObject.Find("SkillScript").GetComponent<CSkillTimer>();
+        _userObject = GameObject.Find("Player");
         _isCooldown = false;
         _timerRegisterNumber = registerNumber;
         _cooldown = cooldown;
     }
 
-    // 스킬 등록
-    public CSkillFacade(int registerNumber, float cooldown, CSkillUIManager.EUIName eUIName)
+    public void RegisterSkill(RetentionSkill register)
     {
-        _timer = GameObject.Find("SkillScript").GetComponent<CSkillTimer>();
-        _isCooldown = false;
-        _timerRegisterNumber = registerNumber;
-        _cooldown = cooldown;
+        _usingSkill = register;
     }
 
-    public void Use()
+    public void Use(Vector3 targetPos)
     {
         if(_isCooldown)
         {
@@ -42,6 +42,7 @@ public class CSkillFacade
         {
             _isCooldown = true;
             // 스킬 실행
+            _usingSkill(_userObject, targetPos);
             _timer.Register(_timerRegisterNumber, _cooldown, EndCooldown);
         }
     }
