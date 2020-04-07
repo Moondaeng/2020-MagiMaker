@@ -16,6 +16,15 @@ public class CSkillFacade
     private int _timerRegisterNumber;
     private float _cooldown;
 
+    public CSkillFacade(int registerNumber, float cooldown, GameObject user)
+    {
+        _userObject = user;
+        _timer = _userObject.GetComponent<CSkillTimer>();
+        _isCooldown = false;
+        _timerRegisterNumber = registerNumber;
+        _cooldown = cooldown;
+    }
+
     // 인터페이스 변경 필요 - Unit이 모두 Timer를 가지므로 자기 자신의 Timer를 추적하게 만들어야 함
     public CSkillFacade(int registerNumber, float cooldown)
     {

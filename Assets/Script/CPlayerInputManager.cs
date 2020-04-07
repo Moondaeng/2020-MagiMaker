@@ -41,7 +41,7 @@ public class CPlayerInputManager : MonoBehaviour
         _timerUiList.RegisterTimer("SkillScript");
 
         // 스킬은 나중에 플레이어 관련 클래스에서 처리하도록 변경
-        _baseSkillList.Add(new CSkillFacade(0, 5.0f));
+        _baseSkillList.Add(new CSkillFacade(0, 1.0f));
         _baseSkillList.Add(new CSkillFacade(1, 7.0f));
         _baseSkillList.Add(new CSkillFacade(2, 9.0f));
         _baseSkillList.Add(new CSkillFacade(3, 10.0f));
@@ -154,6 +154,7 @@ public class CPlayerInputManager : MonoBehaviour
         if(Physics.Raycast(ray, out hit))
         {
             Debug.LogFormat("Click Position : {0}, {1}, {2}", hit.point.x, hit.point.y, hit.point.z);
+            _gameEvent.PlayerMoveStop(new Tuple<float, float>(hit.point.x, hit.point.z));
         }
     }
 

@@ -20,7 +20,7 @@ namespace Network
     public sealed class CTcpClient : MonoBehaviour
     {
         private static CLogComponent logger;
-        private static CGameEvent gameEvent;
+        private static CGameEvent _gameEvent;
 
         // The port number for the remote device.  
         public Int32 port = 9000;
@@ -35,6 +35,7 @@ namespace Network
         private void Start()
         {
             logger = new CLogComponent(ELogType.Network);
+            _gameEvent = GameObject.Find("GameEvent").GetComponent<CGameEvent>();
             StartClient();
         }
 
@@ -88,11 +89,10 @@ namespace Network
                 // Complete the connection.  
                 client.EndConnect(ar);
                 
-                Debug.LogFormat("Socket connected to {0}",
-                    client.RemoteEndPoint.ToString());
+                logger.Log("Socket connected to {0}", client.RemoteEndPoint.ToString());
                 _isConnected = true;
-                
 
+                _gameEvent.PlayerMoveStopEvent += SendMoveStop;
 
                 // Signal that the connection has been made.  
                 //connectDone.Set();
@@ -191,6 +191,13 @@ namespace Network
             var packet = Network.CPacketFactory.CreateMoveStopPacket(nX, nY);
             Send(_client, packet.data);
             return true;
+        }
+
+        private void SendMoveStop(object sender, Tuple<float, float> data)
+        {
+            Console.WriteLine("Send Move Start : {0} {1}", data.Item1, data.Item2);
+            var packet = Network.CPacketFactory.CreateMoveStopPacket(data.Item1, data.Item2);
+            Send(_client, packet.data);
         }
 
         public bool SendShutdown()
