@@ -20,6 +20,15 @@ public class CharacterPara : MonoBehaviour
     [System.NonSerialized]
     public UnityEvent deadEvent = new UnityEvent();
 
+    protected CTimer _buffTimer;
+
+    protected void Awake()
+    {
+        // 변경 예정 : Player 소유의 Buff Timer로
+        //_buffTimer = GameObject.Find(transform.name).GetComponent<CBuffTimer>();
+        _buffTimer = GameObject.Find("SkillScript").GetComponent<CBuffTimer>();
+    }
+
     void Start()
     {
         InitPara();
@@ -104,6 +113,17 @@ public class CharacterPara : MonoBehaviour
         UpdateAfterReceiveAttack();
     }
 
+    // 버프 스킬군
+    public virtual void BuffAttack(float time, float buffScale)
+    {
+        Debug.LogFormat("Character Attack buff!");
+        StartBuffAttack(buffScale);
+        // 버프 효과 끝내기 수치 넣을 땐 필요에 따라 커링을 사용
+        Debug.LogFormat("Character Attack buff! : ");
+        _buffTimer.Register(1, time, () => EndBuffAttack(buffScale));
+    }
+
+
     //캐릭터가 적으로 부터 공격을 받은 뒤에 자동으로 실행될 함수를 가상함수로 만듬
     protected virtual void UpdateAfterReceiveAttack()
     {
@@ -115,5 +135,30 @@ public class CharacterPara : MonoBehaviour
             isDead = true;
             deadEvent.Invoke();
         }
+    }
+
+    protected virtual void StartBuffAttack(float buffScale)
+    {
+        float tempAttackMin = attackMin;
+        float tempAttackMax = attackMax;
+        tempAttackMin *= buffScale;
+        tempAttackMax *= buffScale;
+        attackMin = (int)tempAttackMin;
+        attackMax = (int)tempAttackMax;
+    }
+
+    protected void EndBuffAttack(float buffScale)
+    {
+        float tempAttackMin = attackMin;
+        float tempAttackMax = attackMax;
+        tempAttackMin /= buffScale;
+        tempAttackMax /= buffScale;
+        attackMin = (int)tempAttackMin;
+        attackMax = (int)tempAttackMax;
+    }
+
+    protected void EndBuffDefence(float buffScale)
+    {
+
     }
 }

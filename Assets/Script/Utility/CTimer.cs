@@ -29,6 +29,8 @@ public class CTimer : MonoBehaviour
 
     protected LinkedList<CObserved> observeList = new LinkedList<CObserved>();
 
+    // 타이머에 추가적으로 요청할게 있으면 사용하는 대리자
+    // ex) 타이머 UI 그리기
     public TimerCallback TimerStart;
     public TimerCallback TimerEnd;
 
@@ -63,7 +65,7 @@ public class CTimer : MonoBehaviour
             {
                 // 제거
                 observedObject.Value.notify();
-                TimerEnd(observedObject.Value.registerNumber);
+                TimerEnd?.Invoke(observedObject.Value.registerNumber);
                 var remove = observedObject;
                 observedObject = observedObject.Next;
                 observeList.Remove(remove);
@@ -76,9 +78,11 @@ public class CTimer : MonoBehaviour
     // 콜백이 다른 경우 문제가 생길 수 있음. 버프 같은 경우는 조심해야 함
     public void Register(int regNum, float time, Callback callback)
     {
+        // 이미 있는 번호의 경우 갱신만 하고 생성은 하지 않음
         if(FindByRegisterNumber(regNum) != null)
         {
             Renew(regNum, time);
+            return;
         }
 
         CObserved observed = new CObserved()
@@ -88,7 +92,7 @@ public class CTimer : MonoBehaviour
             current = time,
             notify = callback
         };
-        TimerStart(regNum);
+        TimerStart?.Invoke(regNum);
         observeList.AddLast(observed);
     }
 
@@ -154,6 +158,10 @@ public class CTimer : MonoBehaviour
     // 등록된 번호가 있는지 순회 탐색
     protected LinkedListNode<CObserved> FindByRegisterNumber(int regNum)
     {
+        //for(var f = observeList.First; f != null; f = f.Next)
+        //{
+        //    if (f.Value.registerNumber == regNum) return f;
+        //}
         var find = observeList.First;
         while(find != null)
         {
