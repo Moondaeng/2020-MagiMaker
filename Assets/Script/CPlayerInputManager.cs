@@ -17,15 +17,15 @@ public class CPlayerInputManager : MonoBehaviour
     private CProjectileSkill _projectileSkill;
     private CBuffSkill _buffSkill;
 
-    private List<CSkillFacade> _baseSkillList;
-    private List<CSkillFacade> _comboSkillList;
+    private List<CSkillFormat> _baseSkillList;
+    private List<CSkillFormat> _comboSkillList;
 
     private bool _isCombo;
     
     private void Awake()
     {
-        _baseSkillList = new List<CSkillFacade>();
-        _comboSkillList = new List<CSkillFacade>();
+        _baseSkillList = new List<CSkillFormat>();
+        _comboSkillList = new List<CSkillFormat>();
         _skillUIManager = GameObject.Find("SkillScript").GetComponent<CSkillUIManager>();
         _timerUiList = GameObject.Find("SkillScript").GetComponent<CTimerListUiManager>();
         _projectileSkill = GameObject.Find("SkillScript").GetComponent<CProjectileSkill>();
@@ -44,10 +44,10 @@ public class CPlayerInputManager : MonoBehaviour
 
         // 스킬은 나중에 플레이어 관련 클래스에서 처리하도록 변경
         // 기본 스킬 포맷 추가
-        _baseSkillList.Add(new CSkillFacade(0, 1.0f));
-        _baseSkillList.Add(new CSkillFacade(1, 7.0f));
-        _baseSkillList.Add(new CSkillFacade(2, 9.0f));
-        _baseSkillList.Add(new CSkillFacade(3, 10.0f));
+        _baseSkillList.Add(new CSkillFormat(0, 1.0f));
+        _baseSkillList.Add(new CSkillFormat(1, 7.0f));
+        _baseSkillList.Add(new CSkillFormat(2, 9.0f));
+        _baseSkillList.Add(new CSkillFormat(3, 10.0f));
 
         // 기본 스킬 등록
         _baseSkillList[0].RegisterSkill(_projectileSkill.Fireball);
@@ -56,7 +56,7 @@ public class CPlayerInputManager : MonoBehaviour
         // 콤보 스킬 포맷 등록
         for (int i = 0; i < 36; i++)
         {
-            _comboSkillList.Add(new CSkillFacade(4 + i, 10.5f + 1.0f * i));
+            _comboSkillList.Add(new CSkillFormat(4 + i, 10.5f + 1.0f * i));
         }
 
         // 콤보 스킬 배움(임시 처리)
@@ -185,7 +185,7 @@ public class CPlayerInputManager : MonoBehaviour
         _comboSelector.EndCombo();
     }
 
-    private void UseSkillToMousePos(CSkillFacade skillFormat)
+    private void UseSkillToMousePos(CSkillFormat skillFormat)
     {
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);

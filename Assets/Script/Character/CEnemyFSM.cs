@@ -2,110 +2,81 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CSkeletonFSM : MonoBehaviour
+public class CEnemyFSM : CharacterFSM
 {
-    public enum EState
-    {
-        Idle,  //정지
-        Chase,  //추적
-        Attack,  //공격
-        Dead,   //사망
-    }
-    
-    // 현재 상태를 나타내는 변수
-    public EState currentState = EState.Idle;
-
     CSkeletonAni myAni;
-
     Transform player;
-
-    CSkeletonPara myPara;
+    CEnemyPara myPara;
     CPlayerPara playerPara;
 
-    float chaseDistance = 5f; // 플레이어를 향해 몬스터가 추적을 시작할 거리
+    float chaseDistance = 20f; // 플레이어를 향해 몬스터가 추적을 시작할 거리
     float attackDistance = 2.5f; // 플레이어가 안쪽으로 들오오게 되면 공격을 시작
-    float reChaseDistance = 3f; // 플레이어가 도망 갈 경우 얼마나 떨어져야 다시 추적
-
-    float rotAnglePerSecond = 360f; // 초당 회전 각도
-    float moveSpeed = 2.3f; // 몬스터의 이동 속도
-
-    float attackDelay = 2f; // 몬스터 공격 딜레이
-    float attackTimer = 0f; // 몬스터 공격 타이머 (미구현)
-
-    public ParticleSystem hitEffect;
-    public GameObject selection;
+    float reChaseDistance = 5f; // 플레이어가 도망 갈 경우 얼마나 떨어져야 다시 추적
 
     GameObject myRespawn;
     public int spawnID { get; set; }
     Vector3 originPos;
+    int WhoFlag;
 
-    void Start()
+    public override void InitStat()
     {
-        // 스켈레톤의 Animation을 받아옴
+        moveSpeed = 5f;
+        attackDelay = 1.5f;
+        attackTimer = 3f;
+        attackDistance = 4.5f;
+        
         myAni = GetComponent<CSkeletonAni>();
-        // 스켈레톤의 스텟을 받아옴
-        myPara = GetComponent<CSkeletonPara>();
 
+        myPara = GetComponent<CEnemyPara>();
         myPara.deadEvent.AddListener(CallDeadEvent);
-
         // 첫 상태를 Idle
         ChangeState(EState.Idle, CSkeletonAni.IDLE);
-
         // player 태그를 가진 사람을 변수로 받음
         player = GameObject.FindGameObjectWithTag("Player").transform;
         // player의 스텟을 받아옴
         playerPara = player.gameObject.GetComponent<CPlayerPara>();
-        // 타격 시 이펙트 이거안해두면 Looping함.
-        hitEffect.Stop();
-        HideSelection();
     }
-
-    public void HideSelection()
-    {
-        selection.SetActive(false);
-    }
-
-    public void ShowSelection()
-    {
-        selection.SetActive(true);
-    }
-
+    
     public void SetRespawn(GameObject respawn, int spawnID, Vector3 originPos)
     {
         myRespawn = respawn;
         this.spawnID = spawnID;
         this.originPos = originPos;
-        Debug.Log(respawn + " " + spawnID + " " + originPos + " ");
+        //Debug.Log(respawn + " " + spawnID + " " + originPos + " ");
     }
 
     void CallDeadEvent()
     {
         ChangeState(EState.Dead, CSkeletonAni.DEATH);
-        player.gameObject.SendMessage(myPara.name + " is Dead");
+        player.gameObject.SendMessage("CurrentEnemyDead");
         StartCoroutine("RemoveMe");
     }
 
     IEnumerable RemoveMe()
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(2f);
 
         ChangeState(EState.Idle, CSkeletonAni.IDLE);
 
         myRespawn.GetComponent<CRespawn>().RemoveMonster(spawnID);
     }
 
-    public void AttackCalculate()
+    public override void AttackCalculate()
     {
         playerPara.SetEnemyAttack(myPara.GetRandomAttack(playerPara.eType, myPara.eType));
     }
-
-    // 타격 이펙트 함수
-    public void ShowHitEffect()
+    
+    public void ChangeState(EState newState, string aniName)
     {
-        hitEffect.Play();
+        if (currentState == newState)
+        {
+            return;
+        }
+        myAni.ChangeAni(aniName);
+        currentState = newState;
     }
-
-    void UpdateState()
+    
+    public override void UpdateState()
     {
         switch (currentState)
         {
@@ -124,17 +95,7 @@ public class CSkeletonFSM : MonoBehaviour
         }
     }
 
-    public void ChangeState(EState newState, string aniName)
-    {
-        if (currentState == newState)
-        {
-            return;
-        }
-
-        currentState = newState;
-        myAni.ChangeAni(aniName);
-    }
-    void IdleState()
+    public override void IdleState()
     {
         if (GetDistanceFromPlayer() < chaseDistance)
         {
@@ -142,7 +103,7 @@ public class CSkeletonFSM : MonoBehaviour
         }
     }
 
-    void ChaseState()
+    public void ChaseState()
     {
         myAni.ChangeAni(CSkeletonAni.WALK);
         //몬스터가 공격 가능 거리 안으로 들어가면 공격 상태
@@ -160,7 +121,7 @@ public class CSkeletonFSM : MonoBehaviour
     // 거리재는 함수로 재추격 거리보다 길 경우 뛰어가고
     // 아니면 공격하는데, 이게 쿨타임이 있음 2초 설정
     // 추후 이 함수 안에서, 패턴을 나눠야 할 듯 하다.
-    void AttackState()
+    public override void AttackState()
     {
         if (player.GetComponent<CPlayerFSM>().currentState == CPlayerFSM.EState.Dead)
         {
@@ -177,30 +138,30 @@ public class CSkeletonFSM : MonoBehaviour
             {
                 transform.LookAt(player.position);
                 myAni.ChangeAni(CSkeletonAni.ATTACK);
-
-                attackTimer = 0f;
             }
-
+            else
+            {
+                myAni.ChangeAni(CSkeletonAni.STAND);
+            }
             attackTimer += Time.deltaTime;
         }
     }
-    
+
+
     // 죽으면 선택안되게끔 하려고함
-    void DeadState()
+    public override void DeadState()
     {
-        GetComponent<BoxCollider>().enabled = false;
+        //GetComponent<BoxCollider>().enabled = false;
+        GetComponent<Collider>().enabled = false;
     }
-    
-    // 빙글빙글
-    void TurnToDestination()
+
+    public override void TurnToDestination()
     {
         Quaternion lookRotation = Quaternion.LookRotation(player.position - transform.position);
         transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, Time.deltaTime * rotAnglePerSecond);
     }
 
-    // 종착 위치 계산
-    // 이걸 서버로 보내면 될듯?
-    void MoveToDestination()
+    public override void MoveToDestination()
     {
         transform.position = Vector3.MoveTowards(transform.position, player.position, moveSpeed * Time.deltaTime);
     }
@@ -208,12 +169,6 @@ public class CSkeletonFSM : MonoBehaviour
     //플레이어와 거리을 재는 함수
     float GetDistanceFromPlayer()
     {
-        return Vector3.Distance(transform.position, player.position);   
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        UpdateState();
+        return Vector3.Distance(transform.position, player.position);
     }
 }

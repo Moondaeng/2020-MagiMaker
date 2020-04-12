@@ -7,6 +7,9 @@ public class CRespawn : MonoBehaviour
     List<Transform> spawnPos = new List<Transform>();
     GameObject[] monsters;
 
+    [SerializeField]
+    private GameObject summonMagic;
+    private GameObject destroySummonMagic;
     public GameObject monPrefab;
     public int spawnNumber = 1;
     public float respawnDelay = 3f;
@@ -31,8 +34,9 @@ public class CRespawn : MonoBehaviour
         }
 
         monsters = new GameObject[spawnNumber];
-
+        destroySummonMagic = Instantiate(summonMagic, transform.position + new Vector3(0, 0.5f, 0), summonMagic.transform.rotation);
         MakeMonsters();
+
     }
 
     //프리팹으로 부터 몬스터를 만들어 관리하는 함수
@@ -41,7 +45,7 @@ public class CRespawn : MonoBehaviour
         for (int i = 0; i < spawnNumber; i++)
         {
             GameObject mon = Instantiate(monPrefab, spawnPos[i].position, Quaternion.identity) as GameObject;
-            mon.GetComponent<CSkeletonFSM>().SetRespawn(gameObject, i, spawnPos[i].position);
+            mon.GetComponent<CEnemyFSM>().SetRespawn(gameObject, i, spawnPos[i].position);
             mon.SetActive(false);
             monsters[i] = mon;
             CManager.instance.AddNewMonsters(mon);
@@ -51,18 +55,16 @@ public class CRespawn : MonoBehaviour
     public void RemoveMonster(int spawnID)
     {
         deadMonsters++;
-
         monsters[spawnID].SetActive(false);
-        // print(spawnID + " dead");
-
+        print(spawnID + "monster was killed");
         // 리스폰 트리거
-        /*
+
         if (deadMonsters == monsters.Length)
         {
             StartCoroutine(InitMonsters());
             deadMonsters = 0;
         }
-        */
+        
     }
 
     IEnumerator InitMonsters()

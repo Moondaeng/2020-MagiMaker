@@ -26,7 +26,6 @@ public class CPlayerPara : CharacterPara
         isDead = false;
         CUIManager.instance.UpdatePlayerUI(this);
     }
-    
 
     protected override void UpdateAfterReceiveAttack()
     {
@@ -34,4 +33,17 @@ public class CPlayerPara : CharacterPara
 
         CUIManager.instance.UpdatePlayerUI(this);
     }
+
+    /*void OnTriggerEnter(Collider other)
+    {
+        EElementType attacker;
+        float damage;
+        if (other.gameObject.tag == "Punch")
+        {
+            attacker = other.transform.parent.parent.gameObject.GetComponent<CEnemyPara>().eType;
+            damage = GetRandomAttack(eType, attacker);
+            curHp -= (int)damage;
+            UpdateAfterReceiveAttack();
+        }
+    }*/
 }

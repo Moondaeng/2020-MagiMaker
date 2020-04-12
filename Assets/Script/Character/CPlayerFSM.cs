@@ -2,45 +2,34 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CPlayerFSM : MonoBehaviour
+public class CPlayerFSM : CharacterFSM
 {
-    public enum EState
-    {
-        Idle,
-        Move,
-        Attack,
-        AttackWait,
-        Warp,
-        Dead
-    }
-    //idle 상태를 기본 상태로 지정
-    public EState currentState = EState.Idle;
-
+    float skillDelay, skillTimer;
     //마우스 클릭 지점, 플레이어가 이동할 목적지의 좌표를 저장할 예정
     Vector3 curTargetPos;
-
     GameObject curEnemy;
-
-    public float rotAnglePerSecond = 360f; //1초에 플레이어의 방향을 360도 회전
-    public float moveSpeed = 2f; //초당 2미터의 속도로 이동
-    float attackDelay = 2f; // 공격을 한번 하고 다시 공격할 때까지의 지연
-    float attackTimer = 0f; //공격을 하고 난 뒤에 경과되는 시간을 계산하기 위한 변수
-    float attackDistance = 4.5f; // 공격 거리 (적과의 거리)
-//    float chaseDistance = 2.5f; // 전투 중 적이 도망가면 다시 추적을 시작하기 위한 거리
 
     CPlayerAni myAni;
     CPlayerPara myPara;
-    CSkeletonPara curEnemyPara;
-//    GoblinPara curEnemyPara2;
+    CEnemyPara curEnemyPara;
 
-    void Start()
+    public override void InitStat()
     {
+        moveSpeed = 3f;
+        attackDelay = 1f;
+        attackTimer = 0f;
+        attackDistance = 4.5f;
+
         myAni = GetComponent<CPlayerAni>();
         myPara = GetComponent<CPlayerPara>();
         myPara.InitPara();
         myPara.deadEvent.AddListener(ChangeToPlayerDead);
-
         ChangeState(EState.Idle, CPlayerAni.ANI_IDLE);
+    }
+
+    public void currentEnemyName()
+    {
+
     }
 
     public void ChangeToPlayerDead()
@@ -56,29 +45,34 @@ public class CPlayerFSM : MonoBehaviour
         curEnemy = null;
     }
 
-    public void AttackCalculate()
+    /*void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Punch")
+        {
+        }
+    }*/
+
+    public override void AttackCalculate()
     {
         if (curEnemy == null)
         {
             return;
         }
-        
-        curEnemy.GetComponent<CSkeletonFSM>().ShowHitEffect();
+        curEnemy.GetComponent<CEnemyPara>().ShowHitEffect();
 
         float attackPower = myPara.GetRandomAttack(curEnemyPara.eType, myPara.eType);
         curEnemyPara.SetEnemyAttack(attackPower);
     }
 
-    // 적을 공격하기 위한 함수 
-    public void AttackEnemy(GameObject Enemy)
+    public override void AttackEnemy(GameObject Enemy)
     {
-        Debug.Log(Enemy);
+        //Debug.Log(Enemy);
         if (curEnemy != null && curEnemy == Enemy)
         {
             return;
         }
         // 적(몬스터)의 파라미터를 변수에 저장
-        curEnemyPara = Enemy.GetComponent<CSkeletonPara>();
+        curEnemyPara = Enemy.GetComponent<CEnemyPara>();
 
         if (curEnemyPara.isDead == false)
         {
@@ -93,7 +87,7 @@ public class CPlayerFSM : MonoBehaviour
         }
     }
 
-    void ChangeState(EState newState, int aniNumber)
+    public override void ChangeState(EState newState, int aniNumber)
     {
         if (currentState == newState)
         {
@@ -101,68 +95,57 @@ public class CPlayerFSM : MonoBehaviour
         }
         myAni.ChangeAni(aniNumber);
         currentState = newState;
+        Debug.Log(currentState);
     }
 
     //캐릭터의 상태가 바뀌면 어떤 일이 일어날지 를 미리 정의
-    void UpdateState()
+    public override void UpdateState()
     {
         switch (currentState)
         {
             case EState.Idle:
                 IdleState();
-                myPara.isAnotherAction = false;
                 break;
             case EState.Move:
                 MoveState();
-                myPara.isAnotherAction = true;
                 break;
             case EState.Attack:
                 AttackState();
-                myPara.isAnotherAction = true;
                 break;
             case EState.AttackWait:
                 AttackWaitState();
-                myPara.isAnotherAction = true;
+                break;
+            case EState.Skill:
+                SkillState();
+                break;
+            case EState.SkillWait:
+                SkillWaitState();
                 break;
             case EState.Warp:
                 WarpState();
-                myPara.isAnotherAction = true;
                 break;
             case EState.Dead:
                 DeadState();
-                myPara.isAnotherAction = true;
                 break;
             default:
                 break;
         }
     }
 
-    public void IdleState()
-    {
-        ChangeState(EState.Idle, CPlayerAni.ANI_IDLE);
-    }
-
-    void MoveState()
-    {
-        TurnToDestination();
-        MoveToDestination();
-    }
-
-    void AttackState()
+    public override void AttackState()
     {
         attackTimer = 0f;
 
         //transform.LookAt(목표지점 위치) 목표지점을 향해 오브젝트를 회전시키는 함수
         transform.LookAt(curTargetPos);
-        ChangeState(EState.AttackWait, CPlayerAni.ANI_ATTACK);
+        ChangeState(EState.AttackWait, CPlayerAni.ANI_ATKIDLE);
     }
 
-    void AttackWaitState()
+    public override void AttackWaitState()
     {
         if (attackTimer > attackDelay)
         {
             ChangeState(EState.Attack, CPlayerAni.ANI_ATTACK);
-
         }
         attackTimer += Time.deltaTime;
     }
@@ -172,14 +155,23 @@ public class CPlayerFSM : MonoBehaviour
         ChangeState(EState.Warp, CPlayerAni.ANI_WARP);
     }
 
-    void DeadState()
+    public void SkillState()
     {
-
+        skillTimer = 0f;
+        transform.LookAt(curTargetPos);
+        ChangeState(EState.SkillWait, CPlayerAni.ANI_ATKIDLE);
     }
 
+    public void SkillWaitState()
+    {
+        if (skillTimer > skillDelay)
+        {
+            ChangeState(EState.Skill, CPlayerAni.ANI_SKILL);
+        }
+        skillTimer += Time.deltaTime;
+    }
 
-    //MoveTo(캐릭터가 이동할 목표 지점의 좌표)
-    public void MoveTo(Vector3 tPos)
+    public override void MoveTo(Vector3 tPos)
     {
         if (currentState == EState.Dead)
         {
@@ -190,21 +182,18 @@ public class CPlayerFSM : MonoBehaviour
         ChangeState(EState.Move, CPlayerAni.ANI_RUN);
     }
 
-    void TurnToDestination()
+    public void TurnTo(Vector3 tPos)
     {
-        // Quaternion lookRotation(회전할 목표 방향) : 목표 방향은 목적지 위치에서 자신의 위치를 빼면 구함
-        Quaternion lookRotation = Quaternion.LookRotation(curTargetPos - transform.position);
-        //Quaternion.RotateTowards(현재의 rotation값, 최종 목표 rotation 값, 최대 회전각)
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, 
-                                                        Time.deltaTime * rotAnglePerSecond);
+        curTargetPos = tPos;
+        TurnToDestination();
     }
 
-    void MoveToDestination()
+    public override void MoveToDestination()
     {
         //Vector3.MoveTowards(시작 지점, 목표지점, 최대 이동거리)
-        transform.position = Vector3.MoveTowards(transform.position, 
+        transform.position = Vector3.MoveTowards(transform.position,
                              curTargetPos, moveSpeed * Time.deltaTime);
-        
+
         if (curEnemy == null)
         {
             //플레이어의 위치와 목표지점의 위치가 가까우면, 상태를 Idle 상태로 바꾸라는 명령
@@ -212,15 +201,22 @@ public class CPlayerFSM : MonoBehaviour
             {
                 ChangeState(EState.Idle, CPlayerAni.ANI_IDLE);
             }
-            
+
         }
         else if (Vector3.Distance(transform.position, curTargetPos) < attackDistance)
         {
             ChangeState(EState.Attack, CPlayerAni.ANI_ATTACK);
         }
     }
-    void Update()
+
+    public override void TurnToDestination()
     {
-        UpdateState();
+        // 눌렀을 떄,  y축으로 캐릭터가 기울어짐을 방지하기 위함
+        curTargetPos = curTargetPos - new Vector3(0f, curTargetPos.y, 0f);
+        // Quaternion lookRotation(회전할 목표 방향) : 목표 방향은 목적지 위치에서 자신의 위치를 빼면 구함
+        Quaternion lookRotation = Quaternion.LookRotation(curTargetPos - transform.position);
+        //Quaternion.RotateTowards(현재의 rotation값, 최종 목표 rotation 값, 최대 회전각)
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation,
+                                                        Time.deltaTime * rotAnglePerSecond);
     }
 }

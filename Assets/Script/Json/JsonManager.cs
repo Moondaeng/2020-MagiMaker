@@ -1,84 +1,47 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 //using Newtonsoft.Json;
 //using Newtonsoft.Json.Linq;
-using System.IO;
 using System;
 
-public class JsonManager : MonoBehaviour
+[Serializable]
+public class JsonToObject
 {
-    public static JsonManager instance;
-    public enum EElementType
+    public static JsonToObject instance;
+    public int maxHp;
+    public int attackMin;
+    public int attackMax; 
+    public int defense;
+    public int eLevel;
+    public CharacterPara.EElementType eType;
+    public int rewardMoney;
+    
+    public JsonToObject()
     {
-        none = -1, fire = 0, wind = 1, water = 2, earth = 3
-    }
-    struct MonsterPara
-    {
-        public string name;
-        public int maxHp;
-        public int curHp;
-        public int attackMin;
-        public int attackMax; 
-        public int defense;
-        public int eLevel;
-        public EElementType eType;
-        public bool isStunned;
-        public bool isDead;
-        public int rewardMoney;
+
     }
 
-    //Dictionary<string, MonsterPara> dicMon =
-    //    new Dictionary<string, MonsterPara>();
-    string json;
-
-    private void Awake()
+    public JsonToObject(bool isSet)
     {
-        if (instance == null)
+        if (isSet)
         {
-            instance = this;
+            maxHp = 100;
+            attackMin = 10;
+            attackMax = 20;
+            defense = 1;
+            eLevel = 0;
+            eType = CharacterPara.EElementType.none;
+            rewardMoney = 10;
         }
     }
 
-    static void ReadMonsterJson(string jsonStr, string monsterName)
+    public void Print()
     {
-        //        JObject json = JObject.Parse(jsonStr);
-        //        MonsterPara monster = JsonConvert.DeserializeObject<MonsterPara>(json["Monster"].ToString());
-        /*
-        foreach (var data in json["Monster"])
-        {
-            JProperty jProperty = data.ToObject<JProperty>();
-            
-        }
-
-        Debug.Log(monster);
-                */
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        {
-            StreamReader r = new StreamReader("Stat.json");
-            try
-            {
-                json = r.ReadToEnd();
-                
-                //ReadMonsterJson(json, name);
-            }
-            finally
-            {
-                if (r != null)
-                {
-                    ((IDisposable)r).Dispose();
-                }
-            }
-        }
-        Debug.Log(json);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        Debug.Log("maxHp = " + maxHp);
+        Debug.Log("attackMin = " + attackMin);
+        Debug.Log("attackMax = " + attackMax);
+        Debug.Log("defense = " + defense);
+        Debug.Log("eLevel = " + eLevel);
+        Debug.Log("eType = " + eType);
+        Debug.Log("rewardMoney = " + rewardMoney);
     }
 }

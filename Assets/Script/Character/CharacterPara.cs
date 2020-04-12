@@ -16,11 +16,18 @@ public class CharacterPara : MonoBehaviour
     public bool isAnotherAction { get; set; }
     public bool isStunned { get; set; }
     public bool isDead { get; set; }
+    public int rewardMoney { get; set; }
 
     [System.NonSerialized]
     public UnityEvent deadEvent = new UnityEvent();
 
     protected CTimer _buffTimer;
+
+    public int RandomAttackDamage()
+    {
+        int random = UnityEngine.Random.Range(attackMin, attackMax);
+        return random;
+    }
 
     protected void Awake()
     {
@@ -112,7 +119,7 @@ public class CharacterPara : MonoBehaviour
         curHp -= (int)EnemyAttackPower;
         UpdateAfterReceiveAttack();
     }
-
+    
     // 버프 스킬군
     public virtual void BuffAttack(float time, float buffScale)
     {
@@ -123,7 +130,6 @@ public class CharacterPara : MonoBehaviour
         _buffTimer.Register(1, time, () => EndBuffAttack(buffScale));
     }
 
-
     //캐릭터가 적으로 부터 공격을 받은 뒤에 자동으로 실행될 함수를 가상함수로 만듬
     protected virtual void UpdateAfterReceiveAttack()
     {
@@ -131,12 +137,12 @@ public class CharacterPara : MonoBehaviour
 
         if (curHp <= 0)
         {
-            //curHp = 0;
+            curHp = 0;
             isDead = true;
             deadEvent.Invoke();
         }
     }
-
+    
     protected virtual void StartBuffAttack(float buffScale)
     {
         float tempAttackMin = attackMin;
@@ -155,10 +161,5 @@ public class CharacterPara : MonoBehaviour
         tempAttackMax /= buffScale;
         attackMin = (int)tempAttackMin;
         attackMax = (int)tempAttackMax;
-    }
-
-    protected void EndBuffDefence(float buffScale)
-    {
-
     }
 }

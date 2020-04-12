@@ -11,10 +11,8 @@ public class UsePortal : MonoBehaviour
     {
         player = GameObject.FindGameObjectWithTag("Player");
 
-        Debug.Log("OnTrigger!!!!");
         if (coll.collider.tag == "Player")
         {
-            Debug.Log("PORTAL USED!");
             Transform ParentTransform = coll.transform;
             while (true)
             {
@@ -26,35 +24,25 @@ public class UsePortal : MonoBehaviour
 
             Debug.Log("Position = " + ParentTransform.position);
 
+            CGlobal.roomCount++;
             switch(this.tag)
-            {
+            {             
                 case "PORTAL":                                     
-                    ParentTransform.position += new Vector3(0, 0, CConstants.PORTAL_DISTANCE_Z);
-                    player.GetComponent<CPlayerFSM>().IdleState();
+                    ParentTransform.position = new Vector3(0, 1, CConstants.ROOM_DISTANCE_Z * CGlobal.roomCount - CConstants.PORTAL_DISTANCE_Z);
                     break;
 
                 case "RIGHT_PORTAL":                                   
-                    ParentTransform.position += new Vector3(CConstants.PORTAL_DISTANCE_X, 0, CConstants.PORTAL_DISTANCE_Z);
-                    player.GetComponent<CPlayerFSM>().IdleState();
+                    ParentTransform.position = new Vector3(CConstants.PORTAL_DISTANCE_X, 1, CConstants.ROOM_DISTANCE_Z * CGlobal.roomCount - CConstants.PORTAL_DISTANCE_Z);
                     break;
 
                 case "LEFT_PORTAL":
-                    ParentTransform.position += new Vector3(-CConstants.PORTAL_DISTANCE_X, 0, CConstants.PORTAL_DISTANCE_Z);
-                    player.GetComponent<CPlayerFSM>().IdleState();
+                    ParentTransform.position = new Vector3(-CConstants.PORTAL_DISTANCE_X, 1, CConstants.ROOM_DISTANCE_Z * CGlobal.roomCount - CConstants.PORTAL_DISTANCE_Z);
                     break;
 
             }
+
+            CGlobal.usePortal = true; //포탈 사용 시 다음 맵 생성
+            CGlobal.isClear = false; //포탈을 사용해서 새로운 방으로 왔으므로 방은 클리어되지 않은 상태
         }
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GoblinAni : MonoBehaviour
+public class CGoblinAni : MonoBehaviour
 {
     public const string IDLE = "idle";
     public const string ATTACK1 = "attack1";
@@ -11,11 +11,11 @@ public class GoblinAni : MonoBehaviour
     public const string DEATH2 = "death2";
     public const string HIT1 = "hit1";
     public const string HIT2 = "hit2";
-    public const string CAST = "cast";
     public const string IDLE_battle = "idle_battle";
     public const string POWERATTACK = "pow_attack";
     public const string RUN = "run";
     public const string WALK = "walk";
+    public const string CAST = "cast";
 
     Animation anim;
     

@@ -57,14 +57,14 @@ public class CManager : MonoBehaviour
     public void ChangeCurrentTarget(GameObject mon)
     {
         DeselectAllMonsters();
-        mon.GetComponent<CSkeletonFSM>().ShowSelection();
+        mon.GetComponent<CEnemyPara>().ShowSelection();
     }
 
     public void DeselectAllMonsters()
     {
         for (int i = 0; i < monsters.Count; i++)
         {
-            monsters[i].GetComponent<CSkeletonFSM>().HideSelection();
+            monsters[i].GetComponent<CEnemyPara>().HideSelection();
         }
     }
     // Update is called once per frame
