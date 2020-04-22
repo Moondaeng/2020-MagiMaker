@@ -8,11 +8,10 @@ public class CSkillFormat
     private static CLogComponent _logger = new CLogComponent(ELogType.Skill);
     public delegate void RetentionSkill(GameObject user, Vector3 targetPos);
 
-    public CSkillTimer _timer;
-
     private GameObject _userObject;
+    private CSkillTimer _timer;
     private RetentionSkill _usingSkill;
-    public bool _isCooldown;
+    private bool _isCooldown;
     private int _timerRegisterNumber;
     private float _cooldown;
 
@@ -26,14 +25,14 @@ public class CSkillFormat
     }
 
     // 인터페이스 변경 필요 - Unit이 모두 Timer를 가지므로 자기 자신의 Timer를 추적하게 만들어야 함
-    public CSkillFormat(int registerNumber, float cooldown)
-    {
-        _timer = GameObject.Find("SkillScript").GetComponent<CSkillTimer>();
-        _userObject = GameObject.Find("Player");
-        _isCooldown = false;
-        _timerRegisterNumber = registerNumber;
-        _cooldown = cooldown;
-    }
+    //public CSkillFormat(int registerNumber, float cooldown)
+    //{
+    //    _userObject = GameObject.Find("Player");
+    //    _timer = _userObject.GetComponent<CSkillTimer>();
+    //    _isCooldown = false;
+    //    _timerRegisterNumber = registerNumber;
+    //    _cooldown = cooldown;
+    //}
 
     public void RegisterSkill(RetentionSkill register)
     {

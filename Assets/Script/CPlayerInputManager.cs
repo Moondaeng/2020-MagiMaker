@@ -4,6 +4,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/*
+ * 키 세팅 관리 클래스
+ * 이후 키 커스터마이징 기능 지원 시 여기서 관리
+ */
 public class CPlayerInputManager : MonoBehaviour
 {
     delegate void Action();
@@ -39,25 +43,25 @@ public class CPlayerInputManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _skillUIManager.RegisterTimer("SkillScript");
-        _timerUiList.RegisterTimer("SkillScript");
+        //_skillUIManager.RegisterTimer("SkillScript");
+        //_timerUiList.RegisterTimer("SkillScript");
 
         // 스킬은 나중에 플레이어 관련 클래스에서 처리하도록 변경
-        // 기본 스킬 포맷 추가
-        _baseSkillList.Add(new CSkillFormat(0, 1.0f));
-        _baseSkillList.Add(new CSkillFormat(1, 7.0f));
-        _baseSkillList.Add(new CSkillFormat(2, 9.0f));
-        _baseSkillList.Add(new CSkillFormat(3, 10.0f));
+        //// 기본 스킬 포맷 추가
+        //_baseSkillList.Add(new CSkillFormat(0, 1.0f));
+        //_baseSkillList.Add(new CSkillFormat(1, 7.0f));
+        //_baseSkillList.Add(new CSkillFormat(2, 9.0f));
+        //_baseSkillList.Add(new CSkillFormat(3, 10.0f));
 
-        // 기본 스킬 등록
-        _baseSkillList[0].RegisterSkill(_projectileSkill.Fireball);
-        _baseSkillList[1].RegisterSkill(_buffSkill.DefenceUp);
+        //// 기본 스킬 등록
+        //_baseSkillList[0].RegisterSkill(_projectileSkill.Fireball);
+        //_baseSkillList[1].RegisterSkill(_buffSkill.DefenceUp);
 
-        // 콤보 스킬 포맷 등록
-        for (int i = 0; i < 36; i++)
-        {
-            _comboSkillList.Add(new CSkillFormat(4 + i, 10.5f + 1.0f * i));
-        }
+        //// 콤보 스킬 포맷 등록
+        //for (int i = 0; i < 36; i++)
+        //{
+        //    _comboSkillList.Add(new CSkillFormat(4 + i, 10.5f + 1.0f * i));
+        //}
 
         // 콤보 스킬 배움(임시 처리)
         _comboSelector.LearnSkill(0);
@@ -106,8 +110,6 @@ public class CPlayerInputManager : MonoBehaviour
         if(_isCombo)
         {
             _comboSelector.Combo(0);
-            _comboSelector.DrawCurrentState();
-            _comboSelector.DrawSelectableSkill();
         }
         else
         {
@@ -122,8 +124,6 @@ public class CPlayerInputManager : MonoBehaviour
         if (_isCombo)
         {
             _comboSelector.Combo(1);
-            _comboSelector.DrawCurrentState();
-            _comboSelector.DrawSelectableSkill();
         }
         else
         {
@@ -137,8 +137,6 @@ public class CPlayerInputManager : MonoBehaviour
         if (_isCombo)
         {
             _comboSelector.Combo(2);
-            _comboSelector.DrawCurrentState();
-            _comboSelector.DrawSelectableSkill();
         }
         else
         {

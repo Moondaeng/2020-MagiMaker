@@ -162,7 +162,6 @@ public class CFlyingFSM : CharacterFSM
     // 죽으면 선택안되게끔 하려고함
     public override void DeadState()
     {
-        //GetComponent<BoxCollider>().enabled = false;
         GetComponent<Collider>().enabled = false;
     }
 

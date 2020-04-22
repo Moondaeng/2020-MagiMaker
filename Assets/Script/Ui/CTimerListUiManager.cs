@@ -6,30 +6,41 @@ using UnityEngine.UI;
 // Timer를 UI로 나타내는 클래스
 public class CTimerListUiManager : MonoBehaviour
 {
+    private static CLogComponent _logger;
+
     public class TimerUi
     {
         public int timerRegisteredNumber;
         public GameObject timerDrawer;
     }
 
+    [System.Serializable]
+    public struct TimerUiTransform
+    {
+        public int PosX;
+        public int PosY;
+        public int SquareSize;
+        public int SpaceSize;
+
+        public TimerUiTransform(int x, int y, int square, int space)
+        {
+            PosX = x;
+            PosY = y;
+            SquareSize = square;
+            SpaceSize = space;
+        }
+    }
+
     // 현재 Canvas 왼쪽 아래 기준으로 위치가 설정됨
     // 그러므로 피벗 설정 옵션을 넣어주든 하는게 필요함
-    [SerializeField]
-    protected int TimerUiPosX = 1084;
-    [SerializeField]
-    protected int TimerUiPosY = 284;
-    [SerializeField]
-    protected int TimerUiSquareSize = 50;
-    [SerializeField]
-    protected int TimerUiSpaceSize = 5;
+    public TimerUiTransform timerUiTransform = new TimerUiTransform(1084, 284, 50, 5);
 
     // 갱신 시간 조절
     protected const float _updateTime = 0.1f;
     protected int _updateThreshold;
     protected int _updateCount;
-
+    
     protected Transform _uiCanvas;
-
     protected CTimer _timer;
     protected LinkedList<TimerUi> _timerUiList = new LinkedList<TimerUi>();
 
@@ -38,13 +49,9 @@ public class CTimerListUiManager : MonoBehaviour
 
     protected void Awake()
     {
+        _logger = new CLogComponent(ELogType.UI);
         _updateThreshold = (int)(_updateTime / Time.fixedDeltaTime);
         _updateCount = 0;
-    }
-
-    protected void Start()
-    {
-        _uiCanvas = GameObject.Find("Canvas").transform;
     }
 
     // ui 갱신
@@ -61,11 +68,16 @@ public class CTimerListUiManager : MonoBehaviour
         Draw();
     }
 
+    public void SetCanvas(Transform canvasTransform)
+    {
+        _uiCanvas = canvasTransform;
+    }
+
     // 추적해서 그릴 타이머 등록
     // 이후 등록한 대상의 타이머를 따라 그림
-    public void RegisterTimer(string parentName)
+    public void RegisterTimer(GameObject timerOwner)
     {
-        _timer = GameObject.Find(parentName).GetComponent<CTimer>();
+        _timer = timerOwner.GetComponent<CTimer>();
         _timer.TimerStart += Register;
         _timer.TimerEnd += Deregister;
     }
@@ -74,13 +86,13 @@ public class CTimerListUiManager : MonoBehaviour
     // LinkedList의 AddLast()에 해당
     protected void Register(int registeredNumber)
     {
+        _logger.Log("Register");
         var drawer = Instantiate(timerDrawer);
         // initialize drawer
         drawer.transform.SetParent(_uiCanvas, false);
         drawer.SetActive(true);
-        drawer.GetComponent<Image>().rectTransform.sizeDelta
-            = new Vector2(TimerUiSquareSize, TimerUiSquareSize);
         drawer.GetComponent<CTimerDrawer>().CooldownEnable();
+        drawer.GetComponent<CTimerDrawer>().SetSize(timerUiTransform.SquareSize, timerUiTransform.SquareSize);
 
         // 링크드리스트에 추가하기
         var timerUi = new TimerUi()
@@ -127,8 +139,8 @@ public class CTimerListUiManager : MonoBehaviour
     protected void Relocate()
     {
         var drawer = _timerUiList.First;
-        float posX = TimerUiPosX;
-        float posY = TimerUiPosY;
+        float posX = timerUiTransform.PosX;
+        float posY = timerUiTransform.PosY;
         while (drawer != null)
         {
             var drawerPos = drawer.Value.timerDrawer.transform.position;
@@ -136,7 +148,7 @@ public class CTimerListUiManager : MonoBehaviour
             drawerPos.y = posY;
             drawer.Value.timerDrawer.transform.position = drawerPos;
 
-            posX += TimerUiSquareSize + TimerUiSpaceSize;
+            posX += timerUiTransform.SquareSize + timerUiTransform.SpaceSize;
             drawer = drawer.Next;
         }
     }

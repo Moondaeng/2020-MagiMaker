@@ -20,6 +20,14 @@ public class CTimerDrawer : MonoBehaviour
         cooldownText.enabled = false;
     }
 
+    public void SetSize(int width, int height)
+    {
+        gameObject.GetComponent<Image>().rectTransform.sizeDelta
+            = new Vector2(width, height);
+        transform.GetChild(0).GetComponent<Image>().rectTransform.sizeDelta
+            = new Vector2(width, height);
+    }
+
     public void Draw(float currentCooldown, float maxCooldown)
     {
         cooldownImage.fillAmount = currentCooldown / maxCooldown;

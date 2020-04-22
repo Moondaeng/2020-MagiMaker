@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+ * 모든 투사체형 공격 클래스
+ * 
+ */
 public class CProjectileBase : MonoBehaviour
 {
     // 공격에 해당하는 모든 경우들

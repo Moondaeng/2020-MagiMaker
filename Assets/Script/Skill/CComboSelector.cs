@@ -54,8 +54,8 @@ public class CComboSelector
 
     public CComboSelector()
     {
-        _skillUIManager = GameObject.Find("SkillScript").GetComponent<CSkillUIManager>();
-        _timer = GameObject.Find("SkillScript").GetComponent<CSkillTimer>();
+        _skillUIManager = GameObject.Find("UiScript").GetComponent<CSkillUIManager>();
+        _timer = GameObject.Find("Player").GetComponent<CSkillTimer>();
         _learnedSkillList = 0;
         _currentState = ComboState.cClass;
     }
@@ -65,9 +65,16 @@ public class CComboSelector
         _learnedSkillList |= (UInt64)1 << learnSkillNumber;
     }
 
+    public void Combo(int index)
+    {
+        _Combo(index);
+        DrawCurrentState();
+        DrawSelectableSkill();
+    }
+
     // 콤보 완성이 되면 스킬이 나간다라는 정보가 있어야함
     // 더불어, 초기 상태로 회귀해야 함
-    public void Combo(int index)
+    private void _Combo(int index)
     {
         // 이상한 케이스 인풋 차단
         if(_currentState != ComboState.cSubject && index == 3)

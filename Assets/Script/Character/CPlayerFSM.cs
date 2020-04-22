@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class CPlayerFSM : CharacterFSM
 {
+    private static CLogComponent _logger;
+
     float skillDelay, skillTimer;
     //마우스 클릭 지점, 플레이어가 이동할 목적지의 좌표를 저장할 예정
     Vector3 curTargetPos;
@@ -12,6 +14,11 @@ public class CPlayerFSM : CharacterFSM
     CPlayerAni myAni;
     CPlayerPara myPara;
     CEnemyPara curEnemyPara;
+
+    private void Awake()
+    {
+        _logger = new CLogComponent(ELogType.Character);
+    }
 
     public override void InitStat()
     {
@@ -34,7 +41,7 @@ public class CPlayerFSM : CharacterFSM
 
     public void ChangeToPlayerDead()
     {
-        print("player was dead");
+        _logger.Log("player was dead");
         ChangeState(EState.Dead, CPlayerAni.ANI_DEATH);
     }
 
@@ -95,7 +102,7 @@ public class CPlayerFSM : CharacterFSM
         }
         myAni.ChangeAni(aniNumber);
         currentState = newState;
-        Debug.Log(currentState);
+        _logger.Log(currentState);
     }
 
     //캐릭터의 상태가 바뀌면 어떤 일이 일어날지 를 미리 정의

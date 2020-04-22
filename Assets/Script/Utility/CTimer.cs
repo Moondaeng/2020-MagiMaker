@@ -26,7 +26,7 @@ public class CTimer : MonoBehaviour
     protected const float _updateTime = 0.1f;
     protected int _updateThreshold;
     protected int _updateCount;
-
+    
     protected LinkedList<CObserved> observeList = new LinkedList<CObserved>();
 
     // 타이머에 추가적으로 요청할게 있으면 사용하는 대리자

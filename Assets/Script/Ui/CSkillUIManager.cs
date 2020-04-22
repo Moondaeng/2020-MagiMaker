@@ -101,13 +101,14 @@ public class CSkillUIManager : MonoBehaviour
             return;
         }
 
-        Draw();
+        if(_timer != null)
+            Draw();
     }
 
     // ParentName : 부모로 CSkillTimer를 들고 있는 Object
-    public void RegisterTimer(string parentName)
+    public void RegisterTimer(GameObject timerOwner)
     {
-        _timer = GameObject.Find(parentName).GetComponent<CSkillTimer>();
+        _timer = timerOwner.GetComponent<CSkillTimer>();
         _timer.TimerStart += CooldownEnable;
         _timer.TimerEnd += CooldownDisable;
     }

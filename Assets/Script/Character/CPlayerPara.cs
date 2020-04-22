@@ -5,10 +5,10 @@ using UnityEngine;
 
 public class CPlayerPara : CharacterPara
 {
-    public string name { get; set; }
-    public int curExp { get; set; }
-    public int expToNextLevel { get; set; }
-    public int money { get; set; }
+    public string playerName;
+    public int curExp;
+    public int expToNextLevel;
+    public int money;
 
     public override void InitPara()
     {
@@ -24,14 +24,11 @@ public class CPlayerPara : CharacterPara
         isAnotherAction = false;
         isStunned = false;
         isDead = false;
-        CUIManager.instance.UpdatePlayerUI(this);
     }
 
     protected override void UpdateAfterReceiveAttack()
     {
         base.UpdateAfterReceiveAttack();
-
-        CUIManager.instance.UpdatePlayerUI(this);
     }
 
     /*void OnTriggerEnter(Collider other)

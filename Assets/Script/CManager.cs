@@ -2,10 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+ * 모든 캐릭터를 관리하는 클래스
+ * 
+ */
 public class CManager : MonoBehaviour
 {
     public static CManager instance;
 
+    List<GameObject> players = new List<GameObject>();
     List<GameObject> monsters = new List<GameObject>();
 
     void Awake()
@@ -14,6 +19,18 @@ public class CManager : MonoBehaviour
         {
             instance = this;
         }
+
+    }
+
+    // 캐릭터 추가
+    public void AddCharacter(int charId, Vector3 createPos)
+    {
+        
+    }
+
+    // 캐릭터 삭제
+    public void DeleteCharacter(int charId)
+    {
 
     }
 
@@ -67,6 +84,34 @@ public class CManager : MonoBehaviour
             monsters[i].GetComponent<CEnemyPara>().HideSelection();
         }
     }
+
+    // 이동 명령
+    public void CommandMoveCharacter(int charNumber, Vector3 targetPos)
+    {
+        var charFSM = monsters[charNumber].GetComponent<CharacterFSM>();
+        charFSM.MoveTo(targetPos);
+    }
+
+    // 위치 강제 설정
+    public void CommandSetPosition(int charNumber, Vector3 targetPos)
+    {
+        var charTransform = monsters[charNumber].transform;
+        charTransform.position = targetPos;
+    }
+
+    // 스킬 사용
+    public void CommandUseSkill(int charNumber, int skillNumber, Vector3 targetPos)
+    {
+        var charSkill = monsters[charNumber].GetComponent<CCharacterSkill>();
+        charSkill.UseSkillToPosition(skillNumber, targetPos);
+    }
+
+    // 해당 캐릭터에게 데미지 주기
+    public void CommandDamageCharacter(int charNumber)
+    {
+
+    }
+
     // Update is called once per frame
     void Update()
     {

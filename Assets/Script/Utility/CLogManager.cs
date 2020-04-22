@@ -18,7 +18,9 @@ public enum ELogType
     System,
     Skill,
     Character,
-    Network
+    Network,
+    UI,
+    Ctrl
 }
 
 /*
@@ -36,6 +38,8 @@ public class CLogManager : MonoBehaviour
     public bool onSkill;
     public bool onCharacter;
     public bool onNetwork;
+    public bool onUI;
+    public bool onCtrl;
 
     public void Log(ELogType logType, object message)
     {
@@ -52,6 +56,12 @@ public class CLogManager : MonoBehaviour
                 break;
             case ELogType.Network:
                 if (onNetwork) Debug.Log(message);
+                break;
+            case ELogType.UI:
+                if (onUI) Debug.Log(message);
+                break;
+            case ELogType.Ctrl:
+                if (onCtrl) Debug.Log(message);
                 break;
         }
     }
@@ -71,6 +81,12 @@ public class CLogManager : MonoBehaviour
                 break;
             case ELogType.Network:
                 if (onNetwork) Debug.LogFormat(message, args);
+                break;
+            case ELogType.UI:
+                if (onUI) Debug.LogFormat(message, args);
+                break;
+            case ELogType.Ctrl:
+                if (onCtrl) Debug.LogFormat(message, args);
                 break;
         };
     }

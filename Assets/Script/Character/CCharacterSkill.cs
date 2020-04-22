@@ -9,10 +9,24 @@ using UnityEngine;
 public class CCharacterSkill : MonoBehaviour
 {
     protected List<CSkillFormat> _skillList;
+    protected CProjectileSkill _projectileSkill;
+    protected CBuffSkill _buffSkill;
 
-    protected void Awake()
+    protected virtual void Awake()
     {
         _skillList = new List<CSkillFormat>();
+    }
+
+    protected virtual void Start()
+    {
+        _projectileSkill = GameObject.Find("SkillScript").GetComponent<CProjectileSkill>();
+        _buffSkill = GameObject.Find("SkillScript").GetComponent<CBuffSkill>();
+    }
+    
+    // 스킬 배우기
+    public void LearnSkill(int skillNumber)
+    {
+
     }
 
     public void UseSkillToPosition(int skillNumber, Vector3 targetPos)

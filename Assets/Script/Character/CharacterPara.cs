@@ -4,21 +4,28 @@ using UnityEngine;
 using UnityEngine.Events;
 using System;
 
+[System.Serializable]
+public class DamageEvent : UnityEvent<int, int>
+{
+
+}
+
 public class CharacterPara : MonoBehaviour
 {
-    public int maxHp { get; set; }
-    public int curHp { get; set; }
-    public int attackMin { get; set; }
-    public int attackMax { get; set; }
-    public int defense { get; set; }
-    public int eLevel { get; set; }
-    public EElementType eType {get; set;}
-    public bool isAnotherAction { get; set; }
-    public bool isStunned { get; set; }
-    public bool isDead { get; set; }
-    public int rewardMoney { get; set; }
+    public int maxHp;
+    public int curHp;
+    public int attackMin;
+    public int attackMax;
+    public int defense;
+    public int eLevel;
+    public EElementType eType;
+    public bool isAnotherAction;
+    public bool isStunned;
+    public bool isDead;
+    public int rewardMoney;
 
-    [System.NonSerialized]
+    //[System.NonSerialized]
+    public DamageEvent damageEvent = new DamageEvent();
     public UnityEvent deadEvent = new UnityEvent();
 
     protected CTimer _buffTimer;
@@ -31,9 +38,7 @@ public class CharacterPara : MonoBehaviour
 
     protected void Awake()
     {
-        // 변경 예정 : Player 소유의 Buff Timer로
-        //_buffTimer = GameObject.Find(transform.name).GetComponent<CBuffTimer>();
-        _buffTimer = GameObject.Find("SkillScript").GetComponent<CBuffTimer>();
+        _buffTimer = gameObject.GetComponent<CBuffTimer>();
     }
 
     void Start()
@@ -141,6 +146,7 @@ public class CharacterPara : MonoBehaviour
             isDead = true;
             deadEvent.Invoke();
         }
+        damageEvent?.Invoke(curHp, maxHp);
     }
     
     protected virtual void StartBuffAttack(float buffScale)
