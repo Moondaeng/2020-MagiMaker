@@ -44,29 +44,33 @@ public class CUIManager : MonoBehaviour
     private void Start()
     {
         SetSceneCanvas();
-        UiTargetObject = GameObject.Find("Player");
         SetUiTarget(UiTargetObject);
     }
 
     // for test code
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            _otherPlayerUi.AddOtherPlayerUi(UiTargetObject);
-        }
-        if (Input.GetKeyDown(KeyCode.O))
-        {
-        }
     }
 
     // 지정 캐릭터에 대한 UI를 그림
     // 지정 캐릭터가 없다면 그릴 필요 없음
     public void SetUiTarget(GameObject target)
     {
+        // 이전 타겟 설정 제거
+        if (UiTargetObject != null)
+        {
+            _skillUIManager.DeregisterTimer(UiTargetObject);
+            _skillTimerUiList.DeregisterTimer(UiTargetObject);
+            _buffTimerUiList.DeregisterTimer(UiTargetObject);
+            hpBarObject.GetComponent<CUiHpBar>().Deregister(UiTargetObject.GetComponent<CharacterPara>());
+        }
+
+        UiTargetObject = target;
+
         if (UiTargetObject == null)
             return;
         
+        // 현재 타겟 설정
         _skillUIManager.RegisterTimer(UiTargetObject);
         _skillTimerUiList.RegisterTimer(UiTargetObject);
         _buffTimerUiList.RegisterTimer(UiTargetObject);

@@ -52,6 +52,15 @@ public class CComboSelector
     private ComboSubject _currentSubject;
     private ComboTarget _currentTarget;
 
+
+    public CComboSelector(GameObject player)
+    {
+        _skillUIManager = GameObject.Find("UiScript").GetComponent<CSkillUIManager>();
+        _timer = player.GetComponent<CSkillTimer>();
+        _learnedSkillList = 0;
+        _currentState = ComboState.cClass;
+    }
+
     public CComboSelector()
     {
         _skillUIManager = GameObject.Find("UiScript").GetComponent<CSkillUIManager>();

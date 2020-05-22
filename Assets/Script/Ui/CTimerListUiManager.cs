@@ -82,15 +82,31 @@ public class CTimerListUiManager : MonoBehaviour
         _timer.TimerEnd += Deregister;
     }
 
+    public virtual void DeregisterTimer(GameObject timerOwner)
+    {
+        _timer = timerOwner.GetComponent<CTimer>();
+        _timer.TimerStart -= Register;
+        _timer.TimerEnd -= Deregister;
+
+        // 기존에 있던 Ui 전부 삭제
+        //while(_timerUiList.First != null)
+        //{
+        //    var first = _timerUiList.First;
+        //    Destroy(first.Value.timerDrawer);
+        //    _timerUiList.RemoveFirst();
+        //}
+    }
+
     // 버프 이미지 등록
     // LinkedList의 AddLast()에 해당
-    protected void Register(int registeredNumber)
+    protected virtual void Register(int registeredNumber)
     {
         _logger.Log("Register");
         var drawer = Instantiate(timerDrawer);
         // initialize drawer
         drawer.transform.SetParent(_uiCanvas, false);
         drawer.SetActive(true);
+        drawer.GetComponent<Image>().sprite = GetImageByRegisterNumber(registeredNumber);
         drawer.GetComponent<CTimerDrawer>().CooldownEnable();
         drawer.GetComponent<CTimerDrawer>().SetSize(timerUiTransform.SquareSize, timerUiTransform.SquareSize);
 
@@ -166,5 +182,10 @@ public class CTimerListUiManager : MonoBehaviour
             find = find.Next;
         }
         return find;
+    }
+
+    protected virtual Sprite GetImageByRegisterNumber(int registeredNumber)
+    {
+        return Resources.Load<Sprite>("Sprite/skill_base");
     }
 }

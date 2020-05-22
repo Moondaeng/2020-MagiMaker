@@ -29,6 +29,11 @@ public class CUiHpBar : MonoBehaviour
         cPara.damageEvent.AddListener(Draw);
     }
 
+    public void Deregister(CharacterPara cPara)
+    {
+        cPara.damageEvent.RemoveListener(Draw);
+    }
+
     public void Draw(int curHp, int maxHp)
     {
         // 수평 방식

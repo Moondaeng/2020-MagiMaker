@@ -6,6 +6,8 @@ using UnityEngine.Events;
 
 public class COtherPlayerUiManager : MonoBehaviour
 {
+    private static CLogComponent _logger;
+
     /*
      * 다른 플레이어 캐릭터 UI 그릴 위치 설정
      */
@@ -37,6 +39,8 @@ public class COtherPlayerUiManager : MonoBehaviour
     private void Awake()
     {
         _otherPlayerUiList = new LinkedList<OtherPlayerUiData>();
+
+        _logger = new CLogComponent(ELogType.UI);
     }
 
     public void SetCanvas(Transform canvasTransform)
@@ -79,8 +83,10 @@ public class COtherPlayerUiManager : MonoBehaviour
             return;
         }
 
+        _logger.Log("delete");
+
         // 이전에 Ui 관련 전부 빼기
-        Destroy(otherPlayerNode.Value.target);
+        Destroy(otherPlayerNode.Value.buffList);
         Destroy(otherPlayerNode.Value.hpBar);
         _otherPlayerUiList.Remove(otherPlayerNode);
         Relocate();

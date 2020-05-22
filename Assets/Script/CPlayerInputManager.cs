@@ -159,7 +159,7 @@ public class CPlayerInputManager : MonoBehaviour
         if(Physics.Raycast(ray, out hit))
         {
             Debug.LogFormat("Click Position : {0}, {1}, {2}", hit.point.x, hit.point.y, hit.point.z);
-            _gameEvent.PlayerMoveStop(new Tuple<float, float>(hit.point.x, hit.point.z));
+            _gameEvent.PlayerMoveStop(hit.point);
         }
     }
 

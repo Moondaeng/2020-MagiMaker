@@ -5,26 +5,28 @@ using UnityEngine;
 
 namespace Network
 {
-    // 패킷의 내용을 해석하는 클래스
-    // 해석된 내용은 Commander로 실행시킨다
+    /*
+     * 인게임에서의 패킷 변환을 담당하는 클래스
+     * 네트워크에 연결된 경우 이벤트가 
+     * 해석된 내용은 Commander로 실행시킨다
+     */
     public static class CPacketInterpreter
     {
-        private const int _moveStart            = 110;
-        private const int _moveStop             = 111;
-        private const int _moveCorrection       = 112;
-        private const int _characterCreateMy    = 210;
-        private const int _characterCreateOther = 211;
-        private const int _characterDelete      = 212;
+        private const int _characterCreateMy    = 110;
+        private const int _characterCreateOther = 111;
+        private const int _characterDelete      = 112;
+        private const int _moveStart = 210;
+        private const int _moveStop = 211;
+        private const int _moveCorrection = 212;
 
-        private static CLogComponent logger = new CLogComponent(ELogType.Network);
+        private static CLogComponent _logger = new CLogComponent(ELogType.Network);
 
         public static void PacketInterpret(byte[] data)
         {
             // 헤더 읽기
-            byte payloadSize, messageType;
             CPacket packet = new CPacket(data);
-            packet.ReadHeader(out payloadSize, out messageType);
-            logger.Log("Header : payloadSize = {0}, messageType = {1}", payloadSize, messageType);
+            packet.ReadHeader(out byte payloadSize, out short messageType);
+            _logger.Log("Header : payloadSize = {0}, messageType = {1}", payloadSize, messageType);
 
             switch((int)messageType)
             {
@@ -40,44 +42,60 @@ namespace Network
             }
         }
 
+        public static void Send()
+        {
+
+        }
+
         private static void InterpretMoveStart(CPacket packet)
         {
             Int32 id;
-            float nX, nY, dX, dY;
-
+            Vector3 now, dest;
+            
             id = packet.ReadInt32();
-            nX = packet.ReadSingle();
-            nY = packet.ReadSingle();
-            dX = packet.ReadSingle();
-            dY = packet.ReadSingle();
+            now.x = packet.ReadSingle();
+            now.y = packet.ReadSingle();
+            now.z = packet.ReadSingle();
+            dest.x = packet.ReadSingle();
+            dest.y = packet.ReadSingle();
+            dest.z = packet.ReadSingle();
 
-            logger.Log("Move Start - id{0} move ({1},{2}) to ({3},{4})", id, nX, nY, dX, dY);
+            _logger.Log("Move Start - id{0} move ({1},{2},{3}) to ({4},{5},{6})", 
+                id, now.x, now.y, now.z, dest.x, dest.y, dest.z);
 
             //Commander
+
         }
 
         private static void InterpretMoveStop(CPacket packet)
         {
             Int32 id;
             float nX, nY;
+            Vector3 now;
 
             id = packet.ReadInt32();
-            nX = packet.ReadSingle();
-            nY = packet.ReadSingle();
+            now.x = packet.ReadSingle();
+            now.y = packet.ReadSingle();
+            now.z = packet.ReadSingle();
 
-            logger.Log("Move Stop - id{0} ({1},{2})", id, nX, nY);
+            _logger.Log("Move Stop - id{0} ({1},{2})", id, now.x, now.y, now.z);
         }
 
         private static void InterpretMoveCorrection(CPacket packet)
         {
             Int32 id;
-            float nX, nY;
+            Vector3 now, dest;
 
             id = packet.ReadInt32();
-            nX = packet.ReadSingle();
-            nY = packet.ReadSingle();
+            now.x = packet.ReadSingle();
+            now.y = packet.ReadSingle();
+            now.z = packet.ReadSingle();
+            dest.x = packet.ReadSingle();
+            dest.y = packet.ReadSingle();
+            dest.z = packet.ReadSingle();
 
-            logger.Log("Move Stop - id{0} ({1},{2})", id, nX, nY);
+            _logger.Log("Move Correction - id{0} move ({1},{2},{3}) to ({4},{5},{6})",
+                id, now.x, now.y, now.z, dest.x, dest.y, dest.z);
         }
     }
 }

@@ -13,4 +13,21 @@ public class CBuffTimerListUI : CTimerListUiManager
         _timer.TimerStart += Register;
         _timer.TimerEnd += Deregister;
     }
+
+    public override void DeregisterTimer(GameObject timerOwner)
+    {
+        _timer = timerOwner.GetComponent<CBuffTimer>();
+        _timer.TimerStart -= Register;
+        _timer.TimerEnd -= Deregister;
+    }
+
+    protected override Sprite GetImageByRegisterNumber(int registeredNumber)
+    {
+        if (!CBuffList.BuffUIList.TryGetValue(registeredNumber, out string spritePath))
+        {
+            return base.GetImageByRegisterNumber(registeredNumber);
+        }
+        else
+            return Resources.Load<Sprite>(spritePath);
+    }
 }

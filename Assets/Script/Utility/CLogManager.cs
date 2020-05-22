@@ -20,7 +20,9 @@ public enum ELogType
     Character,
     Network,
     UI,
-    Ctrl
+    Ctrl,
+    Buff,
+    State
 }
 
 /*
@@ -40,6 +42,13 @@ public class CLogManager : MonoBehaviour
     public bool onNetwork;
     public bool onUI;
     public bool onCtrl;
+    public bool onBuff;
+    public bool onState;
+
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+    }
 
     public void Log(ELogType logType, object message)
     {
@@ -62,6 +71,12 @@ public class CLogManager : MonoBehaviour
                 break;
             case ELogType.Ctrl:
                 if (onCtrl) Debug.Log(message);
+                break;
+            case ELogType.Buff:
+                if (onBuff) Debug.Log(message);
+                break;
+            case ELogType.State:
+                if (onState) Debug.Log(message);
                 break;
         }
     }
@@ -87,6 +102,12 @@ public class CLogManager : MonoBehaviour
                 break;
             case ELogType.Ctrl:
                 if (onCtrl) Debug.LogFormat(message, args);
+                break;
+            case ELogType.Buff:
+                if (onBuff) Debug.LogFormat(message, args);
+                break;
+            case ELogType.State:
+                if (onState) Debug.LogFormat(message, args);
                 break;
         };
     }

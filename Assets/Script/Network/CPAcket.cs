@@ -11,8 +11,6 @@ namespace Network
      */
     public class CPacket
     {
-        private static CLogComponent logger = new CLogComponent(ELogType.Network);
-
         private const byte _header_code = 0x86;
         private const int headerSize = 8;
 
@@ -51,19 +49,29 @@ namespace Network
         }
 
         // 메세지 헤더 작성
-        public void WriteHeader(byte payLoad_size, byte type)
+        public void WriteHeader(byte payLoad_size, short type)
         {
-            byte temp = 0x00;
             Int32 checkSum = -1;
-            Write(_header_code).Write(payLoad_size).Write(type).Write(temp).Write(checkSum);
+            Write(_header_code).Write(payLoad_size).Write(type).Write(checkSum);
+            _rear = 8;
         }
 
         // 메세지 헤더 읽기
-        public void ReadHeader(out byte payloadSize, out byte messageType)
+        public void ReadHeader(out byte payloadSize, out short messageType)
         {
-            payloadSize = data[payLoadSizePos];
-            messageType = data[messageTypePos];
+            payloadSize = GetMessageSize();
+            messageType = GetMessageType();
             MoveReadPos(headerSize);
+        }
+
+        public byte GetMessageSize()
+        {
+            return data[payLoadSizePos];
+        }
+
+        public short GetMessageType()
+        {
+            return GetInt16(messageTypePos);
         }
 
         // 패킷 byte에 추가
@@ -202,6 +210,31 @@ namespace Network
             return this;
         }
 
+        // 테스트 필요
+        public CPacket Write(string arg, int length)
+        {
+            if (CanWrite(length))
+            {
+                var byteArr = System.Text.Encoding.ASCII.GetBytes(arg);
+                if (byteArr.Length < length)
+                {
+                    Buffer.BlockCopy(byteArr, 0, data, _rear, byteArr.Length);
+                }
+                else
+                {
+                    Buffer.BlockCopy(byteArr, 0, data, _rear, length);
+                }
+                MoveWritePos(length);
+            }
+            else
+            {
+                // 디버그 코드
+                Console.WriteLine("Packet Write Error");
+            }
+
+            return this;
+        }
+
         public Boolean ReadBoolean()
         {
             Boolean ret = false;
@@ -305,6 +338,24 @@ namespace Network
             {
                 ret = System.BitConverter.ToDouble(data, _front);
                 MoveReadPos(sizeof(Double));
+            }
+            else
+            {
+                // 디버그 코드
+                Console.WriteLine("Packet Read Error");
+            }
+            return ret;
+        }
+
+        public string ReadString(int length)
+        {
+            string ret = null;
+            if (CanRead(length))
+            {
+                byte[] byteArr = new byte[length];
+                Buffer.BlockCopy(data, _front, byteArr, 0, length);
+                ret = System.Text.Encoding.ASCII.GetString(byteArr).TrimEnd('\0');
+                MoveReadPos(length);
             }
             else
             {

@@ -24,27 +24,18 @@ public class CSkillFormat
         _cooldown = cooldown;
     }
 
-    // 인터페이스 변경 필요 - Unit이 모두 Timer를 가지므로 자기 자신의 Timer를 추적하게 만들어야 함
-    //public CSkillFormat(int registerNumber, float cooldown)
-    //{
-    //    _userObject = GameObject.Find("Player");
-    //    _timer = _userObject.GetComponent<CSkillTimer>();
-    //    _isCooldown = false;
-    //    _timerRegisterNumber = registerNumber;
-    //    _cooldown = cooldown;
-    //}
-
     public void RegisterSkill(RetentionSkill register)
     {
         _usingSkill = register;
     }
 
-    public void Use(Vector3 targetPos)
+    public bool Use(Vector3 targetPos)
     {
         if(_isCooldown)
         {
             // 실행 거부
             _logger.Log("Skill is Cooldown!");
+            return false;
         }
         else
         {
@@ -52,6 +43,7 @@ public class CSkillFormat
             // 스킬 실행
             _usingSkill?.Invoke(_userObject, targetPos);
             _timer.Register(_timerRegisterNumber, _cooldown, EndCooldown);
+            return true;
         }
     }
 

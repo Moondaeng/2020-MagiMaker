@@ -113,6 +113,13 @@ public class CSkillUIManager : MonoBehaviour
         _timer.TimerEnd += CooldownDisable;
     }
 
+    public void DeregisterTimer(GameObject timerOwner)
+    {
+        _timer = timerOwner.GetComponent<CSkillTimer>();
+        _timer.TimerStart -= CooldownEnable;
+        _timer.TimerEnd -= CooldownDisable;
+    }
+
     // 스킬 UI 등록
     // 중복 등록을 방지하여 한 스킬의 쿨타임만 돌아갈 수 있게 함
     public void Preempt(EUIName uiName, int registeredNumber)

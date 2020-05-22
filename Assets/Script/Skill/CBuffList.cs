@@ -13,10 +13,12 @@ public static class CBuffList
     public const int Snare          = 103;
     public const int DotDamage      = 104;
 
-    public const int DefenceBuff    = 201;
+    public const int AttackBuff     = 201;
+    public const int DefenceBuff    = 202;
 
     public static Dictionary<int, string> BuffUIList = new Dictionary<int, string>()
     {
-        {DefenceBuff, ""}
+        {AttackBuff, "RPG icons/64X64/Sword_1"},
+        {DefenceBuff, "RPG icons/64X64/Shield"}
     };
 }

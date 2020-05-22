@@ -11,38 +11,16 @@ public class CCntl : MonoBehaviour
     private CComboSelector _comboSelector;
     private bool _isCombo;
 
-    GameObject player;
-    private CPlayerSkill _cPlayerSkill;
+    public GameObject player;
     public bool telepotationCheck = true;
     [SerializeField]
     private GameObject[] spell;
     private GameObject temp, temp2;
     CPlayerPara myPara;
-    
-    // 콤보 스킬 배우기
-    public void LearnComboSkill(int skillNumber)
-    {
-        _comboSelector.LearnSkill(skillNumber);
-    }
 
     private void Awake()
     {
         _isCombo = false;
-        // 콤보 스킬 세팅
-        _comboSelector = new CComboSelector();
-        _comboSelector.ReturnSkill = CallCombo;
-
-        // 콤보 스킬 배움(임시 처리)
-        _comboSelector.LearnSkill(0);
-        _comboSelector.LearnSkill(1);
-        _comboSelector.LearnSkill(2);
-        _comboSelector.LearnSkill(3);
-        _comboSelector.LearnSkill(7);
-        _comboSelector.LearnSkill(12);
-        _comboSelector.LearnSkill(17);
-        _comboSelector.LearnSkill(25);
-        _comboSelector.LearnSkill(31);
-        _comboSelector.LearnSkill(35);
 
         // 조작 관리
         keyDictionary = new Dictionary<KeyCode, Action>
@@ -61,9 +39,27 @@ public class CCntl : MonoBehaviour
 
     void Start()
     {
-        // 플레이어 태그를 가진 개체를 받아옴
-        player = GameObject.FindGameObjectWithTag("Player");
-        _cPlayerSkill = player.GetComponent<CPlayerSkill>();
+        // 콤보 스킬 세팅
+        _comboSelector = new CComboSelector(player);
+        _comboSelector.ReturnSkill = CallCombo;
+
+        // 콤보 스킬 배움(임시 처리)
+        _comboSelector.LearnSkill(0);
+        _comboSelector.LearnSkill(1);
+        _comboSelector.LearnSkill(2);
+        _comboSelector.LearnSkill(3);
+        _comboSelector.LearnSkill(7);
+        _comboSelector.LearnSkill(12);
+        _comboSelector.LearnSkill(17);
+        _comboSelector.LearnSkill(25);
+        _comboSelector.LearnSkill(31);
+        _comboSelector.LearnSkill(35);
+    }
+
+    // 콤보 스킬 배우기
+    public void LearnComboSkill(int skillNumber)
+    {
+        _comboSelector.LearnSkill(skillNumber);
     }
 
     // 기본적으로 이동에 해당
@@ -159,7 +155,6 @@ public class CCntl : MonoBehaviour
     }
 
     // 스킬 사용
-    // 
     private void UseSkill(int number)
     {
         Debug.Log(player.GetComponent<CPlayerFSM>().currentState);
@@ -175,7 +170,8 @@ public class CCntl : MonoBehaviour
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out hit))
             {
-                _cPlayerSkill.UseSkillToPosition(number, hit.point);
+                player.GetComponent<CPlayerSkill>().UseSkillToPosition(number, hit.point);
+                // 성공 시 플레이어 스킬 사용 이벤트 수행
             }
         }
     }
@@ -221,8 +217,9 @@ public class CCntl : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out hit))
         {
-            _cPlayerSkill.UseComboSkillToPosition(skillNumber, hit.point);
+            player.GetComponent<CPlayerSkill>().UseComboSkillToPosition(skillNumber, hit.point);
         }
+        _comboSelector.EndCombo();
     }
 
     private void UseSkillToMousePos(CSkillFormat skillFormat)

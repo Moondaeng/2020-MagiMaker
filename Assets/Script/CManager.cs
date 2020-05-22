@@ -9,8 +9,7 @@ using UnityEngine;
 public class CManager : MonoBehaviour
 {
     public static CManager instance;
-
-    List<GameObject> players = new List<GameObject>();
+    
     List<GameObject> monsters = new List<GameObject>();
 
     void Awake()
@@ -19,18 +18,6 @@ public class CManager : MonoBehaviour
         {
             instance = this;
         }
-
-    }
-
-    // 캐릭터 추가
-    public void AddCharacter(int charId, Vector3 createPos)
-    {
-        
-    }
-
-    // 캐릭터 삭제
-    public void DeleteCharacter(int charId)
-    {
 
     }
 

@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class CBuffBase : MonoBehaviour
 {
+    private static CLogComponent _logger;
+
     // 아군을 돕는 행위 관련 모든 경우들
     // 힐, 버프 등
     public enum BuffType
@@ -26,6 +28,11 @@ public class CBuffBase : MonoBehaviour
     
     private float lifeTime = 0.3f;
 
+    private void Awake()
+    {
+        _logger = new CLogComponent(ELogType.Buff);
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -40,14 +47,14 @@ public class CBuffBase : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Trigger Enter");
-        if (gameObject.tag == "Player" || gameObject.tag == "Alies")
+        _logger.Log("Trigger Enter");
+        if (gameObject.tag == "Player" || gameObject.tag == "Allies")
         {
-            if (other.CompareTag("Player") || other.CompareTag("Alies"))
+            if (other.CompareTag("Player") || other.CompareTag("Allies"))
             {
                 // 이벤트 처리 : 네트워크한테 충돌 알림
 
-                Debug.Log("Buff");
+                _logger.Log("Buff");
                 // 버프 관련 함수
                 var aliesPara = other.GetComponent<CharacterPara>();
                 foreach (var buffArg in BuffArgumentList)
@@ -55,13 +62,13 @@ public class CBuffBase : MonoBehaviour
                     switch (buffArg.type)
                     {
                         case BuffType.fastHeal:
-                            Debug.Log("Heal");
+                            _logger.Log("Heal");
                             break;
                         case BuffType.attackBuff:
                             aliesPara.BuffAttack(buffArg.arg1, buffArg.arg2);
                             break;
                         case BuffType.defenceBuff:
-                            Debug.Log("defenceBuff");
+                            _logger.Log("defenceBuff");
                             break;
                     }
                 }
@@ -69,9 +76,9 @@ public class CBuffBase : MonoBehaviour
         }
         else if (gameObject.tag == "Monster")
         {
-            if (other.CompareTag("Player") || other.CompareTag("Alies"))
+            if (other.CompareTag("Player") || other.CompareTag("Allies"))
             {
-                Debug.Log("Player");
+                _logger.Log("Player");
             }
         }
     }

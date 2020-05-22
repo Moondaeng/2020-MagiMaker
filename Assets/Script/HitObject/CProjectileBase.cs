@@ -71,7 +71,7 @@ public class CProjectileBase : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (gameObject.tag == "Player" || gameObject.tag == "Alies")
+        if (gameObject.tag == "Player" || gameObject.tag == "Allies")
         {
             if(other.CompareTag("Monster"))
             {

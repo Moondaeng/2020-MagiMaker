@@ -5,7 +5,10 @@ TagManager:
   serializedVersion: 2
   tags:
   - Monster
-  - Alies
+  - Weapon
+  - Punch
+  - PORTAL
+  - Allies
   layers:
   - Default
   - TransparentFX

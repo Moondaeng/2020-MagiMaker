@@ -132,7 +132,8 @@ public class CharacterPara : MonoBehaviour
         StartBuffAttack(buffScale);
         // 버프 효과 끝내기 수치 넣을 땐 필요에 따라 커링을 사용
         Debug.LogFormat("Character Attack buff! : ");
-        _buffTimer.Register(1, time, () => EndBuffAttack(buffScale));
+        // 임시
+        _buffTimer.Register(CBuffList.DefenceBuff, time, () => EndBuffAttack(buffScale));
     }
 
     //캐릭터가 적으로 부터 공격을 받은 뒤에 자동으로 실행될 함수를 가상함수로 만듬
