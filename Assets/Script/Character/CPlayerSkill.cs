@@ -39,9 +39,9 @@ public class CPlayerSkill : CCharacterSkill
         }
     }
 
-    public void UseComboSkillToPosition(int skillNumber, Vector3 targetPos)
+    public bool? UseComboSkillToPosition(int skillNumber, Vector3 targetPos)
     {
-        _comboSkillList?[skillNumber].Use(targetPos);
+        return _comboSkillList?[skillNumber].Use(targetPos);
     }
 
     // 아이템에 의한 스킬 대체

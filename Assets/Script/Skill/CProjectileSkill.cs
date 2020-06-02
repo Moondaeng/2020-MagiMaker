@@ -38,7 +38,7 @@ public class CProjectileSkill : MonoBehaviour
         var userStat = user.GetComponent<CharacterPara>();
         var projectileBase = projectile.GetComponent<CProjectileBase>();
         // 공격력 등 필요한 정보 넣기
-        projectileBase.userAttackPower = userStat.attackMax;
+        projectileBase.userAttackPower = userStat._attackMax;
         // 원소 관련 정보
     }
 }

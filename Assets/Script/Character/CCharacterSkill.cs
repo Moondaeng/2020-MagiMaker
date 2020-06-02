@@ -29,8 +29,8 @@ public class CCharacterSkill : MonoBehaviour
 
     }
 
-    public void UseSkillToPosition(int skillNumber, Vector3 targetPos)
+    public bool? UseSkillToPosition(int skillNumber, Vector3 targetPos)
     {
-        _skillList?[skillNumber].Use(targetPos);
+        return _skillList?[skillNumber].Use(targetPos);
     }
 }

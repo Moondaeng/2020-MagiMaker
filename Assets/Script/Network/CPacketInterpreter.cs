@@ -10,18 +10,25 @@ namespace Network
      * 네트워크에 연결된 경우 이벤트가 
      * 해석된 내용은 Commander로 실행시킨다
      */
-    public static class CPacketInterpreter
+    public class CPacketInterpreter
     {
-        private const int _characterCreateMy    = 110;
-        private const int _characterCreateOther = 111;
-        private const int _characterDelete      = 112;
-        private const int _moveStart = 210;
-        private const int _moveStop = 211;
-        private const int _moveCorrection = 212;
+        private const int _setCharacterInfo = 410;
+        private const int _moveStart = 411;
+        private const int _moveStop = 412;
+        private const int _moveCorrection = 413;
+        private const int _actionCommand = 510;
 
         private static CLogComponent _logger = new CLogComponent(ELogType.Network);
+        private Network.CTcpClient _tcpManager;
+        private CPlayerCommand playerCommander;
 
-        public static void PacketInterpret(byte[] data)
+        public CPacketInterpreter(Network.CTcpClient tcpManger)
+        {
+            _tcpManager = tcpManger;
+            playerCommander = GameObject.Find("GameManager").GetComponent<CPlayerCommand>();
+        }
+
+        public void PacketInterpret(byte[] data)
         {
             // 헤더 읽기
             CPacket packet = new CPacket(data);
@@ -30,6 +37,9 @@ namespace Network
 
             switch((int)messageType)
             {
+                case _setCharacterInfo:
+                    InterpretSetCharacter(packet);
+                    break;
                 case _moveStart:
                     InterpretMoveStart(packet);
                     break;
@@ -39,15 +49,53 @@ namespace Network
                 case _moveCorrection:
                     InterpretMoveCorrection(packet);
                     break;
+                case _actionCommand:
+                    InterpretActionCommand(packet);
+                    break;
             }
         }
 
-        public static void Send()
+        #region Send Message
+        public void SendCharacterInfoRequest()
         {
+            var message = CPacketFactory.CreateCharacterInfoPacket();
 
+            _tcpManager.Send(message.data);
         }
 
-        private static void InterpretMoveStart(CPacket packet)
+        public void SendMoveStart(Vector3 now, Vector3 dest)
+        {
+            var message = CPacketFactory.CreateMoveStartPacket(now, dest);
+
+            _tcpManager.Send(message.data);
+        }
+
+        public void SendMoveStop(Vector3 now)
+        {
+            var message = CPacketFactory.CreateMoveStopPacket(now);
+
+            _tcpManager.Send(message.data);
+        }
+        public void SendActionStart(int actionNumber, Vector3 now, Vector3 dest)
+        {
+            var message = CPacketFactory.CreateActionStartPacket(actionNumber, now, dest);
+
+            _tcpManager.Send(message.data);
+        }
+        #endregion
+
+        #region Interpret Packet
+        private void InterpretSetCharacter(CPacket packet)
+        {
+            Int32 MyId = packet.ReadInt32();
+
+            _logger.Log($"Set Character : my id - {MyId}");
+
+            //Commander
+            playerCommander.SetMyCharacter((int)MyId);
+        }
+
+        private void InterpretMoveStart(CPacket packet)
         {
             Int32 id;
             Vector3 now, dest;
@@ -64,10 +112,10 @@ namespace Network
                 id, now.x, now.y, now.z, dest.x, dest.y, dest.z);
 
             //Commander
-
+            playerCommander.Move(id, dest);
         }
 
-        private static void InterpretMoveStop(CPacket packet)
+        private void InterpretMoveStop(CPacket packet)
         {
             Int32 id;
             float nX, nY;
@@ -81,7 +129,7 @@ namespace Network
             _logger.Log("Move Stop - id{0} ({1},{2})", id, now.x, now.y, now.z);
         }
 
-        private static void InterpretMoveCorrection(CPacket packet)
+        private void InterpretMoveCorrection(CPacket packet)
         {
             Int32 id;
             Vector3 now, dest;
@@ -97,5 +145,30 @@ namespace Network
             _logger.Log("Move Correction - id{0} move ({1},{2},{3}) to ({4},{5},{6})",
                 id, now.x, now.y, now.z, dest.x, dest.y, dest.z);
         }
+
+        private void InterpretActionCommand(CPacket packet)
+        {
+
+            Int16 id;
+            Int16 actionNumber;
+            Vector3 now, dest;
+
+            Debug.Log("action Command");
+
+            id = packet.ReadInt16();
+            actionNumber = packet.ReadInt16();
+            now.x = packet.ReadSingle();
+            now.y = packet.ReadSingle();
+            now.z = packet.ReadSingle();
+            dest.x = packet.ReadSingle();
+            dest.y = packet.ReadSingle();
+            dest.z = packet.ReadSingle();
+
+            _logger.Log("Action Start - id{0} actionNumber{1} move ({2},{3},{4}) to ({5},{6},{7})",
+                id, actionNumber, now.x, now.y, now.z, dest.x, dest.y, dest.z);
+
+            playerCommander.UseSkill((int)id, (int)actionNumber, dest);
+        }
+        #endregion
     }
 }

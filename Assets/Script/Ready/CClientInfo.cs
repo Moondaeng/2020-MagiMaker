@@ -110,4 +110,5 @@ public class CClientInfo : MonoBehaviour
 
     public static User ThisUser { get; set; }
     public static JoinRoom ThisRoom { get; set; }
+    public static int PlayerCount { get; set; }
 }

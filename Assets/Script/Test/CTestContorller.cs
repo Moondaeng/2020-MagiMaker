@@ -20,7 +20,8 @@ public class CTestContorller : MonoBehaviour
             {KeyCode.Alpha2, () => commander.SetMyCharacter(1) },
             {KeyCode.Alpha3, () => commander.SetMyCharacter(2) },
             {KeyCode.Alpha4, () => commander.SetMyCharacter(3) },
-            {KeyCode.Alpha8, () => commander.Add(GetHitPoint()) },
+            {KeyCode.Alpha5, () => commander.UseSkill(1, 0, GetHitPoint()) },
+            {KeyCode.Insert, () => commander.SetActivePlayers(4) },
             {KeyCode.Alpha9, () => commander.Move(1, GetHitPoint()) },
             {KeyCode.Alpha0, () => commander.Move(2, GetHitPoint()) }
         };

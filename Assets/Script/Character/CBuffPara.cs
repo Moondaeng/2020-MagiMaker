@@ -9,9 +9,9 @@ public class CBuffPara
     public float MoveSpeedCoef;
     public float AttackSpeedCoef;
 
-    public CSkillTimer timer;
+    public CBuffTimer timer;
 
-    public CBuffPara(CSkillTimer myTimer)
+    public CBuffPara(CBuffTimer myTimer)
     {
         attackCoef = 1.0f;
         DefenceCoef = 1.0f;

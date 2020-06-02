@@ -1,46 +1,27 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-
-public class CPlayerPara : CharacterPara
+﻿public class CPlayerPara : CharacterPara
 {
-    public string playerName;
-    public int curExp;
-    public int expToNextLevel;
-    public int money;
+    public string _name;
+    public int _curExp { get; set; }
+    public int _expToNextLevel { get; set; }
+    public int _money { get; set; }
 
     public override void InitPara()
     {
-        name = "hong";
-        maxHp = 1000;
-        curHp = maxHp;
-        attackMin = 50;
-        attackMax = 80;
-        defense = 30;
-        eLevel = 0;
-        eType = EElementType.none;
-        money = 0;
-        isAnotherAction = false;
-        isStunned = false;
-        isDead = false;
+        _maxHp = 1000;
+        _curHp = _maxHp;
+        _attackMin = 50;
+        _attackMax = 80;
+        _defense = 30;
+        _eLevel = 0;
+        _eType = EElementType.none;
+        _money = 0;
+        _isAnotherAction = false;
+        _isStunned = false;
+        _isDead = false;
     }
 
     protected override void UpdateAfterReceiveAttack()
     {
         base.UpdateAfterReceiveAttack();
     }
-
-    /*void OnTriggerEnter(Collider other)
-    {
-        EElementType attacker;
-        float damage;
-        if (other.gameObject.tag == "Punch")
-        {
-            attacker = other.transform.parent.parent.gameObject.GetComponent<CEnemyPara>().eType;
-            damage = GetRandomAttack(eType, attacker);
-            curHp -= (int)damage;
-            UpdateAfterReceiveAttack();
-        }
-    }*/
 }

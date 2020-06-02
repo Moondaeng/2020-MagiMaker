@@ -6,85 +6,98 @@ public class CPlayerCommand : MonoBehaviour
 {
     private static CLogComponent _logger;
 
-    public GameObject playerCharacter;
+    public List<GameObject> players = new List<GameObject>();
+    public int activePlayersCount;
 
-    private List<GameObject> _players = new List<GameObject>();
-
-    private CCntl _controller;
+    private CController _controller;
     private CUIManager _playerUi;
     private COtherPlayerUiManager _othersUiList;
     private CCameraControl _camera;
 
-    private void Start()
+    private void Awake()
     {
-        var startCharacter = GameObject.Find("hong");
-        _players.Add(startCharacter);
-        Debug.Log("player object : " + _players.Count);
-
         _logger = new CLogComponent(ELogType.Ctrl);
-        _controller = GameObject.Find("Controller").GetComponent<CCntl>();
+        _controller = GameObject.Find("Controller").GetComponent<CController>();
         _playerUi = GameObject.Find("UiScript").GetComponent<CUIManager>();
         _othersUiList = GameObject.Find("UiScript").GetComponent<COtherPlayerUiManager>();
+        _camera = GameObject.Find("Main Camera").GetComponent<CCameraControl>();
     }
 
-    // 캐릭터 추가
-    public void Add(Vector3 createPos)
+    private void Start()
     {
-        var newPlayer = Instantiate(playerCharacter, createPos, Quaternion.identity);
-        newPlayer.tag = "Allies";
-        _players.Add(newPlayer);
+        activePlayersCount = 1;
+    }
 
-        _othersUiList.AddOtherPlayerUi(newPlayer);
+    // 캐릭터 활성화
+    // 멀티플레이 시 필요한 캐릭터 수만큼 활성화
+    public void SetActivePlayers(int playerCount)
+    {
+        if(playerCount > players.Count)
+        {
+            Debug.Log("CPlayerCommand - Active Wrong Size Players");
+            playerCount = players.Count;
+        }
 
-        Debug.Log("player object : " + _players.Count);
+        activePlayersCount = playerCount;
+        for (int i = 0; i < playerCount; i++)
+        {
+            players[i].SetActive(true);
+            _othersUiList.AddOtherPlayerUi(players[i]);
+        }
     }
 
     // 해당 캐릭터 내 캐릭터로 선택
     // 임시 구현 : 앞으로 구현에 따라 방식 변경 가능
     public void SetMyCharacter(int charId)
     {
-        var preCharacter = _controller.player;
-        preCharacter.tag = "Allies";
         Debug.Log("setting Character : " + charId);
 
-        var character = _players?[charId];
+        var character = players?[charId];
         if (character == null) return;
-        Debug.Log("player object : " + _players.Count);
+        Debug.Log("player object : " + players.Count);
         character.tag = "Player";
 
         _controller.player = character;
         _playerUi.SetUiTarget(character);
-        _othersUiList.AddOtherPlayerUi(preCharacter);
         _othersUiList.DeleteOtherPlayerUi(character);
-    }
-
-    // 캐릭터 삭제
-    public void Delete(int charId)
-    {
-
     }
 
     // 캐릭터 이동
     public void Move(int charId, Vector3 movePos)
     {
-        var character = _players?[charId];
+        var character = players?[charId];
         if (character == null) return;
 
-        var playerState = character.GetComponent<CPlayerFSM>();
+        var playerState = character.GetComponent<CCntl>();
         playerState.MoveTo(movePos);
     }
 
-    // 스킬 사용
-    public void UseSkill(int charNumber, int skillNumber, Vector3 targetPos)
+    // 캐릭터 강제 이동
+    public void Teleport(int charId, Vector2 movePos)
     {
-        var charSkill = _players?[charNumber].GetComponent<CCharacterSkill>();
+        var character = players?[charId];
+        if (character == null) return;
+
+        character.transform.position = movePos;
+    }
+
+    // 스킬 사용
+    public void UseSkill(int charId, int skillNumber, Vector3 targetPos)
+    {
+        Debug.Log($"Use Skill {charId} {skillNumber}");
+        var character = players?[charId];
+        if (character == null) return;
+
+        var charSkill = character.GetComponent<CCharacterSkill>();
+        var charState = character.GetComponent<CCntl>();
         charSkill.UseSkillToPosition(skillNumber, targetPos);
+        charState.SkillAction(2);
     }
 
     // 해당 캐릭터에게 데미지 주기
     public void DamageToCharacter(int charId, float damageScale)
     {
-        var character = _players?[charId];
+        var character = players?[charId];
         if (character == null) return;
 
         var charStat = character.GetComponent<CharacterPara>();

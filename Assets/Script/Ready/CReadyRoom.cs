@@ -108,7 +108,7 @@ public class CReadyRoom : MonoBehaviour
     {
         if(nonNetwork)
         {
-            GameStart();
+            GameStart(1);
         }
 
         var message = Network.CPacketFactory.CreateGameStartPacket(CClientInfo.ThisRoom.roomid);
@@ -230,7 +230,7 @@ public class CReadyRoom : MonoBehaviour
         switch ((int)messageType)
         {
             case (int)MessageCode.GameStartAccept:
-                GameStart();
+                GameStart(packet.ReadInt32());
                 break;
             case (int)MessageCode.GuestQuitRoom:
                 QuitRoom();
@@ -250,9 +250,10 @@ public class CReadyRoom : MonoBehaviour
         }
     }
 
-    private void GameStart()
+    private void GameStart(int playerCount)
     {
-        SceneManager.LoadScene("battle");
+        CClientInfo.PlayerCount = playerCount;
+        SceneManager.LoadScene("InGame");
     }
 
     private void QuitRoom()

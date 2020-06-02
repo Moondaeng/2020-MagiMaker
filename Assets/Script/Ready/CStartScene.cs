@@ -39,20 +39,6 @@ public class CStartScene : MonoBehaviour
     // debug mode flag
     public bool debug = false;
 
-    // 접속 승인 정보
-    private class LoginAccept
-    {
-        public int mcode;
-        public int uid;
-        public string id;
-        public int win;
-        public int lose;
-        public int kill;
-        public int death;
-    }
-
-    private LoginAccept accept = new LoginAccept();
-
     private void Awake()
     {
         _logger = new CLogComponent(ELogType.Network);
@@ -90,7 +76,7 @@ public class CStartScene : MonoBehaviour
 
     private void StartGame()
     {
-        SceneManager.LoadScene("battle");
+        SceneManager.LoadScene("InGame");
     }
 
     private void ReadyToNetwork()
@@ -238,10 +224,4 @@ public class CStartScene : MonoBehaviour
     //    ErrorHandling("서버로부터 응답이 없습니다. (Timeout)");
     //    t.Abort();
     //}
-
-    // 실패하면 -1 리턴
-    private bool IsAccepted()
-    {
-        return accept.mcode == (int)MessageCode.LoginSuccess || accept.mcode == (int)MessageCode.RegisterSuccess;
-    }
 }

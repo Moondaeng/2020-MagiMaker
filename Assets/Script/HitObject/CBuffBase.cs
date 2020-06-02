@@ -65,7 +65,7 @@ public class CBuffBase : MonoBehaviour
                             _logger.Log("Heal");
                             break;
                         case BuffType.attackBuff:
-                            aliesPara.BuffAttack(buffArg.arg1, buffArg.arg2);
+                            aliesPara.buffParameter.BuffAttack(buffArg.arg1, buffArg.arg2);
                             break;
                         case BuffType.defenceBuff:
                             _logger.Log("defenceBuff");

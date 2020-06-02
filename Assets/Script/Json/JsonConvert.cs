@@ -10,14 +10,14 @@ public class JsonConvert : MonoBehaviour
     
     struct Monster
     {
-        public int maxHp;
-        public int curHp;
-        public int attackMin;
-        public int attackMax;
-        public int defense;
-        public int eLevel;
-        public CharacterPara.EElementType eType;
-        public int rewardMoney;
+        public int _maxHp;
+        public int _curHp;
+        public int _attackMin;
+        public int _attackMax;
+        public int _defense;
+        public int _eLevel;
+        public CharacterPara.EElementType _eType;
+        public int _rewardMoney;
     }
 
     void Awake()
@@ -60,13 +60,13 @@ public class JsonConvert : MonoBehaviour
         StatName = namingStatFile(name);
         JsonToObject jtc = LoadJsonFile<JsonToObject>(Application.dataPath, StatName);
         
-        mon.maxHp = jtc.maxHp;
-        mon.curHp = mon.maxHp;
-        mon.attackMin = jtc.attackMin;
-        mon.attackMax = jtc.attackMax;
-        mon.defense = jtc.defense;
-        mon.eLevel = jtc.eLevel;
-        mon.eType = jtc.eType;
-        mon.rewardMoney = jtc.rewardMoney;
+        mon._maxHp = jtc._maxHp;
+        mon._curHp = mon._maxHp;
+        mon._attackMin = jtc._attackMin;
+        mon._attackMax = jtc._attackMax;
+        mon._defense = jtc._defense;
+        mon._eLevel = jtc._eLevel;
+        mon._eType = jtc._eType;
+        mon._rewardMoney = jtc._rewardMoney;
     }
 }

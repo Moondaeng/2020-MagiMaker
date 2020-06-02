@@ -13,21 +13,34 @@ using UnityEngine;
  */
 public class CLogComponent
 {
-    protected static CLogManager _logManager = GameObject.Find("Log").GetComponent<CLogManager>();
+    protected static GameObject _logObject = GameObject.Find("Log");
+    protected static CLogManager _logManager = null;
     public ELogType logType;
+    public string className;
 
     public CLogComponent(ELogType type)
     {
         logType = type;
+        if (_logObject != null) _logManager = _logObject.GetComponent<CLogManager>();
+    }
+
+    public CLogComponent(ELogType type, string className)
+    {
+        logType = type;
+        this.className = className;
+        if (_logObject != null) _logManager = _logObject.GetComponent<CLogManager>();
     }
 
     public void Log(object message)
     {
-        _logManager.Log(logType, message);
+        if (_logManager == null) Debug.Log(message);
+        else _logManager.Log(logType, message);
+
     }
 
     public void Log(string message, params object[] args)
     {
-        _logManager.Log(logType, message, args);
+        if (_logManager == null) Debug.LogFormat(message, args);
+        else _logManager.Log(logType, message, args);
     }
 }

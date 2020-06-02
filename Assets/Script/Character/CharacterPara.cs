@@ -12,33 +12,35 @@ public class DamageEvent : UnityEvent<int, int>
 
 public class CharacterPara : MonoBehaviour
 {
-    public int maxHp;
-    public int curHp;
-    public int attackMin;
-    public int attackMax;
-    public int defense;
-    public int eLevel;
-    public EElementType eType;
-    public bool isAnotherAction;
-    public bool isStunned;
-    public bool isDead;
-    public int rewardMoney;
+    public int _maxHp { get; set; }
+    public int _curHp { get; set; }
+    public int _attackMin { get; set; }
+    public int _attackMax { get; set; }
+    public int _defense { get; set; }
+    public int _eLevel { get; set; }
+    public EElementType _eType {get; set;}
+    public bool _isAnotherAction { get; set; }
+    public bool _isStunned { get; set; }
+    public bool _isDead { get; set; }
+    public int _rewardMoney { get; set; }
 
-    //[System.NonSerialized]
-    public DamageEvent damageEvent = new DamageEvent();
+    [System.NonSerialized]
     public UnityEvent deadEvent = new UnityEvent();
+    public DamageEvent damageEvent = new DamageEvent();
 
-    protected CTimer _buffTimer;
+    protected CBuffTimer _buffTimer;
+    public CBuffPara buffParameter;
 
     public int RandomAttackDamage()
     {
-        int random = UnityEngine.Random.Range(attackMin, attackMax);
-        return random;
+        int _random = UnityEngine.Random.Range(_attackMin, _attackMax);
+        return _random;
     }
 
     protected void Awake()
     {
         _buffTimer = gameObject.GetComponent<CBuffTimer>();
+        buffParameter = new CBuffPara(_buffTimer);
     }
 
     void Start()
@@ -110,63 +112,31 @@ public class CharacterPara : MonoBehaviour
     // 평타 데미지 계산식
     public float GetRandomAttack(EElementType eTypeDefence, EElementType eTypeAttack)
     {
-        float randAttack = UnityEngine.Random.Range(attackMin, attackMax + 1);
-        float Bonus = GetElementTypeBonusSize(eLevel, eTypeDefence, eTypeAttack);
+        float randAttack = UnityEngine.Random.Range(_attackMin, _attackMax + 1);
+        float Bonus = GetElementTypeBonusSize(_eLevel, eTypeDefence, eTypeAttack);
         // 최종 계산식 대충
-        randAttack = (randAttack - defense) * Bonus;
-        print(Bonus + "is advantage!!");
+        randAttack = (randAttack - _defense) * Bonus;
         return randAttack;
     }
 
     public void SetEnemyAttack(float EnemyAttackPower)
     {
         // 데미지를 버림 형식으로 표현
-        curHp -= (int)EnemyAttackPower;
+        _curHp -= (int)EnemyAttackPower;
+        //transform.gameObject.SendMessage("hitEnemyAttack");
         UpdateAfterReceiveAttack();
-    }
-    
-    // 버프 스킬군
-    public virtual void BuffAttack(float time, float buffScale)
-    {
-        Debug.LogFormat("Character Attack buff!");
-        StartBuffAttack(buffScale);
-        // 버프 효과 끝내기 수치 넣을 땐 필요에 따라 커링을 사용
-        Debug.LogFormat("Character Attack buff! : ");
-        // 임시
-        _buffTimer.Register(CBuffList.DefenceBuff, time, () => EndBuffAttack(buffScale));
     }
 
     //캐릭터가 적으로 부터 공격을 받은 뒤에 자동으로 실행될 함수를 가상함수로 만듬
     protected virtual void UpdateAfterReceiveAttack()
     {
-        print(name + "'s HP: " + curHp);
+        print(name + "'s HP: " + _curHp);
 
-        if (curHp <= 0)
+        if (_curHp <= 0)
         {
-            curHp = 0;
-            isDead = true;
+            _curHp = 0;
+            _isDead = true;
             deadEvent.Invoke();
         }
-        damageEvent?.Invoke(curHp, maxHp);
-    }
-    
-    protected virtual void StartBuffAttack(float buffScale)
-    {
-        float tempAttackMin = attackMin;
-        float tempAttackMax = attackMax;
-        tempAttackMin *= buffScale;
-        tempAttackMax *= buffScale;
-        attackMin = (int)tempAttackMin;
-        attackMax = (int)tempAttackMax;
-    }
-
-    protected void EndBuffAttack(float buffScale)
-    {
-        float tempAttackMin = attackMin;
-        float tempAttackMax = attackMax;
-        tempAttackMin /= buffScale;
-        tempAttackMax /= buffScale;
-        attackMin = (int)tempAttackMin;
-        attackMax = (int)tempAttackMax;
     }
 }

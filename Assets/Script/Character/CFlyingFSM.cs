@@ -73,7 +73,7 @@ public class CFlyingFSM : CharacterFSM
 
     public override void AttackCalculate()
     {
-        playerPara.SetEnemyAttack(myPara.GetRandomAttack(playerPara.eType, myPara.eType));
+        playerPara.SetEnemyAttack(myPara.GetRandomAttack(playerPara._eType, myPara._eType));
     }
 
     public void ChangeState(EState newState, string aniName)

@@ -67,7 +67,7 @@ public class CPlayerFSM : CharacterFSM
         }
         curEnemy.GetComponent<CEnemyPara>().ShowHitEffect();
 
-        float attackPower = myPara.GetRandomAttack(curEnemyPara.eType, myPara.eType);
+        float attackPower = myPara.GetRandomAttack(curEnemyPara._eType, myPara._eType);
         curEnemyPara.SetEnemyAttack(attackPower);
     }
 
@@ -81,7 +81,7 @@ public class CPlayerFSM : CharacterFSM
         // 적(몬스터)의 파라미터를 변수에 저장
         curEnemyPara = Enemy.GetComponent<CEnemyPara>();
 
-        if (curEnemyPara.isDead == false)
+        if (curEnemyPara._isDead == false)
         {
             curEnemy = Enemy;
             curTargetPos = curEnemy.transform.position;

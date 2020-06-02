@@ -36,8 +36,10 @@ namespace Network
 
         enum EInGame
         {
-            MoveStart,
-            MoveStop
+            CharacterInfoRequest = 400,
+            MoveStart = 401,
+            MoveStop = 402,
+            ActionStart = 500
         }
 
         #region Create Login Message
@@ -210,6 +212,17 @@ namespace Network
         #endregion
 
         #region Create InGame Message
+        public static CPacket CreateCharacterInfoPacket()
+        {
+            byte messageSize = 0;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)EInGame.CharacterInfoRequest);
+
+            return packet;
+        }
+
         public static CPacket CreateMoveStartPacket(Vector3 now, Vector3 dest)
         {
             byte messageSize = 24;
@@ -230,6 +243,18 @@ namespace Network
 
             packet.WriteHeader(messageSize, (int)EInGame.MoveStop);
             packet.Write(now.x).Write(now.y).Write(now.z);
+
+            return packet;
+        }
+
+        public static CPacket CreateActionStartPacket(int actionNumber, Vector3 now, Vector3 dest)
+        {
+            byte messageSize = 28;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)EInGame.ActionStart);
+            packet.Write(actionNumber).Write(now.x).Write(now.y).Write(now.z).Write(dest.x).Write(dest.y).Write(dest.z);
 
             return packet;
         }
