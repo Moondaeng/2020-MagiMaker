@@ -1,0 +1,9 @@
+{
+	"_maxHp":10,
+	"_attackMin":50,
+	"_attackMax":1000,
+	"_defense":10,
+	"_eLevel":0,
+	"_eType":-1,
+	"_rewardMoney":100
+}

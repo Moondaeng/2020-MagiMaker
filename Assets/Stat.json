@@ -1,0 +1,112 @@
+{
+"Player": {
+		"name":"Player",
+		"maxHp":1000,
+		"attackMin":50,
+		"attackMax":80,
+		"defense":1,
+		"eLevel":0,
+		"eType":-1,
+		"isStunned":false,
+		"isDead":false,
+		"money":0
+	},
+ "Monster": [
+		{
+			"name":"Fire Skeleton",
+			"maxHp":50,
+			"attackMin":5,
+			"attackMax":10,
+			"defense":1,
+			"eLevel":0,
+			"eType":0,
+			"isStunned":false,
+			"isDead":false,
+			"rewardMoney":10
+		},
+		{
+			"name":"Wind Skeleton",
+			"maxHp":50,
+			"attackMin":5,
+			"attackMax":10,
+			"defense":1,
+			"eLevel":0,
+			"eType":1,
+			"isStunned":false,
+			"isDead":false,
+			"rewardMoney":10
+		},
+		{
+			"name":"Water Skeleton",
+			"maxHp":50,
+			"attackMin":5,
+			"attackMax":10,
+			"defense":1,
+			"eLevel":0,
+			"eType":2,
+			"isStunned":false,
+			"isDead":false,
+			"rewardMoney":10
+		},
+		{
+			"name":"Earth Skeleton",
+			"maxHp":50,
+			"attackMin":5,
+			"attackMax":10,
+			"defense":5,
+			"eLevel":0,
+			"eType":0,
+			"isStunned":false,
+			"isDead":false,
+			"rewardMoney":10
+		},
+		{
+			"name":"Fire Goblin",
+			"maxHp":20,
+			"attackMin":5,
+			"attackMax":10,
+			"defense":1,
+			"eLevel":0,
+			"eType":0,
+			"isStunned":false,
+			"isDead":false,
+			"rewardMoney":10
+		},
+			{
+			"name":"Wind Goblin",
+			"maxHp":20,
+			"attackMin":5,
+			"attackMax":10,
+			"defense":1,
+			"eLevel":0,
+			"eType":1,
+			"isStunned":false,
+			"isDead":false,
+			"rewardMoney":10
+		},
+		{
+			"name":"Water Goblin",
+			"maxHp":20,
+			"attackMin":5,
+			"attackMax":10,
+			"defense":1,
+			"eLevel":0,
+			"eType":2,
+			"isStunned":false,
+			"isDead":false,
+			"rewardMoney":10
+		},
+		{
+			"name":"Earth Goblin",
+			"maxHp":20,
+			"attackMin":5,
+			"attackMax":10,
+			"defense":1,
+			"eLevel":0,
+			"eType":3,
+			"isStunned":false,
+			"isDead":false,
+			"rewardMoney":10
+		}
+	]
+  }
