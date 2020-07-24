@@ -7,25 +7,26 @@ using UnityEngine.UI;
  * 스킬의 UI를 통합관리하는 클래스
  * 스킬이 UI 이름를 최대한 모르게 하고, UI를 같이 쓰는 일을 방지함
  * 스킬 타이머가 UI를 관리하는 일을 최소화함
+ * 
  */ 
 public class CSkillUIManager : MonoBehaviour
 {
     public enum EUIName
     {
-        Base0, Base1, Base2, Base3, Combo0, Combo1, Combo2, Combo3
+        Base, Combo1, Combo2, Combo3, Combo4
     }
 
-    class CSkillIUI
+    class CSkillUi
     {
         public GameObject ui;
         public Image image;
         public CTimerDrawer drawer;
         public int preemptSkillNumber;
     }
-    
-    private List<CSkillIUI> _comboList = new List<CSkillIUI>();
-    private List<CSkillIUI> _baseList = new List<CSkillIUI>();
 
+    public Transform skillUiObject;
+    
+    private List<CSkillUi>[] _elementSkillLists = new List<CSkillUi>[3];
     private CSkillTimer _timer;
 
     // 갱신 시간 조절
@@ -33,7 +34,6 @@ public class CSkillUIManager : MonoBehaviour
     protected int _updateThreshold;
     protected int _updateCount;
     
-    // 언제 어디서나 쉽게 접금할수 있도록 하기위해 만든 정적변수
     public static CSkillUIManager instance;
 
     private void Awake()
@@ -46,20 +46,25 @@ public class CSkillUIManager : MonoBehaviour
         _updateThreshold = (int)(_updateTime / Time.fixedDeltaTime);
         _updateCount = 0;
 
-        AddSkillUI("Combo 1", _comboList);
-        AddSkillUI("Combo 2", _comboList);
-        AddSkillUI("Combo 3", _comboList);
-        AddSkillUI("Combo 4", _comboList);
+        Transform ElementUi;
+        for (int i = 0; i < 3; i++)
+        {
+            _elementSkillLists[i] = new List<CSkillUi>();
+            ElementUi = skillUiObject.GetChild(i);
+            for (int j = 0; j < 5; j++)
+            {
+                var skillUi = ElementUi.GetChild(j);
+                AddSkillUI(skillUi, _elementSkillLists[i]);
+            }
+        }
 
-        AddSkillUI("Skill 1", _baseList);
-        AddSkillUI("Skill 2", _baseList);
-        AddSkillUI("Skill 3", _baseList);
-        AddSkillUI("Skill 4", _baseList);
-
-        Preempt(EUIName.Base0, 0);
-        Preempt(EUIName.Base1, 1);
-        Preempt(EUIName.Base2, 2);
-        Preempt(EUIName.Base3, 3);
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 5; j++)
+            {
+                DeregisterSkillUi(i, j);
+            }
+        }
     }
 
     // ui 갱신
@@ -77,8 +82,7 @@ public class CSkillUIManager : MonoBehaviour
             Draw();
         
     }
-
-    // ParentName : 부모로 CSkillTimer를 들고 있는 Object
+    
     public void RegisterTimer(GameObject timerOwner)
     {
         _timer = timerOwner.GetComponent<CSkillTimer>();
@@ -92,62 +96,36 @@ public class CSkillUIManager : MonoBehaviour
         _timer.TimerStart -= CooldownEnable;
         _timer.TimerEnd -= CooldownDisable;
     }
-
-    // 스킬 UI 등록
-    // 중복 등록을 방지하여 한 스킬의 쿨타임만 돌아갈 수 있게 함
-    public void Preempt(EUIName uiName, int registeredNumber)
+    
+    public void RegisterSkillUi(int elementUiNumber, int skillUiNumber, int skillNumber)
     {
-        int listPos = 0;
-        if ((int)uiName < (int)EUIName.Combo0)
-        {
-            listPos = (int)uiName;
-            _baseList[listPos].preemptSkillNumber = registeredNumber;
-        }
-        else
-        {
-            listPos = (int)uiName - (int)EUIName.Combo0;
-            _comboList[listPos].preemptSkillNumber = registeredNumber;
-        }
+        if (elementUiNumber < 0 || elementUiNumber >= 3) return;
+        if (skillUiNumber < 0 || skillUiNumber >= 5) return;
+
+        _elementSkillLists[elementUiNumber][skillUiNumber].preemptSkillNumber = skillNumber;
+        skillUiObject.GetChild(elementUiNumber).GetChild(skillUiNumber).gameObject.SetActive(true);
     }
-
-    // 스킬 UI 등록 해제
-    public void Free(EUIName uiName)
+    
+    public void DeregisterSkillUi(int elementUiNumber, int skillUiNumber)
     {
-        int listPos = 0;
-        if((int)uiName < (int)EUIName.Combo0)
-        {
-            listPos = (int)uiName;
-            _baseList[listPos].preemptSkillNumber = -1;
-        }
-        else
-        {
-            listPos = (int)uiName - (int)EUIName.Combo0;
-            _comboList[listPos].preemptSkillNumber = -1;
-        }
+        if (elementUiNumber < 0 || elementUiNumber >= 3) return;
+        if (skillUiNumber < 0 || skillUiNumber >= 5) return;
+
+        _elementSkillLists[elementUiNumber][skillUiNumber].preemptSkillNumber = -1;
+        skillUiObject.GetChild(elementUiNumber).GetChild(skillUiNumber).gameObject.SetActive(false);
     }
 
     // 모든 스킬 UI에 쿨타임을 그리는 명령을 내림
     // 단, 활성화되지 않은 경우 그리지 않음
     public void Draw()
     {
-        foreach(var skillUI in _baseList)
+        foreach(var skillUiList in _elementSkillLists)
         {
-            if(skillUI.preemptSkillNumber != -1)
+            foreach(var skillUi in skillUiList)
             {
-                skillUI.drawer.Draw(
-                    _timer.GetCurrentCooldown(skillUI.preemptSkillNumber),
-                    _timer.GetMaxCooldown(skillUI.preemptSkillNumber)
-                    );
-            }
-        }
-
-        foreach (var skillUI in _comboList)
-        {
-            if (skillUI.preemptSkillNumber != -1)
-            {
-                skillUI.drawer.Draw(
-                    _timer.GetCurrentCooldown(skillUI.preemptSkillNumber),
-                    _timer.GetMaxCooldown(skillUI.preemptSkillNumber)
+                skillUi.drawer.Draw(
+                    _timer.GetCurrentCooldown(skillUi.preemptSkillNumber),
+                    _timer.GetMaxCooldown(skillUi.preemptSkillNumber)
                     );
             }
         }
@@ -173,39 +151,36 @@ public class CSkillUIManager : MonoBehaviour
         }
     }
     
-    private void AddSprite(List<Sprite> sprites, string path)
+    //private void AddSprite(List<Sprite> sprites, string path)
+    //{
+    //    Sprite sprite = Resources.Load(path) as Sprite;
+    //    if (sprite == null)
+    //        Debug.LogFormat("sprite not find : " + path);
+    //    sprites.Add(Resources.Load<Sprite>(path));
+    //}
+
+    private void AddSkillUI(Transform skillUi, List<CSkillUi> list)
     {
-        Sprite sprite = Resources.Load(path) as Sprite;
-        if (sprite == null)
-            Debug.LogFormat("sprite not find : " + path);
-        sprites.Add(Resources.Load<Sprite>(path));
+        var settingSkillUi = new CSkillUi()
+        {
+            ui = skillUi.gameObject,
+            image = skillUi.GetComponent<Image>(),
+            drawer = skillUi.GetComponent<CTimerDrawer>(),
+            preemptSkillNumber = -1
+        };
+        list.Add(settingSkillUi);
     }
 
-    private void AddSkillUI(string uiName, List<CSkillIUI> list)
+    private CSkillUi FindPreemptNumber(int registeredNumber)
     {
-        CSkillIUI skillUI = new CSkillIUI();
-        skillUI.ui = GameObject.Find(uiName);
-        skillUI.image = skillUI.ui.GetComponent<Image>();
-        skillUI.drawer = skillUI.ui.GetComponent<CTimerDrawer>();
-        skillUI.preemptSkillNumber = -1;
-        list.Add(skillUI);
-    }
-
-    private CSkillIUI FindPreemptNumber(int registeredNumber)
-    {
-        foreach (var skillUI in _baseList)
+        foreach (var skillUiList in _elementSkillLists)
         {
-            if (skillUI.preemptSkillNumber == registeredNumber)
+            foreach (var skillUi in skillUiList)
             {
-                return skillUI;
-            }
-        }
-
-        foreach (var skillUI in _comboList)
-        {
-            if (skillUI.preemptSkillNumber == registeredNumber)
-            {
-                return skillUI;
+                if (skillUi.preemptSkillNumber == registeredNumber)
+                {
+                    return skillUi;
+                }
             }
         }
 

@@ -7,13 +7,12 @@ using UnityEngine.UI;
  * 모든 UI 관리 클래스
  * 기본적으로 CUI Manager만 만지면 된다
  */
+[DisallowMultipleComponent]
 public class CUIManager : MonoBehaviour
 {
-    private static CLogComponent _logger;
-     
     // 플레이어 UI - 플레이어를 추적해서 그림
     public GameObject UiTargetObject;
-    public GameObject hpBarObject;
+    public CUiHpBar hpBarObject;
     // Scene Canvas 설정 - Ui가 제대로 추가될 수 있도록 설정
     public Transform UiCanvasTransform;
 
@@ -35,19 +34,12 @@ public class CUIManager : MonoBehaviour
         _skillUIManager = gameObject.GetComponent<CSkillUIManager>();
         _buffTimerUiList = gameObject.GetComponent<CBuffTimerListUI>();
         _otherPlayerUi = gameObject.GetComponent<COtherPlayerUiManager>();
-
-        _logger = new CLogComponent(ELogType.UI);
     }
 
     private void Start()
     {
         SetSceneCanvas();
         SetUiTarget(UiTargetObject);
-    }
-
-    // for test code
-    private void Update()
-    {
     }
 
     // 지정 캐릭터에 대한 UI를 그림
@@ -59,7 +51,7 @@ public class CUIManager : MonoBehaviour
         {
             _skillUIManager.DeregisterTimer(UiTargetObject);
             _buffTimerUiList.DeregisterTimer(UiTargetObject);
-            hpBarObject.GetComponent<CUiHpBar>().Deregister(UiTargetObject.GetComponent<CharacterPara>());
+            hpBarObject.Deregister(UiTargetObject.GetComponent<CharacterPara>());
         }
 
         UiTargetObject = target;
@@ -70,7 +62,7 @@ public class CUIManager : MonoBehaviour
         // 현재 타겟 설정
         _skillUIManager.RegisterTimer(UiTargetObject);
         _buffTimerUiList.RegisterTimer(UiTargetObject);
-        hpBarObject.GetComponent<CUiHpBar>().Register(UiTargetObject.GetComponent<CharacterPara>());
+        hpBarObject.Register(UiTargetObject.GetComponent<CharacterPara>());
     }
 
     // 기본 Canvas 설정(초기화용)
