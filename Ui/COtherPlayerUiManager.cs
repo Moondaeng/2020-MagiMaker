@@ -62,8 +62,8 @@ public class COtherPlayerUiManager : MonoBehaviour
         playerUiData.buffList.RegisterTimer(player);
         playerUiData.buffList.timerDrawer = timerDrawer;
         playerUiData.buffList.SetCanvas(_uiCanvasTransform);
-        playerUiData.buffList.timerUiTransform.SquareSize = uiPos.buffSquareSize;
-        playerUiData.buffList.timerUiTransform.SpaceSize = uiPos.buffSpaceSize;
+        //playerUiData.buffList.timerUiTransform.SquareSize = uiPos.buffSquareSize;
+        //playerUiData.buffList.timerUiTransform.SpaceSize = uiPos.buffSpaceSize;
 
         // 체력바
         playerUiData.hpBar.transform.SetParent(_uiCanvasTransform, false);
@@ -110,8 +110,8 @@ public class COtherPlayerUiManager : MonoBehaviour
             otherPlayerUi.Value.hpBar.transform.position = hpBarPos;
 
             // 버프 위치 갱신
-            otherPlayerUi.Value.buffList.timerUiTransform.PosX = uiPos.x;
-            otherPlayerUi.Value.buffList.timerUiTransform.PosY = posY - uiPos.buffSquareSize;
+            //otherPlayerUi.Value.buffList.timerUiTransform.PosX = uiPos.x;
+            //otherPlayerUi.Value.buffList.timerUiTransform.PosY = posY - uiPos.buffSquareSize;
 
             posY -= uiPos.distance;
         }

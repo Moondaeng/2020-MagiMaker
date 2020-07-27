@@ -40,8 +40,11 @@ public class CController : MonoBehaviour
     void Start()
     {
         _comboSelector.SetMainElement(0, CSkillSelector.SkillElement.Fire);
-        _comboSelector.SetMainElement(1, CSkillSelector.SkillElement.Earth);
+        _comboSelector.SetMainElement(1, CSkillSelector.SkillElement.Water);
         _comboSelector.SetSubElement(0, CSkillSelector.SkillElement.Water);
+        _comboSelector.SetSubElement(1, CSkillSelector.SkillElement.Earth);
+        _comboSelector.SetSubElement(2, CSkillSelector.SkillElement.Wind);
+        _comboSelector.SetSubElement(3, CSkillSelector.SkillElement.Light);
     }
 
     // 임시 방안

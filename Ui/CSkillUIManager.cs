@@ -25,8 +25,10 @@ public class CSkillUIManager : MonoBehaviour
     }
 
     public Transform skillUiObject;
+    public Transform crossHairObject;
     
     private List<CSkillUi>[] _elementSkillLists = new List<CSkillUi>[3];
+    private List<CSkillUi> _SelectElementList = new List<CSkillUi>();
     private CSkillTimer _timer;
 
     // 갱신 시간 조절
@@ -55,15 +57,14 @@ public class CSkillUIManager : MonoBehaviour
             {
                 var skillUi = ElementUi.GetChild(j);
                 AddSkillUI(skillUi, _elementSkillLists[i]);
+                DeregisterSkillUi(i, j);
             }
         }
 
-        for (int i = 0; i < 3; i++)
+        for(int i = 0; i < 5; i++)
         {
-            for (int j = 0; j < 5; j++)
-            {
-                DeregisterSkillUi(i, j);
-            }
+            AddSkillUI(crossHairObject.GetChild(i), _SelectElementList);
+            crossHairObject.GetChild(i).gameObject.SetActive(false);
         }
     }
 
@@ -115,6 +116,39 @@ public class CSkillUIManager : MonoBehaviour
         skillUiObject.GetChild(elementUiNumber).GetChild(skillUiNumber).gameObject.SetActive(false);
     }
 
+    public void ShowSelectElement(int elementUiNumber)
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            _SelectElementList[i].preemptSkillNumber = _elementSkillLists[elementUiNumber][i].preemptSkillNumber;
+            if (_SelectElementList[i].preemptSkillNumber != -1)
+            {
+                crossHairObject.GetChild(i).gameObject.SetActive(true);
+            }
+        }
+    }
+
+    // 주원소의 elementSkillNumber에 해당하는 스킬만 밝게 보여준다
+    // 0일 경우 주원소 기본 스킬 / -1일 경우 보여주지 않는다
+    public void ShowSelectSkill(int elementSubSkillNumber)
+    {
+        if(elementSubSkillNumber == -1)
+        {
+            foreach(var skillUi in _SelectElementList)
+            {
+                skillUi.ui.SetActive(false);
+            }
+        }
+        else
+        {
+            for(int i = 0; i < _SelectElementList.Count; i++)
+            {
+                //SetImageAlpha(_SelectElementList[i].image, i == elementSubSkillNumber ? 1f : 0.3f);
+                _SelectElementList[i].drawer.SetAlpha(i == elementSubSkillNumber ? 1f : 0.3f);
+            }
+        }
+    }
+
     // 모든 스킬 UI에 쿨타임을 그리는 명령을 내림
     // 단, 활성화되지 않은 경우 그리지 않음
     public void Draw()
@@ -128,6 +162,14 @@ public class CSkillUIManager : MonoBehaviour
                     _timer.GetMaxCooldown(skillUi.preemptSkillNumber)
                     );
             }
+        }
+
+        foreach(var elementSkill in _SelectElementList)
+        {
+            elementSkill.drawer.Draw(
+                    _timer.GetCurrentCooldown(elementSkill.preemptSkillNumber),
+                    _timer.GetMaxCooldown(elementSkill.preemptSkillNumber)
+                );
         }
     }
 
@@ -185,5 +227,12 @@ public class CSkillUIManager : MonoBehaviour
         }
 
         return null;
+    }
+
+    private void SetImageAlpha(Image image, float alpha)
+    {
+        var tempColor = image.color;
+        tempColor.a = alpha;
+        image.color = tempColor;
     }
 }

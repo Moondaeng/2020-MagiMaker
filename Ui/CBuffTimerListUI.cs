@@ -11,28 +11,30 @@ public class CBuffTimerListUI : MonoBehaviour
         public GameObject timerDrawer;
     }
 
-    [System.Serializable]
-    public struct TimerUiTransform
-    {
-        public int PosX;
-        public int PosY;
-        public int SquareSize;
-        public int SpaceSize;
+    //[System.Serializable]
+    //public struct TimerUiTransform
+    //{
+    //    public int PosX;
+    //    public int PosY;
+    //    public int SquareSize;
+    //    public int SpaceSize;
 
-        public TimerUiTransform(int x, int y, int square, int space)
-        {
-            PosX = x;
-            PosY = y;
-            SquareSize = square;
-            SpaceSize = space;
-        }
-    }
+    //    public TimerUiTransform(int x, int y, int square, int space)
+    //    {
+    //        PosX = x;
+    //        PosY = y;
+    //        SquareSize = square;
+    //        SpaceSize = space;
+    //    }
+    //}
 
     public RectTransform BuffUiPosition;
+    public int squareSize;
+    public int spaceSize;
 
     // 현재 Canvas 왼쪽 아래 기준으로 위치가 설정됨
     // 그러므로 피벗 설정 옵션을 넣어주든 하는게 필요함
-    public TimerUiTransform timerUiTransform = new TimerUiTransform(1084, 284, 50, 5);
+    //public TimerUiTransform timerUiTransform = new TimerUiTransform(1084, 284, 50, 5);
 
     // 갱신 시간 조절
     protected const float _updateTime = 0.1f;
@@ -104,7 +106,13 @@ public class CBuffTimerListUI : MonoBehaviour
         drawer.SetActive(true);
         drawer.GetComponent<Image>().sprite = GetImageByRegisterNumber(registeredNumber);
         drawer.GetComponent<CTimerDrawer>().CooldownEnable();
-        drawer.GetComponent<CTimerDrawer>().SetSize(timerUiTransform.SquareSize, timerUiTransform.SquareSize);
+        var newPivot = drawer.GetComponent<RectTransform>().pivot;
+        newPivot.x = 0;
+        newPivot.y = 0;
+        drawer.GetComponent<RectTransform>().pivot = newPivot;
+        //drawer.GetComponent<CTimerDrawer>().SetSize(timerUiTransform.SquareSize);
+        drawer.GetComponent<CTimerDrawer>().SetSize((int)BuffUiPosition.rect.height);
+        
 
         // 링크드리스트에 추가하기
         var timerUi = new TimerUi()
@@ -151,8 +159,10 @@ public class CBuffTimerListUI : MonoBehaviour
     protected void Relocate()
     {
         var drawer = _timerUiList.First;
-        float posX = timerUiTransform.PosX;
-        float posY = timerUiTransform.PosY;
+        //float posX = timerUiTransform.PosX;
+        float posX = BuffUiPosition.position.x;
+        //float posY = timerUiTransform.PosY;
+        float posY = BuffUiPosition.position.y;
         while (drawer != null)
         {
             var drawerPos = drawer.Value.timerDrawer.transform.position;
@@ -160,7 +170,7 @@ public class CBuffTimerListUI : MonoBehaviour
             drawerPos.y = posY;
             drawer.Value.timerDrawer.transform.position = drawerPos;
 
-            posX += timerUiTransform.SquareSize + timerUiTransform.SpaceSize;
+            posX += squareSize + spaceSize;
             drawer = drawer.Next;
         }
     }

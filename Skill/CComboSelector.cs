@@ -88,13 +88,28 @@ public class CSkillSelector
         Select(index);
 
         // 현재까지 선택한 콤보 UI로 보여주기
-        DrawCurrentState();
+        DrawCurrentState(index);
     }
 
     // 스킬 성질 선택 상태를 그림
-    public void DrawCurrentState()
+    public void DrawCurrentState(int index)
     {
-        
+        if(_currentState == ComboState.Sub)
+        {
+            _skillUIManager.ShowSelectElement(index);
+        }
+
+        switch(_currentState)
+        {
+            case ComboState.Sub:
+                _skillUIManager.ShowSelectSkill(0);
+                break;
+            case ComboState.Select:
+                _skillUIManager.ShowSelectSkill(index+1);
+                break;
+            default:
+                break;
+        }
     }
 
     // 조합 마법 발사
@@ -113,6 +128,7 @@ public class CSkillSelector
                 + subElement[selectedSubElement];
         }
         _currentState = ComboState.Main;
+        _skillUIManager.ShowSelectSkill(-1);
         return currentSelectedSkillNumber;
     }
 
