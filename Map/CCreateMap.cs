@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static System.Console;
 
-// 해야할 것 정리 : // 4. 멀티기준 플레이어 모두 올라와야 넘어갈수 있게하기(이건 구조만 유도)
-// 8. 다음스테이지 생성시 보스방 제거 알고리즘 생각해야함
+// 해야할 것 정리 : 포탈 생성 삭제하고 포탈 사용 시 페이드 아웃하면서 맵에 잇는 오브젝트들 삭제하고 새로운 맵 불러오고 플레이어 위치 조정
 public class CCreateMap : MonoBehaviour
 {
     CCreateStage map;
@@ -183,7 +182,6 @@ public class CCreateMap : MonoBehaviour
                 }
             }
             CreateRoom(_roomArr, _roomCount);
-            CreatePortal();
             _roomCount++;
 
             //debug
@@ -349,39 +347,6 @@ public class CCreateMap : MonoBehaviour
         public int getRoomCount()
         {
             return _roomCount;
-        }
-
-        public void CreatePortal()
-        {
-            int roomCount = _roomCount - 1;
-            for(int i = 0; i < CConstants.MAX_ROAD; i++)
-            {
-                if(_roomArr[_roomCount, i].RoomType != ERoomType._empty) //앞의 방이 empty가 아니면 뒷방에다가 포탈 생성!
-                {
-                    for(int j = 0; j < CConstants.MAX_ROAD; j++)
-                    {
-                        if(_roomArr[roomCount, j].RoomType != ERoomType._empty) //뒷 방 empty 아닌 경우에만 포탈 생성
-                        {
-                            // j는 0~2번째 방의위치, i는 좌중우 포탈위치
-                            switch (i-1)
-                            {
-                                case -1:
-                                    _portals.AddLast(Instantiate(leftPortal, new Vector3((j - 1) * CConstants.ROOM_DISTANCE_X + (i - 1) * CConstants.PORTAL_POSITION_X, 0
-                                , (roomCount * CConstants.ROOM_DISTANCE_Z) + CConstants.PORTAL_POSITION_Z), Quaternion.Euler(new Vector3())));
-                                    break;
-                                case 0:
-                                    _portals.AddLast(Instantiate(portal, new Vector3((j - 1) * CConstants.ROOM_DISTANCE_X + (i - 1) * CConstants.PORTAL_POSITION_X, 0
-                                , (roomCount * CConstants.ROOM_DISTANCE_Z) + CConstants.PORTAL_POSITION_Z), Quaternion.Euler(new Vector3())));
-                                    break;
-                                case 1:
-                                    _portals.AddLast(Instantiate(rightPortal, new Vector3((j - 1) * CConstants.ROOM_DISTANCE_X + (i - 1) * CConstants.PORTAL_POSITION_X, 0
-                                , (roomCount * CConstants.ROOM_DISTANCE_Z) + CConstants.PORTAL_POSITION_Z), Quaternion.Euler(new Vector3())));
-                                    break;
-                            }
-                        }
-                    }
-                }
-            }
         }
 
         public void CtrlPortal() //포탈 오브젝트 클리어 조건 만족시 true 아닐 경우 false
