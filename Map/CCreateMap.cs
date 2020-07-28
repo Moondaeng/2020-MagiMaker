@@ -52,7 +52,6 @@ public class CCreateMap : MonoBehaviour
         private CRoom[,] _roomArr;
         private LinkedList<GameObject> _rooms;
         private LinkedListNode<GameObject> _tempRoomNode;
-        private LinkedList<GameObject> _portals;
         #endregion
         public CCreateStage(int stageNumber)
         {
@@ -71,7 +70,6 @@ public class CCreateMap : MonoBehaviour
                     _roomArr[i, j] = new CRoom();
 
             _rooms = new LinkedList<GameObject>();
-            _portals = new LinkedList<GameObject>();
         }
 
         public void CreateStage()
@@ -319,13 +317,6 @@ public class CCreateMap : MonoBehaviour
                 _tempRoomNode = _rooms.First;
                 Destroy(_tempRoomNode.Value);
                 _rooms.RemoveFirst();
-
-                for (int j = 0; j < secondExistRoomCount; j++)
-                {
-                    _tempRoomNode = _portals.First;
-                    Destroy(_tempRoomNode.Value);
-                    _portals.RemoveFirst();
-                }
                 return;
             }
 
@@ -334,13 +325,6 @@ public class CCreateMap : MonoBehaviour
                 _tempRoomNode = _rooms.First;
                 Destroy(_tempRoomNode.Value);
                 _rooms.RemoveFirst();
-
-                for(int j = 0; j < secondExistRoomCount; j++)
-                {
-                    _tempRoomNode = _portals.First;
-                    Destroy(_tempRoomNode.Value);
-                    _portals.RemoveFirst();
-                }
             }
         }
 
@@ -351,33 +335,33 @@ public class CCreateMap : MonoBehaviour
 
         public void CtrlPortal() //포탈 오브젝트 클리어 조건 만족시 true 아닐 경우 false
         {
-            GameObject[] leftPortal = GameObject.FindGameObjectsWithTag("LEFT_PORTAL");
-            GameObject[] rightPortal = GameObject.FindGameObjectsWithTag("RIGHT_PORTAL");
-            GameObject[] Portal = GameObject.FindGameObjectsWithTag("PORTAL");
+            //GameObject[] leftPortal = GameObject.FindGameObjectsWithTag("LEFT_PORTAL");
+            //GameObject[] rightPortal = GameObject.FindGameObjectsWithTag("RIGHT_PORTAL");
+            //GameObject[] Portal = GameObject.FindGameObjectsWithTag("PORTAL");
 
-            if (CGlobal.isClear == false) //클리어 아직 안됬을 경우
-            {
-                if (CGlobal.isPortalActive == true)
-                {
-                    foreach (GameObject ob in leftPortal)
-                        ob.transform.Find("Portal").gameObject.SetActive(false);
-                    foreach (GameObject ob in rightPortal)
-                        ob.transform.Find("Portal").gameObject.SetActive(false);
-                    foreach (GameObject ob in Portal)
-                        ob.transform.Find("Portal").gameObject.SetActive(false);
+            //if (CGlobal.isClear == false) //클리어 아직 안됬을 경우
+            //{
+            //    if (CGlobal.isPortalActive == true)
+            //    {
+            //        foreach (GameObject ob in leftPortal)
+            //            ob.transform.Find("Portal").gameObject.SetActive(false);
+            //        foreach (GameObject ob in rightPortal)
+            //            ob.transform.Find("Portal").gameObject.SetActive(false);
+            //        foreach (GameObject ob in Portal)
+            //            ob.transform.Find("Portal").gameObject.SetActive(false);
 
-                    CGlobal.isPortalActive = false;
-                }
-                return;
-            }
+            //        CGlobal.isPortalActive = false;
+            //    }
+            //    return;
+            //}
 
-            //클리어 됬을 경우
-            foreach (GameObject ob in leftPortal)
-                ob.transform.FindChild("Portal").gameObject.SetActive(true);
-            foreach (GameObject ob in rightPortal)
-                ob.transform.FindChild("Portal").gameObject.SetActive(true);
-            foreach (GameObject ob in Portal)
-                ob.transform.FindChild("Portal").gameObject.SetActive(true);
+            ////클리어 됬을 경우
+            //foreach (GameObject ob in leftPortal)
+            //    ob.transform.FindChild("Portal").gameObject.SetActive(true);
+            //foreach (GameObject ob in rightPortal)
+            //    ob.transform.FindChild("Portal").gameObject.SetActive(true);
+            //foreach (GameObject ob in Portal)
+            //    ob.transform.FindChild("Portal").gameObject.SetActive(true);
             CGlobal.isPortalActive = true;
 
         }

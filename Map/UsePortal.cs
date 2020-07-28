@@ -29,7 +29,9 @@ public class UsePortal : MonoBehaviour
 
     public void MoveToNextRoom()
     {
-        Transform ParentTransform = player[0].transform;
+        CFadeInOut.instance.PlayFadeFlow(); //다음 방 넘어갈 때, 페이드 아웃 방 생성 이후 페이드 인
+
+        Transform ParentTransform = player[0].transform; //최상위 오브젝트 찾기
         while (true)
         {
             if (ParentTransform.parent == null)
@@ -38,24 +40,11 @@ public class UsePortal : MonoBehaviour
                 ParentTransform = ParentTransform.parent;
         }
 
-        Debug.Log("Position = " + ParentTransform.position);
-
         CGlobal.roomCount++;
-        switch (this.tag)
-        {
-            case "PORTAL":
-                ParentTransform.position = new Vector3(0, 1, CConstants.ROOM_DISTANCE_Z * CGlobal.roomCount - CConstants.PORTAL_DISTANCE_Z);
-                break;
 
-            case "RIGHT_PORTAL":
-                ParentTransform.position = new Vector3(CConstants.PORTAL_DISTANCE_X, 1, CConstants.ROOM_DISTANCE_Z * CGlobal.roomCount - CConstants.PORTAL_DISTANCE_Z);
-                break;
-
-            case "LEFT_PORTAL":
-                ParentTransform.position = new Vector3(-CConstants.PORTAL_DISTANCE_X, 1, CConstants.ROOM_DISTANCE_Z * CGlobal.roomCount - CConstants.PORTAL_DISTANCE_Z);
-                break;
-
-        }
+        ParentTransform.position = new Vector3(0, 0, 0);
+        //오브젝트 삭제
+        //방 배치
 
         CGlobal.usePortal = true; //포탈 사용 시 다음 맵 생성
         CGlobal.isClear = false; //포탈을 사용해서 새로운 방으로 왔으므로 방은 클리어되지 않은 상태

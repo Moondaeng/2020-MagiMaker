@@ -44,6 +44,7 @@ public class CWaitingForAccept : MonoBehaviour
             _waitingForOtherPlayer.SetActive(false);
 
             UsePortal usePortal = instance._portal.GetComponent<UsePortal>();
+            _player1Accept = EAccept._waiting; // 디버깅용
             usePortal.MoveToNextRoom();
         }
     }
@@ -53,15 +54,14 @@ public class CWaitingForAccept : MonoBehaviour
         _player2Accept = EAccept._accept;
         Image image = _waitingForOtherPlayer.transform.GetChild(1).GetComponent<Image>();
         image.sprite = Resources.Load<Sprite>("T_12_ok_") as Sprite;
-        yield return new WaitForSeconds(3.0f);
 
         _player3Accept = EAccept._accept;
         image = _waitingForOtherPlayer.transform.GetChild(2).GetComponent<Image>();
         image.sprite = Resources.Load<Sprite>("T_12_ok_") as Sprite;
-        yield return new WaitForSeconds(3.0f);
 
         _player4Accept = EAccept._accept;
         image = _waitingForOtherPlayer.transform.GetChild(3).GetComponent<Image>();
         image.sprite = Resources.Load<Sprite>("T_12_ok_") as Sprite;
+        yield return null;
     }
 }

@@ -5,8 +5,8 @@ using UnityEngine.UI;
 
 public class CFadeInOut : MonoBehaviour
 {
-    public float fadeTime = 2f; // Fade효과 재생시간
-    Image fadeImg;
+    public float fadeTime = 10f; // Fade효과 재생시간
+    public Image fadeImg;
     float start;
     float end;
     float time = 0f;
@@ -19,9 +19,7 @@ public class CFadeInOut : MonoBehaviour
         if (instance == null)
             instance = this;
 
-        fadeImg = GetComponent<Image>();
-
-        //PlayFadeIn();
+        PlayFadeIn();
     }
 
     public void PlayFadeIn()
@@ -35,11 +33,10 @@ public class CFadeInOut : MonoBehaviour
         start = 1f;
         end = 0f;
 
-        StartCoroutine("FadeInOut");    //코루틴 실행
+        StartCoroutine("FadeIn");    //코루틴 실행
     }
 
     public void PlayFadeOut()
-
     {
         if (isPlaying == true) //중복재생방지
         {
@@ -48,26 +45,62 @@ public class CFadeInOut : MonoBehaviour
 
         start = 0f;
         end = 1f;
-        StartCoroutine("FadeInOut");
+
+        StartCoroutine("FadeOut");
     }
 
-    IEnumerator FadeInOut()
+    public void PlayFadeFlow()
+    {
+        if (isPlaying == true)
+            return;
+
+        start = 0f;
+        end = 1f;
+
+        StartCoroutine(FadeFlow());
+    }
+
+    IEnumerator FadeIn()
     {
         isPlaying = true;
 
         Color fadeColor = fadeImg.color;
         time = 0f;
-        fadeColor.a = Mathf.Lerp(start, end, time);
 
         while (fadeColor.a > 0f)
-
         {
-            time += Time.deltaTime / fadeTime;
+            time += Time.deltaTime * fadeTime;
             fadeColor.a = Mathf.Lerp(start, end, time);
             fadeImg.color = fadeColor;
             yield return null;
         }
 
         isPlaying = false;
+    }
+
+    IEnumerator FadeOut()
+    {
+        isPlaying = true;
+
+        Color fadeColor = fadeImg.color;
+        time = 0f;
+
+        while (fadeColor.a < 1f)
+        {
+            time += Time.deltaTime * fadeTime;
+            fadeColor.a = Mathf.Lerp(start, end, time);
+            fadeImg.color = fadeColor;
+            yield return null;
+        }
+
+        isPlaying = false;
+    }
+
+    IEnumerator FadeFlow()
+    {
+        yield return StartCoroutine(FadeOut());
+        yield return new WaitForSeconds(3f);
+
+        PlayFadeIn();
     }
 }
