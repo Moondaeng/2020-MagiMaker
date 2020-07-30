@@ -45,8 +45,8 @@ public class UsePortal : MonoBehaviour
         ParentTransform.position = new Vector3(0, 0, 0);
         //오브젝트 삭제
         //방 배치
-
-        CGlobal.usePortal = true; //포탈 사용 시 다음 맵 생성
+        CCreateMap.instance.map.CreateStage(); //포탈 사용 시 맵 생성
+        CCreateMap.instance.map.CreateRoom(CCreateMap.instance.map.GetRooms(), CCreateMap.instance.map.getRoomCount());
         CGlobal.isClear = false; //포탈을 사용해서 새로운 방으로 왔으므로 방은 클리어되지 않은 상태
     }
 }
