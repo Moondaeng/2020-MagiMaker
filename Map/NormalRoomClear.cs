@@ -7,11 +7,13 @@ public class NormalRoomClear : MonoBehaviour
     public Vector3 position;
     GameObject player;
 
-    private void OnCollisionEnter(Collision coll)
+    public void OnTriggerEnter(Collider coll)
     {
         player = GameObject.FindGameObjectWithTag("Player");
 
-        if (coll.collider.tag == "Player")
+        Debug.Log("NormalRoomClear");
+
+        if (coll.tag == "Player")
         {
             CGlobal.isClear = true;
         }

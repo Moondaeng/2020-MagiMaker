@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CCreateStage
 {
@@ -224,15 +226,12 @@ public class CCreateStage
         if (_roomCount == 0)
         {
             _roomArr[0, 0].RoomType = CGlobal.ERoomType._start;
-            CreateRoom(_roomArr, _roomCount); //시작방 생성
-            _roomCount++;
+            CreateRoom(_roomArr, _roomCount, 0); //시작방 생성   
         }
 
         if (_roomCount == CConstants.ROOM_PER_STAGE - 1)
         {
-            _roomArr[CConstants.ROOM_PER_STAGE - 1, 0].RoomType = CGlobal.ERoomType._boss;
-            CreateRoom(_roomArr, _roomCount); //보스방 생성
-            _roomCount++;
+            _roomArr[CConstants.ROOM_PER_STAGE - 1, 0].RoomType = CGlobal.ERoomType._boss; //보스방 따로 넣기
             return;
         }
 
@@ -298,9 +297,11 @@ public class CCreateStage
             }
         }
         //RoomFlagCtrl(ERoomType roomType)l; 주인공 캐릭터가 선택한 룸타입을 설정
+
+        MakePortalText(_roomCount);
     }
 
-    private void RoomFlagCtrl(CGlobal.ERoomType roomType)
+    public void RoomFlagCtrl(CGlobal.ERoomType roomType)
     {
         _noRoomFlag = false;
         switch (roomType)
@@ -348,15 +349,10 @@ public class CCreateStage
 
         return 0;
     }
-    public void CreateRoom(CRoom[,] roomArr, int roomCount)
+    public void CreateRoom(CRoom[,] roomArr, int roomCount, int roadCount)
     {
-        for (int roadCount = 0; roadCount < CConstants.MAX_ROAD; roadCount++)
-        {
-            if (roomArr[roomCount, roadCount].RoomType != CGlobal.ERoomType._empty) //빈 방이 아닐 경우
-            {
-                InstantiateRoom(roomArr[roomCount, roadCount].RoomType, roomCount, roadCount);
-            }
-        }
+        InstantiateRoom(roomArr[roomCount, roadCount].RoomType, roomCount, roadCount);
+
         _roomCount++;
     }
 
@@ -376,64 +372,74 @@ public class CCreateStage
                 if (roadCount == 1 || roadCount == 2) //보스방도 하나만!
                     return;
 
-                tempRoom = Object.Instantiate(bossRoom, new Vector3((roadCount - 1) * CConstants.ROOM_DISTANCE_X, 0, roomCount * CConstants.ROOM_DISTANCE_Z), Quaternion.Euler(new Vector3(90, 0, 0)));
+                tempRoom = Object.Instantiate(bossRoom, new Vector3(0 , 0, 0), Quaternion.Euler(new Vector3(90, 0, 0)));
                 _rooms.AddLast(tempRoom);
                 break;
 
             case CGlobal.ERoomType._event:
-                tempRoom = Object.Instantiate(eventRoom, new Vector3((roadCount - 1) * CConstants.ROOM_DISTANCE_X, 0, roomCount * CConstants.ROOM_DISTANCE_Z), Quaternion.Euler(new Vector3(90, 0, 0)));
+                tempRoom = Object.Instantiate(eventRoomQueue.Dequeue(), new Vector3(0, 0, 0), Quaternion.Euler(new Vector3(90, 0, 0)));
                 _rooms.AddLast(tempRoom);
                 break;
 
             case CGlobal.ERoomType._itemElite:
-                tempRoom = Object.Instantiate(itemEliteRoom, new Vector3((roadCount - 1) * CConstants.ROOM_DISTANCE_X, 0, roomCount * CConstants.ROOM_DISTANCE_Z), Quaternion.Euler(new Vector3(90, 0, 0)));
+                tempRoom = Object.Instantiate(itemEliteRoomQueue.Dequeue(), new Vector3(0, 0, 0), Quaternion.Euler(new Vector3(90, 0, 0)));
                 _rooms.AddLast(tempRoom);
                 break;
 
             case CGlobal.ERoomType._normal:
-                tempRoom = Object.Instantiate(normalRoomQueue.Dequeue(), new Vector3((roadCount - 1) * CConstants.ROOM_DISTANCE_X, 0, roomCount * CConstants.ROOM_DISTANCE_Z), Quaternion.Euler(new Vector3(90, 0, 0)));
+                tempRoom = Object.Instantiate(normalRoomQueue.Dequeue(), new Vector3(0, 0, 0), Quaternion.Euler(new Vector3(90, 0, 0)));
                 _rooms.AddLast(tempRoom);
                 break;
 
             case CGlobal.ERoomType._shop:
-                tempRoom = Object.Instantiate(shopRoom, new Vector3((roadCount - 1) * CConstants.ROOM_DISTANCE_X, 0, roomCount * CConstants.ROOM_DISTANCE_Z), Quaternion.Euler(new Vector3(90, 0, 0)));
+                tempRoom = Object.Instantiate(shopRoom, new Vector3(0, 0, 0), Quaternion.Euler(new Vector3(90, 0, 0)));
                 _rooms.AddLast(tempRoom);
                 break;
 
             case CGlobal.ERoomType._skillElite:
-                tempRoom = Object.Instantiate(skillEliteRoom, new Vector3((roadCount - 1) * CConstants.ROOM_DISTANCE_X, 0, roomCount * CConstants.ROOM_DISTANCE_Z), Quaternion.Euler(new Vector3(90, 0, 0)));
+                tempRoom = Object.Instantiate(skillEliteRoomQueue.Dequeue(), new Vector3(0, 0, 0), Quaternion.Euler(new Vector3(90, 0, 0)));
                 _rooms.AddLast(tempRoom);
                 break;
         }
     }
 
-    private void DestroyRoom()
+    public void DestroyRoom()
     {
-        int tempRoomCount = _roomCount - 2;
-        int existRoomCount = 0;
-        int secondExistRoomCount = 0; //포탈 삭제를 위한 지금 삭제해야할 다음 방 개수
+        _tempRoomNode = _rooms.First;
+        Object.Destroy(_tempRoomNode.Value);
+        _rooms.RemoveFirst();
+        return;
+    }
 
-        for (int i = 0; i < CConstants.MAX_ROAD; i++)
-        {
-            if (_roomArr[tempRoomCount, i].RoomType != CGlobal.ERoomType._empty)
-                existRoomCount++;
-            if (_roomArr[tempRoomCount + 1, i].RoomType != CGlobal.ERoomType._empty)
-                secondExistRoomCount++;
-        }
+    public void MakePortalText(int roomCount) //포탈 위에 다음 방이 어떤 방인지 알려주는 텍스트 생성, 빈 방인 경우 포탈 삭제
+    {
+        GameObject[] portalMom = GameObject.FindGameObjectsWithTag("PORTAL_MOM");
 
-        if (tempRoomCount == 0) //시작 방일 경우, 보스방도 추후에 고려해야함.
-        {
-            _tempRoomNode = _rooms.First;
-            Object.Destroy(_tempRoomNode.Value);
-            _rooms.RemoveFirst();
-            return;
-        }
+        Debug.Log(roomCount);
 
-        for (int i = 0; i < existRoomCount; i++)
+        foreach (GameObject ob in portalMom)
         {
-            _tempRoomNode = _rooms.First;
-            Object.Destroy(_tempRoomNode.Value);
-            _rooms.RemoveFirst();
+            Transform portal = ob.transform.FindChild("Portal");
+            Transform text = ob.transform.FindChild("PortalText").FindChild("Text");
+
+            switch (portal.tag)
+            {
+                case "LEFT_PORTAL":
+                    text.GetComponent<TextMeshProUGUI>().text = _roomArr[roomCount, 0].RoomType.ToString().Substring(1);
+                    if (_roomArr[roomCount, 0].RoomType == CGlobal.ERoomType._empty)
+                        GameObject.Destroy(ob);
+                    break;
+                case "PORTAL":
+                    text.GetComponent<TextMeshProUGUI>().text = _roomArr[roomCount, 1].RoomType.ToString().Substring(1);
+                    if (_roomArr[roomCount, 1].RoomType == CGlobal.ERoomType._empty)
+                        GameObject.Destroy(ob);
+                    break;
+                case "RIGHT_PORTAL":
+                    text.GetComponent<TextMeshProUGUI>().text = _roomArr[roomCount, 2].RoomType.ToString().Substring(1);
+                    if (_roomArr[roomCount, 2].RoomType == CGlobal.ERoomType._empty)
+                        GameObject.Destroy(ob);
+                    break;
+            }
         }
     }
 
@@ -444,20 +450,17 @@ public class CCreateStage
 
     public void CtrlPortal() //포탈 오브젝트 클리어 조건 만족시 true 아닐 경우 false
     {
-        GameObject[] leftPortal = GameObject.FindGameObjectsWithTag("LEFT_PORTAL");
-        GameObject[] rightPortal = GameObject.FindGameObjectsWithTag("RIGHT_PORTAL");
-        GameObject[] Portal = GameObject.FindGameObjectsWithTag("PORTAL");
+        GameObject[] portalMom = GameObject.FindGameObjectsWithTag("PORTAL_MOM");
 
         if (CGlobal.isClear == false) //클리어 아직 안됬을 경우
         {
             if (CGlobal.isPortalActive == true)
             {
-                foreach (GameObject ob in leftPortal)
-                    ob.transform.Find("Portal").gameObject.SetActive(false);
-                foreach (GameObject ob in rightPortal)
-                    ob.transform.Find("Portal").gameObject.SetActive(false);
-                foreach (GameObject ob in Portal)
-                    ob.transform.Find("Portal").gameObject.SetActive(false);
+                foreach (GameObject ob in portalMom)
+                {
+                    ob.transform.FindChild("Portal").gameObject.SetActive(false);
+                    ob.transform.FindChild("PortalText").gameObject.SetActive(false);
+                }
 
                 CGlobal.isPortalActive = false;
             }
@@ -465,12 +468,13 @@ public class CCreateStage
         }
 
         //클리어 됬을 경우
-        foreach (GameObject ob in leftPortal)
-            ob.transform.FindChild("Portal").gameObject.SetActive(true);
-        foreach (GameObject ob in rightPortal)
-            ob.transform.FindChild("Portal").gameObject.SetActive(true);
-        foreach (GameObject ob in Portal)
-            ob.transform.FindChild("Portal").gameObject.SetActive(true);
+        if (portalMom != null)
+            foreach (GameObject ob in portalMom)
+            {
+                ob.transform.FindChild("Portal").gameObject.SetActive(true);
+                ob.transform.FindChild("PortalText").gameObject.SetActive(true);
+            }
+
         CGlobal.isPortalActive = true;
 
     }

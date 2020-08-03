@@ -26,7 +26,6 @@ public class CWaitingForAccept : MonoBehaviour
         if (instance == null)
         {
             instance = this;
-            Debug.Log("instaceeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
         }
         _player1Accept = EAccept._waiting;
         _player2Accept = EAccept._waiting;
