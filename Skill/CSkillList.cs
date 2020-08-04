@@ -4,15 +4,15 @@ using UnityEngine;
 
 public static class CSkillList
 {
-    public const int comboSkill1 = 4;
-    public const int comboSkill2 = 5;
-    public const int comboSkill3 = 6;
-    public const int comboSkill4 = 7;
-    public const int comboSkill5 = 8;
-    public const int comboSkill6 = 9;
-    public const int comboSkill7 = 10;
-    public const int comboSkill8 = 11;
-    public const int comboSkill9 = 12;
+    public const int comboSkill1 = 0;
+    public const int comboSkill2 = 1;
+    public const int comboSkill3 = 2;
+    public const int comboSkill4 = 3;
+    public const int comboSkill5 = 4;
+    public const int comboSkill6 = 5;
+    public const int comboSkill7 = 6;
+    public const int comboSkill8 = 7;
+    public const int comboSkill9 = 8;
 
     public static Dictionary<int, string> SkillList = new Dictionary<int, string>()
     {

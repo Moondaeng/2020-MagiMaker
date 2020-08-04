@@ -69,6 +69,37 @@ public class CSkillSelector
         SyncSubElementWithUi(slot);
     }
 
+    #region Second
+
+    public void ChangeElement()
+    {
+        do
+        {
+            selectedMainElement = (selectedMainElement + 1) % mainElementContainSize;
+        } while (mainElement[selectedMainElement] == -1);
+        _skillUIManager.ShowSelectElement(selectedMainElement);
+    }
+
+    // 임시 2안 - 주원소는 따로 선택된 상태에서 스킬을 사용
+    public int PickElementSkill(int index)
+    {
+        int currentSelectedSkillNumber = -1;
+
+        if(index == 0)
+        {
+            currentSelectedSkillNumber = mainElement[selectedMainElement];
+        }
+        else
+        {
+            currentSelectedSkillNumber = elementTotalNumber
+                    + mainElement[selectedMainElement] * elementTotalNumber
+                    + subElement[index - 1];
+        }
+
+        return currentSelectedSkillNumber;
+    }
+    #endregion
+
     // 콤보 완성이 되면 스킬이 나간다라는 정보가 있어야함
     // 더불어, 초기 상태로 회귀해야 함
     public void Combo(int index)
@@ -116,17 +147,18 @@ public class CSkillSelector
     public int EndCombo()
     {
         int currentSelectedSkillNumber = -1;
+        int subElementNumber = 0;
 
         if (_currentState == ComboState.Sub)
         {
-            currentSelectedSkillNumber = mainElement[selectedMainElement];
+            subElementNumber = 0;
         }
         else if (_currentState == ComboState.Select)
         {
-            currentSelectedSkillNumber = elementTotalNumber
-                + mainElement[selectedMainElement] * elementTotalNumber
-                + subElement[selectedSubElement];
+            subElementNumber = subElement[selectedSubElement];
         }
+        currentSelectedSkillNumber = mainElement[selectedMainElement] * elementTotalNumber + subElementNumber;
+
         _currentState = ComboState.Main;
         _skillUIManager.ShowSelectSkill(-1);
         return currentSelectedSkillNumber;
@@ -174,13 +206,13 @@ public class CSkillSelector
     private void SyncMainElementWithUi(int mainElementSlotNumber)
     {
         _skillUIManager.RegisterSkillUi(mainElementSlotNumber, 0,
-                    mainElement[mainElementSlotNumber]);
+                    mainElement[mainElementSlotNumber] * elementTotalNumber);
         for (int i = 0; i < subElementContainSize; i++)
         {
             if (subElement[i] != -1)
             {
                 _skillUIManager.RegisterSkillUi(mainElementSlotNumber, i+1,
-                    (mainElement[mainElementSlotNumber] + 1) * elementTotalNumber + subElement[i]);
+                    mainElement[mainElementSlotNumber] * elementTotalNumber + subElement[i]);
             }
         }
     }
@@ -192,7 +224,7 @@ public class CSkillSelector
             if (mainElement[i] != -1)
             {
                 _skillUIManager.RegisterSkillUi(i, subElementSlotNumber+1,
-                    (mainElement[i] + 1) * elementTotalNumber + subElement[subElementSlotNumber]);
+                    mainElement[i] * elementTotalNumber + subElement[subElementSlotNumber]);
             }
         }
     }

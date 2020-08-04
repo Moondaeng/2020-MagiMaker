@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class CBuffBase : MonoBehaviour
 {
-    private static CLogComponent _logger;
-
     // 아군을 돕는 행위 관련 모든 경우들
     // 힐, 버프 등
     public enum BuffType
@@ -30,7 +28,6 @@ public class CBuffBase : MonoBehaviour
 
     private void Awake()
     {
-        _logger = new CLogComponent(ELogType.Buff);
     }
 
     // Start is called before the first frame update
@@ -47,14 +44,12 @@ public class CBuffBase : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        _logger.Log("Trigger Enter");
         if (gameObject.tag == "Player" || gameObject.tag == "Allies")
         {
             if (other.CompareTag("Player") || other.CompareTag("Allies"))
             {
                 // 이벤트 처리 : 네트워크한테 충돌 알림
-
-                _logger.Log("Buff");
+                
                 // 버프 관련 함수
                 var aliesPara = other.GetComponent<CharacterPara>();
                 if(aliesPara != null)
@@ -64,13 +59,11 @@ public class CBuffBase : MonoBehaviour
                         switch (buffArg.type)
                         {
                             case BuffType.fastHeal:
-                                _logger.Log("Heal");
                                 break;
                             case BuffType.attackBuff:
                                 aliesPara.buffParameter.BuffAttack(buffArg.arg1, buffArg.arg2);
                                 break;
                             case BuffType.defenceBuff:
-                                _logger.Log("defenceBuff");
                                 break;
                         }
                     }
@@ -81,7 +74,6 @@ public class CBuffBase : MonoBehaviour
         {
             if (other.CompareTag("Player") || other.CompareTag("Allies"))
             {
-                _logger.Log("Player");
             }
         }
     }

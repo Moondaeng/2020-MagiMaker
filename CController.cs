@@ -27,9 +27,17 @@ public class CController : MonoBehaviour
             {KeyCode.Alpha2, () => SkillSelect(1) },
             {KeyCode.Alpha3, () => SkillSelect(2) },
             {KeyCode.Alpha4, () => SkillSelect(3) },
-            {KeyCode.Alpha5, () => SkillSelect(4) },
             {KeyCode.Mouse1, UseSkill },
         };
+        //keyDictionary = new Dictionary<KeyCode, Action>
+        //{
+        //    {KeyCode.Tab, ChangeElement },
+        //    {KeyCode.Alpha1, () => UseSkill(1) },
+        //    {KeyCode.Alpha2, () => UseSkill(2) },
+        //    {KeyCode.Alpha3, () => UseSkill(3) },
+        //    {KeyCode.Alpha4, () => UseSkill(4) },
+        //    {KeyCode.Mouse1, () => UseSkill(0) },
+        //};
 
         // 콤보 스킬 세팅
         _comboSelector = new CSkillSelector();
@@ -50,46 +58,46 @@ public class CController : MonoBehaviour
     // 임시 방안
     public void DeselectEnemy()
     {
-        player.GetComponent<CCntl>().CurrentEnemyDead();
+        //player.GetComponent<CCntl>().CurrentEnemyDead();
     }
 
     // 기본적으로 이동에 해당
     // 현재 적 캐릭터에게 타겟팅 공격 기능이 포함되어 있으나, 필요없다면 해당 부분 제외함
-    private void Move()
-    {
-        // Ray API 참고 직선 방향으로 나아가는 무한대 길이의 선
-        // 카메라 클래스의 메인 카메라로 부터의 스크린의 점을 통해 레이 반환
-        // 여기서 스크린의 점은, Input.mousePosition으로 받음
-        // 포지션.z를 무시한 값임.
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+    //private void Move()
+    //{
+    //    // Ray API 참고 직선 방향으로 나아가는 무한대 길이의 선
+    //    // 카메라 클래스의 메인 카메라로 부터의 스크린의 점을 통해 레이 반환
+    //    // 여기서 스크린의 점은, Input.mousePosition으로 받음
+    //    // 포지션.z를 무시한 값임.
+    //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        RaycastHit hit;
+    //    RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit))
-        {
-            GameObject hitObject = hit.collider.gameObject;
-            string s = hitObject.name;
-            string s2 = hitObject.tag;
-            bool stringExists = s2.Contains("Terrain");
-            // 누른게 지형이면, 이동함.
-            if (stringExists)
-            {
-                //gameEvent.PlayerMoveStart(player.transform.position, hit.point);
-                player.GetComponent<CCntl>().MoveTo(hit.point);
-            }
-            else if (s2 == "Monster")//마우스 클릭한 대상이 적 캐릭터인 경우
-            {
-                player.GetComponent<CCntl>().TargetEnemy(hit.collider.gameObject);
-            }
-            else if (s2 == "ITEM")
-            {
-                var itemInfo = hitObject.GetComponent<CItemInformation>();
-                player.SendMessage("EquipItem", itemInfo._item);
-                //player.transform.GetChild(0).SendMessage("EquipItem", itemInfo._item);
-                Destroy(hitObject);
-            }
-        }
-    }
+    //    if (Physics.Raycast(ray, out hit))
+    //    {
+    //        GameObject hitObject = hit.collider.gameObject;
+    //        string s = hitObject.name;
+    //        string s2 = hitObject.tag;
+    //        bool stringExists = s2.Contains("Terrain");
+    //        // 누른게 지형이면, 이동함.
+    //        if (stringExists)
+    //        {
+    //            //gameEvent.PlayerMoveStart(player.transform.position, hit.point);
+    //            player.GetComponent<CCntl>().MoveTo(hit.point);
+    //        }
+    //        else if (s2 == "Monster")//마우스 클릭한 대상이 적 캐릭터인 경우
+    //        {
+    //            player.GetComponent<CCntl>().TargetEnemy(hit.collider.gameObject);
+    //        }
+    //        else if (s2 == "ITEM")
+    //        {
+    //            var itemInfo = hitObject.GetComponent<CItemInformation>();
+    //            player.SendMessage("EquipItem", itemInfo._item);
+    //            //player.transform.GetChild(0).SendMessage("EquipItem", itemInfo._item);
+    //            Destroy(hitObject);
+    //        }
+    //    }
+    //}
 
     void RotateMotion()
     {
@@ -118,6 +126,7 @@ public class CController : MonoBehaviour
         }
     }
 
+    #region UseSkill1
     private void SkillSelect(int index)
     {
         _comboSelector.Combo(index);
@@ -130,7 +139,9 @@ public class CController : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out hit))
         {
-            bool? isSkillUse = player.GetComponent<CPlayerSkill>().UseSkillToPosition(_comboSelector.EndCombo(), hit.point);
+            int comboSkillNum = _comboSelector.EndCombo();
+            if (comboSkillNum == -1) return;
+            bool? isSkillUse = player.GetComponent<CPlayerSkill>().UseSkillToPosition(comboSkillNum, hit.point);
             // 성공 시 플레이어 스킬 사용 이벤트 수행
             if (isSkillUse == true)
             {
@@ -139,6 +150,33 @@ public class CController : MonoBehaviour
             }
         }
     }
+    #endregion
+
+    #region UseSkill2
+    private void ChangeElement()
+    {
+        _comboSelector.ChangeElement();
+    }
+
+    private void UseSkill(int index)
+    {
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out hit))
+        {
+            //int comboSkillNum = _comboSelector.EndCombo();
+            int comboSkillNum = _comboSelector.PickElementSkill(index);
+            if (comboSkillNum == -1) return;
+            bool? isSkillUse = player.GetComponent<CPlayerSkill>().UseSkillToPosition(comboSkillNum, hit.point);
+            // 성공 시 플레이어 스킬 사용 이벤트 수행
+            if (isSkillUse == true)
+            {
+                //player.GetComponent<CCntl>().SkillAction(2, hit.point);
+                //gameEvent.PlayerAction(number, player.transform.position, hit.point);
+            }
+        }
+    }
+    #endregion
 
     private void Attack()
     {

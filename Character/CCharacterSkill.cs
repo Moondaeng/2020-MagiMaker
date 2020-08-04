@@ -6,6 +6,7 @@ using UnityEngine;
  * 모든 캐릭터의 스킬과 스킬 관련 정보를 저장하는 컴포넌트
  * 아이템 추가에 따라 데미지 증폭, 쿨다운 감소 등을 여기서 관리
  */
+ [RequireComponent(typeof(CSkillTimer))]
 public class CCharacterSkill : MonoBehaviour
 {
     protected List<CSkillFormat> _skillList;

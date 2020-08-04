@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CBuffPara
 {
-    public float attackCoef;
+    public float AttackCoef;
     public float DefenceCoef;
     public float MoveSpeedCoef;
     public float AttackSpeedCoef;
@@ -13,7 +13,7 @@ public class CBuffPara
 
     public CBuffPara(CBuffTimer myTimer)
     {
-        attackCoef = 1.0f;
+        AttackCoef = 1.0f;
         DefenceCoef = 1.0f;
         MoveSpeedCoef = 1.0f;
         AttackSpeedCoef = 1.0f;
@@ -22,11 +22,9 @@ public class CBuffPara
     }
 
     // 버프 스킬군
-    // 버프가 걸린 상태에서 또 걸리면 중첩되지 않도록 캔슬해야함
     public virtual void BuffAttack(float time, float buffScale)
     {
         StartBuffAttack(buffScale);
-        // 버프 효과 끝내기 수치 넣을 땐 필요에 따라 커링을 사용
         timer.Register(CBuffList.AttackBuff, time, () => EndBuffAttack(buffScale));
     }
 
@@ -35,9 +33,33 @@ public class CBuffPara
         StartBuffDefence(buffScale);
         timer.Register(CBuffList.DefenceBuff, time, () => EndBuffDefence(buffScale));
     }
+
+    public void BuffAttackStack(float time, float stackBuffScale, int stack)
+    {
+        StartBuffAttackStack(time, stackBuffScale, stack);
+    }
     
-    protected void StartBuffAttack(float buffScale) => attackCoef *= buffScale;
-    protected void EndBuffAttack(float buffScale) => attackCoef /= buffScale;
+    protected void StartBuffAttack(float buffScale) => AttackCoef *= buffScale;
+    protected void EndBuffAttack(float buffScale) => AttackCoef /= buffScale;
     protected void StartBuffDefence(float buffScale) => DefenceCoef *= buffScale;
     protected void EndBuffDefence(float buffScale) => DefenceCoef /= buffScale;
+
+    protected void StartBuffAttackStack(float time, float stackBuffScale, int stack)
+    {
+        float buffScale = 1.0f + stackBuffScale * stack;
+        AttackCoef *= stackBuffScale;
+        timer.Register(CBuffList.DefenceBuff, time, () => EndBuffAttackStack(time, stackBuffScale, stack), stack);
+    }
+    protected void EndBuffAttackStack(float time, float stackBuffScale, int stack)
+    {
+        float buffScale = 1.0f + stackBuffScale * stack;
+        AttackCoef /= stackBuffScale;
+
+        if (stack == 0)
+        {
+            return;
+        }
+
+        StartBuffAttackStack(time, stackBuffScale, stack-1);
+    }
 }

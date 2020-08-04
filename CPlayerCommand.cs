@@ -79,7 +79,7 @@ public class CPlayerCommand : MonoBehaviour
         if (character == null) return;
 
         var playerState = character.GetComponent<CCntl>();
-        playerState.MoveTo(movePos);
+        //playerState.MoveTo(movePos);
     }
 
     // 캐릭터 강제 이동
@@ -102,7 +102,7 @@ public class CPlayerCommand : MonoBehaviour
         var charSkill = character.GetComponent<CCharacterSkill>();
         var charState = character.GetComponent<CCntl>();
         charSkill.UseSkillToPosition(skillNumber, targetPos);
-        charState.SkillAction(2, targetPos);
+        //charState.SkillAction(2, targetPos);
     }
 
     // 해당 캐릭터에게 데미지 주기
