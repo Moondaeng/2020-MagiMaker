@@ -25,12 +25,13 @@ public class CPlayerSkill : CCharacterSkill
         // 콤보 스킬 포맷 등록
         for (int i = 0; i < 42; i++)
         {
-            _skillList.Add(new CSkillFormat(i, 10.5f + 0.5f * i, gameObject));
+            _skillList.Add(new CSkillFormat(i, 0.5f + 0.5f * i, gameObject));
         }
 
         // 기본 스킬 등록
         _skillList[0].RegisterSkill(_projectileSkill.Fireball);
-        _skillList[1].RegisterSkill(_buffSkill.DefenceUp);
+        _skillList[1].RegisterSkill(_buffSkill.AttackUp);
+        _skillList[2].RegisterSkill(_buffSkill.DefenceUp);
         
     }
 

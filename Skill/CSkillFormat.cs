@@ -47,5 +47,5 @@ public class CSkillFormat
         }
     }
 
-    private void EndCooldown() =>_isCooldown = false;
+    private void EndCooldown(int notUsed) =>_isCooldown = false;
 }

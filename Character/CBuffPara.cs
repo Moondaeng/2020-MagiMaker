@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class CBuffPara
 {
     public float AttackCoef;
@@ -9,7 +10,7 @@ public class CBuffPara
     public float MoveSpeedCoef;
     public float AttackSpeedCoef;
 
-    public CBuffTimer timer;
+    protected readonly CBuffTimer timer;
 
     public CBuffPara(CBuffTimer myTimer)
     {
@@ -24,42 +25,55 @@ public class CBuffPara
     // 버프 스킬군
     public virtual void BuffAttack(float time, float buffScale)
     {
-        StartBuffAttack(buffScale);
-        timer.Register(CBuffList.AttackBuff, time, () => EndBuffAttack(buffScale));
+        timer.Register(CBuffList.AttackBuff, time,
+            (int notUsed) => StartBuffAttack(buffScale),
+            (int notUsed) => EndBuffAttack(buffScale));
     }
 
     public void BuffDefence(float time, float buffScale)
     {
-        StartBuffDefence(buffScale);
-        timer.Register(CBuffList.DefenceBuff, time, () => EndBuffDefence(buffScale));
+        timer.Register(CBuffList.DefenceBuff, time,
+            (int notUsed) => StartBuffDefence(buffScale),
+            (int notUsed) => EndBuffDefence(buffScale));
     }
 
     public void BuffAttackStack(float time, float stackBuffScale, int stack)
     {
-        StartBuffAttackStack(time, stackBuffScale, stack);
+        timer.Register(CBuffList.AttackBuff, time, stack,
+            (int buffStack) => StartBuffAttackStack(stackBuffScale, buffStack),
+            (int buffStack) => EndBuffAttackStack(stackBuffScale, buffStack));
     }
-    
+
+    public void BuffDefenceStack(float time, float stackBuffScale, int stack)
+    {
+        timer.Register(CBuffList.DefenceBuff, time, stack,
+            (int buffStack) => StartBuffDefenceStack(stackBuffScale, buffStack),
+            (int buffStack) => EndBuffDefenceStack(stackBuffScale, buffStack));
+    }
+
     protected void StartBuffAttack(float buffScale) => AttackCoef *= buffScale;
     protected void EndBuffAttack(float buffScale) => AttackCoef /= buffScale;
     protected void StartBuffDefence(float buffScale) => DefenceCoef *= buffScale;
     protected void EndBuffDefence(float buffScale) => DefenceCoef /= buffScale;
 
-    protected void StartBuffAttackStack(float time, float stackBuffScale, int stack)
+    protected void StartBuffAttackStack(float stackBuffScale, int stack)
     {
         float buffScale = 1.0f + stackBuffScale * stack;
-        AttackCoef *= stackBuffScale;
-        timer.Register(CBuffList.DefenceBuff, time, () => EndBuffAttackStack(time, stackBuffScale, stack), stack);
+        AttackCoef *= buffScale;
     }
-    protected void EndBuffAttackStack(float time, float stackBuffScale, int stack)
+    protected void EndBuffAttackStack(float stackBuffScale, int stack)
     {
         float buffScale = 1.0f + stackBuffScale * stack;
-        AttackCoef /= stackBuffScale;
-
-        if (stack == 0)
-        {
-            return;
-        }
-
-        StartBuffAttackStack(time, stackBuffScale, stack-1);
+        AttackCoef /= buffScale;
+    }
+    protected void StartBuffDefenceStack(float stackBuffScale, int stack)
+    {
+        float buffScale = 1.0f + stackBuffScale * stack;
+        DefenceCoef *= buffScale;
+    }
+    protected void EndBuffDefenceStack(float stackBuffScale, int stack)
+    {
+        float buffScale = 1.0f + stackBuffScale * stack;
+        DefenceCoef /= buffScale;
     }
 }

@@ -6,9 +6,9 @@ using UnityEngine;
  * 범용 타이머 클래스
  * 링크드 리스트로 타이머 대상들을 관리
  */
-public class CTimer<T> : MonoBehaviour
+public class CTimer<T, U> : MonoBehaviour
 {
-    public delegate void Callback();
+    public delegate void Callback(U callbackData = default);
     public delegate void TimerCallback(int registerdNumber);
 
     /*
@@ -21,7 +21,8 @@ public class CTimer<T> : MonoBehaviour
         public float current;
         public float max;
         public T data;
-        public Callback notify;
+        public Callback startCallback;
+        public Callback endCallback;
     }
 
     protected const float _updateTime = 0.1f;
@@ -62,8 +63,6 @@ public class CTimer<T> : MonoBehaviour
             }
             else
             {
-                observedObject.Value.notify();
-                TimerEnd?.Invoke(observedObject.Value.key);
                 var remove = observedObject;
                 observedObject = observedObject.Next;
                 Remove(remove);
@@ -74,7 +73,7 @@ public class CTimer<T> : MonoBehaviour
     // 타이머에 등록
     // 번호가 등록되어 있는 경우, 시간에 맞춰 갱신
     // 콜백이 다른 경우 문제가 생길 수 있음. 버프 같은 경우는 조심해야 함
-    protected void Register(int regNum, float time, Callback callback, T initData)
+    protected void Register(int regNum, float time, Callback startFunc, Callback endFunc, T initData)
     {
         // 이미 있는 번호의 경우 갱신만 하고 생성은 하지 않음
         if(FindByRegisterNumber(regNum) != null)
@@ -89,10 +88,17 @@ public class CTimer<T> : MonoBehaviour
             max = time,
             current = time,
             data = initData,
-            notify = callback
+            startCallback = startFunc,
+            endCallback = endFunc
         };
         TimerStart?.Invoke(regNum);
-        observeList.AddLast(observed);
+        var observeNode = observeList.AddLast(observed);
+        ExcuteStartCallback(observeNode);
+    }
+
+    protected void Register(int regNum, float time, Callback endFunc, T initData)
+    {
+        Register(regNum, time, null, endFunc, initData);
     }
 
     // 타이머 갱신
@@ -127,27 +133,28 @@ public class CTimer<T> : MonoBehaviour
         return observed == null ? -1 : observed.Value.max;
     }
 
+    protected virtual void Remove(LinkedListNode<CObserved> cObservedNode)
+    {
+        ExcuteEndCallback(cObservedNode);
+        TimerEnd?.Invoke(cObservedNode.Value.key);
+        observeList.Remove(cObservedNode);
+    }
+    
+    protected virtual void ExcuteStartCallback(LinkedListNode<CObserved> cobservedNode)
+    {
+        cobservedNode.Value.startCallback?.Invoke();
+    }
+
+    protected virtual void ExcuteEndCallback(LinkedListNode<CObserved> cobservedNode)
+    {
+        cobservedNode.Value.endCallback?.Invoke();
+    }
+
     // 등록된 번호가 있는지 순회 탐색
     protected LinkedListNode<CObserved> FindByRegisterNumber(int regNum)
     {
         for (var find = observeList.First; find != null; find = find.Next)
             if (find.Value.key == regNum) return find;
         return null;
-        //var find = observeList.First;
-        //while(find != null)
-        //{
-        //    // 탐색
-        //    if(find.Value.registerNumber == regNum)
-        //    {
-        //        return find;
-        //    }
-        //    find = find.Next;
-        //}
-        //return find;
-    }
-
-    protected void Remove(LinkedListNode<CObserved> cObservedNode)
-    {
-        observeList.Remove(cObservedNode);
     }
 }

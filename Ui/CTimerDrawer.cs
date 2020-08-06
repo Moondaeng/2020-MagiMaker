@@ -13,8 +13,6 @@ public class CTimerDrawer : MonoBehaviour
     public Text stackText;
 
     private readonly int baseSideLength = 80;
-    private readonly int cooldownFontSize = 24;
-    private readonly int stackFontSize = 16;
 
     public void CooldownEnable()
     {
@@ -30,9 +28,8 @@ public class CTimerDrawer : MonoBehaviour
 
     public void SetSize(int sideLength)
     {
-        GetComponent<RectTransform>().sizeDelta = new Vector2(sideLength, sideLength);
-        cooldownText.fontSize = cooldownFontSize * sideLength / baseSideLength;
-        stackText.fontSize = stackFontSize * sideLength / baseSideLength;
+        float changeScale = sideLength / (float)baseSideLength;
+        GetComponent<RectTransform>().localScale = new Vector3(changeScale, changeScale, 1.0f);
     }
 
     public void SetAlpha(float alpha)

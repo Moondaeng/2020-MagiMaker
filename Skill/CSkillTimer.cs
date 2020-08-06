@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CSkillTimer : CTimer<int>
+public class CSkillTimer : CTimer<int, int>
 {
     protected new void Awake()
     {
