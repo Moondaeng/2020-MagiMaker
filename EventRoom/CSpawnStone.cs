@@ -24,11 +24,11 @@ public class CSpawnStone : MonoBehaviour
     void Update()
     {
         _timer += Time.deltaTime;
-        r = new System.Random();
         _waitingTime = 2;
 
         if (_timer > _waitingTime) //이 코드를 통해서 돌이 너무 빠르게 나오지 않게함.
         {
+            r = new System.Random();
             StartCoroutine(SpawnStone(r.Next(3, 6), 0));
             StartCoroutine(SpawnStone(r.Next(3, 6), 1));
             StartCoroutine(SpawnStone(r.Next(3, 6), 2));
@@ -40,10 +40,10 @@ public class CSpawnStone : MonoBehaviour
         }
     }
 
-    IEnumerator SpawnStone(int sec, float pos)
+    IEnumerator SpawnStone(int sec, int pos)
     {
         yield return new WaitForSeconds(sec);
-        StartCoroutine(OnMagicCircle((int)pos));
+        StartCoroutine(OnMagicCircle(pos));
         yield return new WaitForSeconds(1);
         _stone = Resources.Load("Stone") as GameObject;
         Instantiate(_stone, new Vector3(_stoneSpawner.transform.position.x + 2.5f * pos, _stoneSpawner.transform.position.y,

@@ -7,17 +7,16 @@ using UnityEngine.UI;
 public class CCreateStage
 {
     #region room&portal
-    public GameObject portal = Resources.Load("Portal/PortalMom") as GameObject;
-    public GameObject leftPortal = Resources.Load("Portal/LeftPortalMom") as GameObject;
-    public GameObject rightPortal = Resources.Load("Portal/RightPortalMom") as GameObject;
+    //public GameObject portal = Resources.Load("Portal/PortalMom") as GameObject;
+    //public GameObject leftPortal = Resources.Load("Portal/LeftPortalMom") as GameObject;
+    //public GameObject rightPortal = Resources.Load("Portal/RightPortalMom") as GameObject;
     public GameObject startRoom = Resources.Load("Room/StartRoom1") as GameObject;
     public GameObject bossRoom = Resources.Load("Room/BossRoom1") as GameObject;
-    public GameObject itemEliteRoom = Resources.Load("Room/ItemEliteRoom1_0") as GameObject;
-    public GameObject skillEliteRoom = Resources.Load("Room/SkillEliteRoom1_0") as GameObject;
-    public GameObject eventRoom = Resources.Load("Room/EventRoom1_0") as GameObject;
+    //public GameObject itemEliteRoom = Resources.Load("Room/ItemEliteRoom1_0") as GameObject;
+    //public GameObject skillEliteRoom = Resources.Load("Room/SkillEliteRoom1_0") as GameObject;
+    //public GameObject eventRoom = Resources.Load("Room/EventRoom1_0") as GameObject;
     public GameObject shopRoom = Resources.Load("Room/ShopRoom1") as GameObject;
-    public GameObject normalRoom = Resources.Load("Room/NormalRoom1_0") as GameObject;
-    private GameObject tempRoom;
+    //public GameObject normalRoom = Resources.Load("Room/NormalRoom1_0") as GameObject;
     #endregion
 
     #region roomQueue
@@ -226,7 +225,7 @@ public class CCreateStage
         if (_roomCount == 0)
         {
             _roomArr[0, 0].RoomType = CGlobal.ERoomType._start;
-            CreateRoom(_roomArr, _roomCount, 0); //시작방 생성   
+            InstantiateRoom(_roomArr[_roomCount, 0].RoomType); //시작방 생성
         }
 
         if (_roomCount == CConstants.ROOM_PER_STAGE - 1)
@@ -351,56 +350,63 @@ public class CCreateStage
     }
     public void CreateRoom(CRoom[,] roomArr, int roomCount, int roadCount)
     {
-        InstantiateRoom(roomArr[roomCount, roadCount].RoomType, roomCount, roadCount);
-
-        _roomCount++;
+        InstantiateRoom(roomArr[roomCount, roadCount].RoomType);
     }
 
-    private void InstantiateRoom(CGlobal.ERoomType roomType, int roomCount, int roadCount)
+    private void InstantiateRoom(CGlobal.ERoomType roomType)
     {
+        GameObject tempRoom;
+
         switch (roomType)
         {
             case CGlobal.ERoomType._start:
-                if (roadCount == 1 || roadCount == 2) //시작방은 하나만!
-                    return;
-
-                tempRoom = Object.Instantiate(startRoom, new Vector3(0, 0, 0), Quaternion.Euler(new Vector3(90, 0, 0)));
+                tempRoom = Object.Instantiate(startRoom, startRoom.transform.position, startRoom.transform.rotation);
                 _rooms.AddLast(tempRoom);
                 break;
 
             case CGlobal.ERoomType._boss:
-                if (roadCount == 1 || roadCount == 2) //보스방도 하나만!
-                    return;
-
-                tempRoom = Object.Instantiate(bossRoom, new Vector3(0 , 0, 0), Quaternion.Euler(new Vector3(90, 0, 0)));
+                tempRoom = Object.Instantiate(bossRoom, bossRoom.transform.position, bossRoom.transform.rotation);
                 _rooms.AddLast(tempRoom);
                 break;
 
             case CGlobal.ERoomType._event:
-                tempRoom = Object.Instantiate(eventRoomQueue.Dequeue(), new Vector3(0, 0, 0), Quaternion.Euler(new Vector3(90, 0, 0)));
+                tempRoom = eventRoomQueue.Dequeue();
+                tempRoom = Object.Instantiate(tempRoom, tempRoom.transform.position, tempRoom.transform.rotation);
                 _rooms.AddLast(tempRoom);
                 break;
 
             case CGlobal.ERoomType._itemElite:
-                tempRoom = Object.Instantiate(itemEliteRoomQueue.Dequeue(), new Vector3(0, 0, 0), Quaternion.Euler(new Vector3(90, 0, 0)));
+                tempRoom = itemEliteRoomQueue.Dequeue();
+                tempRoom = Object.Instantiate(tempRoom, tempRoom.transform.position, tempRoom.transform.rotation);
                 _rooms.AddLast(tempRoom);
                 break;
 
             case CGlobal.ERoomType._normal:
-                tempRoom = Object.Instantiate(normalRoomQueue.Dequeue(), new Vector3(0, 0, 0), Quaternion.Euler(new Vector3(90, 0, 0)));
+                //tempRoom = normalRoomQueue.Dequeue();
+                //tempRoom = Object.Instantiate(tempRoom, tempRoom.transform.position, tempRoom.transform.rotation);
+
+                //debug
+                tempRoom = Resources.Load("Room/NormalRoom1_1") as GameObject;
+                tempRoom = Object.Instantiate(tempRoom, tempRoom.transform.position, tempRoom.transform.rotation);
                 _rooms.AddLast(tempRoom);
                 break;
 
             case CGlobal.ERoomType._shop:
-                tempRoom = Object.Instantiate(shopRoom, new Vector3(0, 0, 0), Quaternion.Euler(new Vector3(90, 0, 0)));
+                tempRoom = Object.Instantiate(shopRoom, shopRoom.transform.position, shopRoom.transform.rotation);
                 _rooms.AddLast(tempRoom);
                 break;
 
             case CGlobal.ERoomType._skillElite:
-                tempRoom = Object.Instantiate(skillEliteRoomQueue.Dequeue(), new Vector3(0, 0, 0), Quaternion.Euler(new Vector3(90, 0, 0)));
+                tempRoom = skillEliteRoomQueue.Dequeue();
+                tempRoom = Object.Instantiate(tempRoom, tempRoom.transform.position, tempRoom.transform.rotation);
                 _rooms.AddLast(tempRoom);
                 break;
+            case CGlobal.ERoomType._empty:
+                Debug.Log("Can't create empty room error");
+                return;
         }
+
+        _roomCount++;
     }
 
     public void DestroyRoom()
