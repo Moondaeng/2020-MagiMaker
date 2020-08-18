@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-<<<<<<< HEAD
 public class CPlayerInputManager : MonoBehaviour
 {
     delegate void Action();
@@ -22,7 +21,7 @@ public class CPlayerInputManager : MonoBehaviour
     private List<CSkillFormat> _comboSkillList;
 
     private bool _isCombo;
-    
+
     private void Awake()
     {
         _baseSkillList = new List<CSkillFormat>();
@@ -104,7 +103,7 @@ public class CPlayerInputManager : MonoBehaviour
     private void KeyDownQ()
     {
         Debug.Log("Pressed Keyboard Q");
-        if(_isCombo)
+        if (_isCombo)
         {
             _comboSelector.Combo(0);
             _comboSelector.DrawCurrentState();
@@ -119,7 +118,7 @@ public class CPlayerInputManager : MonoBehaviour
     private void KeyDownW()
     {
         Debug.Log("Pressed Keyboard W");
-        
+
         if (_isCombo)
         {
             _comboSelector.Combo(1);
@@ -159,7 +158,7 @@ public class CPlayerInputManager : MonoBehaviour
         RaycastHit hit;
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if(Physics.Raycast(ray, out hit))
+        if (Physics.Raycast(ray, out hit))
         {
             Debug.LogFormat("Click Position : {0}, {1}, {2}", hit.point.x, hit.point.y, hit.point.z);
             _gameEvent.PlayerMoveStop(new Tuple<float, float>(hit.point.x, hit.point.z));
@@ -195,13 +194,8 @@ public class CPlayerInputManager : MonoBehaviour
             skillFormat.Use(hit.point);
         }
     }
-=======
+}
 /*
  * 키 세팅 관리 클래스
  * 이후 키 커스터마이징 기능 지원 시 여기서 관리
  */
-public class CPlayerInputManager : MonoBehaviour
-{
-    
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
-}

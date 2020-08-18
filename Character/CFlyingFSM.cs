@@ -60,12 +60,6 @@ public class CFlyingFSM : CharacterFSM
     void CallDeadEvent()
     {
         ChangeState(EState.Dead, CFlyingAni.DEATH);
-<<<<<<< HEAD
-        //석래 추가
-        gameObject.SendMessage("InstatiateItem"); //죽으면 아이템 생성
-        //석래 끝
-=======
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         player.gameObject.SendMessage("CurrentEnemyDead");
         StartCoroutine("RemoveMe");
     }
@@ -79,11 +73,7 @@ public class CFlyingFSM : CharacterFSM
 
     public override void AttackCalculate()
     {
-<<<<<<< HEAD
-        playerPara.SetEnemyAttack(myPara.GetRandomAttack(playerPara.eType, myPara.eType));
-=======
         playerPara.SetEnemyAttack(myPara.GetRandomAttack(playerPara._eType, myPara._eType));
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
     }
 
     public void ChangeState(EState newState, string aniName)
@@ -172,10 +162,6 @@ public class CFlyingFSM : CharacterFSM
     // 죽으면 선택안되게끔 하려고함
     public override void DeadState()
     {
-<<<<<<< HEAD
-        //GetComponent<BoxCollider>().enabled = false;
-=======
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         GetComponent<Collider>().enabled = false;
     }
 

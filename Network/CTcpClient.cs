@@ -1,8 +1,5 @@
 ﻿using System;
-<<<<<<< HEAD
-=======
 using System.Collections.Concurrent;
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -23,26 +20,6 @@ namespace Network
 
     public sealed class CTcpClient : MonoBehaviour
     {
-<<<<<<< HEAD
-        private static CLogComponent logger;
-        private static CGameEvent _gameEvent;
-
-        // The port number for the remote device.  
-        public Int32 port = 9000;
-        public string ipString = "127.0.0.1";
-        
-        private Socket _client;
-        private bool _isConnected = false;
-
-        // ManualResetEvent instances signal completion.  
-        private static ManualResetEvent connectDone = new ManualResetEvent(false);
-
-        private void Start()
-        {
-            logger = new CLogComponent(ELogType.Network);
-            _gameEvent = GameObject.Find("GameEvent").GetComponent<CGameEvent>();
-            StartClient();
-=======
         private static CLogComponent _logger;
         private static CGameEvent _gameEvent;
 
@@ -72,11 +49,11 @@ namespace Network
 
         private void Update()
         {
-            if(IsConnect && !tcpBuffer.IsEmpty)
+            if (IsConnect && !tcpBuffer.IsEmpty)
             {
                 tcpBuffer.TryDequeue(out byte[] data);
 
-                if(CheckShutdown(data))
+                if (CheckShutdown(data))
                 {
                     EndClient();
                 }
@@ -85,17 +62,12 @@ namespace Network
                     _interpretFunc?.Invoke(data);
                 }
             }
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         }
 
         private void OnApplicationQuit()
         {
             SendShutdown();
-<<<<<<< HEAD
-            if(_isConnected) EndClient();
-=======
-            if(IsConnect) EndClient();
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
+            if (IsConnect) EndClient();
         }
 
         public void StartClient()
@@ -123,14 +95,6 @@ namespace Network
             }
         }
 
-<<<<<<< HEAD
-        public void EndClient()
-        {
-            // Release the socket
-            _client.Shutdown(SocketShutdown.Both);
-            _client.Close();
-            _isConnected = false;
-=======
         // 실제로 끄는 동작
         public void EndClient()
         {
@@ -168,7 +132,6 @@ namespace Network
         public void DeletePacketInterpret()
         {
             _interpretFunc = null;
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         }
 
         // 연결 시 수행할 내용
@@ -181,23 +144,11 @@ namespace Network
 
                 // Complete the connection.  
                 client.EndConnect(ar);
-                
-<<<<<<< HEAD
-                logger.Log("Socket connected to {0}", client.RemoteEndPoint.ToString());
-                _isConnected = true;
 
-                _gameEvent.PlayerMoveStopEvent += SendMoveStop;
-
-                // Signal that the connection has been made.  
-                //connectDone.Set();
-
-                Receive(_client);
-=======
                 Debug.LogFormat("Socket connected to {0}", client.RemoteEndPoint.ToString());
                 IsConnect = true;
 
                 Receive(client);
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
             }
             catch (Exception e)
             {
@@ -205,11 +156,7 @@ namespace Network
             }
         }
 
-<<<<<<< HEAD
-        private static void Receive(Socket client)
-=======
         private void Receive(Socket client)
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         {
             try
             {
@@ -227,11 +174,7 @@ namespace Network
             }
         }
 
-<<<<<<< HEAD
-        private static void ReceiveCallback(IAsyncResult ar)
-=======
         private void ReceiveCallback(IAsyncResult ar)
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         {
             try
             {
@@ -243,14 +186,6 @@ namespace Network
                 // Read data from the remote device.  
                 int bytesRead = client.EndReceive(ar);
 
-<<<<<<< HEAD
-                // 패킷 해석 및 명령 수행
-                CPacketInterpreter.PacketInterpret(state.buffer);
-
-                // 다시 받을 준비
-                client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                    new AsyncCallback(ReceiveCallback), state);
-=======
                 byte[] data = (byte[])state.buffer.Clone();
                 // (확인 중) 엔디안 변환s
                 //Array.Reverse(data);
@@ -260,26 +195,13 @@ namespace Network
 
                 // 다시 받을 준비
                 client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
             }
             catch (Exception e)
             {
                 Debug.Log(e.ToString());
             }
         }
-
-<<<<<<< HEAD
-        private static void Send(Socket client, byte[] data)
-        {
-            // Begin sending the data to the remote device.  
-            client.BeginSend(data, 0, data.Length, 0,
-                new AsyncCallback(SendCallback), client);
-        }
-
-        private static void SendCallback(IAsyncResult ar)
-=======
         private void SendCallback(IAsyncResult ar)
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         {
             try
             {
@@ -296,44 +218,6 @@ namespace Network
             }
         }
 
-<<<<<<< HEAD
-        // 메세지 보내기
-        public bool SendMoveStart(float nX, float nY, float dX, float dY)
-        {
-            if (!_isConnected) return false;
-
-            Console.WriteLine("Send Move Start : {0} {1} {2} {3}", nX, nY, dX, dY);
-            var packet = Network.CPacketFactory.CreateMoveStartPacket(nX, nY, dX, dY);
-            Send(_client, packet.data);
-            return true;
-        }
-
-        public bool SendMoveStop(float nX, float nY)
-        {
-            if (!_isConnected) return false;
-
-            Console.WriteLine("Send Move Start : {0} {1}", nX, nY);
-            var packet = Network.CPacketFactory.CreateMoveStopPacket(nX, nY);
-            Send(_client, packet.data);
-            return true;
-        }
-
-        private void SendMoveStop(object sender, Tuple<float, float> data)
-        {
-            Console.WriteLine("Send Move Start : {0} {1}", data.Item1, data.Item2);
-            var packet = Network.CPacketFactory.CreateMoveStopPacket(data.Item1, data.Item2);
-            Send(_client, packet.data);
-        }
-
-        public bool SendShutdown()
-        {
-            if (!_isConnected) return false;
-
-            Console.WriteLine("Send Shutdown Message");
-            var packet = Network.CPacketFactory.CreateShutdownPacket();
-            Send(_client, packet.data);
-            return true;
-=======
         private bool CheckShutdown(byte[] data)
         {
             const int messageTypePos = 2;
@@ -359,7 +243,6 @@ namespace Network
             Debug.Log("Send Shutdown Message");
             var packet = Network.CPacketFactory.CreateShutdownPacket();
             Send(_client, packet.data);
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         }
     }
 }

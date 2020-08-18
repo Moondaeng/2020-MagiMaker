@@ -6,19 +6,11 @@ using UnityEngine;
 //아이템 받을때 nothing 이면 다른거 받아와야함.
 public class CItemInformation : MonoBehaviour
 {
-<<<<<<< HEAD
-    public CItem _item;
-    public GameObject _goitem;
-    void Start()
-    {
-        _item = new CItem();
-=======
     public Item.CItem _item;
     public GameObject _goitem;
     void Start()
     {
         _item = new Item.CItem();
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         GetItemInfoFromItemManager();
         _item.Print();
         _goitem.GetComponent<Rigidbody>().AddForce(new Vector3(0, 30, 0) * 10f); //물체 한번 띄우기용
@@ -88,11 +80,7 @@ public class CItemInformation : MonoBehaviour
                         _item = CItemManager.instance.GetItemInfo(itemCode);
                     }
                     //나올템이 더 없는 지 체크 있으면 반복 없으면 종료, 장착형인 경우에만 확인
-<<<<<<< HEAD
-                    if (_item._name == "nothing")
-=======
                     if (_item.ItemName == "nothing")
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
                     {
                         if (CItemManager.instance.IsEmptyWithoutShopItem())
                             break;

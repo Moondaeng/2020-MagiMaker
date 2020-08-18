@@ -2,16 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-<<<<<<< HEAD
-=======
 using UnityEngine.Events;
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
 
 /*
  * 게임 이벤트 관리 컴포넌트
  * 
  */
-<<<<<<< HEAD
 public class CGameEvent : MonoBehaviour
 {
     public event EventHandler<Tuple<float, float, float, float>> PlayerMoveStartEvent;
@@ -21,7 +17,6 @@ public class CGameEvent : MonoBehaviour
     public void PlayerMoveStop(Tuple<float, float> e) => PlayerMoveStopEvent?.Invoke(this, e);
 
 
-=======
 namespace NEvent
 {
     [System.Serializable]

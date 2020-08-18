@@ -4,37 +4,6 @@ using UnityEngine;
 using UnityEngine.Events;
 using System;
 
-<<<<<<< HEAD
-public class CharacterPara : MonoBehaviour
-{
-    public int maxHp { get; set; }
-    public int curHp { get; set; }
-    public int attackMin { get; set; }
-    public int attackMax { get; set; }
-    public int defense { get; set; }
-    public int eLevel { get; set; }
-    public EElementType eType {get; set;}
-    public bool isAnotherAction { get; set; }
-    public bool isStunned { get; set; }
-    public bool isDead { get; set; }
-    public int rewardMoney { get; set; }
-
-    //석래가 추가한 부분
-    public int _attackSpeed { get; set; }
-    public int _damageTakeRate { get; set; }
-    public int _HPRegenPerSec { get; set; }
-    //추가한 부분 끝
-
-    [System.NonSerialized]
-    public UnityEvent deadEvent = new UnityEvent();
-
-    protected CTimer _buffTimer;
-
-    public int RandomAttackDamage()
-    {
-        int random = UnityEngine.Random.Range(attackMin, attackMax);
-        return random;
-=======
 [System.Serializable]
 public class DamageEvent : UnityEvent<int, int>
 {
@@ -79,19 +48,12 @@ public class CharacterPara : MonoBehaviour
     {
         int _random = UnityEngine.Random.Range(_attackMin, _attackMax);
         return _random;
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
     }
 
     protected void Awake()
     {
-<<<<<<< HEAD
-        // 변경 예정 : Player 소유의 Buff Timer로
-        //_buffTimer = GameObject.Find(transform.name).GetComponent<CBuffTimer>();
-        _buffTimer = GameObject.Find("SkillScript").GetComponent<CBuffTimer>();
-=======
         _buffTimer = gameObject.GetComponent<CBuffTimer>();
         buffParameter = new CBuffPara(_buffTimer);
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
     }
 
     void Start()
@@ -104,8 +66,6 @@ public class CharacterPara : MonoBehaviour
 
     }
 
-<<<<<<< HEAD
-=======
     // 평타 데미지 계산식
     public float GetRandomAttack()
     {
@@ -156,7 +116,6 @@ public class CharacterPara : MonoBehaviour
     public int _eLevel { get; set; }
     public EElementType _eType { get; set; }
 
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
     public const int _elementTypeSize = 4;
     public static List<EElementType> elementTypeList =
            new List<EElementType>
@@ -212,70 +171,6 @@ public class CharacterPara : MonoBehaviour
     {
         return _elementTypeBonusArray[(eLevel - eLevel + 1), (int)FindAttacksElementTypeBonus(eTypeDefence, eTypeAttack)];
     }
-<<<<<<< HEAD
-    
-    // 평타 데미지 계산식
-    public float GetRandomAttack(EElementType eTypeDefence, EElementType eTypeAttack)
-    {
-        float randAttack = UnityEngine.Random.Range(attackMin, attackMax + 1);
-        float Bonus = GetElementTypeBonusSize(eLevel, eTypeDefence, eTypeAttack);
-        // 최종 계산식 대충
-        randAttack = (randAttack - defense) * Bonus;
-        print(Bonus + "is advantage!!");
-        return randAttack;
-    }
-
-    public void SetEnemyAttack(float EnemyAttackPower)
-    {
-        // 데미지를 버림 형식으로 표현
-        curHp -= (int)EnemyAttackPower;
-        UpdateAfterReceiveAttack();
-    }
-    
-    // 버프 스킬군
-    public virtual void BuffAttack(float time, float buffScale)
-    {
-        Debug.LogFormat("Character Attack buff!");
-        StartBuffAttack(buffScale);
-        // 버프 효과 끝내기 수치 넣을 땐 필요에 따라 커링을 사용
-        Debug.LogFormat("Character Attack buff! : ");
-        _buffTimer.Register(1, time, () => EndBuffAttack(buffScale));
-    }
-
-    //캐릭터가 적으로 부터 공격을 받은 뒤에 자동으로 실행될 함수를 가상함수로 만듬
-    protected virtual void UpdateAfterReceiveAttack()
-    {
-        print(name + "'s HP: " + curHp);
-
-        if (curHp <= 0)
-        {
-            curHp = 0;
-            isDead = true;
-            deadEvent.Invoke();
-        }
-    }
-    
-    protected virtual void StartBuffAttack(float buffScale)
-    {
-        float tempAttackMin = attackMin;
-        float tempAttackMax = attackMax;
-        tempAttackMin *= buffScale;
-        tempAttackMax *= buffScale;
-        attackMin = (int)tempAttackMin;
-        attackMax = (int)tempAttackMax;
-    }
-
-    protected void EndBuffAttack(float buffScale)
-    {
-        float tempAttackMin = attackMin;
-        float tempAttackMax = attackMax;
-        tempAttackMin /= buffScale;
-        tempAttackMax /= buffScale;
-        attackMin = (int)tempAttackMin;
-        attackMax = (int)tempAttackMax;
-    }
-=======
-
     // 평타 데미지 계산식
     public float GetRandomAttack(EElementType eTypeDefence, EElementType eTypeAttack)
     {
@@ -286,5 +181,4 @@ public class CharacterPara : MonoBehaviour
         return randAttack;
     }
     #endregion
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
 }

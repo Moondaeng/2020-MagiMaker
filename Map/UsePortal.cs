@@ -6,39 +6,30 @@ public class UsePortal : MonoBehaviour
 {
     public Vector3 position;
     GameObject[] player;
-<<<<<<< HEAD
     GameObject PortalAcceptParent;
     GameObject FadeController;
-=======
-    public GameObject PortalPopup;
+//=======
+//    public GameObject PortalPopup;
 
-    private CPlayerCommand _playerCommand;
+//    private CPlayerCommand _playerCommand;
 
-    private void Awake()
-    {
-        _playerCommand = GameObject.Find("GameManager").GetComponent<CPlayerCommand>();
-    }
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
+//    private void Awake()
+//    {
+//        _playerCommand = GameObject.Find("GameManager").GetComponent<CPlayerCommand>();
+//    }
+//>>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
 
     private void Start()
     {
         player = GameObject.FindGameObjectsWithTag("Player");
-<<<<<<< HEAD
         PortalAcceptParent = GameObject.Find("PortalPopUp");
         FadeController = GameObject.Find("FadeController");
         PortalAcceptParent.transform.FindChild("PortalAccept").gameObject.SetActive(false);
         PortalAcceptParent.transform.FindChild("WaitingForOtherPlayer").gameObject.SetActive(false);
-=======
-        PortalPopup.transform.Find("PortalAccept").gameObject.SetActive(false);
-        PortalPopup.transform.Find("WaitingForOtherPlayer").gameObject.SetActive(false);
-        PortalPopup.SetActive(false);
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
     }
 
     private void OnTriggerEnter(Collider coll)
     {
-<<<<<<< HEAD
-
         if (coll.tag == "Player")
         {
             PortalAcceptParent.transform.FindChild("PortalAccept").gameObject.SetActive(true);
@@ -91,36 +82,36 @@ public class UsePortal : MonoBehaviour
         CGlobal.roomCount++; //방 생성시 카운트 증가
         CGlobal.isClear = false; //포탈을 사용해서 새로운 방으로 왔으므로 방은 클리어되지 않은 상태
     }
-=======
-        if (coll.tag == "Player")
-        {
-            ActivePortalPopup();
+//=======
+//        if (coll.tag == "Player")
+//        {
+//            ActivePortalPopup();
 
-        }
-    }
+//        }
+//    }
 
-    public void ActivePortalPopup()
-    {
-        Debug.Log("************************************");
-        PortalPopup.SetActive(true);
-        PortalPopup.transform.Find("PortalAccept").gameObject.SetActive(true);
-        PortalPopup.transform.Find("WaitingForOtherPlayer").gameObject.SetActive(true);
-        PortalPopup.GetComponent<CWaitingForAccept>().SetWaitingPlayer();
-        //CWaitingForAccept.instance._portal = gameObject;
-    }
+//    public void ActivePortalPopup()
+//    {
+//        Debug.Log("************************************");
+//        PortalPopup.SetActive(true);
+//        PortalPopup.transform.Find("PortalAccept").gameObject.SetActive(true);
+//        PortalPopup.transform.Find("WaitingForOtherPlayer").gameObject.SetActive(true);
+//        PortalPopup.GetComponent<CWaitingForAccept>().SetWaitingPlayer();
+//        //CWaitingForAccept.instance._portal = gameObject;
+//    }
 
-    public void MoveToNextRoom()
-    {
-        if (_playerCommand == null)
-        {
-            _playerCommand = GameObject.Find("GameManager").GetComponent<CPlayerCommand>();
-        }
-        for (int player = 0; player < _playerCommand.activePlayersCount; player++)
-        {
-            position = position + Vector3.right * player * 8;
-            _playerCommand.Teleport(player, position);
-        }
-    }
+//    public void MoveToNextRoom()
+//    {
+//        if (_playerCommand == null)
+//        {
+//            _playerCommand = GameObject.Find("GameManager").GetComponent<CPlayerCommand>();
+//        }
+//        for (int player = 0; player < _playerCommand.activePlayersCount; player++)
+//        {
+//            position = position + Vector3.right * player * 8;
+//            _playerCommand.Teleport(player, position);
+//        }
+//    }
 
     //public void MoveToNextRoom()
     //{
@@ -155,5 +146,4 @@ public class UsePortal : MonoBehaviour
     //    CGlobal.usePortal = true; //포탈 사용 시 다음 맵 생성
     //    CGlobal.isClear = false; //포탈을 사용해서 새로운 방으로 왔으므로 방은 클리어되지 않은 상태
     //}
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
 }

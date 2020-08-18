@@ -1,156 +1,10 @@
-<<<<<<< HEAD
-﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-[System.Serializable]
-
-public class CCntl : MonoBehaviour
-{
-    GameObject player;
-    public bool telepotationCheck = true;
-    [SerializeField]
-    private GameObject[] spell;
-    private GameObject temp, temp2;
-    CPlayerPara myPara;
-
-    void Start()
-    {
-        // 플레이어 태그를 가진 개체를 받아옴
-        player = GameObject.FindGameObjectWithTag("Player");
-    }
-
-    private void CheckClick()
-    {
-        // Ray API 참고 직선 방향으로 나아가는 무한대 길이의 선
-        // 카메라 클래스의 메인 카메라로 부터의 스크린의 점을 통해 레이 반환
-        // 여기서 스크린의 점은, Input.mousePosition으로 받음
-        // 포지션.z를 무시한 값임.
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit))
-        {
-            string s = hit.collider.gameObject.name;
-            string s2 = hit.collider.gameObject.tag;
-            GameObject obj = hit.collider.gameObject;
-            CItemInformation itemInfo;
-            //Debug.Log(s);
-            //Debug.Log(s2);
-            bool stringExists = s.Contains("Terrain");
-            // 누른게 지형이면, 이동함.
-            if (stringExists)
-            {
-                 player.GetComponent<CPlayerFSM>().MoveTo(hit.point);
-            }
-            else if (s2 == "Monster")//마우스 클릭한 대상이 적 캐릭터인 경우
-            {
-                 //player.GetComponent<CPlayerFSM>().
-                 player.GetComponent<CPlayerFSM>().AttackEnemy(hit.collider.gameObject);
-            }
-            else if (s2 == "ITEM") //마우스 클릭한 대상이 아이템인 경우
-            {
-                itemInfo = obj.GetComponent<CItemInformation>();
-                player.SendMessage("EquipItem", itemInfo._item);
-                Destroy(obj);
-            }
-        }
-    }
-
-    void RotateMotion()
-    {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit))
-        {
-            player.GetComponent<CPlayerFSM>().TurnTo(hit.point);
-//            player.GetComponent<CPlayerFSM>().SkillState();
-        }
-    }
-
-    void WarpMotion()
-    {
-        Destroy(temp2);
-        player.GetComponent<CPlayerAni>().ChangeAni(CPlayerAni.ANI_WARP);
-        temp = Instantiate(spell[0], player.transform.position + new Vector3(0, 0.2f, 0), Quaternion.identity);
-        Invoke("WarpToDestination",1f);
-    }
-
-    void WarpToDestination()
-    {
-        Destroy(temp);
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-        if (Physics.Raycast(ray, out hit))
-        {
-            string s = hit.collider.gameObject.name;
-            bool stringExists = s.Contains("Terrain");
-            // 누른게 지형이면, 이동함.
-            if (stringExists)
-            {
-                temp2 = Instantiate(spell[0], hit.point + new Vector3(0, 0.2f, 0), Quaternion.identity);
-                player.transform.position = hit.point;
-            }
-        }
-        player.GetComponent<CPlayerAni>().ChangeAni(CPlayerAni.ANI_IDLE);
-    }
-
-    private IEnumerator WaitForIt()
-    {
-        yield return new WaitForSeconds(1.0f);
-        telepotationCheck = true;
-    }
-
-    void Update()
-    {
-        if (Input.GetMouseButton(0))
-        {
-            CheckClick();
-        }
-
-        if (Input.GetMouseButton(1))
-        {
-            RotateMotion();
-        }
-
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            Debug.Log("input key Q");
-            Debug.Log(player.GetComponent<CPlayerFSM>().currentState);
-            player.GetComponent<CPlayerFSM>().SkillState();
-        }
-
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            Debug.Log("input key W");
-            Debug.Log(player.GetComponent<CPlayerFSM>().currentState);
-            player.GetComponent<CPlayerFSM>().SkillState();
-        }
-
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            Debug.Log("input key E");
-            Debug.Log(player.GetComponent<CPlayerFSM>().currentState);
-            player.GetComponent<CPlayerFSM>().SkillState();
-        }
-
-        if (Input.GetKeyDown("space"))
-        {
-            telepotationCheck = false;
-            WarpMotion();
-        }
-    }
-}
-=======
-﻿using UnityEngine;
 using System.Collections;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CapsuleCollider))]
 [RequireComponent(typeof(Animator))]
-public class CCntl : MonoBehaviour 
+public class CCntl : MonoBehaviour
 {
     [SerializeField] public float _jumpPower = 12f;
     [Range(1f, 4f)] [SerializeField] float _gravityMultiplier = 3.5f;
@@ -159,7 +13,7 @@ public class CCntl : MonoBehaviour
     // 추후에 공이속 추가되면 사용할 배수
     //[SerializeField] float _animSpeedMultiplier = 1f;
     //[SerializeField] float _moveSpeedMultiplier = 1f;
-    
+
     Animator _animator;
     Rigidbody _rigidbody;
     CapsuleCollider _capsule;
@@ -201,7 +55,7 @@ public class CCntl : MonoBehaviour
         _capsuleCenter = _capsule.center;
         _origGroundCheckDistance = _groundCheckDistance;
     }
-    
+
     public IEnumerator COStunPause(float pauseTime)
     {
         yield return new WaitForSeconds(pauseTime);
@@ -210,9 +64,9 @@ public class CCntl : MonoBehaviour
     private void Update()
     {
         z = Input.GetAxisRaw("Horizontal");
-		x = -(Input.GetAxisRaw("Vertical"));
+        x = -(Input.GetAxisRaw("Vertical"));
         _inputVec = new Vector3(x, 0, z);
-        
+
         CheckGroundStatus();
         // 법선임 hitcast 할 때 씀
         _inputVec = Vector3.ProjectOnPlane(_inputVec, _groundNormal);
@@ -229,26 +83,26 @@ public class CCntl : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.Z))    _roll = true;
-        else                            _roll = false;
+        if (Input.GetKeyDown(KeyCode.Z)) _roll = true;
+        else _roll = false;
 
         // 앉아다니기 모션 키 입력
-        if (Input.GetKey(KeyCode.C))    _crouch = true;
-        else                                _crouch = false;
+        if (Input.GetKey(KeyCode.C)) _crouch = true;
+        else _crouch = false;
 
         // 점프 모션 키 입력
-        if (Input.GetKeyDown(KeyCode.Space))    _jump = true;
-        else                                    _jump = false;
-        
+        if (Input.GetKeyDown(KeyCode.Space)) _jump = true;
+        else _jump = false;
+
         ScaleCapsuleForCrouching();
         ScaleCapsuleForRolling();
         PreventStandingInLowHeadroom();
-        if (_isGrounded)        HandleGroundedMovement();
-        else                    HandleAirborneMovement();
+        if (_isGrounded) HandleGroundedMovement();
+        else HandleAirborneMovement();
 
         UpdateMovement();
     }
-    
+
     // RaycastHit을 이용한 땅에 붙어있는지 체크
     void CheckGroundStatus()
     {
@@ -317,7 +171,7 @@ public class CCntl : MonoBehaviour
 
     void ScaleTrasformForRolling()
     {
-        if(_rollCheck)
+        if (_rollCheck)
         {
             // 구를때 콜라이더가 따로 놀고 자세히 보면 미묘하게 뒤로감 이걸 처리하려고함
         }
@@ -354,7 +208,7 @@ public class CCntl : MonoBehaviour
             _groundCheckDistance = 0.5f;
         }
     }
-    
+
     void HandleAirborneMovement()
     {
         // 인스펙터상으로 추가한 중력보정 곱
@@ -382,11 +236,11 @@ public class CCntl : MonoBehaviour
         _animator.SetBool("Roll", _rollCheck);
 
         // 이동 키를 눌렀을 경우 체크
-        if (x != 0 || z != 0)   _animator.SetBool("Moving", true);
-        else                    _animator.SetBool("Moving", false);
+        if (x != 0 || z != 0) _animator.SetBool("Moving", true);
+        else _animator.SetBool("Moving", false);
 
         // 땅에 붙어 있지 않으면 y축의 속도를 잼 -> 가속도를 재는 것
-        if (!_isGrounded)       _animator.SetFloat("Jump", _rigidbody.velocity.y);
+        if (!_isGrounded) _animator.SetFloat("Jump", _rigidbody.velocity.y);
         RotateTowardMovementDirection();
         GetCameraRelativeMovement();
     }
@@ -402,7 +256,7 @@ public class CCntl : MonoBehaviour
                 Quaternion.LookRotation(_targetDirection), Time.deltaTime * _rotationSpeed);
         }
     }
-    
+
     // 캐릭터가 바라보는 방향으로 돌려버림
     void GetCameraRelativeMovement()
     {
@@ -413,13 +267,13 @@ public class CCntl : MonoBehaviour
         forward = forward.normalized;
 
         Vector3 right = new Vector3(forward.z, 0, -forward.x);
-        
+
         float v = Input.GetAxisRaw("Vertical");
         float h = Input.GetAxisRaw("Horizontal");
 
         _targetDirection = h * right + v * forward;
     }
-    
+
     // 점프할 발 체크 추후에 여기에 사운드 추가
     // 애니메이션 placeholder에 들어가있는 함수
     void FootR()
@@ -449,10 +303,9 @@ public class CCntl : MonoBehaviour
         if (_isGrounded && Time.deltaTime > 0)
         {
             Vector3 v = _animator.deltaPosition / Time.deltaTime;
-            
+
             v.y = _rigidbody.velocity.y;
             _rigidbody.velocity = v;
         }
     }
 }
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3

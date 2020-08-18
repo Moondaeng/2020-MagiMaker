@@ -4,11 +4,7 @@ using UnityEngine;
 
 public class CPlayerFSM : CharacterFSM
 {
-<<<<<<< HEAD
-=======
     private static CLogComponent _logger;
-
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
     float skillDelay, skillTimer;
     //마우스 클릭 지점, 플레이어가 이동할 목적지의 좌표를 저장할 예정
     Vector3 curTargetPos;
@@ -18,14 +14,10 @@ public class CPlayerFSM : CharacterFSM
     CPlayerPara myPara;
     CEnemyPara curEnemyPara;
 
-<<<<<<< HEAD
-=======
     private void Awake()
     {
         _logger = new CLogComponent(ELogType.Character);
     }
-
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
     public override void InitStat()
     {
         moveSpeed = 3f;
@@ -47,11 +39,7 @@ public class CPlayerFSM : CharacterFSM
 
     public void ChangeToPlayerDead()
     {
-<<<<<<< HEAD
-        print("player was dead");
-=======
         _logger.Log("player was dead");
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         ChangeState(EState.Dead, CPlayerAni.ANI_DEATH);
     }
 
@@ -77,11 +65,7 @@ public class CPlayerFSM : CharacterFSM
         }
         curEnemy.GetComponent<CEnemyPara>().ShowHitEffect();
 
-<<<<<<< HEAD
-        float attackPower = myPara.GetRandomAttack(curEnemyPara.eType, myPara.eType);
-=======
         float attackPower = myPara.GetRandomAttack(curEnemyPara._eType, myPara._eType);
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         curEnemyPara.SetEnemyAttack(attackPower);
     }
 
@@ -95,11 +79,7 @@ public class CPlayerFSM : CharacterFSM
         // 적(몬스터)의 파라미터를 변수에 저장
         curEnemyPara = Enemy.GetComponent<CEnemyPara>();
 
-<<<<<<< HEAD
-        if (curEnemyPara.isDead == false)
-=======
         if (curEnemyPara._isDead == false)
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         {
             curEnemy = Enemy;
             curTargetPos = curEnemy.transform.position;
@@ -120,11 +100,7 @@ public class CPlayerFSM : CharacterFSM
         }
         myAni.ChangeAni(aniNumber);
         currentState = newState;
-<<<<<<< HEAD
-        Debug.Log(currentState);
-=======
         _logger.Log(currentState);
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
     }
 
     //캐릭터의 상태가 바뀌면 어떤 일이 일어날지 를 미리 정의
