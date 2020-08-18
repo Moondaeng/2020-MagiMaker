@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+<<<<<<< HEAD
 public class CPlayerInputManager : MonoBehaviour
 {
     delegate void Action();
@@ -194,4 +195,13 @@ public class CPlayerInputManager : MonoBehaviour
             skillFormat.Use(hit.point);
         }
     }
+=======
+/*
+ * 키 세팅 관리 클래스
+ * 이후 키 커스터마이징 기능 지원 시 여기서 관리
+ */
+public class CPlayerInputManager : MonoBehaviour
+{
+    
+>>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
 }

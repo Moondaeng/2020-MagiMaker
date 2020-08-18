@@ -39,6 +39,10 @@ public class CGoblinPara : CharacterPara
     {
         base.UpdateAfterReceiveAttack();
 
+<<<<<<< HEAD
         hpBar.rectTransform.localScale = new Vector3((float)curHp / (float)maxHp, 1f, 1f);
+=======
+        hpBar.rectTransform.localScale = new Vector3((float)_curHp / (float)_maxHp, 1f, 1f);
+>>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
     }
 }

@@ -31,14 +31,24 @@ public class CProjectileSkill : MonoBehaviour
 
         // 투사체 생성
         var projectile = Instantiate(ProjectileModel, userPos, lookRotation);
+<<<<<<< HEAD
         projectile.SendMessage("SetTargetPos", targetPos);
+=======
+        //projectile.SendMessage("SetTargetPos", targetPos);
+>>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         projectile.tag = user.tag;
 
         // 유저 스탯에 비례해 스킬 발사
         var userStat = user.GetComponent<CharacterPara>();
+<<<<<<< HEAD
         var projectileBase = projectile.GetComponent<CProjectileBase>();
         // 공격력 등 필요한 정보 넣기
         projectileBase.userAttackPower = userStat.attackMax;
+=======
+        //var projectileBase = projectile.GetComponent<CProjectileBase>();
+        // 공격력 등 필요한 정보 넣기
+        //projectileBase.userAttackPower = userStat._attackMax;
+>>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         // 원소 관련 정보
     }
 }

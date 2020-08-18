@@ -5,6 +5,7 @@ using UnityEngine;
 public class CGlobal : MonoBehaviour
 {
     public static bool isPlay = false; // 메뉴창에서 플레이 중에 메뉴창으로 들어왔는지 체크하는 플래그
+<<<<<<< HEAD
     public static bool isClear = true; //CCreateMap에서 포탈 생성 조건
     public static bool isPortalActive = true; //노말방 포탈 액티브를 위한 포탈 작동 확인 플래그
     public static int roomCount = 0;
@@ -20,4 +21,10 @@ public class CGlobal : MonoBehaviour
         _boss,
         _empty
     }
+=======
+    public static bool usePortal = false; //CCreateMap에서 다음방 생성될 조건
+    public static bool isClear = true; //CCreateMap에서 포탈 생성 조건
+    public static bool isPortalActive = true; //노말방 포탈 액티브를 위한 포탈 작동 확인 플래그
+    public static int roomCount = 0; 
+>>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
 }

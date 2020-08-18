@@ -18,7 +18,15 @@ public enum ELogType
     System,
     Skill,
     Character,
+<<<<<<< HEAD
     Network
+=======
+    Network,
+    UI,
+    Ctrl,
+    Buff,
+    State
+>>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
 }
 
 /*
@@ -36,6 +44,18 @@ public class CLogManager : MonoBehaviour
     public bool onSkill;
     public bool onCharacter;
     public bool onNetwork;
+<<<<<<< HEAD
+=======
+    public bool onUI;
+    public bool onCtrl;
+    public bool onBuff;
+    public bool onState;
+
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+    }
+>>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
 
     public void Log(ELogType logType, object message)
     {
@@ -53,6 +73,21 @@ public class CLogManager : MonoBehaviour
             case ELogType.Network:
                 if (onNetwork) Debug.Log(message);
                 break;
+<<<<<<< HEAD
+=======
+            case ELogType.UI:
+                if (onUI) Debug.Log(message);
+                break;
+            case ELogType.Ctrl:
+                if (onCtrl) Debug.Log(message);
+                break;
+            case ELogType.Buff:
+                if (onBuff) Debug.Log(message);
+                break;
+            case ELogType.State:
+                if (onState) Debug.Log(message);
+                break;
+>>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         }
     }
 
@@ -72,6 +107,21 @@ public class CLogManager : MonoBehaviour
             case ELogType.Network:
                 if (onNetwork) Debug.LogFormat(message, args);
                 break;
+<<<<<<< HEAD
+=======
+            case ELogType.UI:
+                if (onUI) Debug.LogFormat(message, args);
+                break;
+            case ELogType.Ctrl:
+                if (onCtrl) Debug.LogFormat(message, args);
+                break;
+            case ELogType.Buff:
+                if (onBuff) Debug.LogFormat(message, args);
+                break;
+            case ELogType.State:
+                if (onState) Debug.LogFormat(message, args);
+                break;
+>>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         };
     }
 }

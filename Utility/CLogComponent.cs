@@ -13,21 +13,50 @@ using UnityEngine;
  */
 public class CLogComponent
 {
+<<<<<<< HEAD
     protected static CLogManager _logManager = GameObject.Find("Log").GetComponent<CLogManager>();
     public ELogType logType;
+=======
+    protected static GameObject _logObject = GameObject.Find("Log");
+    protected static CLogManager _logManager = null;
+    public ELogType logType;
+    public string className;
+>>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
 
     public CLogComponent(ELogType type)
     {
         logType = type;
+<<<<<<< HEAD
+=======
+        if (_logObject != null) _logManager = _logObject.GetComponent<CLogManager>();
+    }
+
+    public CLogComponent(ELogType type, string className)
+    {
+        logType = type;
+        this.className = className;
+        if (_logObject != null) _logManager = _logObject.GetComponent<CLogManager>();
+>>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
     }
 
     public void Log(object message)
     {
+<<<<<<< HEAD
         _logManager.Log(logType, message);
+=======
+        if (_logManager == null) Debug.Log(message);
+        else _logManager.Log(logType, message);
+
+>>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
     }
 
     public void Log(string message, params object[] args)
     {
+<<<<<<< HEAD
         _logManager.Log(logType, message, args);
+=======
+        if (_logManager == null) Debug.LogFormat(message, args);
+        else _logManager.Log(logType, message, args);
+>>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
     }
 }
