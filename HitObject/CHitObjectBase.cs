@@ -20,6 +20,7 @@ public class CHitObjectBase : MonoBehaviour
         public AttackType type;
         public float arg1;
         public float arg2;
+        public float arg3;
     }
 
     // 아군을 돕는 행위 관련 모든 경우들
@@ -78,7 +79,7 @@ public class CHitObjectBase : MonoBehaviour
                             case BuffType.fastHeal:
                                 break;
                             case BuffType.attackBuff:
-                                aliesPara.buffParameter.BuffAttack(buffArg.arg1, buffArg.arg2);
+                                //aliesPara.buffParameter.BuffAttack(buffArg.arg1, buffArg.arg2);
                                 break;
                             case BuffType.defenceBuff:
                                 break;

@@ -51,37 +51,37 @@ public class CItemManager : MonoBehaviour
     {
         for (int i = 0; i < CConstants.MAX_ITEM_IN_GAME; i++) //안비어있는가 체크 일단 낫띵이 아닌가 체크하고 낫띵이 아니면 used 체크해서 0이면 보내기
         {
-            if (_equipCommonItemArray.items[i]._name != "nothing")
-                if(_equipCommonItemArray.items[i]._used == 0)
-                    return false;
+            //if (_equipCommonItemArray.items[i]._name != "nothing")
+            //    if(_equipCommonItemArray.items[i]._used == 0)
+            //        return false;
 
-            if (_equipSpecialItemArray.items[i]._name != "nothing")
-                if (_equipSpecialItemArray.items[i]._used == 0)
-                    return false;
+            //if (_equipSpecialItemArray.items[i]._name != "nothing")
+            //    if (_equipSpecialItemArray.items[i]._used == 0)
+            //        return false;
 
-            if (_equipUniqueItemArray.items[i]._name != "nothing")
-                if (_equipUniqueItemArray.items[i]._used == 0)
-                    return false;
+            //if (_equipUniqueItemArray.items[i]._name != "nothing")
+            //    if (_equipUniqueItemArray.items[i]._used == 0)
+            //        return false;
 
-            if (_equipMysteryItemArray.items[i]._name != "nothing")
-                if (_equipMysteryItemArray.items[i]._used == 0)
-                    return false;
+            //if (_equipMysteryItemArray.items[i]._name != "nothing")
+            //    if (_equipMysteryItemArray.items[i]._used == 0)
+            //        return false;
         }
         return true;
     }
 
-    public CItem FindItem(ref CItemArray itemArray, int itemType)
+    public Item.CItem FindItem(ref CItemArray itemArray, int itemType)
     {
-        CItem temp = new CItem();
+        Item.CItem temp = new Item.CItem();
         System.Random r = new System.Random();
 
         if (itemType == 1) //장착형
             for (int i = 0; i < CConstants.MAX_ITEM_IN_GAME; i++)
             {
-                if (itemArray.items[i]._name != "nothing")
+                if (itemArray.items[i].ItemName != "nothing")
                 {
                     temp = itemArray.items[i];
-                    itemArray.items[i].RemoveItem();
+                    //itemArray.items[i].RemoveItem();
                     return temp;
                 }
             }
@@ -90,7 +90,7 @@ public class CItemManager : MonoBehaviour
             while(true)
             {
                 int i = r.Next() % CConstants.MAX_ITEM_IN_GAME;
-                if (itemArray.items[i]._name != "nothing")
+                if (itemArray.items[i].ItemName != "nothing")
                     return itemArray.items[i];
             }
         }
@@ -98,9 +98,9 @@ public class CItemManager : MonoBehaviour
         return temp;
     }
 
-    public CItem GetItemInfo(int itemCode)  
+    public Item.CItem GetItemInfo(int itemCode)  
     {
-        CItem temp = new CItem();
+        Item.CItem temp = new Item.CItem();
         if (itemCode == -1)
             return temp;
 
@@ -172,7 +172,7 @@ public class CItemManager : MonoBehaviour
 
     void ShuffleItemArray(int arrayCount, ref CItemArray itemArray)
     {
-        CItem temp;
+        Item.CItem temp;
         int random;
         System.Random r = new System.Random();
 
@@ -190,7 +190,7 @@ public class CItemManager : MonoBehaviour
 
         for (int i = 0; i < CConstants.MAX_ITEM_IN_GAME; i++)
         {
-            int itemCode = _itemArray.items[i]._itemCode;
+            int itemCode = _itemArray.items[i].ItemCode;
 
             if (itemCode == -1) //아무것도 없을때 예외처리
                 continue;

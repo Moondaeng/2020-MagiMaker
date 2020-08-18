@@ -23,7 +23,7 @@ public class CBuffBase : MonoBehaviour
     }
 
     public List<BuffArgument> BuffArgumentList;
-    
+
     private float lifeTime = 0.3f;
 
     private void Awake()
@@ -49,10 +49,10 @@ public class CBuffBase : MonoBehaviour
             if (other.CompareTag("Player") || other.CompareTag("Allies"))
             {
                 // 이벤트 처리 : 네트워크한테 충돌 알림
-                
+
                 // 버프 관련 함수
                 var aliesPara = other.GetComponent<CharacterPara>();
-                if(aliesPara != null)
+                if (aliesPara != null)
                 {
                     foreach (var buffArg in BuffArgumentList)
                     {

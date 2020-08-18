@@ -1,14 +1,26 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
+﻿/*
+ * 능력치 버프 및 디버프 관리 클래스(지속 힐 / 데미지는 미포함)
+ */
 [System.Serializable]
 public class CBuffPara
 {
-    public float AttackCoef;
-    public float DefenceCoef;
-    public float MoveSpeedCoef;
-    public float AttackSpeedCoef;
+    public enum EBuffType
+    {
+        Attack,
+        Defence,
+        MoveSpeed,
+        AttackSpeed
+    }
+    
+    public float AttackCoef { get; private set; }
+    public float DefenceCoef { get; private set; }
+    public float MoveSpeedCoef { get; private set; }
+    public float AttackSpeedCoef { get; private set; }
+
+    public float AttackDebuffCoef { get; private set; }
+    public float DefenceDebuffCoef { get; private set; }
+    public float MoveSpeedDebuffCoef { get; private set; }
+    public float AttackSpeedDebuffCoef { get; private set; }
 
     protected readonly CBuffTimer timer;
 
@@ -19,11 +31,16 @@ public class CBuffPara
         MoveSpeedCoef = 1.0f;
         AttackSpeedCoef = 1.0f;
 
+        AttackDebuffCoef = 1.0f;
+        DefenceDebuffCoef = 1.0f;
+        MoveSpeedDebuffCoef = 1.0f;
+        AttackSpeedDebuffCoef = 1.0f;
+
         timer = myTimer;
     }
 
-    // 버프 스킬군
-    public virtual void BuffAttack(float time, float buffScale)
+    #region command buff
+    public void BuffAttack(float time, float buffScale)
     {
         timer.Register(CBuffList.AttackBuff, time,
             (int notUsed) => StartBuffAttack(buffScale),
@@ -50,7 +67,8 @@ public class CBuffPara
             (int buffStack) => StartBuffDefenceStack(stackBuffScale, buffStack),
             (int buffStack) => EndBuffDefenceStack(stackBuffScale, buffStack));
     }
-
+    #endregion
+    #region implement buff
     protected void StartBuffAttack(float buffScale) => AttackCoef *= buffScale;
     protected void EndBuffAttack(float buffScale) => AttackCoef /= buffScale;
     protected void StartBuffDefence(float buffScale) => DefenceCoef *= buffScale;
@@ -76,4 +94,5 @@ public class CBuffPara
         float buffScale = 1.0f + stackBuffScale * stack;
         DefenceCoef /= buffScale;
     }
+    #endregion
 }

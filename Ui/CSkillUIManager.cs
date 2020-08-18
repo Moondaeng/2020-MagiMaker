@@ -104,7 +104,9 @@ public class CSkillUIManager : MonoBehaviour
         if (skillUiNumber < 0 || skillUiNumber >= 5) return;
 
         _elementSkillLists[elementUiNumber][skillUiNumber].preemptSkillNumber = skillNumber;
-        skillUiObject.GetChild(elementUiNumber).GetChild(skillUiNumber).gameObject.SetActive(true);
+        var skillUiObejct = skillUiObject.GetChild(elementUiNumber).GetChild(skillUiNumber).gameObject;
+        skillUiObejct.SetActive(true);
+        skillUiObejct.GetComponent<Image>().sprite = GetImageByRegisterNumber(skillNumber);
     }
     
     public void DeregisterSkillUi(int elementUiNumber, int skillUiNumber)
@@ -192,14 +194,18 @@ public class CSkillUIManager : MonoBehaviour
             skillUI.drawer.CooldownDisable();
         }
     }
-    
-    //private void AddSprite(List<Sprite> sprites, string path)
-    //{
-    //    Sprite sprite = Resources.Load(path) as Sprite;
-    //    if (sprite == null)
-    //        Debug.LogFormat("sprite not find : " + path);
-    //    sprites.Add(Resources.Load<Sprite>(path));
-    //}
+
+    private Sprite GetImageByRegisterNumber(int registeredNumber)
+    {
+        if (!CSkillList.SkillList.TryGetValue(registeredNumber, out string spritePath))
+        {
+            return Resources.Load<Sprite>("Clean Vector Icons/T_0_empty_");
+        }
+        else
+        {
+            return Resources.Load<Sprite>(spritePath);
+        }
+    }
 
     private void AddSkillUI(Transform skillUi, List<CSkillUi> list)
     {

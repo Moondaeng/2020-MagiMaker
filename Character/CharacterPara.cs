@@ -24,17 +24,17 @@ public class CharacterPara : MonoBehaviour
     public int _rewardMoney { get; set; }
 
     // ((캐릭터 공격력 * 공격력 증가) + 장비 공격력) * 버프로 올라가는 공격력 %
-    public int TotalAttackMin
+    public virtual int TotalAttackMin
     {
-        get { return (int)(_attackMin * buffParameter.AttackCoef); }
+        get { return (int)(_attackMin * buffParameter.AttackCoef * buffParameter.AttackDebuffCoef); }
     }
-    public int TotalAttackMax
+    public virtual int TotalAttackMax
     {
-        get { return (int)(_attackMax * buffParameter.AttackCoef); }
+        get { return (int)(_attackMax * buffParameter.AttackCoef * buffParameter.AttackDebuffCoef); }
     }
-    public int TotalDefenece
+    public virtual int TotalDefenece
     {
-        get { return (int)(_defense * buffParameter.DefenceCoef); }
+        get { return (int)(_defense * buffParameter.DefenceCoef * buffParameter.DefenceDebuffCoef); }
     }
     
     [System.NonSerialized]

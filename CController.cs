@@ -29,15 +29,6 @@ public class CController : MonoBehaviour
             {KeyCode.Alpha4, () => SkillSelect(3) },
             {KeyCode.Mouse1, UseSkill },
         };
-        //keyDictionary = new Dictionary<KeyCode, Action>
-        //{
-        //    {KeyCode.Tab, ChangeElement },
-        //    {KeyCode.Alpha1, () => UseSkill(1) },
-        //    {KeyCode.Alpha2, () => UseSkill(2) },
-        //    {KeyCode.Alpha3, () => UseSkill(3) },
-        //    {KeyCode.Alpha4, () => UseSkill(4) },
-        //    {KeyCode.Mouse1, () => UseSkill(0) },
-        //};
 
         // 콤보 스킬 세팅
         _comboSelector = new CSkillSelector();
@@ -99,19 +90,6 @@ public class CController : MonoBehaviour
     //    }
     //}
 
-    void RotateMotion()
-    {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit))
-        {
-            //player.GetComponent<CPlayerFSM>().TurnTo(hit.point);
-            //player.GetComponent<CPlayerFSM>().SkillState();
-        }
-    }
-
     void Update()
     {
         if (Input.anyKeyDown)
@@ -125,8 +103,7 @@ public class CController : MonoBehaviour
             }
         }
     }
-
-    #region UseSkill1
+    
     private void SkillSelect(int index)
     {
         _comboSelector.Combo(index);
@@ -135,10 +112,13 @@ public class CController : MonoBehaviour
     // 스킬 사용
     private void UseSkill()
     {
+        int layerMask = 1 << 9;
+        layerMask = ~layerMask;
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out hit))
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
         {
+            print("I'm looking at " + hit.transform.name);
             int comboSkillNum = _comboSelector.EndCombo();
             if (comboSkillNum == -1) return;
             bool? isSkillUse = player.GetComponent<CPlayerSkill>().UseSkillToPosition(comboSkillNum, hit.point);
@@ -150,37 +130,9 @@ public class CController : MonoBehaviour
             }
         }
     }
-    #endregion
-
-    #region UseSkill2
-    private void ChangeElement()
-    {
-        _comboSelector.ChangeElement();
-    }
-
-    private void UseSkill(int index)
-    {
-        RaycastHit hit;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out hit))
-        {
-            //int comboSkillNum = _comboSelector.EndCombo();
-            int comboSkillNum = _comboSelector.PickElementSkill(index);
-            if (comboSkillNum == -1) return;
-            bool? isSkillUse = player.GetComponent<CPlayerSkill>().UseSkillToPosition(comboSkillNum, hit.point);
-            // 성공 시 플레이어 스킬 사용 이벤트 수행
-            if (isSkillUse == true)
-            {
-                //player.GetComponent<CCntl>().SkillAction(2, hit.point);
-                //gameEvent.PlayerAction(number, player.transform.position, hit.point);
-            }
-        }
-    }
-    #endregion
 
     private void Attack()
     {
-        RotateMotion();
-        //player.GetComponent<CCntl>().AttackState();
+        
     }
 }

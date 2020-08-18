@@ -5,7 +5,7 @@ using UnityEngine;
 public class CShopCntl : MonoBehaviour
 {
     public Transform _itemRoot;     //아이템 오브젝트들을 모아둔 루트 오브젝트
-    public List<CItem> _items;      //리스트로 관리
+    public List<Item.CItem> _items;      //리스트로 관리
     public System.Random r;         //아이템 배치 랜덤용
     public int _commmonItemCount;
     public int _specialItemCount;
@@ -63,20 +63,20 @@ public class CShopCntl : MonoBehaviour
 
     }
 
-    void SetItem(CItem item)
+    void SetItem(Item.CItem item)
     {
 
     }
 
     void MakeItemList()
     {
-        _items = new List<CItem>();
+        _items = new List<Item.CItem>();
 
         int itemCount = _itemRoot.childCount;
 
         for (int i = 0; i < itemCount; i++)
         {
-            var item = _itemRoot.GetChild(i).GetComponent<CItem>();
+            var item = _itemRoot.GetChild(i).GetComponent<Item.CItem>();
             _items.Add(item);
         }
     }

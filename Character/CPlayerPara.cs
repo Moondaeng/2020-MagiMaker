@@ -8,6 +8,34 @@ public class CPlayerPara : CharacterPara
     public int _curExp { get; set; }
     public int _expToNextLevel { get; set; }
     public int _money { get; set; }
+    private string _itemTarget;
+
+    [SerializeField]
+    public CInventory _inventory;
+
+    public override int TotalAttackMin
+    {
+        get { return (int)(((_attackMin * _inventory.AtkIncreaseRate) + _inventory.EquipAtkIncreaseSize)
+                * buffParameter.AttackCoef * buffParameter.AttackDebuffCoef); }
+    }
+    public override int TotalAttackMax
+    {
+        get { return (int)(((_attackMax * _inventory.AtkIncreaseRate) + _inventory.EquipAtkIncreaseSize)
+                * buffParameter.AttackCoef * buffParameter.AttackDebuffCoef); }
+    }
+    public override int TotalDefenece
+    {
+        get { return (int)(_defense + _inventory.DefIncreaseSize 
+                * buffParameter.DefenceCoef * buffParameter.DefenceDebuffCoef); }
+    }
+    public int TotalMaxHp
+    {
+        get { return (int)(_maxHp + _inventory.MaxHpIncreaseSize); }
+    }
+    public int TotalHpRegen
+    {
+        get { return (int)(_inventory.HpRegenIncreaseSize); }
+    }
 
     public override void InitPara()
     {
@@ -23,18 +51,6 @@ public class CPlayerPara : CharacterPara
         _isStunned = false;
         _isDead = false;
     }
-
-    //석래가 추가한 부분 시작
-    public List<CItem> _items = new List<CItem>();
-    private string _itemTarget;
-    public void EquipItem(CItem item)
-    {
-        Debug.Log("before equip armor : " + _defense);
-        _items.Add(item);
-        _defense += item._armor;
-        Debug.Log("after equip armor : " + _defense);
-    }
-    //석래가 추가한 부분 끝
 
     protected override void UpdateAfterReceiveAttack()
     {
