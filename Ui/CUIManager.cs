@@ -3,14 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-<<<<<<< HEAD
-public class CUIManager : MonoBehaviour
-{
-    // 언제 어디서나 쉽게 접금할수 있도록 하기위해 만든 정적변수
-    public static CUIManager instance;
-    
-    public Image playerHPBar;
-=======
 /*
  * 모든 UI 관리 클래스
  * 기본적으로 CUI Manager만 만지면 된다
@@ -30,7 +22,6 @@ public class CUIManager : MonoBehaviour
 
     // 언제 어디서나 쉽게 접금할수 있도록 하기위해 만든 정적변수
     public static CUIManager instance;
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
 
     private void Awake()
     {
@@ -38,19 +29,6 @@ public class CUIManager : MonoBehaviour
         {
             instance = this;
         }
-<<<<<<< HEAD
-    }
-
-    public void UpdatePlayerUI(CPlayerPara playerPara)
-    {
-        playerHPBar.rectTransform.localScale = 
-            new Vector3(1f, playerPara.curHp / (float)playerPara.maxHp, 1f);
-    }
-    void Update()
-    {
-
-=======
-
         // 하위 UI 관리
         _skillUIManager = gameObject.GetComponent<CSkillUIManager>();
         _buffTimerUiList = gameObject.GetComponent<CBuffTimerListUI>();
@@ -91,7 +69,6 @@ public class CUIManager : MonoBehaviour
     {
         _buffTimerUiList.SetCanvas(UiCanvasTransform);
         _otherPlayerUi.SetCanvas(UiCanvasTransform);
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
     }
 }
 

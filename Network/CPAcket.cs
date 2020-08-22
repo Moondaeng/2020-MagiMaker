@@ -11,11 +11,6 @@ namespace Network
      */
     public class CPacket
     {
-<<<<<<< HEAD
-        private static CLogComponent logger = new CLogComponent(ELogType.Network);
-
-=======
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         private const byte _header_code = 0x86;
         private const int headerSize = 8;
 
@@ -54,23 +49,6 @@ namespace Network
         }
 
         // 메세지 헤더 작성
-<<<<<<< HEAD
-        public void WriteHeader(byte payLoad_size, byte type)
-        {
-            byte temp = 0x00;
-            Int32 checkSum = -1;
-            Write(_header_code).Write(payLoad_size).Write(type).Write(temp).Write(checkSum);
-        }
-
-        // 메세지 헤더 읽기
-        public void ReadHeader(out byte payloadSize, out byte messageType)
-        {
-            payloadSize = data[payLoadSizePos];
-            messageType = data[messageTypePos];
-            MoveReadPos(headerSize);
-        }
-
-=======
         public void WriteHeader(byte payLoad_size, short type)
         {
             Int32 checkSum = -1;
@@ -96,7 +74,6 @@ namespace Network
             return GetInt16(messageTypePos);
         }
 
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         // 패킷 byte에 추가
         public CPacket Write(bool arg)
         {
@@ -233,8 +210,6 @@ namespace Network
             return this;
         }
 
-<<<<<<< HEAD
-=======
         // 테스트 필요
         public CPacket Write(string arg, int length)
         {
@@ -260,7 +235,6 @@ namespace Network
             return this;
         }
 
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         public Boolean ReadBoolean()
         {
             Boolean ret = false;
@@ -373,8 +347,6 @@ namespace Network
             return ret;
         }
 
-<<<<<<< HEAD
-=======
         public string ReadString(int length)
         {
             string ret = null;
@@ -393,7 +365,6 @@ namespace Network
             return ret;
         }
 
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         // 패킷 byte[] 특정 위치에 arg를 박음
         public void Insert(Boolean arg, int offset)
         {

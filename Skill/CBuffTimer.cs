@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-<<<<<<< HEAD
-=======
 public struct BuffStack
 {
     public bool stackable;
@@ -16,16 +14,11 @@ public struct BuffStack
     }
 }
 
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
 /*
  * 버프 및 디버프 시간을 관리하는 타이머 클래스
  * 필요에 따라 다양한 기능 추가
  */
-<<<<<<< HEAD
-public class CBuffTimer : CTimer
-=======
 public class CBuffTimer : CTimer<BuffStack, int>
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
 {
     // 시간에 상관없이 해당 버프 취소
     // 버프 효과 해제, 디버프 효과 해제에 이용 가능
@@ -35,14 +28,6 @@ public class CBuffTimer : CTimer<BuffStack, int>
 
         if(cancel == null) return;
 
-<<<<<<< HEAD
-        cancel.Value.notify();
-        TimerEnd?.Invoke(cancel.Value.registerNumber);
-        var remove = cancel;
-        cancel = cancel.Next;
-        observeList.Remove(cancel);
-    }
-=======
         cancel.Value.endCallback(cancel.Value.data.stack);
         TimerEnd?.Invoke(cancel.Value.key);
         observeList.Remove(cancel);
@@ -128,5 +113,4 @@ public class CBuffTimer : CTimer<BuffStack, int>
             ExcuteStartCallback(observed);
         }
     }
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
 }

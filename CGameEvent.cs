@@ -4,19 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-/*
- * 게임 이벤트 관리 컴포넌트
- * 
- */
-public class CGameEvent : MonoBehaviour
-{
-    public event EventHandler<Tuple<float, float, float, float>> PlayerMoveStartEvent;
-    public event EventHandler<Tuple<float, float>> PlayerMoveStopEvent;
-    public event EventHandler<Tuple<float, float>> PlayerAttackEvent;
-
-    public void PlayerMoveStop(Tuple<float, float> e) => PlayerMoveStopEvent?.Invoke(this, e);
-
-
 namespace NEvent
 {
     [System.Serializable]
@@ -87,5 +74,4 @@ public class CGameEvent : MonoBehaviour
     public void PlayerMoveStop(Vector3 pos) => PlayerMoveStopEvent?.Invoke(pos);
     public void PlayerAttack(Vector3 pos) => PlayerAttackEvent?.Invoke(pos);
     public void PlayerAction(int actionNumber, Vector3 now, Vector3 dest) => PlayerActionEvent?.Invoke(actionNumber, now, dest);
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
 }

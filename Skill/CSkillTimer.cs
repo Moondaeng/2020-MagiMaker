@@ -2,18 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-<<<<<<< HEAD
-public class CSkillTimer : CTimer
-{
-    private static CLogComponent _logger;
-
-
-
-    protected new void Awake()
-    {
-        base.Awake();
-        _logger = new CLogComponent(ELogType.Skill);
-=======
 public class CSkillTimer : CTimer<int, int>
 {
     protected new void Awake()
@@ -25,7 +13,6 @@ public class CSkillTimer : CTimer<int, int>
     public void Register(int regNum, float time, Callback callback)
     {
         Register(regNum, time, callback, default);
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
     }
 
     // 해당 번호를 가진 observe 대상 시간 추가 / 감소
@@ -68,10 +55,6 @@ public class CSkillTimer : CTimer<int, int>
             var cooldown = FindByRegisterNumber(skill);
             if (cooldown == null)
             {
-<<<<<<< HEAD
-                Debug.LogFormat("minimum = {0}", skill);
-=======
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
                 return skill;
             }
             else
@@ -83,11 +66,6 @@ public class CSkillTimer : CTimer<int, int>
                 }
             }
         }
-<<<<<<< HEAD
-        Debug.LogFormat("final minimum = {0}", minimumNumber);
-=======
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
-
         return minimumNumber;
     }
 }

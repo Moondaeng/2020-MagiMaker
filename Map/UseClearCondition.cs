@@ -2,16 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NormalRoomClear : MonoBehaviour
+public class UseClearCondition : MonoBehaviour
 {
     public Vector3 position;
     GameObject player;
 
-    private void OnCollisionEnter(Collision coll)
+    private void OnTriggerEnter(Collider coll)
     {
         player = GameObject.FindGameObjectWithTag("Player");
 
-        if (coll.collider.tag == "Player")
+        Debug.Log("Use ClearCondition");
+
+        if (coll.tag == "Player")
         {
             CGlobal.isClear = true;
         }

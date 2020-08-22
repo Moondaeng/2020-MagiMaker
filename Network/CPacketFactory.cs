@@ -3,22 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-<<<<<<< HEAD
-=======
 using UnityEngine;
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
 
 namespace Network
 {
     public static class CPacketFactory
     {
-<<<<<<< HEAD
-        private const int _cmdShutdownCode = 99;
-        private const int _cmdMoveStartCode = 100;
-        private const int _cmdMoveStopCode = 101;
-
-        public static CPacket CreateMoveStartPacket(float now_x, float now_y, float dest_x, float dest_y)
-=======
         private const int _cmdShutdownCode = 900;
 
         enum ELogin
@@ -92,16 +82,11 @@ namespace Network
 
         #region Create Lobby Message
         public static CPacket CreateRoomCreateRequest(string id)
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         {
             byte messageSize = 16;
 
             CPacket packet = new CPacket((int)messageSize);
 
-<<<<<<< HEAD
-            packet.WriteHeader(messageSize, _cmdMoveStartCode);
-            packet.Write(now_x).Write(now_y).Write(dest_x).Write(dest_y);
-=======
             packet.WriteHeader(messageSize, (int)ELobby.RoomCreateRequest);
             packet.Write(id, 16);
             Debug.Log("Room Create Request");
@@ -158,28 +143,16 @@ namespace Network
             packet.WriteHeader(messageSize, (int)EReadyRoom.StartRequest);
             packet.Write(rid);
             Debug.Log("Game Start Request");
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
 
             return packet;
         }
 
-<<<<<<< HEAD
-        public static CPacket CreateMoveStopPacket(float now_x, float now_y)
-=======
         public static CPacket CreateGuestQuitPacket(int rid, int slot)
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
         {
             byte messageSize = 8;
 
             CPacket packet = new CPacket((int)messageSize);
 
-<<<<<<< HEAD
-            packet.WriteHeader(messageSize, _cmdMoveStopCode);
-            packet.Write(now_x).Write(now_y);
-
-            return packet;
-        }
-=======
             packet.WriteHeader(messageSize, (int)EReadyRoom.GuestQuitRequest);
             packet.Write(rid).Write(slot);
             Debug.Log("Guest Quit Request");
@@ -286,7 +259,6 @@ namespace Network
             return packet;
         }
         #endregion
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
 
         public static CPacket CreateShutdownPacket()
         {
