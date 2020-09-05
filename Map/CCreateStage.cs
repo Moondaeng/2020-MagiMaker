@@ -7,16 +7,9 @@ using UnityEngine.UI;
 public class CCreateStage
 {
     #region room&portal
-    //public GameObject portal = Resources.Load("Portal/PortalMom") as GameObject;
-    //public GameObject leftPortal = Resources.Load("Portal/LeftPortalMom") as GameObject;
-    //public GameObject rightPortal = Resources.Load("Portal/RightPortalMom") as GameObject;
     public GameObject startRoom = Resources.Load("Room/StartRoom1") as GameObject;
     public GameObject bossRoom = Resources.Load("Room/BossRoom1") as GameObject;
-    //public GameObject itemEliteRoom = Resources.Load("Room/ItemEliteRoom1_0") as GameObject;
-    //public GameObject skillEliteRoom = Resources.Load("Room/SkillEliteRoom1_0") as GameObject;
-    //public GameObject eventRoom = Resources.Load("Room/EventRoom1_0") as GameObject;
     public GameObject shopRoom = Resources.Load("Room/ShopRoom1") as GameObject;
-    //public GameObject normalRoom = Resources.Load("Room/NormalRoom1_0") as GameObject;
     #endregion
 
     #region roomQueue
@@ -370,7 +363,12 @@ public class CCreateStage
                 break;
 
             case CGlobal.ERoomType._event:
-                tempRoom = eventRoomQueue.Dequeue();
+                //tempRoom = eventRoomQueue.Dequeue();
+                //tempRoom = Object.Instantiate(tempRoom, tempRoom.transform.position, tempRoom.transform.rotation);
+                //_rooms.AddLast(tempRoom);
+
+                //debug
+                tempRoom = Resources.Load("Room/EventRoom1_3") as GameObject;
                 tempRoom = Object.Instantiate(tempRoom, tempRoom.transform.position, tempRoom.transform.rotation);
                 _rooms.AddLast(tempRoom);
                 break;
@@ -382,13 +380,13 @@ public class CCreateStage
                 break;
 
             case CGlobal.ERoomType._normal:
-                //tempRoom = normalRoomQueue.Dequeue();
-                //tempRoom = Object.Instantiate(tempRoom, tempRoom.transform.position, tempRoom.transform.rotation);
+                tempRoom = normalRoomQueue.Dequeue();
+                tempRoom = Object.Instantiate(tempRoom, tempRoom.transform.position, tempRoom.transform.rotation);
 
                 //debug
-                tempRoom = Resources.Load("Room/NormalRoom1_1") as GameObject;
-                tempRoom = Object.Instantiate(tempRoom, tempRoom.transform.position, tempRoom.transform.rotation);
-                _rooms.AddLast(tempRoom);
+                //tempRoom = Resources.Load("Room/NormalRoom1_1") as GameObject;
+                //tempRoom = Object.Instantiate(tempRoom, tempRoom.transform.position, tempRoom.transform.rotation);
+                //_rooms.AddLast(tempRoom);
                 break;
 
             case CGlobal.ERoomType._shop:
