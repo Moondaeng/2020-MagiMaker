@@ -45,6 +45,8 @@ public class CCntl : MonoBehaviour
     const float _halfF = .5f;
     const float _seatingTime = .2f;
 
+    private bool _isJumpInputed;
+
     private void Start()
     {
         _animator = GetComponent<Animator>();
@@ -61,44 +63,59 @@ public class CCntl : MonoBehaviour
         yield return new WaitForSeconds(pauseTime);
     }
 
+    public void Move(float inputX, float inputZ)
+    {
+        z = inputZ;
+        x = inputX;
+        _inputVec = new Vector3(x, 0, z);
+    }
+
+    public void Attack()
+    {
+        // 공격 모션 키 입력
+        if ((_animator.GetCurrentAnimatorStateInfo(0).IsName("Idle")
+               || _animator.GetCurrentAnimatorStateInfo(0).IsName("Run"))
+               && _isGrounded)
+        {
+            _animator.SetTrigger("Attack");
+            StartCoroutine(COStunPause(.6f));
+        }
+    }
+
+    public void Jump()
+    {
+        _isJumpInputed = true;
+    }
+
     private void Update()
     {
-        z = Input.GetAxisRaw("Horizontal");
-		x = -(Input.GetAxisRaw("Vertical"));
-        _inputVec = new Vector3(x, 0, z);
-        
         CheckGroundStatus();
         // 법선임 hitcast 할 때 씀
         _inputVec = Vector3.ProjectOnPlane(_inputVec, _groundNormal);
 
-        // 공격 모션 키 입력
-        if (Input.GetButtonDown("Fire1"))
-        {
-            if ((_animator.GetCurrentAnimatorStateInfo(0).IsName("Idle")
-                || _animator.GetCurrentAnimatorStateInfo(0).IsName("Run"))
-                && _isGrounded)
-            {
-                _animator.SetTrigger("Attack");
-                StartCoroutine(COStunPause(.6f));
-            }
-        }
+        //if (Input.GetKeyDown(KeyCode.Z))    _roll = true;
+        //else                            _roll = false;
 
-        if (Input.GetKeyDown(KeyCode.Z))    _roll = true;
-        else                            _roll = false;
-
-        // 앉아다니기 모션 키 입력
-        if (Input.GetKey(KeyCode.C))    _crouch = true;
-        else                                _crouch = false;
+        //// 앉아다니기 모션 키 입력
+        //if (Input.GetKey(KeyCode.C))    _crouch = true;
+        //else                                _crouch = false;
 
         // 점프 모션 키 입력
-        if (Input.GetKeyDown(KeyCode.Space))    _jump = true;
-        else                                    _jump = false;
-        
-        ScaleCapsuleForCrouching();
-        ScaleCapsuleForRolling();
-        PreventStandingInLowHeadroom();
-        if (_isGrounded)        HandleGroundedMovement();
-        else                    HandleAirborneMovement();
+        if(_isJumpInputed)
+        {
+            _jump = true;
+            _isJumpInputed = false;
+        }
+        else
+        {
+            _jump = false;
+        }
+
+        //ScaleCapsuleForCrouching();
+        //ScaleCapsuleForRolling();
+        //PreventStandingInLowHeadroom();
+        if (_isGrounded) HandleGroundedMovement();
+        else HandleAirborneMovement();
 
         UpdateMovement();
     }

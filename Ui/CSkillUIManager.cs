@@ -126,6 +126,8 @@ public class CSkillUIManager : MonoBehaviour
             if (_SelectElementList[i].preemptSkillNumber != -1)
             {
                 crossHairObject.GetChild(i).gameObject.SetActive(true);
+                crossHairObject.GetChild(i).gameObject.GetComponent<Image>().sprite 
+                    = GetImageByRegisterNumber(_SelectElementList[i].preemptSkillNumber);
             }
         }
     }

@@ -22,7 +22,9 @@ public class CBuffTimerListUI : MonoBehaviour
 
     protected Transform _uiCanvas;
     protected CBuffTimer _timer;
+    // 타이머를 그릴 때 필요한 리스트
     protected LinkedList<TimerUi> _timerUiList = new LinkedList<TimerUi>();
+    protected List<TimerUi> _timerUiPool = new List<TimerUi>(10);
 
     // 임시 : 그릴 타이머 모양 지정
     public GameObject timerDrawer;
@@ -31,6 +33,29 @@ public class CBuffTimerListUI : MonoBehaviour
     {
         _updateThreshold = (int)(_updateTime / Time.fixedDeltaTime);
         _updateCount = 0;
+    }
+
+    protected void OnEnable()
+    {
+        for(int i = 0; i < _timerUiPool.Capacity; i++)
+        {
+            var drawer = Instantiate(timerDrawer);
+            // initialize drawer
+            drawer.transform.SetParent(_uiCanvas, false);
+            drawer.SetActive(false);
+            drawer.GetComponent<Image>().sprite = GetImageByRegisterNumber(-1);
+            var newPivot = drawer.GetComponent<RectTransform>().pivot;
+            newPivot.x = 0;
+            newPivot.y = 0;
+            drawer.GetComponent<RectTransform>().pivot = newPivot;
+            drawer.GetComponent<CTimerDrawer>().SetSize((int)BuffUiPosition.rect.height);
+
+            _timerUiPool.Add(new TimerUi{
+                timerRegisteredNumber = -1,
+                timerDrawer = drawer
+                }
+            );
+        }
     }
 
     // ui 갱신
@@ -59,6 +84,13 @@ public class CBuffTimerListUI : MonoBehaviour
         _timer = timerOwner.GetComponent<CBuffTimer>();
         _timer.TimerStart += Register;
         _timer.TimerEnd += Deregister;
+
+        // 현재 타이머에 맞게 UI 그리기
+        //var regNumList = _timer.GetRegisterNumberList();
+        //foreach(var regNum in regNumList)
+        //{
+        //    Register(regNum);
+        //}
     }
 
     public virtual void DeregisterTimer(GameObject timerOwner)
@@ -68,6 +100,7 @@ public class CBuffTimerListUI : MonoBehaviour
         _timer.TimerEnd -= Deregister;
 
         // 기존에 있던 Ui 전부 삭제
+        //_timerUiList.Clear();
         //while(_timerUiList.First != null)
         //{
         //    var first = _timerUiList.First;
@@ -84,17 +117,20 @@ public class CBuffTimerListUI : MonoBehaviour
         drawer.transform.SetParent(_uiCanvas, false);
         drawer.SetActive(true);
         drawer.GetComponent<Image>().sprite = GetImageByRegisterNumber(registeredNumber);
-        drawer.GetComponent<CTimerDrawer>().CooldownEnable();
-        if(_timer.IsStackableBuff(registeredNumber) == true)
-        {
-            drawer.GetComponent<CTimerDrawer>().stackText.enabled = true;
-        }
         var newPivot = drawer.GetComponent<RectTransform>().pivot;
         newPivot.x = 0;
         newPivot.y = 0;
         drawer.GetComponent<RectTransform>().pivot = newPivot;
         drawer.GetComponent<CTimerDrawer>().SetSize((int)BuffUiPosition.rect.height);
-        
+        // TimerDrawer에서 필요한 부분 켜기
+        drawer.GetComponent<CTimerDrawer>().CooldownEnable();
+        if(_timer.IsStackableBuff(registeredNumber) == true)
+        {
+            drawer.GetComponent<CTimerDrawer>().stackText.enabled = true;
+        }
+        // TimerDrawer Pool에서 적당한 TimerDrawer 리턴하기
+        // GameObject drawer = FindTimerDrawerInPool(registeredNumber)
+
 
         // 링크드리스트에 추가하기
         var timerUi = new TimerUi()
@@ -107,6 +143,18 @@ public class CBuffTimerListUI : MonoBehaviour
         Relocate();
     }
 
+    protected GameObject FindTimerDrawerInPool(int registeredNumber)
+    {
+        // TimerDrawer Pool에서 registerNumber에 해당하는 이미지가 있는지 확인
+        // int matchDrawerIndex = MatchTimerDrawer(registeredNumber);
+        // 이미지가 없다면 이미지 설정 안 된 TimerDrawer부터 이미지 설정에서 리턴
+        // if(-1 == matchDrawerIndex)
+        //{
+        //      matchDrawerIndex = TakeLRUTimerDrawer();
+        //}
+        return null;
+    }
+
     // 버프 이미지 등록 해제
     // LinkedList의 Remove()에 해당
     protected void Deregister(int registeredNumber)
@@ -115,6 +163,7 @@ public class CBuffTimerListUI : MonoBehaviour
         if (deregistered == null)
             return;
 
+        // 변경 예정 : TimerDrawer를 disable로만 만듦
         Destroy(deregistered.Value.timerDrawer);
         _timerUiList.Remove(deregistered);
 

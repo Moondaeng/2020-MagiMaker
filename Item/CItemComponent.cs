@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
 
 namespace Item
 {
@@ -9,8 +6,14 @@ namespace Item
     [System.Serializable]
     public class CItem
     {
-        public string ItemName { get; protected set; }
-        public Sprite ItemImage { get; protected set; }
+        public string ItemName
+        {
+            get { return _itemName; }
+        }
+        public Sprite ItemImage
+        {
+            get { return _itemImage; }
+        }
 
         /*
          * 등급 기준
@@ -22,20 +25,28 @@ namespace Item
         /// <summary>
         /// 천번대 등급, 백번대 아이템 타입, 00부터 아이템 번호
         /// </summary>
-        public int ItemCode { get; protected set; }
-
-        public CItem()
+        public int ItemCode
         {
-            ItemName = "";
-            ItemCode = 0;
-            ItemImage = null;
+            get { return _itemCode; }
         }
 
-        public CItem(string _itemName, int _itemCode, Sprite _itemImage)
+        [SerializeField]
+        protected string _itemName;
+        [SerializeField]
+        protected Sprite _itemImage;
+        [SerializeField]
+        protected int _itemCode;
+
+        public CItem()
+            : this("", 0, null)
         {
-            ItemName = _itemName;
-            ItemCode = _itemCode;
-            ItemImage = _itemImage;
+        }
+
+        public CItem(string itemName, int itemCode, Sprite itemImage)
+        {
+            _itemName = itemName;
+            _itemImage = itemImage;
+            _itemCode = itemCode;
         }
 
         public void Print()

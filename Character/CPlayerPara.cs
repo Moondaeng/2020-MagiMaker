@@ -11,30 +11,37 @@ public class CPlayerPara : CharacterPara
     private string _itemTarget;
 
     [SerializeField]
-    public CInventory _inventory;
+    public CInventory Inventory;
 
+    // ((캐릭터 공격력 * 공격력 증가) + 장비 공격력) * 버프로 올라가는 공격력 %
     public override int TotalAttackMin
     {
-        get { return (int)(((_attackMin * _inventory.AtkIncreaseRate) + _inventory.EquipAtkIncreaseSize)
+        get { return (int)(((_attackMin * Inventory.AtkIncreaseRate) + Inventory.EquipAtkIncreaseSize)
                 * buffParameter.AttackCoef * buffParameter.AttackDebuffCoef); }
     }
     public override int TotalAttackMax
     {
-        get { return (int)(((_attackMax * _inventory.AtkIncreaseRate) + _inventory.EquipAtkIncreaseSize)
+        get { return (int)(((_attackMax * Inventory.AtkIncreaseRate) + Inventory.EquipAtkIncreaseSize)
                 * buffParameter.AttackCoef * buffParameter.AttackDebuffCoef); }
     }
     public override int TotalDefenece
     {
-        get { return (int)(_defense + _inventory.DefIncreaseSize 
+        get { return (int)(_defense + Inventory.DefIncreaseSize 
                 * buffParameter.DefenceCoef * buffParameter.DefenceDebuffCoef); }
     }
     public int TotalMaxHp
     {
-        get { return (int)(_maxHp + _inventory.MaxHpIncreaseSize); }
+        get { return (int)(_maxHp + Inventory.MaxHpIncreaseSize); }
     }
     public int TotalHpRegen
     {
-        get { return (int)(_inventory.HpRegenIncreaseSize); }
+        get { return (int)(Inventory.HpRegenIncreaseSize); }
+    }
+
+    protected override void Awake()
+    {
+        base.Awake();
+        Inventory = new CInventory();
     }
 
     public override void InitPara()

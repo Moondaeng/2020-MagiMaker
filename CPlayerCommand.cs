@@ -8,13 +8,15 @@ public class CPlayerCommand : MonoBehaviour
     public static CPlayerCommand instance;
 
     public List<GameObject> players = new List<GameObject>();
+    [SerializeField]
     public int activePlayersCount;
+    [SerializeField]
     public int ControlCharacterId;
 
     private CController _controller;
     private CUIManager _playerUi;
     private COtherPlayerUiManager _othersUiList;
-    private CCameraControl _camera;
+    private UnityStandardAssets.Cameras.FreeLookCam _camera;
 
     private void Awake()
     {
@@ -27,7 +29,7 @@ public class CPlayerCommand : MonoBehaviour
         _controller = GameObject.Find("Controller").GetComponent<CController>();
         _playerUi = GameObject.Find("UiScript").GetComponent<CUIManager>();
         _othersUiList = GameObject.Find("UiScript").GetComponent<COtherPlayerUiManager>();
-        _camera = GameObject.Find("Main Camera").GetComponent<CCameraControl>();
+        _camera = GameObject.Find("FreeLookCameraRig").GetComponent<UnityStandardAssets.Cameras.FreeLookCam>();
     }
 
     private void Start()
@@ -49,8 +51,8 @@ public class CPlayerCommand : MonoBehaviour
         for (int i = 0; i < playerCount; i++)
         {
             players[i].SetActive(true);
-            //_othersUiList.AddOtherPlayerUi(players[i]);
-            _othersUiList.AddOtherPlayerUi(players[i].transform.GetChild(0).gameObject);
+            _othersUiList.AddOtherPlayerUi(players[i]);
+            //_othersUiList.AddOtherPlayerUi(players[i].transform.GetChild(0).gameObject);
         }
     }
 
@@ -66,10 +68,10 @@ public class CPlayerCommand : MonoBehaviour
         character.tag = "Player";
 
         _controller.player = character;
-        _camera._player = character;
-        //_playerUi.SetUiTarget(character);
-        _playerUi.SetUiTarget(character.transform.GetChild(0).gameObject);
-        _othersUiList.DeleteOtherPlayerUi(character.transform.GetChild(0).gameObject);
+        _camera.SetTarget(character.transform);
+        _playerUi.SetUiTarget(character);
+        //_playerUi.SetUiTarget(character.transform.GetChild(0).gameObject);
+        //_othersUiList.DeleteOtherPlayerUi(character.transform.GetChild(0).gameObject);
     }
 
     // 캐릭터 이동
@@ -106,12 +108,12 @@ public class CPlayerCommand : MonoBehaviour
     }
 
     // 해당 캐릭터에게 데미지 주기
-    public void DamageToCharacter(int charId, float damageScale)
+    public void DamageToCharacter(int charId, int damageScale)
     {
         var character = players?[charId];
         if (character == null) return;
 
         var charStat = character.GetComponent<CharacterPara>();
-        charStat.SetEnemyAttack(damageScale);
+        charStat.DamegedRegardDefence(damageScale);
     }
 }

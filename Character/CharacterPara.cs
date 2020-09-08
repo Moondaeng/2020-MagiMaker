@@ -22,8 +22,8 @@ public class CharacterPara : MonoBehaviour
     public bool _isStunned { get; set; }
     public bool _isDead { get; set; }
     public int _rewardMoney { get; set; }
+    public int _spawnID { get; set; }
 
-    // ((캐릭터 공격력 * 공격력 증가) + 장비 공격력) * 버프로 올라가는 공격력 %
     public virtual int TotalAttackMin
     {
         get { return (int)(_attackMin * buffParameter.AttackCoef * buffParameter.AttackDebuffCoef); }
@@ -50,14 +50,10 @@ public class CharacterPara : MonoBehaviour
         return _random;
     }
 
-    protected void Awake()
+    protected virtual void Awake()
     {
         _buffTimer = gameObject.GetComponent<CBuffTimer>();
         buffParameter = new CBuffPara(_buffTimer);
-    }
-
-    void Start()
-    {
         InitPara();
     }
 
@@ -86,7 +82,7 @@ public class CharacterPara : MonoBehaviour
     // 방어력 계산식: 1000 / (950 + 10*방어력)
     public void DamegedRegardDefence(int enemyAttack)
     {
-        int damage = 1000 / (950 + 10*TotalDefenece);
+        int damage = enemyAttack * 1000 / (950 + 10*TotalDefenece);
         DamagedDisregardDefence(damage);
     }
 

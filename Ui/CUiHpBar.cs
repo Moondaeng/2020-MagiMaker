@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,24 +8,28 @@ using UnityEngine.UI;
  */
 public class CUiHpBar : MonoBehaviour
 {
-    [System.Serializable]
-    public enum HpBarType
-    {
-        horizontal, vertical
-    }
-
     public Image HpBarImage;
-    public HpBarType hpBarType;
+
+    private float _targetPercent;
+    private float _animationPercent;
+
+    private const int ANIM_DRAW_FRAME_COUNT = 30;
+
+    public static readonly WaitForEndOfFrame WaitForEndOfFrame = new WaitForEndOfFrame();
+    public static readonly WaitForFixedUpdate WaitForFixedUpdate = new WaitForFixedUpdate();
 
     // Start is called before the first frame update
     void Start()
     {
-        //HpBarImage = gameObject.GetComponent<Image>();
+        HpBarImage = gameObject.GetComponent<Image>();
+        _animationPercent = _targetPercent;
     }
 
     public void Register(CharacterPara cPara)
     {
         cPara.damageEvent.AddListener(Draw);
+        _targetPercent = cPara._curHp / cPara._maxHp;
+        _animationPercent = cPara._curHp / cPara._maxHp;
     }
 
     public void Deregister(CharacterPara cPara)
@@ -36,15 +39,23 @@ public class CUiHpBar : MonoBehaviour
 
     public void Draw(int curHp, int maxHp)
     {
-        // 수평 방식
-        if(hpBarType == HpBarType.horizontal)
+        _targetPercent = (float)curHp / (float)maxHp;
+        Debug.Log($"target persent : {_targetPercent}");
+        StopCoroutine("DrawHpAnimation");
+        StartCoroutine("DrawHpAnimation");
+    }
+
+    private IEnumerator DrawHpAnimation()
+    {
+        Debug.Log("Draw Animation");
+        float interpolatePercent = (_targetPercent - _animationPercent) / ANIM_DRAW_FRAME_COUNT;
+        for(int i = 0; i < ANIM_DRAW_FRAME_COUNT; i++)
         {
-            HpBarImage.fillAmount = (float)curHp / (float)maxHp;
+            _animationPercent += interpolatePercent;
+            HpBarImage.fillAmount = _animationPercent;
+            yield return WaitForFixedUpdate;
         }
-        // 수직 방식
-        else 
-        {
-            HpBarImage.fillAmount = (float)curHp / (float)maxHp;
-        }
+        _animationPercent = _targetPercent;
+        HpBarImage.fillAmount = _animationPercent;
     }
 }
