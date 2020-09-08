@@ -87,8 +87,6 @@ public class CController : MonoBehaviour
                 }
             }
         }
-
-
     }
 
     private void Attack()

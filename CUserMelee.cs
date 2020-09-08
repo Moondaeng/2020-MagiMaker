@@ -7,7 +7,7 @@ public class CUserMelee : MonoBehaviour
     Collider _myCol;
     Collider _obj;
     Animator _anim;
-
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -47,9 +47,9 @@ public class CUserMelee : MonoBehaviour
         {
             _obj = col;
             SendAttackEnemy();
-            
         }
     }
+
     private void Update()
     {
         StartCoroutine("CheckAnimationState");
