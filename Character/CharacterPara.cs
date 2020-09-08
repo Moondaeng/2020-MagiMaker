@@ -167,7 +167,6 @@ public class CharacterPara : MonoBehaviour
     {
         return _elementTypeBonusArray[(eLevel - eLevel + 1), (int)FindAttacksElementTypeBonus(eTypeDefence, eTypeAttack)];
     }
-
     // 평타 데미지 계산식
     public float GetRandomAttack(EElementType eTypeDefence, EElementType eTypeAttack)
     {

@@ -6,13 +6,12 @@ public class CEnemyMelee : MonoBehaviour
 {
     Collider _myCol;
     Animator _anim;
+    bool _attackTrigger;
     // Start is called before the first frame update
     void Start()
     {
         _myCol = GetComponent<Collider>();
         _anim = transform.root.GetComponent<Animator>();
-        Debug.Log(_myCol);
-        Debug.Log(_anim);
     }
 
     public void SendAttackEnemy()

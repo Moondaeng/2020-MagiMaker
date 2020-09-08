@@ -17,7 +17,6 @@ public class CCharacterSkill : MonoBehaviour
     {
         _skillList = new List<CSkillFormat>();
     }
-
     protected virtual void Start()
     {
         _projectileSkill = GameObject.Find("SkillScript").GetComponent<CProjectileSkill>();

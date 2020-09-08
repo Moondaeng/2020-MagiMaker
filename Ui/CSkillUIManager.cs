@@ -7,7 +7,10 @@ using UnityEngine.UI;
  * 스킬의 UI를 통합관리하는 클래스
  * 스킬이 UI 이름를 최대한 모르게 하고, UI를 같이 쓰는 일을 방지함
  * 스킬 타이머가 UI를 관리하는 일을 최소화함
+<<<<<<< HEAD
+=======
  * 
+>>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
  */ 
 public class CSkillUIManager : MonoBehaviour
 {
@@ -34,8 +37,7 @@ public class CSkillUIManager : MonoBehaviour
     // 갱신 시간 조절
     protected const float _updateTime = 0.1f;
     protected int _updateThreshold;
-    protected int _updateCount;
-    
+    protected int _updateCount;    
     public static CSkillUIManager instance;
 
     private void Awake()
@@ -236,7 +238,6 @@ public class CSkillUIManager : MonoBehaviour
 
         return null;
     }
-
     private void SetImageAlpha(Image image, float alpha)
     {
         var tempColor = image.color;

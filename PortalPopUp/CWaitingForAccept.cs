@@ -9,15 +9,16 @@ public class CWaitingForAccept : MonoBehaviour
     {
         _waiting,
         _accept,
-        _cancel
+        _cancle
     }
-    public List<EAccept> _playerAcceptList;
+    public EAccept _player1Accept;
+    public EAccept _player2Accept;
+    public EAccept _player3Accept;
+    public EAccept _player4Accept;
     public GameObject _portal;
     public GameObject _waitingForOtherPlayer;
     public GameObject _portalPopUp;
     public static CWaitingForAccept instance = null;
-
-    private CPlayerCommand _playerCommand;
 
     // Start is called before the first frame update
     void Start()
@@ -25,70 +26,41 @@ public class CWaitingForAccept : MonoBehaviour
         if (instance == null)
         {
             instance = this;
-            Debug.Log("instaceeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
         }
-        for (int i = 0; i < _playerAcceptList.Count; i++)
-        {
-            _playerAcceptList[i] = EAccept._waiting;
-        }
-        //_portalPopUp = GameObject.Find("PortalPopUp");
-        //_waitingForOtherPlayer = _portalPopUp.transform.Find("WaitingForOtherPlayer").gameObject;
-        _playerCommand = GameObject.Find("GameManager").GetComponent<CPlayerCommand>();
+        _player1Accept = EAccept._waiting;
+        _player2Accept = EAccept._waiting;
+        _player3Accept = EAccept._waiting;
+        _player4Accept = EAccept._waiting;
+        _portalPopUp = GameObject.Find("PortalPopUp");
+        _waitingForOtherPlayer = _portalPopUp.transform.Find("WaitingForOtherPlayer").gameObject;
     }
 
-    public void SetWaitingPlayer()
+    // Update is called once per frame
+    void Update()
     {
-        if(_playerCommand == null)
+        if (_player1Accept == EAccept._accept && _player2Accept == EAccept._accept && _player3Accept == EAccept._accept && _player4Accept == EAccept._accept)
         {
-            _playerCommand = GameObject.Find("GameManager").GetComponent<CPlayerCommand>();
-        }
-        for (int player = 0; player < _playerCommand.activePlayersCount; player++)
-        {
-            Debug.Log($"Waiting Player : {player}");
-            _waitingForOtherPlayer.transform.GetChild(player).gameObject.SetActive(true);
-        }
-    }
+            _waitingForOtherPlayer.SetActive(false);
 
-    public void SetPlayerAccept(int playerNum, EAccept accept)
-    {
-        Image image = _waitingForOtherPlayer.transform.GetChild(playerNum).GetComponent<Image>();
-        if (accept == EAccept._accept)
-        {
-            Debug.Log($"Press Accept : {playerNum}");
-            _playerAcceptList[playerNum] = EAccept._accept;
-            image.sprite = Resources.Load<Sprite>("T_12_ok_") as Sprite;
-            CheckAllAccept();
-        }
-        else if(accept == EAccept._cancel)
-        {
-            Debug.Log($"Press Cancel : {playerNum}");
-            _playerAcceptList[playerNum] = EAccept._cancel;
-            image.sprite = Resources.Load<Sprite>("T_12_no_") as Sprite;
-            CancelPortal();
+            UsePortal usePortal = instance._portal.GetComponent<UsePortal>();
+            _player1Accept = EAccept._waiting; // 디버깅용
+            usePortal.MoveToNextRoom();
         }
     }
 
-    // 모든 사람이 Accept했는지 확인한다
-    // 모든 사람이 Accept했다면 Portal 위치로 전부 강제 이동시킨다
-    private void CheckAllAccept()
+    IEnumerator TestAccept()
     {
-        for (int player = 0; player < _playerCommand.activePlayersCount; player++)
-        {
-            Debug.Log($"Check Accept");
-            if (_playerAcceptList[player] != EAccept._accept)
-            {
-                return;
-            }
-        }
+        _player2Accept = EAccept._accept;
+        Image image = _waitingForOtherPlayer.transform.GetChild(1).GetComponent<Image>();
+        image.sprite = Resources.Load<Sprite>("T_12_ok_") as Sprite;
 
-        _portalPopUp.SetActive(false);
+        _player3Accept = EAccept._accept;
+        image = _waitingForOtherPlayer.transform.GetChild(2).GetComponent<Image>();
+        image.sprite = Resources.Load<Sprite>("T_12_ok_") as Sprite;
 
-        UsePortal usePortal = instance._portal.GetComponent<UsePortal>();
-        usePortal.MoveToNextRoom();
-    }
-
-    private void CancelPortal()
-    {
-        _portalPopUp.SetActive(false);
+        _player4Accept = EAccept._accept;
+        image = _waitingForOtherPlayer.transform.GetChild(3).GetComponent<Image>();
+        image.sprite = Resources.Load<Sprite>("T_12_ok_") as Sprite;
+        yield return null;
     }
 }

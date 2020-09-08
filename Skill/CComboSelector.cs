@@ -15,7 +15,7 @@ public class CSkillSelector
     {
         Fire, Water, Earth, Wind, Light, Dark
     }
-    
+
     private readonly int mainElementContainSize = 3;
     private readonly int subElementContainSize = 4;
     private const int elementTotalNumber = 6;
@@ -25,9 +25,9 @@ public class CSkillSelector
 
     private int selectedMainElement = 0;
     private int selectedSubElement = 0;
-    
+
     private CSkillUIManager _skillUIManager;
-    
+
     private ComboState _currentState;
 
     public CSkillSelector()
@@ -39,7 +39,7 @@ public class CSkillSelector
         mainElement = new int[mainElementContainSize];
         subElement = new int[subElementContainSize];
 
-        for(int slot = 0; slot < mainElement.Length; slot++)
+        for (int slot = 0; slot < mainElement.Length; slot++)
         {
             mainElement[slot] = -1;
         }
@@ -65,7 +65,7 @@ public class CSkillSelector
         if (slot < 0 || slot >= subElementContainSize) return;
 
         subElement[slot] = (int)element;
-        
+
         SyncSubElementWithUi(slot);
     }
 
@@ -85,7 +85,7 @@ public class CSkillSelector
     {
         int currentSelectedSkillNumber = -1;
 
-        if(index == 0)
+        if (index == 0)
         {
             currentSelectedSkillNumber = mainElement[selectedMainElement];
         }
@@ -125,18 +125,18 @@ public class CSkillSelector
     // 스킬 성질 선택 상태를 그림
     public void DrawCurrentState(int index)
     {
-        if(_currentState == ComboState.Sub)
+        if (_currentState == ComboState.Sub)
         {
             _skillUIManager.ShowSelectElement(index);
         }
 
-        switch(_currentState)
+        switch (_currentState)
         {
             case ComboState.Sub:
                 _skillUIManager.ShowSelectSkill(0);
                 break;
             case ComboState.Select:
-                _skillUIManager.ShowSelectSkill(index+1);
+                _skillUIManager.ShowSelectSkill(index + 1);
                 break;
             default:
                 break;
@@ -202,7 +202,7 @@ public class CSkillSelector
         selectedSubElement = index;
         _currentState = ComboState.Select;
     }
-    
+
     private void SyncMainElementWithUi(int mainElementSlotNumber)
     {
         _skillUIManager.RegisterSkillUi(mainElementSlotNumber, 0,
@@ -211,19 +211,19 @@ public class CSkillSelector
         {
             if (subElement[i] != -1)
             {
-                _skillUIManager.RegisterSkillUi(mainElementSlotNumber, i+1,
+                _skillUIManager.RegisterSkillUi(mainElementSlotNumber, i + 1,
                     mainElement[mainElementSlotNumber] * elementTotalNumber + subElement[i]);
             }
         }
     }
-    
+
     private void SyncSubElementWithUi(int subElementSlotNumber)
     {
         for (int i = 0; i < mainElementContainSize; i++)
         {
             if (mainElement[i] != -1)
             {
-                _skillUIManager.RegisterSkillUi(i, subElementSlotNumber+1,
+                _skillUIManager.RegisterSkillUi(i, subElementSlotNumber + 1,
                     mainElement[i] * elementTotalNumber + subElement[subElementSlotNumber]);
             }
         }

@@ -13,7 +13,6 @@ public class CPlayerEventController : MonoBehaviour
     {
         transform.root.gameObject.SendMessage("AttackCalculate");
     }
-
     // Update is called once per frame
     void Update()
     {

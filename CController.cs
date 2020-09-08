@@ -40,14 +40,14 @@ public class CController : MonoBehaviour
             {KeyCode.Mouse1, UseSkill },
         };
 
-        // 콤보 스킬 세팅
-        _comboSelector = new CSkillSelector();
-
         //gameEvent = GameObject.Find("GameEvent").GetComponent<CGameEvent>();
     }
 
     void Start()
     {
+        // 콤보 스킬 세팅
+        _comboSelector = new CSkillSelector();
+
         _comboSelector.SetMainElement(0, CSkillSelector.SkillElement.Fire);
         _comboSelector.SetMainElement(1, CSkillSelector.SkillElement.Water);
         _comboSelector.SetSubElement(0, CSkillSelector.SkillElement.Water);
@@ -55,7 +55,7 @@ public class CController : MonoBehaviour
         _comboSelector.SetSubElement(2, CSkillSelector.SkillElement.Wind);
         _comboSelector.SetSubElement(3, CSkillSelector.SkillElement.Light);
 
-        if(player != null)
+        if (player != null)
         {
             _playerControl = player.GetComponent<CCntl>();
         }
@@ -71,6 +71,10 @@ public class CController : MonoBehaviour
     {
         z = Input.GetAxisRaw("Horizontal");
         x = -(Input.GetAxisRaw("Vertical"));
+        if (player != null)
+        {
+            _playerControl = player.GetComponent<CCntl>();
+        }
         _playerControl.Move(x, z);
 
         if (Input.anyKeyDown)

@@ -4,10 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-/*
- * 게임 이벤트 관리 컴포넌트
- * 
- */
 namespace NEvent
 {
     [System.Serializable]

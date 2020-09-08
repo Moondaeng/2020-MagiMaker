@@ -29,7 +29,9 @@ namespace Item
         [System.Serializable]
         public class UseEffectWithChance
         {
+            [Tooltip("소비 아이템 사용 효과")]
             public UseEffect useEffect;
+            [Tooltip("효과 발동 확률")]
             [Range(0f, 1f)] public float Chance;
         }
 
@@ -43,6 +45,7 @@ namespace Item
     }
 }
 
+[RequireComponent(typeof(Rigidbody))]
 public class CConsumableComponent : CItemComponent
 {
     public Item.CConsumable ConsumableStat;

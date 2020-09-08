@@ -62,7 +62,6 @@ public class CShopCntl : MonoBehaviour
     {
 
     }
-
     void SetItem(Item.CItem item)
     {
 

@@ -49,11 +49,11 @@ namespace Network
 
         private void Update()
         {
-            if(IsConnect && !tcpBuffer.IsEmpty)
+            if (IsConnect && !tcpBuffer.IsEmpty)
             {
                 tcpBuffer.TryDequeue(out byte[] data);
 
-                if(CheckShutdown(data))
+                if (CheckShutdown(data))
                 {
                     EndClient();
                 }
@@ -67,7 +67,7 @@ namespace Network
         private void OnApplicationQuit()
         {
             SendShutdown();
-            if(IsConnect) EndClient();
+            if (IsConnect) EndClient();
         }
 
         public void StartClient()
@@ -144,7 +144,7 @@ namespace Network
 
                 // Complete the connection.  
                 client.EndConnect(ar);
-                
+
                 Debug.LogFormat("Socket connected to {0}", client.RemoteEndPoint.ToString());
                 IsConnect = true;
 
@@ -201,7 +201,6 @@ namespace Network
                 Debug.Log(e.ToString());
             }
         }
-
         private void SendCallback(IAsyncResult ar)
         {
             try

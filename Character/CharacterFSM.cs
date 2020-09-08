@@ -21,7 +21,7 @@ public class CharacterFSM : MonoBehaviour
     public float attackDelay { get; set; } // 공격을 한번 하고 다시 공격할 때까지의 지연
     public float attackTimer { get; set; } //공격을 하고 난 뒤에 경과되는 시간을 계산하기 위한 변수
     public float attackDistance { get; set; } // 공격 거리 (적과의 거리)
-    
+
     //idle 상태를 기본 상태로 지정
     public EState currentState = EState.Idle;
 
@@ -102,7 +102,7 @@ public class CharacterFSM : MonoBehaviour
     // 이걸 서버로 보내면 될듯?
     public virtual void MoveToDestination()
     {
-        
+
     }
 
     public void Update()

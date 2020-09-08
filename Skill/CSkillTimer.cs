@@ -66,7 +66,6 @@ public class CSkillTimer : CTimer<int, int>
                 }
             }
         }
-
         return minimumNumber;
     }
 }

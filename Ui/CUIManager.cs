@@ -29,7 +29,6 @@ public class CUIManager : MonoBehaviour
         {
             instance = this;
         }
-
         // 하위 UI 관리
         _skillUIManager = gameObject.GetComponent<CSkillUIManager>();
         _buffTimerUiList = gameObject.GetComponent<CBuffTimerListUI>();

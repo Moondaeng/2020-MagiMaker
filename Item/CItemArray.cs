@@ -18,6 +18,6 @@ public class CItemArray
 
     public void SetItemArray(ref CItemArray itemArray)
     {
-        CItemJsonConvert.instance.loadToItem("Items", ref itemArray);
+        //CItemJsonConvert.instance.loadToItem("Items", ref itemArray);
     }
 }

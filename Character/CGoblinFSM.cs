@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class CGoblinFSM : CEnemyFSM
 {
-    protected List<float> _distances = new List<float>();
-
+    bool _runEnd;
+    Vector3 _dest;
+    float second = 1f;
     protected override void InitStat()
     {
         _moveSpeed = 5f;
@@ -17,13 +18,22 @@ public class CGoblinFSM : CEnemyFSM
         _myRespawn = _myPara.GetComponent<CEnemyPara>()._myRespawn;
 
         _walkState = Animator.StringToHash("Base Layer.Run");
-        _idleBattleState = Animator.StringToHash("Base Layer.Idle_battle");
-        _attackState = Animator.StringToHash("Base Layer.Attack1");
+        _waitState = Animator.StringToHash("Base Layer.AttackWait");
+        _standState = Animator.StringToHash("Base Layer.Idle_battle");
+        _skillState1 = Animator.StringToHash("Base Layer.Skill1");
+        _skillWaitState1 = Animator.StringToHash("Base Layer.SkillWait1");
+        _attackState1 = Animator.StringToHash("Base Layer.Attack1");
+        _attackState2 = Animator.StringToHash("Base Layer.Attack2");
         _deadState1 = Animator.StringToHash("Base Layer.Death1");
         _deadState2 = Animator.StringToHash("Base Layer.Death2");
+        
+        _cooltime = 1f;
+        _skillCooltime1 = 5f;
+        _originCooltime = _cooltime;
+        _originSkillCooltime1 = _skillCooltime1;
     }
 
-    protected void CallDeadEvent()
+    protected override void CallDeadEvent()
     {
         int n = Random.Range(0, 2);
         if (n == 0)
@@ -31,122 +41,124 @@ public class CGoblinFSM : CEnemyFSM
             _anim.SetInteger("Dead", 1);
         }
         else { _anim.SetInteger("Dead", 2); }
-        GetComponent<BoxCollider>().enabled = false;
-        GameObject.Find("Controller").GetComponent<CController>().DeselectEnemy();
-        //_player.gameObject.SendMessage("CurrentEnemyDead");
+        this.tag = "Untagged";
         Invoke("RemoveMe", 2f);
     }
-    void RemoveMe()
+
+    protected override void RemoveMe()
     {
         _myRespawn.GetComponent<CRespawn>().RemoveMonster(_spawnID);
         _anim.SetInteger("Dead", 0);
     }
-
-    protected void AttackCalculate()
-    {
-        _playerPara.SetEnemyAttack(_myPara.GetRandomAttack(_playerPara._eType, _myPara._eType));
-    }
-
+    
     protected void AttackCheck()
     {
-        for(int i = 0; i < _players.Count; i++)
+        for (int i = 0; i < _players.Count; i++)
         {
-            if (IsTargetInSight(60f, _players[i].transform))
+            if (IsTargetInSight(10f, _players[i].transform) && IsInAttackDistance(3f, _players[i].transform))
             {
                 _playerPara = _players[i].GetComponent<CPlayerPara>();
                 AttackCalculate();
             }
         }
     }
-    
-    protected void UpdateState()
-    {  
-        if (_currentBaseState.nameHash == _walkState)
+
+    protected override void UpdateState()
+    {
+        if (_actionStart)
         {
-            ChaseState();
+            _skillCooltime1 -= Time.deltaTime;
+            _skillCoolDown1 = true;
         }
-        else if (_currentBaseState.nameHash == _attackState)
+        if (_currentBaseState.nameHash == _walkState) ChaseState();
+        else if (_currentBaseState.nameHash == _attackState1
+            || _currentBaseState.nameHash == _attackState2) AttackState();
+        else if (_currentBaseState.nameHash == _waitState) AttackWaitState();
+        else if (_currentBaseState.nameHash == _skillWaitState1) SkillWaitState1();
+        else if (_currentBaseState.nameHash == _skillState1) SkillState1();
+
+        if (_skillCooltime1 < 0f)
         {
-            AttackState();
+            _anim.SetBool("Skill1", true);
+            _skillCoolDown1 = false;
         }
     }
 
     protected void ChaseState()
     {
-        MoveState();
+        _runEnd = false;
+        if (!_actionStart) _actionStart = true;
+        if (_currentBaseState.nameHash != _deadState1 
+            || _currentBaseState.nameHash != _deadState2)
+            MoveState();
+    }
+
+    protected override void MoveState()
+    {
+        _anotherAction = false;
+        base.MoveState();
     }
 
     protected void AttackState()
     {
-        transform.LookAt(_player.transform.position);
+        if (!_lookAtPlayer)
+            transform.LookAt(_player.transform.position
+                - new Vector3(0f, _player.transform.position.y, 0f));
+        _coolDown = true;
+    }
+    
+    private void AttackWaitState()
+    {
+        _cooltime -= Time.deltaTime;
+        if (_cooltime < 0)
+        {
+            _coolDown = false;
+            _cooltime = _originCooltime;
+        }
+        else if (GetDistanceFromPlayer(_distances) > 3f)
+        {
+            _coolDown = false;
+            _anotherAction = true;
+            _cooltime = _originCooltime;
+        }
+    }
+    
+    protected void SkillWaitState1()
+    {
+        _skill1 = false;
+        float runDistance = 10f;
+        Vector3 Distance = Vector3.forward * runDistance;
+        Quaternion Rotate = Quaternion.Euler(0f, 180f, 0f);
+        Vector3 TargetPoint = Rotate * Distance;
+        _dest = transform.position + TargetPoint;
     }
 
-    protected override void MoveToDestination()
+    protected void SkillState1()
     {
+        second -= Time.deltaTime;
         transform.position = Vector3.MoveTowards(transform.position,
-            _player.transform.position, _moveSpeed * Time.deltaTime);
-    }
+            _dest, _moveSpeed * 2f * Time.deltaTime);
 
-    protected override void TurnToDestination()
-    {
         Quaternion lookRotation =
-            Quaternion.LookRotation(_player.transform.position - transform.position);
+                Quaternion.LookRotation(_dest - transform.position);
         transform.rotation = Quaternion.RotateTowards(transform.rotation,
             lookRotation, Time.deltaTime * _rotAnglePerSecond);
-    }
 
-    //플레이어와 거리을 재는 함수
-    private float GetDistanceFromPlayer()
-    {
-        for (int i = 0; i < _distances.Count - 1; i++)
+        if (Vector3.Distance(transform.position, _dest) < 0.5f || second < 0f)
         {
-            int j, tmp = i;
-            float tempDis;
-            GameObject nullGameObj;
-
-            for (j = i + 1; j < _distances.Count; j++)
-            {
-                if (_distances[tmp] >= _distances[j] + 4f)
-                {
-                    tmp = j;
-                }
-            }
-
-            tempDis = _distances[tmp];
-            _distances[tmp] = _distances[i];
-            _distances[i] = tempDis;
-
-            nullGameObj = _players[tmp];
-            _players[tmp] = _players[i];
-            _players[i] = nullGameObj;
+            _runEnd = true;
+            _skillCooltime1 = _originSkillCooltime1;
+            second = 1f;
         }
-        _player = _players[0];
-        _playerPara = _players[0].GetComponent<CPlayerPara>();
-        return _distances[0];
     }
 
     protected override void Update()
     {
+        _anim.SetBool("Skill1", _skill1);
+        _anim.SetBool("CoolDown", _coolDown);
+        _anim.SetBool("CoolDown1", _skillCoolDown1);
+        _anim.SetBool("RunEnd", _runEnd);
+        _anim.SetBool("AnotherAction", _anotherAction);
         base.Update();
-        _currentBaseState = _anim.GetCurrentAnimatorStateInfo(0);
-        _distances = CalculateDistance(_players);
-        Debug.Log(_players.Count);
-        _anim.SetInteger("PlayerCount", _players.Count);
-        if (_players.Count > 1)
-        {
-            _anim.SetFloat("DistanceFromPlayer", GetDistanceFromPlayer());
-            UpdateState();
-        }
-        else if (_players.Count == 1)
-        {
-            _player = _players[0];
-            _playerPara = _players[0].GetComponent<CPlayerPara>();
-            _anim.SetFloat("DistanceFromPlayer", _distances[0]);
-            UpdateState();
-        }
-        else if (_players.Count == 0)
-        {
-            _anim.SetFloat("DistanceFromPlayer", 999f);
-        }
     }
 }

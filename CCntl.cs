@@ -1,10 +1,10 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CapsuleCollider))]
 [RequireComponent(typeof(Animator))]
-public class CCntl : MonoBehaviour 
+public class CCntl : MonoBehaviour
 {
     [SerializeField] public float _jumpPower = 12f;
     [Range(1f, 4f)] [SerializeField] float _gravityMultiplier = 3.5f;
@@ -13,7 +13,7 @@ public class CCntl : MonoBehaviour
     // 추후에 공이속 추가되면 사용할 배수
     //[SerializeField] float _animSpeedMultiplier = 1f;
     //[SerializeField] float _moveSpeedMultiplier = 1f;
-    
+
     Animator _animator;
     Rigidbody _rigidbody;
     CapsuleCollider _capsule;
@@ -57,7 +57,7 @@ public class CCntl : MonoBehaviour
         _capsuleCenter = _capsule.center;
         _origGroundCheckDistance = _groundCheckDistance;
     }
-    
+
     public IEnumerator COStunPause(float pauseTime)
     {
         yield return new WaitForSeconds(pauseTime);
@@ -119,7 +119,7 @@ public class CCntl : MonoBehaviour
 
         UpdateMovement();
     }
-    
+
     // RaycastHit을 이용한 땅에 붙어있는지 체크
     void CheckGroundStatus()
     {
@@ -188,7 +188,7 @@ public class CCntl : MonoBehaviour
 
     void ScaleTrasformForRolling()
     {
-        if(_rollCheck)
+        if (_rollCheck)
         {
             // 구를때 콜라이더가 따로 놀고 자세히 보면 미묘하게 뒤로감 이걸 처리하려고함
         }
@@ -225,7 +225,7 @@ public class CCntl : MonoBehaviour
             _groundCheckDistance = 0.5f;
         }
     }
-    
+
     void HandleAirborneMovement()
     {
         // 인스펙터상으로 추가한 중력보정 곱
@@ -253,11 +253,11 @@ public class CCntl : MonoBehaviour
         _animator.SetBool("Roll", _rollCheck);
 
         // 이동 키를 눌렀을 경우 체크
-        if (x != 0 || z != 0)   _animator.SetBool("Moving", true);
-        else                    _animator.SetBool("Moving", false);
+        if (x != 0 || z != 0) _animator.SetBool("Moving", true);
+        else _animator.SetBool("Moving", false);
 
         // 땅에 붙어 있지 않으면 y축의 속도를 잼 -> 가속도를 재는 것
-        if (!_isGrounded)       _animator.SetFloat("Jump", _rigidbody.velocity.y);
+        if (!_isGrounded) _animator.SetFloat("Jump", _rigidbody.velocity.y);
         RotateTowardMovementDirection();
         GetCameraRelativeMovement();
     }
@@ -273,7 +273,7 @@ public class CCntl : MonoBehaviour
                 Quaternion.LookRotation(_targetDirection), Time.deltaTime * _rotationSpeed);
         }
     }
-    
+
     // 캐릭터가 바라보는 방향으로 돌려버림
     void GetCameraRelativeMovement()
     {
@@ -284,13 +284,13 @@ public class CCntl : MonoBehaviour
         forward = forward.normalized;
 
         Vector3 right = new Vector3(forward.z, 0, -forward.x);
-        
+
         float v = Input.GetAxisRaw("Vertical");
         float h = Input.GetAxisRaw("Horizontal");
 
         _targetDirection = h * right + v * forward;
     }
-    
+
     // 점프할 발 체크 추후에 여기에 사운드 추가
     // 애니메이션 placeholder에 들어가있는 함수
     void FootR()
@@ -320,7 +320,7 @@ public class CCntl : MonoBehaviour
         if (_isGrounded && Time.deltaTime > 0)
         {
             Vector3 v = _animator.deltaPosition / Time.deltaTime;
-            
+
             v.y = _rigidbody.velocity.y;
             _rigidbody.velocity = v;
         }

@@ -38,7 +38,6 @@ public class CGoblinPara : CharacterPara
     protected override void UpdateAfterReceiveAttack()
     {
         base.UpdateAfterReceiveAttack();
-
         hpBar.rectTransform.localScale = new Vector3((float)_curHp / (float)_maxHp, 1f, 1f);
     }
 }

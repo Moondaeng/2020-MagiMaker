@@ -18,7 +18,6 @@ public class CUiHpBar : MonoBehaviour
     public static readonly WaitForEndOfFrame WaitForEndOfFrame = new WaitForEndOfFrame();
     public static readonly WaitForFixedUpdate WaitForFixedUpdate = new WaitForFixedUpdate();
 
-    // Start is called before the first frame update
     void Start()
     {
         HpBarImage = gameObject.GetComponent<Image>();
@@ -40,14 +39,12 @@ public class CUiHpBar : MonoBehaviour
     public void Draw(int curHp, int maxHp)
     {
         _targetPercent = (float)curHp / (float)maxHp;
-        Debug.Log($"target persent : {_targetPercent}");
         StopCoroutine("DrawHpAnimation");
         StartCoroutine("DrawHpAnimation");
     }
 
     private IEnumerator DrawHpAnimation()
     {
-        Debug.Log("Draw Animation");
         float interpolatePercent = (_targetPercent - _animationPercent) / ANIM_DRAW_FRAME_COUNT;
         for(int i = 0; i < ANIM_DRAW_FRAME_COUNT; i++)
         {
