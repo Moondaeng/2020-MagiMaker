@@ -6,13 +6,9 @@ using UnityEngine.UI;
 public class CEnemyPara : CharacterPara
 {
     public string _name;
-    public Image _hpBar;
-    public GameObject _selection;
     public ParticleSystem _hitEffect;
     public int _spawnID { get; set; }
-    [System.NonSerialized]
-    public GameObject _myRespawn;
-    GameObject _effect;
+    [SerializeField] public GameObject _myRespawn;
     Vector3 _originPos;
 
     public override void InitPara()
@@ -21,10 +17,6 @@ public class CEnemyPara : CharacterPara
         _isStunned = false;
         _isDead = false;
         _curHp = _maxHp;
-        HideSelection();
-        HideHitEffect();
-        HideHpBar();
-        InitHpBarSize();
     }
     
     public void SetRespawn(GameObject respawn, int spawnID, Vector3 originPos)
@@ -32,31 +24,14 @@ public class CEnemyPara : CharacterPara
         _myRespawn = respawn;
         this._spawnID = spawnID;
         this._originPos = originPos;
+        Debug.Log(_spawnID);
     }
 
-    public void respawnAgain()
+    // 타격 이펙트 함수
+    public void ShowHitEffect()
     {
-        //  리스폰 오브젝트에서 처음 생성될때의 위치와 같게 함
-        transform.position = _originPos;
-        InitPara();
-        GetComponent<Collider>().enabled = true;
-        GetComponent<Animator>().enabled = true;
-    }
-
-    void InitHpBarSize()
-    {
-        _hpBar.rectTransform.localScale = new Vector3(1f, 1f, 1f);
-    }
-
-    protected override void UpdateAfterReceiveAttack()
-    {
-        base.UpdateAfterReceiveAttack();
-        if(_curHp == 0)
-        {
-            HideSelection();
-        }
-        Debug.Log(_curHp);
-        _hpBar.rectTransform.localScale = new Vector3((float)_curHp / _maxHp, 1f, 1f);
+        transform.GetChild(1).gameObject.SetActive(true);
+        _hitEffect.Play();
     }
 
     public void ShowSelection()
@@ -67,13 +42,6 @@ public class CEnemyPara : CharacterPara
     public void HideSelection()
     {
         transform.GetChild(0).gameObject.SetActive(false);
-    }
-    
-    // 타격 이펙트 함수
-    public void ShowHitEffect()
-    {
-        transform.GetChild(1).gameObject.SetActive(true);
-        _hitEffect.Play();
     }
 
     public void HideHitEffect()
@@ -89,5 +57,18 @@ public class CEnemyPara : CharacterPara
     public void HideHpBar()
     {
         transform.GetChild(2).gameObject.SetActive(false);
+    }
+
+    public void respawnAgain()
+    {
+        //  리스폰 오브젝트에서 처음 생성될때의 위치와 같게 함
+        transform.position = _originPos;
+        this.tag = "Monster";
+        InitPara();
+    }
+    protected override void UpdateAfterReceiveAttack()
+    {
+        base.UpdateAfterReceiveAttack();
+        Debug.Log(_curHp); 
     }
 }
