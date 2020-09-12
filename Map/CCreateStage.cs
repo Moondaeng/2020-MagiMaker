@@ -423,8 +423,8 @@ public class CCreateStage
 
         foreach (GameObject ob in portalMom)
         {
-            Transform portal = ob.transform.FindChild("Portal");
-            Transform text = ob.transform.FindChild("PortalText").FindChild("Text");
+            Transform portal = ob.transform.Find("Portal");
+            Transform text = ob.transform.Find("PortalText").Find("Text");
 
             switch (portal.tag)
             {
@@ -462,8 +462,8 @@ public class CCreateStage
             {
                 foreach (GameObject ob in portalMom)
                 {
-                    ob.transform.FindChild("Portal").gameObject.SetActive(false);
-                    ob.transform.FindChild("PortalText").gameObject.SetActive(false);
+                    ob.transform.Find("Portal").gameObject.SetActive(false);
+                    ob.transform.Find("PortalText").gameObject.SetActive(false);
                 }
 
                 CGlobal.isPortalActive = false;
@@ -475,8 +475,8 @@ public class CCreateStage
         if (portalMom != null)
             foreach (GameObject ob in portalMom)
             {
-                ob.transform.FindChild("Portal").gameObject.SetActive(true);
-                ob.transform.FindChild("PortalText").gameObject.SetActive(true);
+                ob.transform.Find("Portal").gameObject.SetActive(true);
+                ob.transform.Find("PortalText").gameObject.SetActive(true);
             }
 
         CGlobal.isPortalActive = true;

@@ -24,23 +24,23 @@ public class UsePortal : MonoBehaviour
         player = GameObject.FindGameObjectsWithTag("Player");
         PortalAcceptParent = GameObject.Find("PortalPopUp");
         FadeController = GameObject.Find("FadeController");
-        PortalAcceptParent.transform.FindChild("PortalAccept").gameObject.SetActive(false);
-        PortalAcceptParent.transform.FindChild("WaitingForOtherPlayer").gameObject.SetActive(false);
+        PortalAcceptParent.transform.Find("PortalAccept").gameObject.SetActive(false);
+        PortalAcceptParent.transform.Find("WaitingForOtherPlayer").gameObject.SetActive(false);
     }
 
     private void OnTriggerEnter(Collider coll)
     {
         if (coll.tag == "Player")
         {
-            PortalAcceptParent.transform.FindChild("PortalAccept").gameObject.SetActive(true);
-            FadeController.transform.FindChild("FadeCanvas").gameObject.SetActive(false);
+            PortalAcceptParent.transform.Find("PortalAccept").gameObject.SetActive(true);
+            FadeController.transform.Find("FadeCanvas").gameObject.SetActive(false);
             CWaitingForAccept.instance._portal = gameObject;
         }
     }
 
     public void MoveToNextRoom()
     {
-        FadeController.transform.FindChild("FadeCanvas").gameObject.SetActive(true);
+        FadeController.transform.Find("FadeCanvas").gameObject.SetActive(true);
         CFadeInOut.instance.PlayFadeFlow(); //다음 방 넘어갈 때, 페이드 아웃 방 생성 이후 페이드 인
 
         StartCoroutine(RefreshWorld());

@@ -17,7 +17,7 @@ public class CAcceptClickEvent : MonoBehaviour
         Image image = CWaitingForAccept.instance._waitingForOtherPlayer.transform.GetChild(0).GetComponent<Image>();
         image.sprite = Resources.Load<Sprite>("T_12_ok_") as Sprite;
         CWaitingForAccept.instance._portalPopUp.SendMessage("TestAccept");
-        CWaitingForAccept.instance._portalPopUp.transform.FindChild("PortalAccept").gameObject.SetActive(false);
+        CWaitingForAccept.instance._portalPopUp.transform.Find("PortalAccept").gameObject.SetActive(false);
 //=======
 //    public GameObject portalPopup;
 //    public Button AcceptBtn;

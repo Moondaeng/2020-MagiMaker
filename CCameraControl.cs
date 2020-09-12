@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CCameraControl : MonoBehaviour
-{
+{ 
     public GameObject _player;
 
     Vector3 offset;

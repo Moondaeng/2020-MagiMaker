@@ -56,6 +56,17 @@ public class CBuffTimer : CTimer<BuffStack, int>
         return observed == null ? -1 : observed.Value.data.stack;
     }
 
+    public List<int> GetRegisterNumberList()
+    {
+        List<int> regNumList = new List<int>();
+        for (var find = observeList.First; find != null; find = find.Next)
+        {
+            regNumList.Add(find.Value.key);
+        }
+        //regNumList.Add();
+        return regNumList;
+    }
+
     protected override void ExcuteStartCallback(LinkedListNode<CObserved> observedObject)
     {
         observedObject.Value.startCallback?.Invoke(observedObject.Value.data.stack);

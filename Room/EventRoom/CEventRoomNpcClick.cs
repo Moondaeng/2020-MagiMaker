@@ -10,7 +10,7 @@ public class CEventRoomNpcClick : MonoBehaviour
     void Start()
     {
         _eventRoom = gameObject.transform.parent.gameObject;
-        _popUp = _eventRoom.transform.FindChild("PopUp").gameObject;
+        _popUp = _eventRoom.transform.Find("PopUp").gameObject;
         _popUp.SetActive(false);
     }
 

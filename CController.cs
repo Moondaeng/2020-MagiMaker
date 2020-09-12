@@ -16,6 +16,11 @@ public class CController : MonoBehaviour
 
     public GameObject player;
 
+    private CCntl _playerControl;
+
+    float x;
+    float z;
+
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
@@ -23,27 +28,37 @@ public class CController : MonoBehaviour
         // 조작 관리
         keyDictionary = new Dictionary<KeyCode, Action>
         {
+            {KeyCode.Mouse0, Attack},
+            {KeyCode.Space, Jump},
             {KeyCode.Alpha1, () => SkillSelect(0) },
             {KeyCode.Alpha2, () => SkillSelect(1) },
             {KeyCode.Alpha3, () => SkillSelect(2) },
             {KeyCode.Alpha4, () => SkillSelect(3) },
+            {KeyCode.Q, ChangeConsumable },
+            {KeyCode.E, UseConsumable },
+            {KeyCode.F, GetItem },
             {KeyCode.Mouse1, UseSkill },
         };
-
-        // 콤보 스킬 세팅
-        _comboSelector = new CSkillSelector();
 
         //gameEvent = GameObject.Find("GameEvent").GetComponent<CGameEvent>();
     }
 
     void Start()
     {
+        // 콤보 스킬 세팅
+        _comboSelector = new CSkillSelector();
+
         _comboSelector.SetMainElement(0, CSkillSelector.SkillElement.Fire);
         _comboSelector.SetMainElement(1, CSkillSelector.SkillElement.Water);
         _comboSelector.SetSubElement(0, CSkillSelector.SkillElement.Water);
         _comboSelector.SetSubElement(1, CSkillSelector.SkillElement.Earth);
         _comboSelector.SetSubElement(2, CSkillSelector.SkillElement.Wind);
         _comboSelector.SetSubElement(3, CSkillSelector.SkillElement.Light);
+
+        if (player != null)
+        {
+            _playerControl = player.GetComponent<CCntl>();
+        }
     }
 
     // 임시 방안
@@ -52,46 +67,16 @@ public class CController : MonoBehaviour
         //player.GetComponent<CCntl>().CurrentEnemyDead();
     }
 
-    // 기본적으로 이동에 해당
-    // 현재 적 캐릭터에게 타겟팅 공격 기능이 포함되어 있으나, 필요없다면 해당 부분 제외함
-    //private void Move()
-    //{
-    //    // Ray API 참고 직선 방향으로 나아가는 무한대 길이의 선
-    //    // 카메라 클래스의 메인 카메라로 부터의 스크린의 점을 통해 레이 반환
-    //    // 여기서 스크린의 점은, Input.mousePosition으로 받음
-    //    // 포지션.z를 무시한 값임.
-    //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-    //    RaycastHit hit;
-
-    //    if (Physics.Raycast(ray, out hit))
-    //    {
-    //        GameObject hitObject = hit.collider.gameObject;
-    //        string s = hitObject.name;
-    //        string s2 = hitObject.tag;
-    //        bool stringExists = s2.Contains("Terrain");
-    //        // 누른게 지형이면, 이동함.
-    //        if (stringExists)
-    //        {
-    //            //gameEvent.PlayerMoveStart(player.transform.position, hit.point);
-    //            player.GetComponent<CCntl>().MoveTo(hit.point);
-    //        }
-    //        else if (s2 == "Monster")//마우스 클릭한 대상이 적 캐릭터인 경우
-    //        {
-    //            player.GetComponent<CCntl>().TargetEnemy(hit.collider.gameObject);
-    //        }
-    //        else if (s2 == "ITEM")
-    //        {
-    //            var itemInfo = hitObject.GetComponent<CItemInformation>();
-    //            player.SendMessage("EquipItem", itemInfo._item);
-    //            //player.transform.GetChild(0).SendMessage("EquipItem", itemInfo._item);
-    //            Destroy(hitObject);
-    //        }
-    //    }
-    //}
-
     void Update()
     {
+        z = Input.GetAxisRaw("Horizontal");
+        x = -(Input.GetAxisRaw("Vertical"));
+        if (player != null)
+        {
+            _playerControl = player.GetComponent<CCntl>();
+        }
+        _playerControl.Move(x, z);
+
         if (Input.anyKeyDown)
         {
             foreach (var dic in keyDictionary)
@@ -99,6 +84,71 @@ public class CController : MonoBehaviour
                 if (Input.GetKeyDown(dic.Key))
                 {
                     dic.Value();
+                }
+            }
+        }
+    }
+
+    private void Attack()
+    {
+        _playerControl.Attack();
+    }
+
+    private void Jump()
+    {
+        _playerControl.Jump();
+    }
+
+    private void ChangeConsumable()
+    {
+        var playerPara = player.GetComponent<CPlayerPara>();
+        if (playerPara != null)
+        {
+            playerPara.Inventory.GetNextConsumable();
+        }
+    }
+
+    private void UseConsumable()
+    {
+        var playerPara = player.GetComponent<CPlayerPara>();
+        if (playerPara != null)
+        {
+            playerPara.Inventory.UseSelectedConsumable();
+        }
+    }
+
+    private void GetItem()
+    {
+        print("Get Item");
+        int layerMask = 1 << LayerMask.NameToLayer("Item");
+        print(layerMask);
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out hit, 10, layerMask))
+        {
+            print("I'm looking at " + hit.transform.name);
+
+        }
+
+        var playerPara = player.GetComponent<CPlayerPara>();
+        if (playerPara != null)
+        {
+            var item = hit.transform.gameObject.GetComponent<CEquipComponent>();
+            if(item != null)
+            {
+                bool tryAddEquip = playerPara.Inventory.AddEquip(item.equipStat);
+                if (tryAddEquip)
+                {
+                    hit.transform.gameObject.SetActive(false);
+                }
+            }
+            else
+            {
+                var consumable = hit.transform.gameObject.GetComponent<CConsumableComponent>();
+                bool tryAddConsumable = playerPara.Inventory.AddConsumableItem(consumable.ConsumableStat);
+                if (tryAddConsumable)
+                {
+                    hit.transform.gameObject.SetActive(false);
                 }
             }
         }
@@ -129,10 +179,5 @@ public class CController : MonoBehaviour
                 //gameEvent.PlayerAction(number, player.transform.position, hit.point);
             }
         }
-    }
-
-    private void Attack()
-    {
-        
     }
 }

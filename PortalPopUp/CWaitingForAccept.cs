@@ -32,7 +32,7 @@ public class CWaitingForAccept : MonoBehaviour
         _player3Accept = EAccept._waiting;
         _player4Accept = EAccept._waiting;
         _portalPopUp = GameObject.Find("PortalPopUp");
-        _waitingForOtherPlayer = _portalPopUp.transform.FindChild("WaitingForOtherPlayer").gameObject;
+        _waitingForOtherPlayer = _portalPopUp.transform.Find("WaitingForOtherPlayer").gameObject;
     }
 
     // Update is called once per frame
