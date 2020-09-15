@@ -112,25 +112,23 @@ public class CBuffTimerListUI : MonoBehaviour
     // 버프 이미지 등록
     protected virtual void Register(int registeredNumber)
     {
-        var drawer = Instantiate(timerDrawer);
+        // TimerDrawer Pool에서 적당한 TimerDrawer 리턴하기
+        GameObject drawer = FindTimerDrawerInPool(registeredNumber);
         // initialize drawer
         drawer.transform.SetParent(_uiCanvas, false);
         drawer.SetActive(true);
         drawer.GetComponent<Image>().sprite = GetImageByRegisterNumber(registeredNumber);
-        var newPivot = drawer.GetComponent<RectTransform>().pivot;
-        newPivot.x = 0;
-        newPivot.y = 0;
-        drawer.GetComponent<RectTransform>().pivot = newPivot;
-        drawer.GetComponent<CTimerDrawer>().SetSize((int)BuffUiPosition.rect.height);
+        //var newPivot = drawer.GetComponent<RectTransform>().pivot;
+        //newPivot.x = 0;
+        //newPivot.y = 0;
+        //drawer.GetComponent<RectTransform>().pivot = newPivot;
+        //drawer.GetComponent<CTimerDrawer>().SetSize((int)BuffUiPosition.rect.height);
         // TimerDrawer에서 필요한 부분 켜기
         drawer.GetComponent<CTimerDrawer>().CooldownEnable();
-        if(_timer.IsStackableBuff(registeredNumber) == true)
+        if (_timer.IsStackableBuff(registeredNumber) == true)
         {
             drawer.GetComponent<CTimerDrawer>().stackText.enabled = true;
         }
-        // TimerDrawer Pool에서 적당한 TimerDrawer 리턴하기
-        // GameObject drawer = FindTimerDrawerInPool(registeredNumber)
-
 
         // 링크드리스트에 추가하기
         var timerUi = new TimerUi()
@@ -146,13 +144,46 @@ public class CBuffTimerListUI : MonoBehaviour
     protected GameObject FindTimerDrawerInPool(int registeredNumber)
     {
         // TimerDrawer Pool에서 registerNumber에 해당하는 이미지가 있는지 확인
-        // int matchDrawerIndex = MatchTimerDrawer(registeredNumber);
+        int matchDrawerIndex = MatchTimerDrawer(registeredNumber);
         // 이미지가 없다면 이미지 설정 안 된 TimerDrawer부터 이미지 설정에서 리턴
-        // if(-1 == matchDrawerIndex)
-        //{
-        //      matchDrawerIndex = TakeLRUTimerDrawer();
-        //}
-        return null;
+        if (-1 == matchDrawerIndex)
+        {
+            matchDrawerIndex = TakeNotUsedTimerDrawer();
+        }
+        _timerUiPool[matchDrawerIndex].timerRegisteredNumber = registeredNumber;
+        return _timerUiPool[matchDrawerIndex].timerDrawer;
+    }
+
+    /// <summary>
+    /// 해당 번호를 가진 TimerDrawer나 미사용 TimerDrawer 구하기
+    /// </summary>
+    /// <returns></returns>
+    protected int MatchTimerDrawer(int registeredNumber)
+    {
+        for(int idx = 0; idx < _timerUiPool.Count; idx++)
+        {
+            if(_timerUiPool[idx].timerRegisteredNumber == registeredNumber)
+            {
+                return idx;
+            }
+        }
+        return -1;
+    }
+
+    /// <summary>
+    /// 가장 사용하지 않는 Timer Drawer 가져오기(LRU 방식) - 미구현
+    /// </summary>
+    /// <returns></returns>
+    protected int TakeNotUsedTimerDrawer()
+    {
+        for (int idx = 0; idx < _timerUiPool.Count; idx++)
+        {
+            if (_timerUiPool[idx].timerRegisteredNumber == -1)
+            {
+                return idx;
+            }
+        }
+        return 0;
     }
 
     // 버프 이미지 등록 해제
@@ -161,10 +192,11 @@ public class CBuffTimerListUI : MonoBehaviour
     {
         var deregistered = FindByNumber(registeredNumber);
         if (deregistered == null)
+        {
             return;
+        }
 
-        // 변경 예정 : TimerDrawer를 disable로만 만듦
-        Destroy(deregistered.Value.timerDrawer);
+        deregistered.Value.timerDrawer.SetActive(false);
         _timerUiList.Remove(deregistered);
 
         Relocate();

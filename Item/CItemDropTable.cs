@@ -76,11 +76,7 @@ public class CItemDropTable : MonoBehaviour
             return null;
         }
 
-        int randInt = UnityEngine.Random.Range(0, itemList.Count);
-        if(randInt == itemList.Count)
-        {
-            randInt--;
-        }
+        int randInt = UnityEngine.Random.Range(1, itemList.Count) - 1;
 
         var item = itemList[randInt];
         itemList.RemoveAt(randInt);

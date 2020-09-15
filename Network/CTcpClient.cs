@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 using UnityEngine;
 
 namespace Network
@@ -27,6 +26,8 @@ namespace Network
 
         public delegate void PacketInterpret(byte[] buffer);
 
+        public static CTcpClient instance;
+
         // The port number for the remote device.  
         public Int32 port = 9000;
         public string ipString = "127.0.0.1";
@@ -40,6 +41,10 @@ namespace Network
         private void Awake()
         {
             DontDestroyOnLoad(gameObject);
+            if (instance == null)
+            {
+                instance = this;
+            }
         }
 
         private void Start()

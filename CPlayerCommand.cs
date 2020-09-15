@@ -17,6 +17,7 @@ public class CPlayerCommand : MonoBehaviour
     private CUIManager _playerUi;
     private COtherPlayerUiManager _othersUiList;
     private UnityStandardAssets.Cameras.FreeLookCam _camera;
+    private Network.CTcpClient _network;
 
     private void Awake()
     {
@@ -30,6 +31,7 @@ public class CPlayerCommand : MonoBehaviour
         _playerUi = GameObject.Find("UiScript").GetComponent<CUIManager>();
         _othersUiList = GameObject.Find("UiScript").GetComponent<COtherPlayerUiManager>();
         _camera = GameObject.Find("FreeLookCameraRig").GetComponent<UnityStandardAssets.Cameras.FreeLookCam>();
+        _network = Network.CTcpClient.instance;
     }
 
     private void Start()
@@ -116,4 +118,15 @@ public class CPlayerCommand : MonoBehaviour
         var charStat = character.GetComponent<CharacterPara>();
         charStat.DamegedRegardDefence(damageScale);
     }
+
+    public void BuffToCharacter(int charId, float buffTime, float buffScale)
+    {
+        var character = players?[charId];
+        if (character == null) return;
+
+        var charStat = character.GetComponent<CharacterPara>();
+        charStat.buffParameter.Buff(CBuffList.AttackBuff, buffTime, buffScale);
+    }
+
+
 }

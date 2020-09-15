@@ -12,6 +12,7 @@ public class CController : MonoBehaviour
 
     private Dictionary<KeyCode, Action> keyDictionary;
     private CSkillSelector _comboSelector;
+    private CConsumableItemViewer _consumableViewer;
     //public CGameEvent gameEvent;
 
     public GameObject player;
@@ -20,6 +21,8 @@ public class CController : MonoBehaviour
 
     float x;
     float z;
+
+    private GameObject _viewingObject;
 
     private void Awake()
     {
@@ -55,6 +58,8 @@ public class CController : MonoBehaviour
         _comboSelector.SetSubElement(2, CSkillSelector.SkillElement.Wind);
         _comboSelector.SetSubElement(3, CSkillSelector.SkillElement.Light);
 
+        //_consumableViewer = 
+
         if (player != null)
         {
             _playerControl = player.GetComponent<CCntl>();
@@ -76,6 +81,8 @@ public class CController : MonoBehaviour
             _playerControl = player.GetComponent<CCntl>();
         }
         _playerControl.Move(x, z);
+        ViewPopup();
+
 
         if (Input.anyKeyDown)
         {
@@ -105,6 +112,7 @@ public class CController : MonoBehaviour
         if (playerPara != null)
         {
             playerPara.Inventory.GetNextConsumable();
+
         }
     }
 
@@ -117,39 +125,76 @@ public class CController : MonoBehaviour
         }
     }
 
-    private void GetItem()
+    private void ViewPopup()
     {
-        print("Get Item");
         int layerMask = 1 << LayerMask.NameToLayer("Item");
-        print(layerMask);
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out hit, 10, layerMask))
         {
-            print("I'm looking at " + hit.transform.name);
+            _viewingObject = hit.transform.gameObject;
 
+            var playerPara = player.GetComponent<CPlayerPara>();
+            if (playerPara == null)
+            {
+                return;
+            }
+
+            var npc = _viewingObject.GetComponent<CEventRoomNpcClick>();
+            if (npc != null)
+            {
+                //CEventRoomNpcClick.instance.UseNPC();
+            }
+
+            var itemComponent = _viewingObject.GetComponent<CItemComponent>();
+            if (itemComponent != null)
+            {
+                CDropItemInfoPopup.instance.gameObject.SetActive(true);
+                CDropItemInfoPopup.instance.DrawItemInfo(itemComponent.Item);
+            }
+        }
+        else
+        {
+            CDropItemInfoPopup.instance.gameObject.SetActive(false);
+        }
+    }
+
+    private void GetItem()
+    {
+        if(_viewingObject == null)
+        {
+            return;
         }
 
         var playerPara = player.GetComponent<CPlayerPara>();
-        if (playerPara != null)
+        if (playerPara == null)
         {
-            var item = hit.transform.gameObject.GetComponent<CEquipComponent>();
-            if(item != null)
+            return;
+        }
+
+        var npc = _viewingObject.GetComponent<CEventRoomNpcClick>();
+        if (npc != null)
+        {
+            //CEventRoomNpcClick.instance.UseNPC();
+        }
+
+        var itemComponent = _viewingObject.GetComponent<CItemComponent>();
+        if (itemComponent != null)
+        {
+            bool canAddItem = false;
+            if (itemComponent.Item is Item.CEquip)
             {
-                bool tryAddEquip = playerPara.Inventory.AddEquip(item.equipStat);
-                if (tryAddEquip)
-                {
-                    hit.transform.gameObject.SetActive(false);
-                }
+                canAddItem = playerPara.Inventory.AddEquip(itemComponent.Item as Item.CEquip);
             }
-            else
+            else if (itemComponent.Item is Item.CConsumable)
             {
-                var consumable = hit.transform.gameObject.GetComponent<CConsumableComponent>();
-                bool tryAddConsumable = playerPara.Inventory.AddConsumableItem(consumable.ConsumableStat);
-                if (tryAddConsumable)
-                {
-                    hit.transform.gameObject.SetActive(false);
-                }
+                canAddItem = playerPara.Inventory.AddConsumableItem(itemComponent.Item as Item.CConsumable);
+            }
+
+            if (canAddItem)
+            {
+                itemComponent.gameObject.SetActive(false);
+                _viewingObject = null;
             }
         }
     }

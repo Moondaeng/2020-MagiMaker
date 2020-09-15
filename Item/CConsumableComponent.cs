@@ -48,7 +48,8 @@ namespace Item
 [RequireComponent(typeof(Rigidbody))]
 public class CConsumableComponent : CItemComponent
 {
-    public Item.CConsumable ConsumableStat;
+    [SerializeField]
+    private Item.CConsumable ConsumableStat;
 
     private void Awake()
     {
@@ -56,13 +57,7 @@ public class CConsumableComponent : CItemComponent
         {
             ConsumableStat = new Item.CConsumable("", 0, null);
         }
-    }
 
-    /// <summary>
-    /// 드랍된 아이템 주울 때 정보창 보여주기
-    /// </summary>
-    public override void CallItemUI()
-    {
-
+        Item = ConsumableStat;
     }
 }

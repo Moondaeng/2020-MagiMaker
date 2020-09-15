@@ -52,7 +52,7 @@ namespace Item
                 AttackSpeed,
                 MaxHp,
                 HpRegen,
-                Def,
+                Defence,
                 Speed,
                 SkillCoolTime,
                 DamageReduceRate,
@@ -64,16 +64,6 @@ namespace Item
         }
 
         public List<EquipAbility> equipAbilities;
-
-        public int As;     // 공격속도
-        public int Atk;    // 공격력
-        public int MaxHp;           // 최대 체력
-        public int HpRegen;   // 초당 체력 리젠
-        public int Def;           // 방어력
-        public int Spd;       // 이동속도
-        public int _skillCoolTime;   // 쿨타임
-        public int _damageTakenRate; // 받는 피해율
-        public int _skillRange;      // 스킬 범위
 
         public List<EquipEffectWithChance> EquipEffectList;
 
@@ -88,7 +78,8 @@ namespace Item
 [RequireComponent(typeof(Rigidbody))]
 public class CEquipComponent : CItemComponent
 {
-    public Item.CEquip equipStat;
+    [SerializeField]
+    private Item.CEquip equipStat;
 
     private void Awake()
     {
@@ -96,10 +87,7 @@ public class CEquipComponent : CItemComponent
         {
             equipStat = new Item.CEquip("", 0, null);
         }
-    }
 
-    public override void CallItemUI()
-    {
-
+        Item = equipStat;
     }
 }

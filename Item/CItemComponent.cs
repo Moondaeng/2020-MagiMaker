@@ -2,7 +2,6 @@
 
 namespace Item
 {
-
     [System.Serializable]
     public class CItem
     {
@@ -59,10 +58,10 @@ namespace Item
 
 public class CItemComponent : MonoBehaviour
 {
-    Item.CItem item;
+    public Item.CItem Item { get; protected set; }
 
-    public virtual void CallItemUI()
+    protected void Start()
     {
-
+        gameObject.layer = LayerMask.NameToLayer("Item");
     }
 }

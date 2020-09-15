@@ -18,6 +18,7 @@ public class CUIManager : MonoBehaviour
 
     private CSkillUIManager _skillUIManager;
     private CBuffTimerListUI _buffTimerUiList;
+    private CConsumableItemViewer _consumableViewer;
     private COtherPlayerUiManager _otherPlayerUi;
 
     // 언제 어디서나 쉽게 접금할수 있도록 하기위해 만든 정적변수
@@ -32,6 +33,7 @@ public class CUIManager : MonoBehaviour
         // 하위 UI 관리
         _skillUIManager = gameObject.GetComponent<CSkillUIManager>();
         _buffTimerUiList = gameObject.GetComponent<CBuffTimerListUI>();
+        _consumableViewer = CConsumableItemViewer.instance;
         _otherPlayerUi = gameObject.GetComponent<COtherPlayerUiManager>();
     }
 
@@ -51,6 +53,7 @@ public class CUIManager : MonoBehaviour
             _skillUIManager.DeregisterTimer(UiTargetObject);
             _buffTimerUiList.DeregisterTimer(UiTargetObject);
             hpBarObject.Deregister(UiTargetObject.GetComponent<CharacterPara>());
+            _consumableViewer.Deregister(UiTargetObject.GetComponent<CPlayerPara>().Inventory);
         }
 
         UiTargetObject = target;
@@ -62,6 +65,7 @@ public class CUIManager : MonoBehaviour
         _skillUIManager.RegisterTimer(UiTargetObject);
         _buffTimerUiList.RegisterTimer(UiTargetObject);
         hpBarObject.Register(UiTargetObject.GetComponent<CharacterPara>());
+        _consumableViewer.Register(UiTargetObject.GetComponent<CPlayerPara>().Inventory);
     }
 
     // 기본 Canvas 설정(초기화용)

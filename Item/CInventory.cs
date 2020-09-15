@@ -1,6 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.Events;
+
+public class ChangeConsumableEvent : UnityEvent<Sprite, string, int> { }
 
 [System.Serializable]
 public class CInventory
@@ -32,6 +36,7 @@ public class CInventory
     public float MaxHpIncreaseSize { get; private set; }
     public float HpRegenIncreaseSize { get; private set; }
 
+    public ChangeConsumableEvent changeConsumableEvent = new ChangeConsumableEvent();
 
     public CInventory(int equipCapacity = 10, int consumableCapacity = 3)
     {
@@ -107,7 +112,10 @@ public class CInventory
             _consumableItems.Add(new ConsumableWithStack(newItem, 1));
         }
 
-        RewindConsumableUI();
+        changeConsumableEvent.Invoke(
+            _consumableItems[_selectedConsumableNumber].consumable.ItemImage,
+            _consumableItems[_selectedConsumableNumber].consumable.ItemName,
+            _consumableItems[_selectedConsumableNumber].stack);
 
         return true;
     }
@@ -125,6 +133,11 @@ public class CInventory
             _selectedConsumableNumber = 0;
         }
         Debug.Log($"Current Consumable Number : {_selectedConsumableNumber}");
+
+        changeConsumableEvent.Invoke(
+            _consumableItems[_selectedConsumableNumber].consumable.ItemImage,
+            _consumableItems[_selectedConsumableNumber].consumable.ItemName,
+            _consumableItems[_selectedConsumableNumber].stack);
     }
 
     public void UseSelectedConsumable()
@@ -143,7 +156,20 @@ public class CInventory
             _selectedConsumableNumber = 0;
         }
 
-        RewindConsumableUI();
+        if(_consumableItems.Count == 0)
+        {
+            changeConsumableEvent.Invoke(
+                null,
+                "",
+                0);
+        }
+        else
+        {
+            changeConsumableEvent.Invoke(
+                _consumableItems[_selectedConsumableNumber].consumable.ItemImage,
+                _consumableItems[_selectedConsumableNumber].consumable.ItemName,
+                _consumableItems[_selectedConsumableNumber].stack);
+        }
     }
 
     private void SwapEquip(ref Item.CEquip lhs, ref Item.CEquip rhs)
@@ -159,26 +185,64 @@ public class CInventory
     /// </summary>
     private void AddEquipAbility(Item.CEquip equip)
     {
-        EquipAtkIncreaseSize += equip.Atk;
-        DefIncreaseSize += equip.Def;
-        ASIncreaseSize += equip.As;
-        SpdIncreaseSize += equip.Spd;
-        //AvdIncreaseSize += equip.avd;
-        MaxHpIncreaseSize += equip.MaxHp;
-        HpRegenIncreaseSize += equip.HpRegen;
+        foreach(var ability in equip.equipAbilities)
+        {
+            switch(ability.equipEffect)
+            {
+                case Item.CEquip.EquipAbility.EAbility.Attack:
+                    EquipAtkIncreaseSize += ability.value;
+                    break;
+                case Item.CEquip.EquipAbility.EAbility.Defence:
+                    DefIncreaseSize += ability.value;
+                    break;
+                case Item.CEquip.EquipAbility.EAbility.AttackSpeed:
+                    ASIncreaseSize += ability.value;
+                    break;
+                case Item.CEquip.EquipAbility.EAbility.Speed:
+                    SpdIncreaseSize += ability.value;
+                    break;
+                case Item.CEquip.EquipAbility.EAbility.MaxHp:
+                    MaxHpIncreaseSize += ability.value;
+                    break;
+                case Item.CEquip.EquipAbility.EAbility.HpRegen:
+                    HpRegenIncreaseSize += ability.value;
+                    break;
+                default:
+                    break;
+            }
+        }
 
         // 패시브 효과 추가
 }
 
     private void DeleteEquipAbility(Item.CEquip equip)
     {
-        EquipAtkIncreaseSize -= equip.Atk;
-        DefIncreaseSize -= equip.Def;
-        ASIncreaseSize -= equip.As;
-        SpdIncreaseSize -= equip.Spd;
-        //AvdIncreaseSize -= equip.avd;
-        MaxHpIncreaseSize -= equip.MaxHp;
-        HpRegenIncreaseSize -= equip.HpRegen;
+        foreach (var ability in equip.equipAbilities)
+        {
+            switch (ability.equipEffect)
+            {
+                case Item.CEquip.EquipAbility.EAbility.Attack:
+                    EquipAtkIncreaseSize -= ability.value;
+                    break;
+                case Item.CEquip.EquipAbility.EAbility.Defence:
+                    DefIncreaseSize -= ability.value;
+                    break;
+                case Item.CEquip.EquipAbility.EAbility.AttackSpeed:
+                    ASIncreaseSize -= ability.value;
+                    break;
+                case Item.CEquip.EquipAbility.EAbility.Speed:
+                    SpdIncreaseSize -= ability.value;
+                    break;
+                case Item.CEquip.EquipAbility.EAbility.MaxHp:
+                    MaxHpIncreaseSize -= ability.value;
+                    break;
+                case Item.CEquip.EquipAbility.EAbility.HpRegen:
+                    HpRegenIncreaseSize -= ability.value;
+                    break;
+                default:
+                    break;
+            }
+        }
 
         // 패시브 효과 제거
     }

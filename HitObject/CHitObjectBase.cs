@@ -14,6 +14,17 @@ public class CHitObjectBase : MonoBehaviour
     // 공격에 해당하는 경우들에 필요한 정보들 구조체
     // 데미지 - 데미지 계수 / 스턴 - 시간 / 슬로우 - 슬로우량, 시간 등
     // 필요에 따라 추가하기
+
+    [System.Serializable]
+    protected struct DamageList
+    {
+        public int startDamage;
+        public int dotDamage;
+        public float dotPeriod;
+    }
+
+
+
     [System.Serializable]
     protected struct AttackArgumentsList
     {

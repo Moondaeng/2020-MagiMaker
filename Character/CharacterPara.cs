@@ -22,7 +22,7 @@ public class CharacterPara : MonoBehaviour
     public bool _isStunned { get; set; }
     public bool _isDead { get; set; }
     public int _rewardMoney { get; set; }
-    public int _spawnID { get; set; }
+    //public int _spawnID { get; set; }
 
     public virtual int TotalAttackMin
     {
