@@ -5,100 +5,46 @@ using System;
 
 public class CSearching : MonoBehaviour
 {
-    Collider[] _things;
-    List<Collider> _monsters;
+    GameObject _respawn;
     List<float> _distance;
-    Texture2D _aimTexture;
-    public Texture2D _white_aimTexture;
-    public Texture2D _red_aimTexture;
-    public Camera _myCamera;
-    Rect AimRect;
-    float hitdist = 0.0f;
-    Vector3 _targetPosition;
-    private LineRenderer lineRenderer;
-    bool key1, key2, key3, key4, key5, key6;
+    List<GameObject> _monster;
     CPlayerPara _myPara;
     CEnemyPara _enemyPara;
-
+    CManager _manager;
+    bool key1, key2, key3, key4, key5, key6;
     public GameObject[] Prefabs;
     private GameObject currentPrefabObject;
     private CMonsterSkillBase currentPrefabScript;
     int COUNT = 0;
 
-    private void Awake()
+    private void Start()
     {
-        _monsters = new List<Collider>();
-        _distance = new List<float>();
-        _aimTexture = _white_aimTexture;
-        float left = (Screen.width - _aimTexture.width) / 2;
-        float top = (Screen.height - _aimTexture.height) / 2;
-        float width = _aimTexture.width;
-        float height = _aimTexture.height;
         _myPara = GetComponent<CPlayerPara>();
-        AimRect = new Rect(left, top, width, height);
-
-        //lineRenderer = GetComponent<LineRenderer>();
-        //lineRenderer.startColor = Color.red;
-        //lineRenderer.endColor = Color.blue;
-        //lineRenderer.startWidth = 1f;
-        //lineRenderer.endWidth = 1f;
-        //lineRenderer.enabled = false;
-    }
-
-    private void OnGUI()
-    {
-        GUI.DrawTexture(AimRect, _aimTexture);
+        _respawn = GameObject.FindGameObjectWithTag("Respawn");
+        _manager = _respawn.GetComponent<CManager>();
+        _distance = new List<float>();
     }
 
     void SearchMonster(float searchLength)
     {
-        _monsters.Clear();
-        _distance.Clear();
-        _things = Physics.OverlapSphere(transform.position, searchLength);
-
-        if (_things != null)
+        for (int i = 0; i < _manager._monsters.Count; i++)
         {
-            foreach (Collider _monster in _things)
-            {
-                if (_monster.gameObject.tag == "Monster")
-                {
-                    _monsters.Add(_monster);
-                    float distance 
-                        = Vector3.Distance(transform.position, _monster.transform.gameObject.transform.position);
-                    _distance.Add(distance);
-                    //Debug.Log(distance);
-                }
-            }
+            float distance = Vector3.Distance(transform.position, _manager._monsters[i].transform.position);
+            _distance.Add(distance);
         }
-        else { return; }
     }
     
-    //public void SkillLine()
-    //{
-    //    Transform cameraTransform = Camera.main.transform;
-    //    Vector3 forward = cameraTransform.TransformDirection(Vector3.forward);
-    //    forward.y = 0;
-    //    forward = forward.normalized;
-
-    //    Vector3 right = new Vector3(forward.z, 0, -forward.x);
-
-    //    float v = Input.GetAxisRaw("Vertical");
-    //    float h = Input.GetAxisRaw("Horizontal");
-    //    _targetPosition = h * right + v * forward;
-    //    lineRenderer.SetPosition(0, transform.position);
-    //    lineRenderer.SetPosition(1, transform.position + forward * 5f);
-    //}
 
     protected void AttackCheck()
     {
-        BeginEffect();
+        _manager.Say();
+        //BeginEffect();
         SearchMonster(10f);
-        for (int i = 0; i < _monsters.Count; i++)
+        for (int i = 0; i < _manager._monsters.Count; i++)
         {
-            if (IsTargetInSight(30f, _monsters[i].transform) && _distance[i] < 5f)
+            if (IsTargetInSight(30f, _manager._monsters[i].transform) && _distance[i] < 5f)
             {
-                _enemyPara = _monsters[i].transform.gameObject.GetComponent<CEnemyPara>();
-                //Debug.Log(_enemyPara.name);
+                _enemyPara = _manager._monsters[i].transform.gameObject.GetComponent<CEnemyPara>();
                 _enemyPara.SetEnemyAttack(_myPara._attackMax);
             }
         }

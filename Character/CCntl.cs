@@ -6,6 +6,7 @@ using System.Collections;
 [RequireComponent(typeof(Animator))]
 public class CCntl : MonoBehaviour
 {
+    #region Properties
     [SerializeField] public float _jumpPower = 12f;
     [Range(1f, 4f)] [SerializeField] float _gravityMultiplier = 3.5f;
     [SerializeField] float _groundCheckDistance = 0.5f;
@@ -15,6 +16,9 @@ public class CCntl : MonoBehaviour
     //[SerializeField] float _moveSpeedMultiplier = 1f;
 
     Animator _animator;
+    AnimatorStateInfo _currentBaseState;
+    CPlayerPara _myPara;
+    CStunExitCommand _myStun;
     Rigidbody _rigidbody;
     CapsuleCollider _capsule;
     BoxCollider _attack;
@@ -34,35 +38,64 @@ public class CCntl : MonoBehaviour
     Vector3 _groundNormal;
 
     // 애니메이션 상태값
-    bool _crouchCheck;
-    bool _rollCheck;
     bool _isGrounded;
     bool _jump;
-    bool _crouch;
     bool _roll;
+
+    // 애니메이션 상태값 상태이상
+    bool _knockBack;
+    float _downTime;
+    public bool _getHit;
+    bool _stun;
 
     // 상수
     const float _halfF = .5f;
     const float _seatingTime = .2f;
+    Coroutine CO;
 
+    static int _rollState;
+    static int _wakeUpState;
+    #endregion
+
+    #region __start__
     private void Start()
     {
         _animator = GetComponent<Animator>();
         _rigidbody = GetComponent<Rigidbody>();
+        _myPara = GetComponent<CPlayerPara>();
+        _myStun = GetComponent<CStunExitCommand>();
         _capsule = GetComponent<CapsuleCollider>();
         _attack = GetComponentInChildren<BoxCollider>();
+        _animator.SetFloat("Jump", -4f);
         _capsuleHeight = _capsule.height;
         _capsuleCenter = _capsule.center;
         _origGroundCheckDistance = _groundCheckDistance;
+        _rollState = Animator.StringToHash("Base Layer.Roll");
+        _wakeUpState = Animator.StringToHash("Base Layer.WakeUp");
     }
+    #endregion
 
+    #region 코루틴 모음집
     public IEnumerator COStunPause(float pauseTime)
     {
         yield return new WaitForSeconds(pauseTime);
     }
 
+    public IEnumerator COStun(float pauseTime)
+    {
+        _stun = true;
+        _myStun.Start((int)pauseTime * 3);
+        _animator.SetTrigger("StunTrigger");
+        yield return new WaitForSeconds(pauseTime);
+        SendMessage("EndTime");
+        ExitStun();
+    }
+    #endregion
+
+    #region 업데이트
     private void Update()
     {
+        _currentBaseState = _animator.GetCurrentAnimatorStateInfo(0);
         z = Input.GetAxisRaw("Horizontal");
         x = -(Input.GetAxisRaw("Vertical"));
         _inputVec = new Vector3(x, 0, z);
@@ -83,7 +116,11 @@ public class CCntl : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.Z)) _roll = true;
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            _roll = true;
+            GetStateFreeFromDamage();
+        }
         else _roll = false;
        
 
@@ -93,8 +130,41 @@ public class CCntl : MonoBehaviour
         
         if (_isGrounded) HandleGroundedMovement();
         else HandleAirborneMovement();
-
+        
         UpdateMovement();
+    }
+
+    #endregion
+
+    #region 움직임 관리
+    // 애니메이터에 기입할 정보들을 갱신
+    void UpdateMovement()
+    {
+        Vector3 motion = _inputVec;
+        // 만약에 대각선으로 움직이면 움직임 총량을 0.7로 바꿈
+        motion *= (Mathf.Abs(_inputVec.x) == 1 && Mathf.Abs(_inputVec.z) == 1) ? 0.7f : 1;
+
+        // 이동방향 
+        _animator.SetFloat("Input X", z);
+        _animator.SetFloat("Input Z", -(x));
+        // 땅바닥에 있는가? -> 점프 체크
+        _animator.SetBool("OnGround", _isGrounded);
+        // 구르기 체크
+        _animator.SetBool("Roll", _roll);
+
+        _animator.SetBool("KnockBack", _knockBack);
+
+        _animator.SetBool("Stun", _stun);
+
+        // 이동 키를 눌렀을 경우 체크
+        if (x != 0 || z != 0) _animator.SetBool("Moving", true);
+        else _animator.SetBool("Moving", false);
+
+        // 땅에 붙어 있지 않으면 y축의 속도를 잼 -> 가속도를 재는 것
+        if (!_isGrounded) _animator.SetFloat("Jump", _rigidbody.velocity.y);
+        RotateTowardMovementDirection();
+        GetCameraRelativeMovement();
+        CrowdControlAnimation();
     }
 
     // RaycastHit을 이용한 땅에 붙어있는지 체크
@@ -115,7 +185,7 @@ public class CCntl : MonoBehaviour
             _animator.applyRootMotion = false;
         }
     }
-    
+
     void HandleGroundedMovement()
     {
         // 점프 조건 1. 앉아 있지 않기 2. Idle 상태 3. 뛰는 상태
@@ -137,31 +207,6 @@ public class CCntl : MonoBehaviour
         _rigidbody.AddForce(extraGravityForce);
 
         _groundCheckDistance = _rigidbody.velocity.y < 0 ? _origGroundCheckDistance : 0.01f;
-    }
-
-    // 애니메이터에 기입할 정보들을 갱신
-    void UpdateMovement()
-    {
-        Vector3 motion = _inputVec;
-        // 만약에 대각선으로 움직이면 움직임 총량을 0.7로 바꿈
-        motion *= (Mathf.Abs(_inputVec.x) == 1 && Mathf.Abs(_inputVec.z) == 1) ? 0.7f : 1;
-
-        // 이동방향 
-        _animator.SetFloat("Input X", z);
-        _animator.SetFloat("Input Z", -(x));
-        // 땅바닥에 있는가? -> 점프 체크
-        _animator.SetBool("OnGround", _isGrounded);
-        // 구르기 체크
-        _animator.SetBool("Roll", _rollCheck);
-
-        // 이동 키를 눌렀을 경우 체크
-        if (x != 0 || z != 0) _animator.SetBool("Moving", true);
-        else _animator.SetBool("Moving", false);
-
-        // 땅에 붙어 있지 않으면 y축의 속도를 잼 -> 가속도를 재는 것
-        if (!_isGrounded) _animator.SetFloat("Jump", _rigidbody.velocity.y);
-        RotateTowardMovementDirection();
-        GetCameraRelativeMovement();
     }
 
     // 구형보간 
@@ -190,6 +235,14 @@ public class CCntl : MonoBehaviour
         float h = Input.GetAxisRaw("Horizontal");
 
         _targetDirection = h * right + v * forward;
+    }
+
+    void CrowdControlAnimation()
+    {
+        if (_animator.GetCurrentAnimatorStateInfo(0).IsName("KnockBack"))
+        {
+            _knockBack = false;
+        }
     }
 
     // 점프할 발 체크 추후에 여기에 사운드 추가
@@ -226,4 +279,40 @@ public class CCntl : MonoBehaviour
             _rigidbody.velocity = v;
         }
     }
+    #endregion
+
+    #region 상태이상 관리
+    public void CCController(string type, float level)
+    {
+        if (_myPara._invincibility) return;
+        switch (type) {
+            case "KnockBack":
+                level = (1 / 30f) / level;
+                _knockBack = true;
+                GetStateFreeFromDamage();
+                _animator.SetFloat("KnockBackTime", level);
+                break;
+            case "Gethit":
+                break;
+            case "Stun":
+                CO = StartCoroutine(COStun(level * 2.5f));
+                break;
+            case null:
+                break;
+        }
+            
+    }
+
+    void GetStateFreeFromDamage()
+    {
+        _myPara._invincibility = true;
+        _myPara._invincibilityChecker = true;
+    }
+    
+    public void ExitStun()
+    {
+        _stun = false;
+        StopCoroutine(CO);
+    }
+    #endregion
 }

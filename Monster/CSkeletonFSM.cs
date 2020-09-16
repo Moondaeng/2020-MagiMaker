@@ -7,6 +7,8 @@ public class CSkeletonFSM : CEnemyFSM
     protected override void InitStat()
     {
         _moveSpeed = 4f;
+        _attackDistance = 3f;
+        _attackRadius = 20f;
         _anim = GetComponent<Animator>();
         _myPara = GetComponent<CEnemyPara>();
         _myPara.deadEvent.AddListener(CallDeadEvent);
@@ -33,19 +35,8 @@ public class CSkeletonFSM : CEnemyFSM
         _originSkillCooltime1 = _skillCooltime1;
         _originSkillCooltime2 = _skillCooltime2;
     }
-
-    protected void AttackCheck()
-    {
-        for (int i = 0; i < _players.Count; i++)
-        {
-            if (IsTargetInSight(20f, _players[i].transform) && IsInAttackDistance(3f, _players[i].transform))
-            {
-                _playerPara = _players[i].GetComponent<CPlayerPara>();
-                AttackCalculate();
-            }
-        }
-    }
-
+    
+    #region 통상적인 State 관련 함수들
     protected override void UpdateState()
     {
         if (_actionStart)
@@ -91,25 +82,20 @@ public class CSkeletonFSM : CEnemyFSM
         if (!_lookAtPlayer)
         {
             _lookAtPlayer = false;
-            transform.LookAt(_player.transform.position);
         }
         _coolDown = true;
-    }
-
-    private void SkillState()
-    {
-
     }
     
     private void AttackWaitState()
     {
         _cooltime -= Time.deltaTime;
+        _lookAtPlayer = true;
         if (_cooltime < 0)
         {
             _coolDown = false;
             _cooltime = _originCooltime;
         }
-        else if (GetDistanceFromPlayer(_distances) > 3f)
+        else if (GetDistanceFromPlayer(_distances) > _attackDistance)
         {
             _coolDown = false;
             _anotherAction = true;
@@ -120,12 +106,15 @@ public class CSkeletonFSM : CEnemyFSM
     private void SkillState1()
     {
         _skillCooltime1 = _originSkillCooltime1;
+        _skillCoolDown1 = true;
     }
 
     private void SkillState2()
     {
         _skillCooltime2 = _originSkillCooltime2;
+        _skillCoolDown2 = true;
     }
+    #endregion
 
     protected override void Update()
     {

@@ -4,16 +4,23 @@ using UnityEngine;
 
 public class CGolemFSM : CEnemyFSM
 {
+    #region 골렘만 필요한 Properties
     int _attackCount;
     [SerializeField] GameObject _hand;
     [SerializeField] GameObject _rock;
     GameObject Rock;
     ThrowObject RockScript;
     bool _holding;
+    bool _shooting;
+    #endregion
+    
     protected override void InitStat()
     {
         _attackCount = 0;
         _moveSpeed = 4f;
+        _attackDistance = 4f;
+        _attackRadius = 20f;
+
         _anim = GetComponent<Animator>();
         _myPara = GetComponent<CEnemyPara>();
         _myPara.deadEvent.AddListener(CallDeadEvent);
@@ -29,25 +36,7 @@ public class CGolemFSM : CEnemyFSM
         _deadState1 = Animator.StringToHash("Base Layer.Dead");
     }
 
-    protected override void CallDeadEvent()
-    {
-        _anim.SetBool("Dead", true);
-        this.tag = "Untagged";
-        Invoke("RemoveMe", 3.0f);
-    }
-
-    protected void AttackCheck()
-    {
-        for (int i = 0; i < _players.Count; i++)
-        {
-            if (IsTargetInSight(20f, _players[i].transform) && IsInAttackDistance(4f, _players[i].transform))
-            {
-                _playerPara = _players[i].GetComponent<CPlayerPara>();
-                AttackCalculate();
-            }
-        }
-    }
-
+    #region 통상적인 State 관련 함수들
     protected override void UpdateState()
     {
         if (_currentBaseState.nameHash == _walkState) ChaseState();
@@ -74,17 +63,39 @@ public class CGolemFSM : CEnemyFSM
         _coolDown = true;
     }
 
+    private void AttackWaitState()
+    {
+        _cooltime -= Time.deltaTime;
+        _lookAtPlayer = true;
+        if (_cooltime < 0)
+        {
+            _coolDown = false;
+            _cooltime = _originCooltime;
+        }
+        else if (GetDistanceFromPlayer(_distances) > _attackDistance)
+        {
+            _coolDown = false;
+            _anotherAction = true;
+            _cooltime = _originCooltime;
+        }
+    }
+    #endregion
+
+    #region 스킬 관련 함수들
     private void AttackState2()
     {
         if (!_lookAtPlayer)
         {
             _lookAtPlayer = false;
-            transform.LookAt(_player.transform.position);
         }
         if (_holding) Rock.transform.position = _hand.transform.position;
         else
         {
-            Rock.SendMessage("StartShot");
+            if (_shooting)
+            {
+                Rock.SendMessage("StartShot");
+                _shooting = false;
+            }
         }
     }
 
@@ -96,7 +107,7 @@ public class CGolemFSM : CEnemyFSM
         RockScript.Projectile = Rock.transform;
         RockScript._myTransform = _hand.transform;
     }
-
+    
     private void OnHold()
     {
         _holding = true;
@@ -105,36 +116,9 @@ public class CGolemFSM : CEnemyFSM
     private void OffHold()
     {
         _holding = false;
+        _shooting = true;
     }
-    
-    private void AttackWaitState()
-    {
-        _cooltime -= Time.deltaTime;
-        if (_cooltime < 0)
-        {
-            _coolDown = false;
-            _cooltime = _originCooltime;
-        }
-        else if (GetDistanceFromPlayer(_distances) > 3f)
-        {
-            _coolDown = false;
-            _anotherAction = true;
-            _cooltime = _originCooltime;
-        }
-    }
-    protected override void MoveToDestination()
-    {
-        transform.position = Vector3.MoveTowards(transform.position,
-            _player.transform.position, _moveSpeed * Time.deltaTime);
-    }
-
-    protected override void TurnToDestination()
-    {
-        Vector3 position = new Vector3(0f, _player.transform.position.y, 0f);
-        Quaternion lookRotation = Quaternion.LookRotation(_player.transform.position - position - transform.position);
-        transform.rotation = Quaternion.RotateTowards(transform.rotation,
-            lookRotation, Time.deltaTime * _rotAnglePerSecond);
-    }
+    #endregion
 
     protected override void Update()
     {

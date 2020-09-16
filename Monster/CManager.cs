@@ -2,9 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/* @help
+ * 이 클래스는 CRespawn에서 사용되는 맵 전체의 몬스터 배열을 관리하는 클래스이다.
+ * 
+ */
 public class CManager : MonoBehaviour
 {
-    List<GameObject> _monsters = new List<GameObject>();
+    public List<GameObject> _monsters = new List<GameObject>();
 
     //외부에서 전달된 몬스터가 기존에 리스트에 보관하고 있는 몬스터와 일치하는지 여부를 체크
     public void AddNewMonsters(GameObject mon)
@@ -16,16 +20,18 @@ public class CManager : MonoBehaviour
             if (_monsters[i] == mon)
             {
                 sameExist = true;
-
                 break;
             }
         }
+        if (sameExist == false) _monsters.Add(mon);
+    }
 
-        if (sameExist == false)
+    public void Say()
+    {
+        for (int i = 0; i < _monsters.Count; i++)
         {
-            _monsters.Add(mon);
+            Debug.Log(_monsters[i].name);
         }
-
     }
 
     public void RemoveMonster(GameObject mon)
@@ -37,7 +43,6 @@ public class CManager : MonoBehaviour
                 _monsters.Remove(monster);
                 break;
             }
-
         }
     }
 
