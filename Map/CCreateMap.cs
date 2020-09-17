@@ -10,12 +10,12 @@ public class CCreateMap : MonoBehaviour
 {
     public CCreateStage map;
     static public CCreateMap instance = null;
-    private int _createStageNumber;
+    public int createStageNumber;
 
     private void Start()
     {
-        _createStageNumber = 1;
-        map = new CCreateStage(_createStageNumber);
+        createStageNumber = 1;
+        map = new CCreateStage(createStageNumber);
         map.RandomRoomEnqueue();
         map.CreateStage();
         if (instance == null)

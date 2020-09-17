@@ -43,6 +43,28 @@ namespace Item
             [Range(0f, 1f)] public float Chance;
         }
 
+        [System.Serializable]
+        public class EquipAbility
+        {
+            public enum EAbility
+            {
+                Attack,
+                AttackSpeed,
+                MaxHp,
+                HpRegen,
+                Def,
+                Speed,
+                SkillCoolTime,
+                DamageReduceRate,
+                SkillRange
+            }
+
+            public EAbility equipEffect;
+            public int value;
+        }
+
+        public List<EquipAbility> equipAbilities;
+
         public int As;     // 공격속도
         public int Atk;    // 공격력
         public int MaxHp;           // 최대 체력
@@ -63,6 +85,7 @@ namespace Item
     }
 }
 
+[RequireComponent(typeof(Rigidbody))]
 public class CEquipComponent : CItemComponent
 {
     public Item.CEquip equipStat;
@@ -73,10 +96,7 @@ public class CEquipComponent : CItemComponent
         {
             equipStat = new Item.CEquip("", 0, null);
         }
-    }
 
-    public override void CallItemUI()
-    {
-
+        Item = equipStat;
     }
 }

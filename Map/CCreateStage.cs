@@ -288,7 +288,6 @@ public class CCreateStage
                 RoomFlagCtrl(CGlobal.ERoomType._itemElite);
             }
         }
-        //RoomFlagCtrl(ERoomType roomType)l; 주인공 캐릭터가 선택한 룸타입을 설정
 
         MakePortalText(_roomCount);
     }
@@ -343,6 +342,13 @@ public class CCreateStage
     }
     public void CreateRoom(CRoom[,] roomArr, int roomCount, int roadCount)
     {
+        //debug용 보고싶은 맵 있으면 여기다 가져다 두면 됨.
+        if(roomCount == 1)
+        {
+            GameObject temproom = Resources.Load("Room/ShopRoom1") as GameObject;
+            Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
+            return;
+        }
         InstantiateRoom(roomArr[roomCount, roadCount].RoomType);
     }
 
@@ -363,12 +369,7 @@ public class CCreateStage
                 break;
 
             case CGlobal.ERoomType._event:
-                //tempRoom = eventRoomQueue.Dequeue();
-                //tempRoom = Object.Instantiate(tempRoom, tempRoom.transform.position, tempRoom.transform.rotation);
-                //_rooms.AddLast(tempRoom);
-
-                //debug
-                tempRoom = Resources.Load("Room/EventRoom1_3") as GameObject;
+                tempRoom = eventRoomQueue.Dequeue();
                 tempRoom = Object.Instantiate(tempRoom, tempRoom.transform.position, tempRoom.transform.rotation);
                 _rooms.AddLast(tempRoom);
                 break;
@@ -382,11 +383,7 @@ public class CCreateStage
             case CGlobal.ERoomType._normal:
                 tempRoom = normalRoomQueue.Dequeue();
                 tempRoom = Object.Instantiate(tempRoom, tempRoom.transform.position, tempRoom.transform.rotation);
-
-                //debug
-                //tempRoom = Resources.Load("Room/NormalRoom1_1") as GameObject;
-                //tempRoom = Object.Instantiate(tempRoom, tempRoom.transform.position, tempRoom.transform.rotation);
-                //_rooms.AddLast(tempRoom);
+                _rooms.AddLast(tempRoom);
                 break;
 
             case CGlobal.ERoomType._shop:
@@ -423,8 +420,8 @@ public class CCreateStage
 
         foreach (GameObject ob in portalMom)
         {
-            Transform portal = ob.transform.FindChild("Portal");
-            Transform text = ob.transform.FindChild("PortalText").FindChild("Text");
+            Transform portal = ob.transform.Find("Portal");
+            Transform text = ob.transform.Find("PortalText").Find("Text");
 
             switch (portal.tag)
             {
@@ -462,8 +459,8 @@ public class CCreateStage
             {
                 foreach (GameObject ob in portalMom)
                 {
-                    ob.transform.FindChild("Portal").gameObject.SetActive(false);
-                    ob.transform.FindChild("PortalText").gameObject.SetActive(false);
+                    ob.transform.Find("Portal").gameObject.SetActive(false);
+                    ob.transform.Find("PortalText").gameObject.SetActive(false);
                 }
 
                 CGlobal.isPortalActive = false;
@@ -475,8 +472,8 @@ public class CCreateStage
         if (portalMom != null)
             foreach (GameObject ob in portalMom)
             {
-                ob.transform.FindChild("Portal").gameObject.SetActive(true);
-                ob.transform.FindChild("PortalText").gameObject.SetActive(true);
+                ob.transform.Find("Portal").gameObject.SetActive(true);
+                ob.transform.Find("PortalText").gameObject.SetActive(true);
             }
 
         CGlobal.isPortalActive = true;

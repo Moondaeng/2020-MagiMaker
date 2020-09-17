@@ -5,6 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class CInventory
 {
+    [System.Serializable]
     public class ConsumableWithStack
     {
         public Item.CConsumable consumable;
@@ -50,7 +51,7 @@ public class CInventory
             return false;
         }
 
-        if(!HasOverlapEquip(newEquip))
+        if(HasOverlapEquip(newEquip))
         {
             Debug.Log("overlap equip");
             return false;
@@ -91,13 +92,12 @@ public class CInventory
     /// <returns>아이템 넣기 성공했는지</returns>
     public bool AddConsumableItem(Item.CConsumable newItem)
     {
-        if (_consumableItems.Capacity >= _consumableItems.Count)
+        if (_consumableItems.Count >= _consumableItems.Capacity)
         {
             return false;
         }
 
         int overlapIndex;
-        // 중복 체크
         if ((overlapIndex = HasOverlapConsumable(newItem)) != -1)
         {
             _consumableItems[overlapIndex].stack++;
@@ -116,6 +116,7 @@ public class CInventory
     {
         if(_consumableItems.Count == 0)
         {
+            Debug.Log("Consumable inventory is empty");
             return;
         }
 
@@ -123,6 +124,7 @@ public class CInventory
         {
             _selectedConsumableNumber = 0;
         }
+        Debug.Log($"Current Consumable Number : {_selectedConsumableNumber}");
     }
 
     public void UseSelectedConsumable()
@@ -133,6 +135,7 @@ public class CInventory
             return;
         }
 
+        Debug.Log($"Selected Consumable Number : {_selectedConsumableNumber}");
         UseConsumable(_consumableItems[_selectedConsumableNumber].consumable);
         if(--_consumableItems[_selectedConsumableNumber].stack <= 0)
         {
@@ -221,6 +224,60 @@ public class CInventory
 
     private void UseConsumable(Item.CConsumable consumable)
     {
-        
+        int useEffectIndex = SelectRandomEffect(consumable);
+        Debug.Log($"useEffectIndex : {useEffectIndex}");
+        UseConsumableSelectedEffect(consumable, useEffectIndex);
+    }
+
+    private int SelectRandomEffect(Item.CConsumable consumable)
+    {
+        if(consumable.UseEffectList.Count == 0)
+        {
+            Debug.Log("No Use Effect");
+            return -1;
+        }
+        else if(consumable.UseEffectList.Count == 1)
+        {
+            return 0;
+        }
+
+        Debug.Log("Get Random Effect");
+        float chanceSum = 0f;
+        List<float> chanceSumList = new List<float>(consumable.UseEffectList.Count);
+        foreach (var elem in consumable.UseEffectList)
+        {
+            chanceSum += elem.Chance;
+            chanceSumList.Add(chanceSum);
+        }
+        Debug.Log("set chance");
+
+        // 임의 효과 선택
+        float randomChance = UnityEngine.Random.Range(0f, 1f);
+        int idx = 0;
+        while (idx < chanceSumList.Count - 1 && randomChance >= chanceSumList[idx])
+        {
+            idx++;
+        }
+
+        return idx;
+    }
+
+    private void UseConsumableSelectedEffect(Item.CConsumable consumable, int useEffectIndex)
+    {
+        if(useEffectIndex == -1)
+        {
+            Debug.Log("index error");
+            return;
+        }
+
+        switch (consumable.UseEffectList[useEffectIndex].useEffect.EffectType)
+        {
+            case Item.CConsumable.UseEffect.EType.Heal:
+                Debug.Log("Heal");
+                break;
+            default:
+                Debug.Log("not implement Effect");
+                break;
+        }
     }
 }

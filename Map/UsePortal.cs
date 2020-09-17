@@ -24,23 +24,23 @@ public class UsePortal : MonoBehaviour
         player = GameObject.FindGameObjectsWithTag("Player");
         PortalAcceptParent = GameObject.Find("PortalPopUp");
         FadeController = GameObject.Find("FadeController");
-        PortalAcceptParent.transform.FindChild("PortalAccept").gameObject.SetActive(false);
-        PortalAcceptParent.transform.FindChild("WaitingForOtherPlayer").gameObject.SetActive(false);
+        PortalAcceptParent.transform.Find("PortalAccept").gameObject.SetActive(false);
+        PortalAcceptParent.transform.Find("WaitingForOtherPlayer").gameObject.SetActive(false);
     }
 
     private void OnTriggerEnter(Collider coll)
     {
         if (coll.tag == "Player")
         {
-            PortalAcceptParent.transform.FindChild("PortalAccept").gameObject.SetActive(true);
-            FadeController.transform.FindChild("FadeCanvas").gameObject.SetActive(false);
+            PortalAcceptParent.transform.Find("PortalAccept").gameObject.SetActive(true);
+            FadeController.transform.Find("FadeCanvas").gameObject.SetActive(false);
             CWaitingForAccept.instance._portal = gameObject;
         }
     }
 
     public void MoveToNextRoom()
     {
-        FadeController.transform.FindChild("FadeCanvas").gameObject.SetActive(true);
+        FadeController.transform.Find("FadeCanvas").gameObject.SetActive(true);
         CFadeInOut.instance.PlayFadeFlow(); //다음 방 넘어갈 때, 페이드 아웃 방 생성 이후 페이드 인
 
         StartCoroutine(RefreshWorld());
@@ -51,13 +51,7 @@ public class UsePortal : MonoBehaviour
         yield return new WaitForSeconds(1.0f);
 
         Transform ParentTransform = player[0].transform; //최상위 오브젝트 찾기 -> 캐릭터 옮기기
-        while (true)
-        {
-            if (ParentTransform.parent == null)
-                break;
-            else
-                ParentTransform = ParentTransform.parent;
-        }
+
         ParentTransform.position = new Vector3(0, 1, 0);
 
         CCreateMap.instance.map.DestroyRoom();//오브젝트 삭제
