@@ -41,6 +41,8 @@ public class CCntl : MonoBehaviour
     bool _isGrounded;
     bool _jump;
     bool _roll;
+    private bool _isJumpInputed;
+    private bool _isRollInputed;
 
     // 애니메이션 상태값 상태이상
     bool _knockBack;
@@ -93,41 +95,60 @@ public class CCntl : MonoBehaviour
     #endregion
 
     #region 업데이트
+    public void Move(float inputX, float inputZ)
+    {
+        z = inputZ;
+        x = inputX;
+        _inputVec = new Vector3(x, 0, z);
+    }
+    
+    public void Attack()
+    {
+        // 공격 모션 키 입력
+        if ((_animator.GetCurrentAnimatorStateInfo(0).IsName("Idle")
+               || _animator.GetCurrentAnimatorStateInfo(0).IsName("Run"))
+               && _isGrounded)
+        {
+            _animator.SetTrigger("Attack");
+            StartCoroutine(COStunPause(.6f));
+        }
+    }
+
+    public void Skill()
+    {
+        _animator.SetTrigger("SkillTrigger");
+    }
+
+    public void Jump()
+    {
+        _isJumpInputed = true;
+    }
+
+    public void Roll()
+    {
+        _animator.SetTrigger("Roll");
+    }
+
     private void Update()
     {
         _currentBaseState = _animator.GetCurrentAnimatorStateInfo(0);
-        z = Input.GetAxisRaw("Horizontal");
-        x = -(Input.GetAxisRaw("Vertical"));
         _inputVec = new Vector3(x, 0, z);
 
         CheckGroundStatus();
         // 법선임 hitcast 할 때 씀
         _inputVec = Vector3.ProjectOnPlane(_inputVec, _groundNormal);
 
-        // 공격 모션 키 입력
-        if (Input.GetButtonDown("Fire1"))
-        {
-            if ((_animator.GetCurrentAnimatorStateInfo(0).IsName("Idle")
-                || _animator.GetCurrentAnimatorStateInfo(0).IsName("Run"))
-                && _isGrounded)
-            {
-                _animator.SetTrigger("Attack");
-                StartCoroutine(COStunPause(.6f));
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.Z))
-        {
-            _roll = true;
-            GetStateFreeFromDamage();
-        }
-        else _roll = false;
-       
-
         // 점프 모션 키 입력
-        if (Input.GetKeyDown(KeyCode.Space)) _jump = true;
-        else _jump = false;
-        
+        if (_isJumpInputed)
+        {
+            _jump = true;
+            _isJumpInputed = false;
+        }
+        else
+        {
+            _jump = false;
+        }
+       
         if (_isGrounded) HandleGroundedMovement();
         else HandleAirborneMovement();
         
@@ -149,8 +170,6 @@ public class CCntl : MonoBehaviour
         _animator.SetFloat("Input Z", -(x));
         // 땅바닥에 있는가? -> 점프 체크
         _animator.SetBool("OnGround", _isGrounded);
-        // 구르기 체크
-        _animator.SetBool("Roll", _roll);
 
         _animator.SetBool("KnockBack", _knockBack);
 

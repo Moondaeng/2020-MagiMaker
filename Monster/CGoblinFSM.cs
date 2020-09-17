@@ -64,12 +64,12 @@ public class CGoblinFSM : CEnemyFSM
             _skillCooltime1 -= Time.deltaTime;
             _skillCoolDown1 = true;
         }
-        if (_currentBaseState.nameHash == _walkState) ChaseState();
-        else if (_currentBaseState.nameHash == _attackState1
-            || _currentBaseState.nameHash == _attackState2) AttackState();
-        else if (_currentBaseState.nameHash == _waitState) AttackWaitState();
-        else if (_currentBaseState.nameHash == _skillWaitState1) SkillWaitState1();
-        else if (_currentBaseState.nameHash == _skillState1) SkillState1();
+        if (_currentBaseState.fullPathHash == _walkState) ChaseState();
+        else if (_currentBaseState.fullPathHash == _attackState1
+            || _currentBaseState.fullPathHash == _attackState2) AttackState();
+        else if (_currentBaseState.fullPathHash == _waitState) AttackWaitState();
+        else if (_currentBaseState.fullPathHash == _skillWaitState1) SkillWaitState1();
+        else if (_currentBaseState.fullPathHash == _skillState1) SkillState1();
 
         if (_skillCooltime1 < 0f)
         {
@@ -82,8 +82,8 @@ public class CGoblinFSM : CEnemyFSM
     {
         _runEnd = false;
         if (!_actionStart) _actionStart = true;
-        if (_currentBaseState.nameHash != _deadState1 
-            || _currentBaseState.nameHash != _deadState2)
+        if (_currentBaseState.fullPathHash != _deadState1 
+            || _currentBaseState.fullPathHash != _deadState2)
             MoveState();
     }
 

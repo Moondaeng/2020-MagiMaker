@@ -47,11 +47,11 @@ public class CSkeletonFSM : CEnemyFSM
             _skillCoolDown2 = true;
         }
 
-        if (_currentBaseState.nameHash == _walkState)           ChaseState();
-        else if (_currentBaseState.nameHash == _attackState1)    AttackState();
-        else if (_currentBaseState.nameHash == _waitState)      AttackWaitState();
-        else if (_currentBaseState.nameHash == _skillState1)    SkillState1();
-        else if (_currentBaseState.nameHash == _skillState2)    SkillState2();
+        if (_currentBaseState.fullPathHash == _walkState)           ChaseState();
+        else if (_currentBaseState.fullPathHash == _attackState1)    AttackState();
+        else if (_currentBaseState.fullPathHash == _waitState)      AttackWaitState();
+        else if (_currentBaseState.fullPathHash == _skillState1)    SkillState1();
+        else if (_currentBaseState.fullPathHash == _skillState2)    SkillState2();
 
         if (_skillCooltime1 < 0f)
         {
@@ -68,7 +68,7 @@ public class CSkeletonFSM : CEnemyFSM
     private void ChaseState()
     {
         if (!_actionStart) _actionStart = true;
-        if (_currentBaseState.nameHash != _deadState1) MoveState();
+        if (_currentBaseState.fullPathHash != _deadState1) MoveState();
     }
 
     protected override void MoveState()

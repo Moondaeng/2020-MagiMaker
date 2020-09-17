@@ -6,7 +6,6 @@ using UnityEngine.UI;
 public class CEnemyPara : CharacterPara
 {
     public string _name;
-    public int _spawnID { get; set; }
     string _originTag = "Monster";
     [HideInInspector] public GameObject _myRespawn;
     Vector3 _originPos;

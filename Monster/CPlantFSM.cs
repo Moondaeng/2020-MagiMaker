@@ -51,11 +51,11 @@ public class CPlantFSM : CEnemyFSM
             _skillCoolDown2 = true;
         }
 
-        if (_currentBaseState.nameHash == _standState)          StartState();
-        else if (_currentBaseState.nameHash == _attackState1)   AttackState();
-        else if (_currentBaseState.nameHash == _waitState)      AttackWaitState();
-        else if (_currentBaseState.nameHash == _skillState1)    SkillState1();
-        else if (_currentBaseState.nameHash == _skillState2)    SkillState2();
+        if (_currentBaseState.fullPathHash == _standState)          StartState();
+        else if (_currentBaseState.fullPathHash == _attackState1)   AttackState();
+        else if (_currentBaseState.fullPathHash == _waitState)      AttackWaitState();
+        else if (_currentBaseState.fullPathHash == _skillState1)    SkillState1();
+        else if (_currentBaseState.fullPathHash == _skillState2)    SkillState2();
 
         if (_skillCooltime1 < 0f)
         {
@@ -146,7 +146,6 @@ public class CPlantFSM : CEnemyFSM
         _anim.SetBool("CoolDown", _coolDown);
         _anim.SetBool("CoolDown1", _skillCoolDown1);
         _anim.SetBool("CoolDown2", _skillCoolDown2);
-        _anim.SetBool("AnotherAction", _anotherAction);
         base.Update();
     }
 }

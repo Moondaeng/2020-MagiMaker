@@ -39,15 +39,15 @@ public class CGolemFSM : CEnemyFSM
     #region 통상적인 State 관련 함수들
     protected override void UpdateState()
     {
-        if (_currentBaseState.nameHash == _walkState) ChaseState();
-        else if (_currentBaseState.nameHash == _attackState1) AttackState1();
-        else if (_currentBaseState.nameHash == _attackState2) AttackState2();
-        else if (_currentBaseState.nameHash == _waitState) AttackWaitState();
+        if (_currentBaseState.fullPathHash == _walkState) ChaseState();
+        else if (_currentBaseState.fullPathHash == _attackState1) AttackState1();
+        else if (_currentBaseState.fullPathHash == _attackState2) AttackState2();
+        else if (_currentBaseState.fullPathHash == _waitState) AttackWaitState();
     }
 
     private void ChaseState()
     {
-        if (_currentBaseState.nameHash != _deadState1)
+        if (_currentBaseState.fullPathHash != _deadState1)
         {
             MoveState();
         }

@@ -4,6 +4,13 @@ using UnityEngine;
 using UnityEngine.Events;
 using System;
 
+[System.Serializable]
+public class DamageEvent : UnityEvent<int, int>
+{
+
+}
+
+[RequireComponent(typeof(CBuffTimer))]
 public class CharacterPara : MonoBehaviour
 {
     public int _maxHp { get; set; }
@@ -11,15 +18,31 @@ public class CharacterPara : MonoBehaviour
     public int _attackMin { get; set; }
     public int _attackMax { get; set; }
     public int _defense { get; set; }
-    public int _eLevel { get; set; }
-    public EElementType _eType {get; set;}
     public bool _isAnotherAction { get; set; }
     public bool _isStunned { get; set; }
     public bool _isDead { get; set; }
     public int _rewardMoney { get; set; }
-    
+    public int _spawnID { get; set; }
+
+    public virtual int TotalAttackMin
+    {
+        get { return (int)(_attackMin * buffParameter.AttackCoef * buffParameter.AttackDebuffCoef); }
+    }
+    public virtual int TotalAttackMax
+    {
+        get { return (int)(_attackMax * buffParameter.AttackCoef * buffParameter.AttackDebuffCoef); }
+    }
+    public virtual int TotalDefenece
+    {
+        get { return (int)(_defense * buffParameter.DefenceCoef * buffParameter.DefenceDebuffCoef); }
+    }
+
     [System.NonSerialized]
     public UnityEvent deadEvent = new UnityEvent();
+    public DamageEvent damageEvent = new DamageEvent();
+
+    protected CBuffTimer _buffTimer;
+    public CBuffPara buffParameter;
 
     public int RandomAttackDamage()
     {
@@ -27,8 +50,10 @@ public class CharacterPara : MonoBehaviour
         return _random;
     }
 
-    void Start()
+    protected virtual void Awake()
     {
+        _buffTimer = gameObject.GetComponent<CBuffTimer>();
+        buffParameter = new CBuffPara(_buffTimer);
         InitPara();
     }
 
@@ -36,6 +61,56 @@ public class CharacterPara : MonoBehaviour
     {
 
     }
+
+    // 평타 데미지 계산식
+    public float GetRandomAttack()
+    {
+        float randAttack = UnityEngine.Random.Range(_attackMin, _attackMax + 1);
+        // 최종 계산식 대충
+        randAttack = randAttack - _defense;
+        return randAttack;
+    }
+
+    public void SetEnemyAttack(float EnemyAttackPower)
+    {
+        // 데미지를 버림 형식으로 표현
+        _curHp -= (int)EnemyAttackPower;
+        //transform.gameObject.SendMessage("hitEnemyAttack");
+        UpdateAfterReceiveAttack();
+    }
+
+    // 방어력 계산식: 1000 / (950 + 10*방어력)
+    public void DamegedRegardDefence(int enemyAttack)
+    {
+        int damage = enemyAttack * 1000 / (950 + 10 * TotalDefenece);
+        DamagedDisregardDefence(damage);
+    }
+
+    public void DamagedDisregardDefence(int enemyAttack)
+    {
+        _curHp -= (int)enemyAttack;
+        UpdateAfterReceiveAttack();
+    }
+
+    //캐릭터가 적으로 부터 공격을 받은 뒤에 자동으로 실행될 함수를 가상함수로 만듬
+    protected virtual void UpdateAfterReceiveAttack()
+    {
+        print(name + "'s HP: " + _curHp);
+        // 체력 관련 이벤트
+        damageEvent?.Invoke(_curHp, _maxHp);
+
+        if (_curHp <= 0)
+        {
+            _curHp = 0;
+            _isDead = true;
+            deadEvent.Invoke();
+        }
+    }
+
+    #region ObsoleteCode
+    // 기획안에서 없어진 부분
+    public int _eLevel { get; set; }
+    public EElementType _eType { get; set; }
 
     public const int _elementTypeSize = 4;
     public static List<EElementType> elementTypeList =
@@ -92,7 +167,6 @@ public class CharacterPara : MonoBehaviour
     {
         return _elementTypeBonusArray[(eLevel - eLevel + 1), (int)FindAttacksElementTypeBonus(eTypeDefence, eTypeAttack)];
     }
-    
     // 평타 데미지 계산식
     public float GetRandomAttack(EElementType eTypeDefence, EElementType eTypeAttack)
     {
@@ -102,30 +176,5 @@ public class CharacterPara : MonoBehaviour
         randAttack = (randAttack - _defense) * Bonus;
         return randAttack;
     }
-
-    public void SendAttackEnemy()
-    {
-        transform.gameObject.SendMessage("AttackCalculate");
-    }
-
-    public void SetEnemyAttack(float EnemyAttackPower)
-    {
-        // 데미지를 버림 형식으로 표현
-        _curHp -= (int)EnemyAttackPower;
-        //transform.gameObject.SendMessage("hitEnemyAttack");
-        UpdateAfterReceiveAttack();
-    }
-
-    //캐릭터가 적으로 부터 공격을 받은 뒤에 자동으로 실행될 함수를 가상함수로 만듬
-    protected virtual void UpdateAfterReceiveAttack()
-    {
-        print(name + "'s HP: " + _curHp);
-
-        if (_curHp <= 0)
-        {
-            _curHp = 0;
-            _isDead = true;
-            deadEvent.Invoke();
-        }
-    }
+    #endregion
 }
