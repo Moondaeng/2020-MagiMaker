@@ -94,14 +94,14 @@ public class CCntl : MonoBehaviour
     }
     #endregion
 
-    #region 업데이트
+    #region CController Use these function
     public void Move(float inputX, float inputZ)
     {
         z = inputZ;
         x = inputX;
         _inputVec = new Vector3(x, 0, z);
     }
-    
+
     public void Attack()
     {
         // 공격 모션 키 입력
@@ -127,7 +127,9 @@ public class CCntl : MonoBehaviour
     public void Roll()
     {
         _animator.SetTrigger("Roll");
+        GetStateFreeFromDamage();
     }
+    #endregion
 
     private void Update()
     {
@@ -148,16 +150,36 @@ public class CCntl : MonoBehaviour
         {
             _jump = false;
         }
-       
+
         if (_isGrounded) HandleGroundedMovement();
         else HandleAirborneMovement();
-        
+
         UpdateMovement();
     }
 
-    #endregion
+    void HandleGroundedMovement()
+    {
+        // 점프 조건 1. 앉아 있지 않기 2. Idle 상태 3. 뛰는 상태
+        if (_jump && (_animator.GetCurrentAnimatorStateInfo(0).IsName("Idle")
+            || _animator.GetCurrentAnimatorStateInfo(0).IsName("Run")))
+        {
+            _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, _jumpPower,
+                _rigidbody.velocity.z);
+            _isGrounded = false;
+            _animator.applyRootMotion = false;
+            _groundCheckDistance = 0.5f;
+        }
+    }
 
-    #region 움직임 관리
+    void HandleAirborneMovement()
+    {
+        // 인스펙터상으로 추가한 중력보정 곱
+        Vector3 extraGravityForce = (Physics.gravity * _gravityMultiplier) - Physics.gravity;
+        _rigidbody.AddForce(extraGravityForce);
+
+        _groundCheckDistance = _rigidbody.velocity.y < 0 ? _origGroundCheckDistance : 0.01f;
+    }
+
     // 애니메이터에 기입할 정보들을 갱신
     void UpdateMovement()
     {
@@ -172,7 +194,6 @@ public class CCntl : MonoBehaviour
         _animator.SetBool("OnGround", _isGrounded);
 
         _animator.SetBool("KnockBack", _knockBack);
-
         _animator.SetBool("Stun", _stun);
 
         // 이동 키를 눌렀을 경우 체크
@@ -203,29 +224,6 @@ public class CCntl : MonoBehaviour
             _groundNormal = hitInfo.normal;
             _animator.applyRootMotion = false;
         }
-    }
-
-    void HandleGroundedMovement()
-    {
-        // 점프 조건 1. 앉아 있지 않기 2. Idle 상태 3. 뛰는 상태
-        if (_jump && (_animator.GetCurrentAnimatorStateInfo(0).IsName("Idle")
-            || _animator.GetCurrentAnimatorStateInfo(0).IsName("Run")))
-        {
-            _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, _jumpPower,
-                _rigidbody.velocity.z);
-            _isGrounded = false;
-            _animator.applyRootMotion = false;
-            _groundCheckDistance = 0.5f;
-        }
-    }
-
-    void HandleAirborneMovement()
-    {
-        // 인스펙터상으로 추가한 중력보정 곱
-        Vector3 extraGravityForce = (Physics.gravity * _gravityMultiplier) - Physics.gravity;
-        _rigidbody.AddForce(extraGravityForce);
-
-        _groundCheckDistance = _rigidbody.velocity.y < 0 ? _origGroundCheckDistance : 0.01f;
     }
 
     // 구형보간 
@@ -298,20 +296,22 @@ public class CCntl : MonoBehaviour
             _rigidbody.velocity = v;
         }
     }
-    #endregion
 
     #region 상태이상 관리
     public void CCController(string type, float level)
     {
         if (_myPara._invincibility) return;
-        switch (type) {
+        switch (type)
+        {
             case "KnockBack":
+                // 30프레임을 기준으로 입력한 레벨만큼 배수를 해서 초단위로 변경함
                 level = (1 / 30f) / level;
                 _knockBack = true;
                 GetStateFreeFromDamage();
                 _animator.SetFloat("KnockBackTime", level);
                 break;
             case "Gethit":
+                _animator.SetTriggger("GetHit");
                 break;
             case "Stun":
                 CO = StartCoroutine(COStun(level * 2.5f));
@@ -319,15 +319,17 @@ public class CCntl : MonoBehaviour
             case null:
                 break;
         }
-            
+
     }
 
+    // 무적 판정을 넣어줌.
+    // Animation 상에서 실행시키는 Offinvincibility가 알아서 check 해제함
     void GetStateFreeFromDamage()
     {
         _myPara._invincibility = true;
         _myPara._invincibilityChecker = true;
     }
-    
+
     public void ExitStun()
     {
         _stun = false;
