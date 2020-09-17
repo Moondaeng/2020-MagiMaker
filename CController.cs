@@ -6,13 +6,16 @@ using UnityEngine;
  * 플레이어 오브젝트 조작 인터페이스 클래스
  * 
  */
+[DisallowMultipleComponent]
 public class CController : MonoBehaviour
 {
     delegate void Action();
 
     private Dictionary<KeyCode, Action> keyDictionary;
-    private CSkillSelector _comboSelector;
     private CConsumableItemViewer _consumableViewer;
+
+    private CUIManager _playerUi;
+    private Network.CTcpClient _network;
     //public CGameEvent gameEvent;
 
     public GameObject player;
@@ -48,28 +51,12 @@ public class CController : MonoBehaviour
 
     void Start()
     {
-        // 콤보 스킬 세팅
-        _comboSelector = new CSkillSelector();
-
-        _comboSelector.SetMainElement(0, CSkillSelector.SkillElement.Fire);
-        _comboSelector.SetMainElement(1, CSkillSelector.SkillElement.Water);
-        _comboSelector.SetSubElement(0, CSkillSelector.SkillElement.Water);
-        _comboSelector.SetSubElement(1, CSkillSelector.SkillElement.Earth);
-        _comboSelector.SetSubElement(2, CSkillSelector.SkillElement.Wind);
-        _comboSelector.SetSubElement(3, CSkillSelector.SkillElement.Light);
-
-        //_consumableViewer = 
+        _playerUi = CUIManager.instance;
 
         if (player != null)
         {
             _playerControl = player.GetComponent<CCntl>();
         }
-    }
-
-    // 임시 방안
-    public void DeselectEnemy()
-    {
-        //player.GetComponent<CCntl>().CurrentEnemyDead();
     }
 
     void Update()
@@ -81,7 +68,7 @@ public class CController : MonoBehaviour
             _playerControl = player.GetComponent<CCntl>();
         }
         _playerControl.Move(x, z);
-        ViewPopup();
+        ViewInteractionPopup();
 
 
         if (Input.anyKeyDown)
@@ -94,6 +81,11 @@ public class CController : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void SetControlCharacter(GameObject controlCharacter)
+    {
+        _playerUi.SetUiTarget(controlCharacter);
     }
 
     private void Attack()
@@ -125,7 +117,7 @@ public class CController : MonoBehaviour
         }
     }
 
-    private void ViewPopup()
+    private void ViewInteractionPopup()
     {
         int layerMask = 1 << LayerMask.NameToLayer("Item");
         RaycastHit hit;
@@ -201,28 +193,20 @@ public class CController : MonoBehaviour
     
     private void SkillSelect(int index)
     {
-        _comboSelector.Combo(index);
+        player.GetComponent<CCharacterSkill>().SkillSelect(index);
     }
 
     // 스킬 사용
     private void UseSkill()
     {
-        int layerMask = 1 << 9;
+        int layerMask = 1 << LayerMask.NameToLayer("Player");
         layerMask = ~layerMask;
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
         {
             print("I'm looking at " + hit.transform.name);
-            int comboSkillNum = _comboSelector.EndCombo();
-            if (comboSkillNum == -1) return;
-            bool? isSkillUse = player.GetComponent<CPlayerSkill>().UseSkillToPosition(comboSkillNum, hit.point);
-            // 성공 시 플레이어 스킬 사용 이벤트 수행
-            if (isSkillUse == true)
-            {
-                //player.GetComponent<CCntl>().SkillAction(2, hit.point);
-                //gameEvent.PlayerAction(number, player.transform.position, hit.point);
-            }
+            player.GetComponent<CPlayerSkill>().UseSkillToPosition(hit.point);
         }
     }
 }

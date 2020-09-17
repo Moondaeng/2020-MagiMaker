@@ -40,7 +40,6 @@ public class CUIManager : MonoBehaviour
     private void Start()
     {
         SetSceneCanvas();
-        SetUiTarget(UiTargetObject);
     }
 
     // 지정 캐릭터에 대한 UI를 그림
@@ -50,7 +49,8 @@ public class CUIManager : MonoBehaviour
         // 이전 타겟 설정 제거
         if (UiTargetObject != null)
         {
-            _skillUIManager.DeregisterTimer(UiTargetObject);
+            //_skillUIManager.DeregisterTimer(UiTargetObject);
+            _skillUIManager.Deregister(UiTargetObject);
             _buffTimerUiList.DeregisterTimer(UiTargetObject);
             hpBarObject.Deregister(UiTargetObject.GetComponent<CharacterPara>());
             _consumableViewer.Deregister(UiTargetObject.GetComponent<CPlayerPara>().Inventory);
@@ -60,9 +60,10 @@ public class CUIManager : MonoBehaviour
 
         if (UiTargetObject == null)
             return;
-        
+
         // 현재 타겟 설정
-        _skillUIManager.RegisterTimer(UiTargetObject);
+        //_skillUIManager.RegisterTimer(UiTargetObject);
+        _skillUIManager.Register(UiTargetObject);
         _buffTimerUiList.RegisterTimer(UiTargetObject);
         hpBarObject.Register(UiTargetObject.GetComponent<CharacterPara>());
         _consumableViewer.Register(UiTargetObject.GetComponent<CPlayerPara>().Inventory);

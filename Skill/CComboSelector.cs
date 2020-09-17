@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+// 삭제 예정 클래스
 public class CSkillSelector
 {
+    /*
     enum ComboState
     {
         Main, Sub, Select
@@ -32,7 +34,6 @@ public class CSkillSelector
 
     public CSkillSelector()
     {
-        //_skillUIManager = GameObject.Find("UiScript").GetComponent<CSkillUIManager>();
         _skillUIManager = CSkillUIManager.instance;
         _currentState = ComboState.Main;
 
@@ -228,4 +229,5 @@ public class CSkillSelector
             }
         }
     }
+    */
 }
