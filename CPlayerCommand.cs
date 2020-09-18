@@ -104,7 +104,6 @@ public class CPlayerCommand : MonoBehaviour
         var charSkill = character.GetComponent<CCharacterSkill>();
         var charState = character.GetComponent<CCntl>();
         //charSkill.UseSkillToPosition(skillNumber, targetPos);
-        //charState.SkillAction(2, targetPos);
     }
 
     // 해당 캐릭터에게 데미지 주기

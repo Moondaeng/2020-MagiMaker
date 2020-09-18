@@ -22,7 +22,7 @@ public class CharacterPara : MonoBehaviour
     public bool _isStunned { get; set; }
     public bool _isDead { get; set; }
     public int _rewardMoney { get; set; }
-    //public int _spawnID { get; set; }
+    public int _spawnID { get; set; }
 
     public virtual int TotalAttackMin
     {
@@ -36,7 +36,7 @@ public class CharacterPara : MonoBehaviour
     {
         get { return (int)(_defense * buffParameter.DefenceCoef * buffParameter.DefenceDebuffCoef); }
     }
-    
+
     [System.NonSerialized]
     public UnityEvent deadEvent = new UnityEvent();
     public DamageEvent damageEvent = new DamageEvent();
@@ -82,7 +82,7 @@ public class CharacterPara : MonoBehaviour
     // 방어력 계산식: 1000 / (950 + 10*방어력)
     public void DamegedRegardDefence(int enemyAttack)
     {
-        int damage = enemyAttack * 1000 / (950 + 10*TotalDefenece);
+        int damage = enemyAttack * 1000 / (950 + 10 * TotalDefenece);
         DamagedDisregardDefence(damage);
     }
 

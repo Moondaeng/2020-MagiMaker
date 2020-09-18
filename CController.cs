@@ -43,6 +43,7 @@ public class CController : MonoBehaviour
             {KeyCode.Q, ChangeConsumable },
             {KeyCode.E, UseConsumable },
             {KeyCode.F, GetItem },
+            {KeyCode.Z, Roll },
             {KeyCode.Mouse1, UseSkill },
         };
 
@@ -70,7 +71,6 @@ public class CController : MonoBehaviour
         _playerControl.Move(x, z);
         ViewInteractionPopup();
 
-
         if (Input.anyKeyDown)
         {
             foreach (var dic in keyDictionary)
@@ -85,17 +85,28 @@ public class CController : MonoBehaviour
 
     public void SetControlCharacter(GameObject controlCharacter)
     {
+        player = controlCharacter;
         _playerUi.SetUiTarget(controlCharacter);
     }
-
+    
     private void Attack()
     {
         _playerControl.Attack();
     }
 
+    private void Skill()
+    {
+        _playerControl.Skill();
+    }
+
     private void Jump()
     {
         _playerControl.Jump();
+    }
+
+    private void Roll()
+    {
+        _playerControl.Roll();
     }
 
     private void ChangeConsumable()
@@ -104,7 +115,6 @@ public class CController : MonoBehaviour
         if (playerPara != null)
         {
             playerPara.Inventory.GetNextConsumable();
-
         }
     }
 

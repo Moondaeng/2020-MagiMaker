@@ -114,6 +114,7 @@ public class CBuffTimerListUI : MonoBehaviour
     {
         // TimerDrawer Pool에서 적당한 TimerDrawer 리턴하기
         GameObject drawer = FindTimerDrawerInPool(registeredNumber);
+
         // initialize drawer
         drawer.transform.SetParent(_uiCanvas, false);
         drawer.SetActive(true);

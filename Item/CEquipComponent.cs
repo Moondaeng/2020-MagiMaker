@@ -83,7 +83,7 @@ public class CEquipComponent : CItemComponent
 
     private void Awake()
     {
-        if(equipStat == null)
+        if (equipStat == null)
         {
             equipStat = new Item.CEquip("", 0, null);
         }

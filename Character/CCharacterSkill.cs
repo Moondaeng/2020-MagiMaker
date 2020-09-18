@@ -27,19 +27,19 @@ public class CCharacterSkill : MonoBehaviour
     {
         _skillList = new List<CSkillFormat>();
         _selectedSkillNum = 0;
+
+        for (int i = 0; i < _skillList.Count; i++)
+        {
+            _skillList[i].InitRegisteredNumber(i);
+            _skillList[i].InitSkillUser(gameObject);
+            _skillList[i].SetSkillUseEvent(i, skillUseEvent);
+        }
     }
 
     protected virtual void Start()
     {
         _projectileSkill = GameObject.Find("SkillScript").GetComponent<CProjectileSkill>();
         _buffSkill = GameObject.Find("SkillScript").GetComponent<CBuffSkill>();
-
-        for(int i = 0; i < _skillList.Count; i++)
-        {
-            _skillList[i].InitRegisteredNumber(i);
-            _skillList[i].InitSkillUser(gameObject);
-            _skillList[i].SetSkillUseEvent(i, skillUseEvent);
-        }
     }
 
     /// <summary>
@@ -57,11 +57,6 @@ public class CCharacterSkill : MonoBehaviour
         _selectedSkillNum = index + 1;
         skillSelectEvent.Invoke(_selectedSkillNum);
     }
-
-    //public bool? UseSkillToPosition(int skillNumber, Vector3 targetPos)
-    //{
-    //    return _skillList[_selectedSkillNum].Use(targetPos);
-    //}
 
     public virtual void UseSkillToPosition(Vector3 targetPos)
     {

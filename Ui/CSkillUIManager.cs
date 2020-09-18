@@ -7,6 +7,7 @@ using UnityEngine.UI;
  * 스킬의 UI를 통합관리하는 클래스
  * 스킬이 UI 이름를 최대한 모르게 하고, UI를 같이 쓰는 일을 방지함
  * 스킬 타이머가 UI를 관리하는 일을 최소화함
+ * 
  */ 
 public class CSkillUIManager : MonoBehaviour
 {
@@ -116,13 +117,12 @@ public class CSkillUIManager : MonoBehaviour
             if (charSkill is CPlayerSkill)
             {
                 var playerSkill = charSkill as CPlayerSkill;
-                playerSkill.mainElementLearnEvent.AddListener(ChangeMainElementUi);
-                playerSkill.subElementLearnEvent.AddListener(ChangeSubElementUi);
+                playerSkill.mainElementLearnEvent.RemoveListener(ChangeMainElementUi);
+                playerSkill.subElementLearnEvent.RemoveListener(ChangeSubElementUi);
                 playerSkill.elementSelectEvent.RemoveListener(ShowSelectElement);
             }
         }
     }
-
 
     public void RegisterTimer(GameObject timerOwner)
     {
@@ -140,6 +140,7 @@ public class CSkillUIManager : MonoBehaviour
 
     public void ChangeMainElementUi(int mainElementIndex, int mainElementNumber)
     {
+        Debug.Log("Change");
         for(int i = 0; i < 5; i++)
         {
             int skillNumber = _uiTarget.GetComponent<CPlayerSkill>().GetRegisterNumber(mainElementIndex, i-1);
