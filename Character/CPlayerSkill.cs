@@ -66,7 +66,6 @@ public class CPlayerSkill : CCharacterSkill
         _skillList[2].RegisterSkill(_buffSkill.DefenceUp);
 
         // 주원소, 부원소 배우기
-        Debug.Log("Learn");
         SetMainElement(0, SkillElement.Fire);
         SetMainElement(1, SkillElement.Water);
         SetSubElement(0, SkillElement.Water);

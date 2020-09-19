@@ -99,6 +99,7 @@ public class CSkillUIManager : MonoBehaviour
             if(charSkill is CPlayerSkill)
             {
                 var playerSkill = charSkill as CPlayerSkill;
+                AdjustUiTarget();
                 playerSkill.mainElementLearnEvent.AddListener(ChangeMainElementUi);
                 playerSkill.subElementLearnEvent.AddListener(ChangeSubElementUi);
                 playerSkill.elementSelectEvent.AddListener(ShowSelectElement);
@@ -124,23 +125,37 @@ public class CSkillUIManager : MonoBehaviour
         }
     }
 
-    public void RegisterTimer(GameObject timerOwner)
+    private void RegisterTimer(GameObject timerOwner)
     {
         _timer = timerOwner.GetComponent<CSkillTimer>();
         _timer.TimerStart += CooldownEnable;
         _timer.TimerEnd += CooldownDisable;
     }
 
-    public void DeregisterTimer(GameObject timerOwner)
+    private void DeregisterTimer(GameObject timerOwner)
     {
         _timer = timerOwner.GetComponent<CSkillTimer>();
         _timer.TimerStart -= CooldownEnable;
         _timer.TimerEnd -= CooldownDisable;
     }
 
-    public void ChangeMainElementUi(int mainElementIndex, int mainElementNumber)
+    private void AdjustUiTarget()
     {
-        Debug.Log("Change");
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 5; j++)
+            {
+                _elementSkillLists[i][j].preemptSkillNumber = _uiTarget.GetComponent<CPlayerSkill>().GetRegisterNumber(i, j-1);
+                if(_elementSkillLists[i][j].preemptSkillNumber == -1)
+                {
+                    skillUiObject.GetChild(i).GetChild(j).gameObject.SetActive(false);
+                }
+            }
+        }
+    }
+
+    private void ChangeMainElementUi(int mainElementIndex, int mainElementNumber)
+    {
         for(int i = 0; i < 5; i++)
         {
             int skillNumber = _uiTarget.GetComponent<CPlayerSkill>().GetRegisterNumber(mainElementIndex, i-1);
@@ -155,7 +170,7 @@ public class CSkillUIManager : MonoBehaviour
         }
     }
 
-    public void ChangeSubElementUi(int subElementIndex, int subElementNumber)
+    private void ChangeSubElementUi(int subElementIndex, int subElementNumber)
     {
         for (int i = 0; i < 3; i++)
         {
@@ -173,7 +188,7 @@ public class CSkillUIManager : MonoBehaviour
 
     // 주원소의 스킬들을 보여준다
     // mainElementIndex가 -1일 경우 보여주지 않는다
-    public void ShowSelectElement(int mainElementIndex)
+    private void ShowSelectElement(int mainElementIndex)
     {
         if(mainElementIndex == -1)
         {
@@ -197,7 +212,7 @@ public class CSkillUIManager : MonoBehaviour
     }
 
     // 주원소의 elementSkillNumber에 해당하는 스킬만 밝게 보여준다
-    public void ShowSelectSkill(int elementSubSkillNumber)
+    private void ShowSelectSkill(int elementSubSkillNumber)
     {
         for (int i = 0; i < _SelectElementList.Count; i++)
         {
