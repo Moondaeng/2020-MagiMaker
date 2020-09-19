@@ -71,7 +71,9 @@ public static class CConstants
     public const int UNIQUE = 90;
     public const int MYSTERY = 100;
     #endregion
-}
-public class Constants : MonoBehaviour
-{
+
+    #region Number of Slot
+    public const int SLOT_ROW = 2;  //CStroeController에서 커서 위치 이동에 필요한 상수들
+    public const int SLOT_COLOUMN = 4;
+    #endregion //CStoreController에서 커서 이동에 필요한 상수들
 }
