@@ -29,8 +29,8 @@ public class CPlayerSkill : CCharacterSkill
         }
 
         // 기본 스킬 등록
-        _skillList[0].RegisterSkill(_projectileSkill.Fireball);
-        _skillList[1].RegisterSkill(_buffSkill.AttackUp);
+        _skillList[0].RegisterSkill(_projectileSkill.LightArrow);
+        _skillList[1].RegisterSkill(_projectileSkill.Fireball);
         _skillList[2].RegisterSkill(_buffSkill.DefenceUp);
         
     }

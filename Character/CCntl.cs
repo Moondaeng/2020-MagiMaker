@@ -58,7 +58,7 @@ public class CCntl : MonoBehaviour
     static int _rollState;
     static int _wakeUpState;
     #endregion
-
+    
     #region __start__
     private void Start()
     {
@@ -105,9 +105,7 @@ public class CCntl : MonoBehaviour
     public void Attack()
     {
         // 공격 모션 키 입력
-        if ((_animator.GetCurrentAnimatorStateInfo(0).IsName("Idle")
-               || _animator.GetCurrentAnimatorStateInfo(0).IsName("Run"))
-               && _isGrounded)
+        if ((_currentBaseState.IsName("Idle") || _currentBaseState.IsName("Run")))
         {
             _animator.SetTrigger("Attack");
             StartCoroutine(COStunPause(.6f));
@@ -116,7 +114,19 @@ public class CCntl : MonoBehaviour
 
     public void Skill()
     {
-        _animator.SetTrigger("SkillTrigger");
+        if ((_currentBaseState.IsName("Idle") || _currentBaseState.IsName("Run")))
+        {
+            _animator.SetTrigger("SkillTrigger");
+            StartCoroutine(COStunPause(.8f));
+            int layerMask = (1 << LayerMask.NameToLayer("Monster")) + (1 << LayerMask.NameToLayer("Player"));
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
+            {
+                print("I'm looking at " + hit.transform.name);
+                var HitInfo = GetComponent<CController>().hit;
+            }
+        }
     }
 
     public void Jump()
@@ -160,8 +170,7 @@ public class CCntl : MonoBehaviour
     void HandleGroundedMovement()
     {
         // 점프 조건 1. 앉아 있지 않기 2. Idle 상태 3. 뛰는 상태
-        if (_jump && (_animator.GetCurrentAnimatorStateInfo(0).IsName("Idle")
-            || _animator.GetCurrentAnimatorStateInfo(0).IsName("Run")))
+        if (_jump && (_currentBaseState.IsName("Idle") || _currentBaseState.IsName("Run")))
         {
             _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, _jumpPower,
                 _rigidbody.velocity.z);
@@ -311,7 +320,6 @@ public class CCntl : MonoBehaviour
                 _animator.SetFloat("KnockBackTime", level);
                 break;
             case "Gethit":
-                _animator.SetTriggger("GetHit");
                 break;
             case "Stun":
                 CO = StartCoroutine(COStun(level * 2.5f));
