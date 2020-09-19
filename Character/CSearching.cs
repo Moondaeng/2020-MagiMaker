@@ -15,7 +15,6 @@ public class CSearching : MonoBehaviour
     {
         _myPara = GetComponent<CPlayerPara>();
         _distance = new List<float>();
-        Debug.Log(GetComponent<GameObject>().layer);
     }
 
     private void SearchMonster(float searchLength)
@@ -37,7 +36,7 @@ public class CSearching : MonoBehaviour
         {
             if (IsTargetInSight(30f, CManager.instance._monsters[i].transform) && _distance[i] < 5f)
             {
-                _enemyPara = CManager.instance._monsters[i].transform.gameObject.GetComponent<CEnemyPara>();
+                _enemyPara = CManager.instance._monsters[i].GetComponent<CEnemyPara>();
                 _enemyPara.SetEnemyAttack(_myPara._attackMax);
             }
         }
