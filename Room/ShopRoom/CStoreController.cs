@@ -8,9 +8,10 @@ public class CStoreController : MonoBehaviour
     private List<CSlotController> _slots;
     private int _positionX; //아이템 선택 위치
     private int _positionY;
-    private int _currentSlot;
+    private int _currentSlot; //현재 슬롯
     private int _lastSlot;  //이전 슬롯
     private EArrow _arrow;
+    private bool allBuyCheckFlag; //상점 아이템 다팔렸는지 확인
     enum EArrow
     {
         _left,
@@ -60,9 +61,20 @@ public class CStoreController : MonoBehaviour
         _positionY = 0;
         _lastSlot = 0;
         _arrow = EArrow._right;
+        allBuyCheckFlag = false;
     }
     private void Update()
     {
+        if (allBuyCheckFlag == true) //상점 품목 전부 구매 시
+        {
+            for(int i = 0; i < _slots.Count; i++) //슬롯 전부 꺼버림
+            {
+                _slots[i].gameObject.SetActive(false);
+            }
+
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
             if (_positionX > 0)
@@ -71,6 +83,8 @@ public class CStoreController : MonoBehaviour
                 _positionX = CConstants.SLOT_COLOUMN - 1;
 
             _arrow = EArrow._left;
+
+            _currentSlot = _positionX + _positionY * CConstants.SLOT_COLOUMN;
         }
 
         if (Input.GetKeyDown(KeyCode.RightArrow))
@@ -81,6 +95,8 @@ public class CStoreController : MonoBehaviour
                 _positionX = 0;
 
             _arrow = EArrow._right;
+
+            _currentSlot = _positionX + _positionY * CConstants.SLOT_COLOUMN;
         }
 
         if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow))
@@ -88,19 +104,19 @@ public class CStoreController : MonoBehaviour
             _positionY = (_positionY == 0 ? 1 : 0);
 
             _arrow = EArrow._up;
+
+            _currentSlot = _positionX + _positionY * CConstants.SLOT_COLOUMN;
         }
 
-        _currentSlot = _positionX + _positionY * CConstants.SLOT_COLOUMN;
-
-        if (_slots[_currentSlot].gameObject.transform.FindChild("Item").gameObject.activeSelf == false) //상점에 존재하는 상품이 아닌경우 커서 위치 바꿔야함
+        if (_slots[_currentSlot].transform.FindChild("Item").gameObject.activeSelf == false) //상점에 존재하는 상품이 아닌경우 커서 위치 바꿔야함
         {
             switch (_arrow)
             {
-                case EArrow._left: //아이템 구매할때 예외처리 따로 필요함 예시) 맨 윗줄 3개 아이템 이미 구매한 상태에서 마지막 남은 1개 구매할 때 -> 아마 구매할때 액티브인 슬롯 포문 돌려서 찾아서 거따 두면 될듯
-                    while (_slots[_currentSlot].gameObject.transform.FindChild("Item").gameObject.activeSelf == false)
+                case EArrow._left: 
+                    while (_slots[_currentSlot].transform.FindChild("Item").gameObject.activeSelf == false)
                     {
-                        if (_positionX == 0 || _positionX == 4)
-                            _positionX += 3;
+                        if (_positionX <= 0)
+                            _positionX += CConstants.SLOT_COLOUMN - 1;
                         else
                             _positionX--;
 
@@ -109,10 +125,10 @@ public class CStoreController : MonoBehaviour
                     break;
 
                 case EArrow._right:
-                    while (_slots[_currentSlot].gameObject.transform.FindChild("Item").gameObject.activeSelf == false)
+                    while (_slots[_currentSlot].transform.FindChild("Item").gameObject.activeSelf == false)
                     {
-                        if (_positionX == 3 || _positionX == 7)
-                            _positionX -= 3;
+                        if (_positionX >= CConstants.SLOT_COLOUMN - 1)
+                            _positionX -= CConstants.SLOT_COLOUMN - 1;
                         else
                             _positionX++;
 
@@ -121,7 +137,7 @@ public class CStoreController : MonoBehaviour
                     break;
 
                 case EArrow._up:
-                    while (_slots[_currentSlot].gameObject.transform.FindChild("Item").gameObject.activeSelf == false)
+                    while (_slots[_currentSlot].transform.FindChild("Item").gameObject.activeSelf == false)
                     {
                         _positionY = (_positionY == 0 ? 1 : 0);
 
@@ -130,10 +146,34 @@ public class CStoreController : MonoBehaviour
                     break;
             }
         }
-
-        _slots[_lastSlot].gameObject.transform.FindChild("Image").gameObject.SetActive(false);
-        _slots[_currentSlot].gameObject.transform.FindChild("Image").gameObject.SetActive(true);
+         
+        _slots[_lastSlot].transform.FindChild("Image").gameObject.SetActive(false);
+        _slots[_currentSlot].transform.FindChild("Image").gameObject.SetActive(true);
         _lastSlot = _currentSlot;
 
+        //정보창 텍스트 띄워주는거 해야함
+
+        if(Input.GetKeyDown(KeyCode.Return)) //엔터키 입력 시 아이템 구매
+        {
+            Debug.Log("Buy Item"); //인벤토리에 넣는 코드 구현해야함
+
+            GameObject slot = _slots[_currentSlot].gameObject;
+            for (int i = 0; i < slot.transform.childCount; i++)
+                slot.transform.GetChild(i).gameObject.SetActive(false);
+
+            //아이템 구매시 커서 이동
+            allBuyCheckFlag = true;
+            for (int i = 0; i < _slots.Count; i++) //리스트 가장 앞쪽부터 확인해서 커서 옮김
+                if (_slots[i].transform.FindChild("Item").gameObject.activeSelf == true)
+                {
+                    _currentSlot = i;
+                    allBuyCheckFlag = false;
+
+                    _slots[_lastSlot].transform.FindChild("Image").gameObject.SetActive(false);
+                    _slots[_currentSlot].transform.FindChild("Image").gameObject.SetActive(true);
+                    _lastSlot = _currentSlot;
+                    break;
+                }
+        }
     }
 }

@@ -342,13 +342,13 @@ public class CCreateStage
     }
     public void CreateRoom(CRoom[,] roomArr, int roomCount, int roadCount)
     {
-        //debug용 보고싶은 맵 있으면 여기다 가져다 두면 됨.
-        if(roomCount == 1)
-        {
-            GameObject temproom = Resources.Load("Room/ShopRoom1") as GameObject;
-            Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
-            return;
-        }
+        ////debug용 보고싶은 맵 있으면 여기다 가져다 두면 됨.
+        //if(roomCount == 1)
+        //{
+        //    GameObject temproom = Resources.Load("Room/ShopRoom1") as GameObject;
+        //    Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
+        //    return;
+        //}
         InstantiateRoom(roomArr[roomCount, roadCount].RoomType);
     }
 

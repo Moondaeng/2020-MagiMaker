@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class CSlotController : MonoBehaviour
 {
-    public GameObject item;
+    private GameObject item;
     public void SetItem(GameObject item)
     {
         this.item = item;
