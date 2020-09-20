@@ -8,6 +8,7 @@ public class CStoreController : MonoBehaviour
     private List<CSlotController> _slots;
     private int _positionX; //아이템 선택 위치
     private int _positionY;
+    private int _currentSlot;
     private int _currentSlot; //현재 슬롯
     private int _lastSlot;  //이전 슬롯
     private EArrow _arrow;
