@@ -7,39 +7,21 @@ namespace Item
     [System.Serializable]
     public class CEquip : CItem
     {
-        [System.Serializable]
-        public class EquipEffect
+        /// <summary>
+        /// 패시브 효과 발동 조건
+        /// </summary>
+        public enum ECondition
         {
-            /// <summary>
-            /// 발동 효과
-            /// </summary>
-            public enum EType
-            {
-                Heal
-            }
-
-            /// <summary>
-            /// 패시브 효과 발동 조건
-            /// </summary>
-            public enum ECondition
-            {
-                Teleport,
-                UseSkill,
-                KillMonster
-            }
-
-            public EType EffectType;
-            public ECondition EffectCondition;
-            public float arg1;
-            public float arg2;
-            public float arg3;
-            public float arg4;
+            Teleport,
+            UseSkill,
+            KillMonster
         }
 
         [System.Serializable]
         public class EquipEffectWithChance
         {
-            public EquipEffect equipEffect;
+            public ECondition useEffectCondition;
+            public CUseEffect useEffect;
             [Range(0f, 1f)] public float Chance;
         }
 

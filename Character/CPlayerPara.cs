@@ -50,7 +50,7 @@ public class CPlayerPara : CharacterPara
     protected override void Awake()
     {
         base.Awake();
-        Inventory = new CInventory();
+        Inventory = new CInventory(gameObject);
     }
 
     public override void InitPara()
@@ -74,6 +74,7 @@ public class CPlayerPara : CharacterPara
     {
         if (_invincibility) return;
         print(name + "'s HP: " + _curHp);
+        damageEvent?.Invoke(_curHp, _maxHp);
 
         if (_curHp <= 0)
         {

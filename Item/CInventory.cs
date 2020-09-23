@@ -27,6 +27,8 @@ public class CInventory
     private List<ConsumableWithStack> _consumableItems;
     private int _selectedConsumableNumber;
 
+    private GameObject _inventoryUser;
+
     public int EquipAtkIncreaseSize { get; private set; }
     public float AtkIncreaseRate { get; private set; }
     public int DefIncreaseSize { get; private set; }
@@ -38,8 +40,9 @@ public class CInventory
 
     public ChangeConsumableEvent changeConsumableEvent = new ChangeConsumableEvent();
 
-    public CInventory(int equipCapacity = 10, int consumableCapacity = 3)
+    public CInventory(GameObject userObject, int equipCapacity = 10, int consumableCapacity = 3)
     {
+        _inventoryUser = userObject;
         _equipItems = new List<Item.CEquip>(equipCapacity);
         _consumableItems = new List<ConsumableWithStack>(consumableCapacity);
         _selectedConsumableNumber = 0;
@@ -290,7 +293,7 @@ public class CInventory
     {
         int useEffectIndex = SelectRandomEffect(consumable);
         Debug.Log($"useEffectIndex : {useEffectIndex}");
-        UseConsumableSelectedEffect(consumable, useEffectIndex);
+        UseConsumableSelectedEffect(consumable.UseEffectList[useEffectIndex].useEffect);
     }
 
     private int SelectRandomEffect(Item.CConsumable consumable)
@@ -326,22 +329,45 @@ public class CInventory
         return idx;
     }
 
-    private void UseConsumableSelectedEffect(Item.CConsumable consumable, int useEffectIndex)
+    private void UseConsumableSelectedEffect(CUseEffect useEffect)
     {
-        if(useEffectIndex == -1)
+        foreach(var damage in useEffect.DamageEffectList)
         {
-            Debug.Log("index error");
-            return;
+            switch(damage.type)
+            {
+                case CUseEffect.DamageType.damage:
+                    _inventoryUser.GetComponent<CPlayerPara>().DamagedDisregardDefence(damage.startDamage);
+                    break;
+                case CUseEffect.DamageType.heal:
+                    _inventoryUser.GetComponent<CPlayerPara>().DamagedDisregardDefence(-damage.startDamage);
+                    break;
+                default:
+                    break;
+            }
         }
-
-        switch (consumable.UseEffectList[useEffectIndex].useEffect.EffectType)
+        foreach(var cc in useEffect.CCEffectList)
         {
-            case Item.CConsumable.UseEffect.EType.Heal:
-                Debug.Log("Heal");
-                break;
-            default:
-                Debug.Log("not implement Effect");
-                break;
+            switch(cc.type)
+            {
+                case CUseEffect.CCType.stun:
+                    break;
+                case CUseEffect.CCType.slow:
+                    break;
+                default:
+                    break;
+            }
+        }
+        foreach (var buff in useEffect.BuffEffectList)
+        {
+            switch(buff.type)
+            {
+                case CUseEffect.BuffType.attackBuff:
+                    break;
+                case CUseEffect.BuffType.defenceBuff:
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
