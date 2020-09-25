@@ -37,7 +37,7 @@ public class CSearching : MonoBehaviour
             if (IsTargetInSight(30f, CManager.instance._monsters[i].transform) && _distance[i] < 5f)
             {
                 _enemyPara = CManager.instance._monsters[i].GetComponent<CEnemyPara>();
-                _enemyPara.SetEnemyAttack(_myPara._attackMax);
+                _enemyPara.DamegedRegardDefence(_myPara.GetRandomAttack());
             }
         }
     }

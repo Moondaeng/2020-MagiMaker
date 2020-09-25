@@ -47,7 +47,7 @@ public class CStunExitCommand : MonoBehaviour
 
     public void ResetAllParameters()
     {
-        _barFrontImage.rectTransform.localScale = new Vector3(1f, 1f, 1f);
+        _barFrontImage.rectTransform.localScale = new Vector3(2f, 1f, 1f);
         _start = false;
         _left.SetActive(false);
         _right.SetActive(false);

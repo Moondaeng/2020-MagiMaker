@@ -58,24 +58,24 @@ public class CPlayerPara : CharacterPara
         _col = GetComponent<BoxCollider>();
         _maxHp = 1000;
         _curHp = _maxHp;
-        _attackMin = 50;
-        _attackMax = 80;
-        _defense = 30;
+        _attackMin = 5;
+        _attackMax = 8;
+        _defense = 3;
         _eLevel = 0;
         _eType = EElementType.none;
         _isAnotherAction = false;
         _isStunned = false;
         _isDead = false;
         _invincibility = false;
-        _originColor = _obj.material.color;
+        //_originColor = _obj.material.color;
         //CUIManager.instance.UpdatePlayerUI(this);
     }
     
     protected override void UpdateAfterReceiveAttack()
     {
         if (_invincibility) return;
-        print(name + "'s HP: " + _curHp);
 
+        print(name + "'s HP: " + _curHp);
         if (_curHp <= 0)
         {
             _curHp = 0;
@@ -83,20 +83,19 @@ public class CPlayerPara : CharacterPara
             deadEvent.Invoke();
         }
     }
-
+    #region 무적판정
     public void OffInvincibility()
     {
         _invincibility = false;
         StopCoroutine(PowerOverwhelming());
         _obj.material.color = _originColor;
-        _col.enabled = true;
+        gameObject.layer = LayerMask.NameToLayer("DeadBody");
     }
 
     public void OnInvincibility()
     {
         if (_invincibilityChecker)
         {
-            _col.enabled = false;
             _invincibilityChecker = false;
             StartCoroutine(PowerOverwhelming());
         }
@@ -111,4 +110,5 @@ public class CPlayerPara : CharacterPara
             yield return null;
         }
     }
+    #endregion
 }

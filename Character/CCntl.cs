@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(CapsuleCollider))]
@@ -15,50 +16,60 @@ public class CCntl : MonoBehaviour
     //[SerializeField] float _animSpeedMultiplier = 1f;
     //[SerializeField] float _moveSpeedMultiplier = 1f;
 
-    Animator _animator;
-    AnimatorStateInfo _currentBaseState;
-    CPlayerPara _myPara;
-    CStunExitCommand _myStun;
-    Rigidbody _rigidbody;
-    CapsuleCollider _capsule;
-    BoxCollider _attack;
-    float z, x;
-    float _rotationSpeed = 30;
+    private Animator _animator;
+    private AnimatorStateInfo _currentBaseState;
+    private CPlayerPara _myPara;
+    private CStunExitCommand _myStun;
+    private Rigidbody _rigidbody;
+    private CapsuleCollider _capsule;
+    private BoxCollider _attack;
+    private CPlayerSkill _mySkill;
+    private float z, x;
+    private float _rotationSpeed = 360f;
 
     // 초기 체크값을 저장할 변수
-    float _origGroundCheckDistance;
-    float _capsuleHeight;
-    Vector3 _capsuleCenter;
+    private float _origGroundCheckDistance;
+    private float _capsuleHeight;
+    private Vector3 _capsuleCenter;
 
     // 입력 위치값 조정
-    Vector3 _inputVec;
-    Vector3 _targetDirection;
+    private Vector3 _inputVec;
+    private Vector3 _targetDirection;
 
     // 법선 벡터 (
-    Vector3 _groundNormal;
+    private Vector3 _groundNormal;
 
     // 애니메이션 상태값
-    bool _isGrounded;
-    bool _jump;
-    bool _roll;
+    private bool _isGrounded;
+    private bool _jump;
+    private bool _roll;
     private bool _isJumpInputed;
     private bool _isRollInputed;
+    private bool _isConcentrated;
+    private int _skillActionNumber;
 
     // 애니메이션 상태값 상태이상
-    bool _knockBack;
-    float _downTime;
+    private bool _knockBack;
+    private float _downTime;
     public bool _getHit;
-    bool _stun;
+    private bool _stun;
 
     // 상수
-    const float _halfF = .5f;
+    private const float _halfF = .5f;
     const float _seatingTime = .2f;
     Coroutine CO;
+    Coroutine COAttack;
+    Coroutine COSkill;
 
     static int _rollState;
     static int _wakeUpState;
+    private int indexer;
+    [SerializeField] public GameObject staff;
+
+    [System.NonSerialized]
+    public UnityEvent SkillExitEvent = new UnityEvent();
     #endregion
-    
+
     #region __start__
     private void Start()
     {
@@ -68,17 +79,19 @@ public class CCntl : MonoBehaviour
         _myStun = GetComponent<CStunExitCommand>();
         _capsule = GetComponent<CapsuleCollider>();
         _attack = GetComponentInChildren<BoxCollider>();
+        _mySkill = GetComponent<CPlayerSkill>();
         _animator.SetFloat("Jump", -4f);
         _capsuleHeight = _capsule.height;
         _capsuleCenter = _capsule.center;
         _origGroundCheckDistance = _groundCheckDistance;
         _rollState = Animator.StringToHash("Base Layer.Roll");
         _wakeUpState = Animator.StringToHash("Base Layer.WakeUp");
+        _skillActionNumber = 0;
     }
     #endregion
 
     #region 코루틴 모음집
-    public IEnumerator COStunPause(float pauseTime)
+    public IEnumerator COPause(float pauseTime)
     {
         yield return new WaitForSeconds(pauseTime);
     }
@@ -92,6 +105,14 @@ public class CCntl : MonoBehaviour
         SendMessage("EndTime");
         ExitStun();
     }
+
+    public IEnumerator COExitConcentration(float pauseTime)
+    {
+        _isConcentrated = true;
+        yield return new WaitForSeconds(pauseTime);
+        _isConcentrated = false;
+    }
+
     #endregion
 
     #region CController Use these function
@@ -108,24 +129,45 @@ public class CCntl : MonoBehaviour
         if ((_currentBaseState.IsName("Idle") || _currentBaseState.IsName("Run")))
         {
             _animator.SetTrigger("Attack");
-            StartCoroutine(COStunPause(.6f));
+            COAttack = StartCoroutine(COPause(.6f));
         }
+    }
+
+    public void ComboIndexer(int index)
+    {
+        indexer = index;
     }
 
     public void Skill()
     {
-        if ((_currentBaseState.IsName("Idle") || _currentBaseState.IsName("Run")))
+        Debug.Log(indexer);
+        if ((_currentBaseState.IsName("Idle") || _currentBaseState.IsName("Run")) || !_isConcentrated)
         {
-            _animator.SetTrigger("SkillTrigger");
-            StartCoroutine(COStunPause(.8f));
-            int layerMask = (1 << LayerMask.NameToLayer("Monster")) + (1 << LayerMask.NameToLayer("Player"));
+            int layerMask = (1 << LayerMask.NameToLayer("Monster")) + (1 << LayerMask.NameToLayer("Player")) + (1 << LayerMask.NameToLayer("Default"));
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
             {
-                print("I'm looking at " + hit.transform.name);
-                var HitInfo = GetComponent<CController>().hit;
+                //print("I'm looking at " + hit.transform.name);
+                GetComponent<CController>().hit = hit;
             }
+            if (indexer == 3)
+            {
+                _skillActionNumber = 1;
+                StartCoroutine(COExitConcentration(5f));
+            }
+            else
+            {
+                _skillActionNumber = 0;
+            }
+            _animator.SetTrigger("SkillTrigger");
+            COSkill = StartCoroutine(COPause(.8f));
+        }
+        else if (_isConcentrated)
+        {
+            StopCoroutine(COSkill);
+            _isConcentrated = false;
+            SkillExitEvent.Invoke();
         }
     }
 
@@ -141,6 +183,8 @@ public class CCntl : MonoBehaviour
     }
     #endregion
 
+
+    #region 업데이트
     private void Update()
     {
         _currentBaseState = _animator.GetCurrentAnimatorStateInfo(0);
@@ -159,6 +203,11 @@ public class CCntl : MonoBehaviour
         else
         {
             _jump = false;
+        }
+
+        if (_currentBaseState.IsName("Attack1") || _currentBaseState.IsName("Skill1") || _currentBaseState.IsName("KnockBack"))
+        {
+            TurnToCameraRelative();
         }
 
         if (_isGrounded) HandleGroundedMovement();
@@ -204,6 +253,8 @@ public class CCntl : MonoBehaviour
 
         _animator.SetBool("KnockBack", _knockBack);
         _animator.SetBool("Stun", _stun);
+        _animator.SetInteger("SkillList", _skillActionNumber);
+        _animator.SetBool("Skill2", _isConcentrated);
 
         // 이동 키를 눌렀을 경우 체크
         if (x != 0 || z != 0) _animator.SetBool("Moving", true);
@@ -238,8 +289,7 @@ public class CCntl : MonoBehaviour
     // 구형보간 
     void RotateTowardMovementDirection()
     {
-        if (_inputVec != Vector3.zero && (_animator.GetCurrentAnimatorStateInfo(0).IsName("Idle")
-            || _animator.GetCurrentAnimatorStateInfo(0).IsName("Run")))
+        if (_inputVec != Vector3.zero && (_currentBaseState.IsName("Idle") || _currentBaseState.IsName("Run")))
         {
             transform.rotation = Quaternion.Slerp(transform.rotation,
                 Quaternion.LookRotation(_targetDirection), Time.deltaTime * _rotationSpeed);
@@ -263,13 +313,25 @@ public class CCntl : MonoBehaviour
         _targetDirection = h * right + v * forward;
     }
 
+    public void TurnToCameraRelative()
+    {
+        int layerMask = 1 << LayerMask.NameToLayer("Default");
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
+        {
+            transform.LookAt(hit.point - new Vector3(0f, hit.point.y, 0f));
+        }
+    }
+
     void CrowdControlAnimation()
     {
-        if (_animator.GetCurrentAnimatorStateInfo(0).IsName("KnockBack"))
+        if (_currentBaseState.IsName("KnockBack"))
         {
             _knockBack = false;
         }
     }
+    #endregion
 
     // 점프할 발 체크 추후에 여기에 사운드 추가
     // 애니메이션 placeholder에 들어가있는 함수

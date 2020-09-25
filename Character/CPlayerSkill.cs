@@ -8,7 +8,7 @@ using UnityEngine;
  */
 public class CPlayerSkill : CCharacterSkill
 {
-    protected List<CSkillFormat> _comboSkillList;
+    public List<CSkillFormat> _comboSkillList;
 
     protected override void Awake()
     {
@@ -25,14 +25,17 @@ public class CPlayerSkill : CCharacterSkill
         // 콤보 스킬 포맷 등록
         for (int i = 0; i < 42; i++)
         {
-            _skillList.Add(new CSkillFormat(i, 0.5f + 0.5f * i, gameObject));
+            if (i == 3) _skillList.Add(new CSkillFormat(i, 10f * i, gameObject, 1));
+            else _skillList.Add(new CSkillFormat(i, 0.5f + 0.5f * i, gameObject, 0));
         }
 
         // 기본 스킬 등록
         _skillList[0].RegisterSkill(_projectileSkill.LightArrow);
         _skillList[1].RegisterSkill(_projectileSkill.Fireball);
-        _skillList[2].RegisterSkill(_buffSkill.DefenceUp);
-        
+        _skillList[2].RegisterSkill(_projectileSkill.LightOfPurification);
+        _skillList[3].RegisterSkill(_projectileSkill.Flamethrower);
+        _skillList[6].RegisterSkill(_projectileSkill.Rain);
+        _skillList[7].RegisterSkill(_buffSkill.DefenceUp);
     }
 
     public bool? UseComboSkillToPosition(int skillNumber, Vector3 targetPos)

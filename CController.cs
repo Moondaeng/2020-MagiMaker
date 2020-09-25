@@ -14,17 +14,18 @@ public class CController : MonoBehaviour
     private CSkillSelector _comboSelector;
     //public CGameEvent gameEvent;
 
-    public GameObject player;
+    [SerializeField] public GameObject player;
 
     private CCntl _playerControl;
 
     float x;
     float z;
 
+    public RaycastHit hit;
+
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
-
         // 조작 관리
         keyDictionary = new Dictionary<KeyCode, Action>
         {
@@ -38,7 +39,7 @@ public class CController : MonoBehaviour
             {KeyCode.E, UseConsumable },
             {KeyCode.F, GetItem },
             {KeyCode.Z, Roll },
-            {KeyCode.Mouse1, UseSkill },
+            {KeyCode.Mouse1, Skill },
         };
 
         //gameEvent = GameObject.Find("GameEvent").GetComponent<CGameEvent>();
@@ -164,31 +165,25 @@ public class CController : MonoBehaviour
             }
         }
     }
-    
+
     private void SkillSelect(int index)
     {
         _comboSelector.Combo(index);
+        SendMessage("ComboIndexer", _comboSelector.EndComboIndex());
     }
 
+    // CCntl로 해당 내용 옮김
     // 스킬 사용
     private void UseSkill()
     {
-        int layerMask = 1 << 9;
-        layerMask = ~layerMask;
-        RaycastHit hit;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
+        int comboSkillNum = _comboSelector.EndCombo();
+        if (comboSkillNum == -1) return;
+        bool? isSkillUse = player.GetComponent<CPlayerSkill>().UseSkillToPosition(comboSkillNum, hit.point);
+        // 성공 시 플레이어 스킬 사용 이벤트 수행
+        if (isSkillUse == true)
         {
-            print("I'm looking at " + hit.transform.name);
-            int comboSkillNum = _comboSelector.EndCombo();
-            if (comboSkillNum == -1) return;
-            bool? isSkillUse = player.GetComponent<CPlayerSkill>().UseSkillToPosition(comboSkillNum, hit.point);
-            // 성공 시 플레이어 스킬 사용 이벤트 수행
-            if (isSkillUse == true)
-            {
-                //player.GetComponent<CCntl>().SkillAction(2, hit.point);
-                //gameEvent.PlayerAction(number, player.transform.position, hit.point);
-            }
+            //player.GetComponent<CCntl>().SkillAction(2, hit.point);
+            //gameEvent.PlayerAction(number, player.transform.position, hit.point);
         }
     }
 }

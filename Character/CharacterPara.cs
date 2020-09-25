@@ -13,11 +13,11 @@ public class DamageEvent : UnityEvent<int, int>
 [RequireComponent(typeof(CBuffTimer))]
 public class CharacterPara : MonoBehaviour
 {
-    public int _maxHp { get; set; }
-    public int _curHp { get; set; }
-    public int _attackMin { get; set; }
-    public int _attackMax { get; set; }
-    public int _defense { get; set; }
+    [Tooltip("최대 체력")] [SerializeField] public int _maxHp;
+    [HideInInspector] public int _curHp;
+    [Tooltip("최소 공격력")] [SerializeField] public int _attackMin;
+    [Tooltip("최대 공격력")] [SerializeField] public int _attackMax;
+    [Tooltip("방어력")] [SerializeField] public int _defense;
     public bool _isAnotherAction { get; set; }
     public bool _isStunned { get; set; }
     public bool _isDead { get; set; }
@@ -61,24 +61,12 @@ public class CharacterPara : MonoBehaviour
     {
 
     }
-
-    // 평타 데미지 계산식
-    public float GetRandomAttack()
+    
+    public int GetRandomAttack()
     {
-        float randAttack = UnityEngine.Random.Range(_attackMin, _attackMax + 1);
-        // 최종 계산식 대충
-        randAttack = randAttack - _defense;
-        return randAttack;
+        return UnityEngine.Random.Range(_attackMin, _attackMax + 1);
     }
-
-    public void SetEnemyAttack(float EnemyAttackPower)
-    {
-        // 데미지를 버림 형식으로 표현
-        _curHp -= (int)EnemyAttackPower;
-        //transform.gameObject.SendMessage("hitEnemyAttack");
-        UpdateAfterReceiveAttack();
-    }
-
+    
     // 방어력 계산식: 1000 / (950 + 10*방어력)
     public void DamegedRegardDefence(int enemyAttack)
     {
@@ -88,7 +76,12 @@ public class CharacterPara : MonoBehaviour
 
     public void DamagedDisregardDefence(int enemyAttack)
     {
-        _curHp -= (int)enemyAttack;
+        // 초과딜 방지
+        if (enemyAttack >= _curHp)
+        {
+            enemyAttack = _curHp;
+        }
+        _curHp -= enemyAttack;
         UpdateAfterReceiveAttack();
     }
 
