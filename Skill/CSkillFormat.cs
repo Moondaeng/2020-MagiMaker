@@ -16,8 +16,9 @@ public class CSkillFormat
 
     private int _timerRegisterNumber;
     private float _cooldown;
+    private int _animationNumber;
 
-    public CSkillFormat(int registerNumber, float cooldown, GameObject user)
+    public CSkillFormat(int registerNumber, float cooldown, GameObject user, int ani)
     {
         MaxStack = 1;
         _currentStack = 1;
@@ -25,6 +26,7 @@ public class CSkillFormat
         _timer = _userObject.GetComponent<CSkillTimer>();
         _timerRegisterNumber = registerNumber;
         _cooldown = cooldown;
+        _animationNumber = ani;
     }
 
     public CSkillFormat(int maxStack, int registerNumber, float cooldown, GameObject user)

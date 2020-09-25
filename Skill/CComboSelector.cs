@@ -164,6 +164,23 @@ public class CSkillSelector
         return currentSelectedSkillNumber;
     }
 
+    public int EndComboIndex()
+    {
+        int currentSelectedSkillNumber = -1;
+        int subElementNumber = 0;
+
+        if (_currentState == ComboState.Sub)
+        {
+            subElementNumber = 0;
+        }
+        else if (_currentState == ComboState.Select)
+        {
+            subElementNumber = subElement[selectedSubElement];
+        }
+        currentSelectedSkillNumber = mainElement[selectedMainElement] * elementTotalNumber + subElementNumber;
+        return currentSelectedSkillNumber;
+    }
+
     // 키 입력을 받으면 현재 상태에 따라 함수 실행
     private void Select(int index)
     {

@@ -19,11 +19,15 @@ public class CParitcleSkillBase : MonoBehaviour
 
     [Tooltip("수동으로 쓰는 파티클")]
     [SerializeField] protected ParticleSystem[] _manualParticleSystems;
+    
+    [HideInInspector] public GameObject _skillUsingUser;
 
-
+    [Tooltip("Staff에서 발사됨")]
+    [SerializeField] public bool IsStartingStaff;
     public enum AttackType
     {
-        damage, stun
+        damage, stun, KnockBack, Slow, Burn, Curse, Blind,
+        DecreaseDefense, DecreaseAttack, Debuff
     }
 
     // 공격에 해당하는 경우들에 필요한 정보들 구조체
@@ -33,12 +37,11 @@ public class CParitcleSkillBase : MonoBehaviour
     public struct AttackArgumentsList
     {
         public AttackType type;
-        public float arg1;
-        public float arg2;
+        public int arg1;
     }
 
     public List<AttackArgumentsList> AttackArguments;
-    public int _attackPower;
+    [HideInInspector] public int _attackPower;
     #endregion
 
     private IEnumerator CleanupEverythingCoRoutine()
@@ -69,8 +72,6 @@ public class CParitcleSkillBase : MonoBehaviour
 
     protected virtual void Start()
     {
-        CreateExplosion(gameObject.transform.position, _forceRadius, _forceAmount);
-        
         StartParticleSystems();
         
         ICollisionHandler handler = (this as ICollisionHandler);
@@ -94,7 +95,7 @@ public class CParitcleSkillBase : MonoBehaviour
         }
     }
 
-    public static void CreateExplosion(Vector3 pos, float radius, float force)
+    public virtual void CreateExplosion(Vector3 pos, float radius, float force)
     {
         if (force <= 0.0f || radius <= 0.0f)
         {
@@ -120,5 +121,90 @@ public class CParitcleSkillBase : MonoBehaviour
         }
 
         StartCoroutine(CleanupEverythingCoRoutine());
+    }
+
+    protected void SwitchInType(AttackArgumentsList a, CPlayerPara p)
+    {
+        switch (a.type)
+        {
+            #region Nonused
+            case AttackType.damage:
+                p.DamegedRegardDefence(_attackPower * a.arg1);
+                //if (_skillUsingUser.tag == "Player")
+                //    return;
+                break;
+            case AttackType.stun:
+                if (_skillUsingUser.tag == "Player")
+                    return;
+                break;
+            case AttackType.KnockBack:
+                if (_skillUsingUser.tag == "Player")
+                    return;
+                break;
+            case AttackType.Slow:
+                if (_skillUsingUser.tag == "Player")
+                    return;
+                break;
+            case AttackType.Burn:
+                if (_skillUsingUser.tag == "Player")
+                    return;
+                break;
+            case AttackType.Curse:
+                if (_skillUsingUser.tag == "Player")
+                    return;
+                break;
+            case AttackType.Blind:
+                if (_skillUsingUser.tag == "Player")
+                    return;
+                break;
+            case AttackType.DecreaseDefense:
+                if (_skillUsingUser.tag == "Player")
+                    return;
+                break;
+            case AttackType.DecreaseAttack:
+                if (_skillUsingUser.tag == "Player")
+                    return;
+                break;
+            #endregion
+            case AttackType.Debuff:
+                if (_skillUsingUser.tag == "Player")
+                {
+                    Debug.Log("정화!");
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    protected void SwitchInType(AttackArgumentsList a, CEnemyPara e)
+    {
+        //damage, stun, KnockBack, Slow, Burn, Curse, Blind, DecreaseDefense, DecreaseAttack, Debuff
+        switch (a.type)
+        {
+            case AttackType.damage:
+                e.DamegedRegardDefence(_attackPower * a.arg1);
+                break;
+            case AttackType.stun:
+                break;
+            case AttackType.KnockBack:
+                break;
+            case AttackType.Slow:
+                break;
+            case AttackType.Burn:
+                break;
+            case AttackType.Curse:
+                break;
+            case AttackType.Blind:
+                break;
+            case AttackType.DecreaseDefense:
+                break;
+            case AttackType.DecreaseAttack:
+                break;
+            case AttackType.Debuff:
+                break;
+            default:
+                break;
+        }
     }
 }

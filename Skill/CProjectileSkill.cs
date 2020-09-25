@@ -6,11 +6,9 @@ using UnityEngine;
 // 스킬 제작 경과에 따라 다른 스킬군과 코드 합체할 수도 있음
 public class CProjectileSkill : MonoBehaviour
 {
-    public GameObject _fireballObject;
-    public GameObject _lightArrowObject;
+    public List<GameObject> _spellObject;
     private GameObject _prefabObject;
     private CParitcleSkillBase _prefabScript;
-
     private static CLogComponent _log;
 
     private void Awake()
@@ -21,13 +19,29 @@ public class CProjectileSkill : MonoBehaviour
     // 스킬 포맷에 넣을 스킬
     public void Fireball(GameObject user, Vector3 targetPos)
     {
-        MakeProjectilePrototype(user, targetPos, _fireballObject, true, false);
+        MakeProjectilePrototype(user, targetPos, _spellObject[0], true, false);
     }
 
     public void LightArrow(GameObject user, Vector3 targetPos)
     {
-        MakeProjectilePrototype(user, targetPos, _lightArrowObject, true, false);
+        MakeProjectilePrototype(user, targetPos, _spellObject[1], true, false);
     }
+
+    public void LightOfPurification(GameObject user, Vector3 targetPos)
+    {
+        MakeProjectilePrototype(user, targetPos, _spellObject[2], true, false);
+    }
+
+    public void Flamethrower(GameObject user, Vector3 targetPos)
+    {
+        MakeProjectilePrototype(user, targetPos, _spellObject[3], true, false);
+    }
+
+    public void Rain(GameObject user, Vector3 targetPos)
+    {
+        MakeProjectilePrototype(user, targetPos, _spellObject[4], true, false);
+    }
+
 
     // 투사체 발사 스킬 원형
     private void MakeProjectilePrototype(GameObject user, Vector3 targetPos, 
@@ -57,20 +71,55 @@ public class CProjectileSkill : MonoBehaviour
                 if (_prefabScript._isProjectile)
                 {
                     rotation = user.transform.rotation;
-                    startPos = user.transform.position + forward * 2f + up * 1.7f;
+                    if (_prefabScript.IsStartingStaff)
+                    {
+                        startPos = user.GetComponent<CCntl>().staff.transform.position;
+                        _prefabObject.transform.position = startPos;
+                        Debug.Log(startPos);
+                    }
+                    else
+                    {
+                        startPos = user.transform.position + forward * 2f + up * 1.7f;
+                        _prefabObject.transform.position = startPos;
+                    }
+                    //Debug.Log("요기다1");
                 }
                 else
                 {
                     startPos = user.transform.position + (forwardY * 10.0f);
+                    _prefabObject.transform.position = startPos;
+                    //Debug.Log("요기다2");
                 }
             }
             else
             {
-                startPos = transform.position + (forwardY * 5.0f);
-                rotation = transform.rotation;
-                startPos.y = 0.0f;
+                if (Vector3.Distance(targetPos, user.transform.position) >= 5f || targetPos == Vector3.zero)
+                {
+                    if (ProjectileModel.name == "LightOfPurification")
+                    {
+                        startPos = user.transform.position + forward * 10 + up * 5;
+                    }
+                    else if (ProjectileModel.name == "Flamethrower")
+                    {
+                        startPos = user.transform.position + forward * 5f;
+                    }
+                    else startPos = user.transform.position + forward * 5;
+                    _prefabObject.transform.position = startPos;
+                    //Debug.Log(startPos);
+                    //Debug.Log("요기다3");
+                }
+                else
+                {
+                    if (targetPos.y <= 1 && targetPos.y >= -1)
+                    {
+                        startPos = targetPos;
+                        startPos.y = 2f;
+                        _prefabObject.transform.position = startPos;
+                    }
+                    //Debug.Log("요기다4");
+                }
+
             }
-            _prefabObject.transform.position = startPos;
             _prefabObject.transform.rotation = rotation;
 
             var projectileScript = _prefabObject.GetComponent<CParticleProjectile>();
@@ -87,7 +136,8 @@ public class CProjectileSkill : MonoBehaviour
             projectile.tag = user.tag;
         }
         // 공격력 등 필요한 정보 넣기
-        _prefabScript._attackPower = user.GetComponent<CharacterPara>()._attackMax;
+        _prefabScript._attackPower = user.GetComponent<CharacterPara>().GetRandomAttack();
+        _prefabScript._skillUsingUser = user;
         // 원소 관련 정보
     }
 }

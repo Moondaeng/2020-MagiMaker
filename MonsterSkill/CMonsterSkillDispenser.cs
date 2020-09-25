@@ -23,24 +23,24 @@ public class CMonsterSkillDispenser : MonoBehaviour
             _prefabScript = _prefabObject.GetComponent<CParitcleSkillBase>();
             if (_prefabScript._isProjectile)
             {
-                // set the start point near the player
                 rotation = transform.rotation;
                 pos = transform.position + forward + right + up;
             }
             else
             {
-                // set the start point in front of the player a ways
                 pos = transform.position + (forwardY * 10.0f);
             }
         }
         else
         {
-            // set the start point in front of the player a ways, rotated the same way as the player
             pos = transform.position + (forwardY * 5.0f);
             rotation = transform.rotation;
             pos.y = 0.0f;
         }
         _prefabObject.transform.position = pos;
         _prefabObject.transform.rotation = rotation;
+
+        _prefabScript._attackPower = gameObject.GetComponent<CharacterPara>().GetRandomAttack();
+        _prefabScript._skillUsingUser = gameObject;
     }
 }

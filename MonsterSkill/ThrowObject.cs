@@ -2,19 +2,29 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ThrowObject : MonoBehaviour
+
+public class ThrowObject : MonoBehaviour, ICollisionHandler
 {
     [SerializeField] float firingAngle = 45f;
     [SerializeField] float gravity = 9.8f;
     public Transform Projectile;
     [HideInInspector] public Transform Target;
     [HideInInspector] public Transform _myTransform;
-    
+    private void Start()
+    {
+        ICollisionHandler handler = (this as ICollisionHandler);
+        CCollision Checker = GetComponent<CCollision>();
+        if (Checker != null)
+        {
+            Checker.CollisionHandler = handler;
+        }
+    }
+
     void StartShot()
     {
         StartCoroutine(SimulateProjectile());
     }
-    
+
     IEnumerator SimulateProjectile()
     {
         // 투사체를 던지는 물체의 위치로 이동 + 필요한 경우 오프셋을 추가
@@ -46,16 +56,18 @@ public class ThrowObject : MonoBehaviour
         Destroy(this.gameObject);
     }
 
-    private void OnTriggerEnter(Collider other)
+    public void HandleCollision(GameObject obj, Collision c)
     {
-        // 플레이어의 히트박스가 꺼져있으면 그냥 지나감
-        if (other.gameObject.tag == "Player" && other.gameObject.GetComponent<BoxCollider>().enabled)
+        if (c.contacts.Length != 0)
         {
-            StopAllCoroutines();
-            SendMessage("Explosion");
-            CCntl hitscan = other.GetComponent<CCntl>();
-            hitscan.CCController("Stun", 2f);
-            RemoveMe();
+            if (c.gameObject.layer == LayerMask.NameToLayer("Player"))
+            {
+                StopAllCoroutines();
+                SendMessage("Explosion");
+                Invoke("RemoveMe", 1f);
+                CCntl hitscan = c.gameObject.GetComponent<CCntl>();
+                hitscan.CCController("Stun", 2f);
+            }
         }
     }
 }

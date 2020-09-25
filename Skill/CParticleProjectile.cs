@@ -7,13 +7,13 @@ public class CParticleProjectile : CParitcleSkillBase, ICollisionHandler
 {
     #region parameters
     [Tooltip("충돌 및 물리에 사용할 충돌체 개체")]
-    [SerializeField] private GameObject _projectileColliderObject;
+    [SerializeField] private GameObject _projectileColliderObject = null;
 
     [Tooltip("충돌시 재생할 사운드")]
-    [SerializeField] private AudioSource _projectileCollisionSound;
+    [SerializeField] private AudioSource _projectileCollisionSound = null;
 
     [Tooltip("충돌시 재생할 파티클 시스템")]
-    [SerializeField] private ParticleSystem _explosion;
+    [SerializeField] private ParticleSystem _explosion = null;
 
     [Tooltip("충돌시 폭발 반경")]
     [SerializeField] private float _explosionRadius = 50.0f;
@@ -26,9 +26,7 @@ public class CParticleProjectile : CParitcleSkillBase, ICollisionHandler
 
     [Tooltip("충돌체가 갈 방향")]
     [SerializeField] public Vector3 _direction = Vector3.forward;
-
-
-
+    
     [Tooltip("충돌시 파괴 할 파티클 시스템.")]
     public ParticleSystem[] _destroyParticleonCollision;
 
@@ -76,31 +74,26 @@ public class CParticleProjectile : CParitcleSkillBase, ICollisionHandler
         {
             _explosion.transform.position = c.contacts[0].point;
             _explosion.Play();
-            CParitcleSkillBase.CreateExplosion(c.contacts[0].point, _explosionRadius, _explosionForce);
+            CreateExplosion(c.contacts[0].point, _explosionRadius, _explosionForce);
 
-            // 몬스터 타격 관련 함수
-            CEnemyPara enemyPara = c.gameObject.GetComponent<CEnemyPara>();
-            CPlayerPara playerPara = c.gameObject.GetComponent<CPlayerPara>();
-
-            foreach (var attackArg in AttackArguments)
+            if (c.gameObject.tag == "player")
             {
-                switch (attackArg.type)
+                CPlayerPara p = c.gameObject.GetComponent<CPlayerPara>();
+                foreach (AttackArgumentsList a in AttackArguments)
                 {
-                    case AttackType.damage:
-                        if (enemyPara != null)
-                        {
-                            enemyPara.SetEnemyAttack(_attackPower * attackArg.arg1);
-                        }   
-                        else if (playerPara != null)
-                        {
-                            playerPara.SetEnemyAttack(_attackPower * attackArg.arg1);
-                        }
-                        break;
-                    case AttackType.stun:
-                        Debug.Log("stun");
-                        break;
+                    SwitchInType(a, p);
                 }
             }
+            else if (c.gameObject.tag == "Monster")
+            {
+                CEnemyPara e = c.gameObject.GetComponent<CEnemyPara>();
+                foreach (AttackArgumentsList a in AttackArguments)
+                {
+                    SwitchInType(a, e);
+                }
+            }
+            // 몬스터 타격 관련 함수
+            
             if (CollisionDelegate != null)
             {
                 CollisionDelegate(this, c.contacts[0].point);
