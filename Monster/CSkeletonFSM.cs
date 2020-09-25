@@ -8,7 +8,7 @@ public class CSkeletonFSM : CEnemyFSM
     {
         _moveSpeed = 4f;
         _attackDistance = 5f;
-        _attackRadius = 20f;
+        _attackAngle = 20f;
         _anim = GetComponent<Animator>();
         _myPara = GetComponent<CEnemyPara>();
         _myPara.deadEvent.AddListener(CallDeadEvent);

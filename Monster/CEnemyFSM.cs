@@ -29,7 +29,7 @@ public class CEnemyFSM : MonoBehaviour
     protected float _rotAnglePerSecond = 360f; //1초에 플레이어의 방향을 360도 회전
     public float _moveSpeed { get; set; } //초당 ~미터의 속도로 이동
     public float _attackDistance { get; set; } // 공격 거리 (적과의 거리)
-    protected float _attackRadius { get; set; } // 공격 범위
+    protected float _attackAngle { get; set; } // 공격 범위
 
     #region 모션들
     protected static int _idleState { get; set; }
@@ -88,8 +88,14 @@ public class CEnemyFSM : MonoBehaviour
     // 이동함수
     protected virtual void MoveState()
     {
-        _anotherAction = false;
-        _lookAtPlayer = true;
+        if (_anotherAction)
+        {
+            _anotherAction = false;
+        }
+        if (!_lookAtPlayer)
+        {
+            _lookAtPlayer = true;
+        }
         _myState = EState.Move;
         MoveToDestination();
     }
@@ -114,20 +120,32 @@ public class CEnemyFSM : MonoBehaviour
     // _lookAtPlayer는 UpdateState들의 state들에서 OnOff처리를 해야한다.
     protected void IsLookPlayer()
     {
-        if (_lookAtPlayer) TurnToDestination();
+        if (_lookAtPlayer)
+        {
+            TurnToDestination();
+        }
     }
 
     protected virtual void ChaseState()
     {
         _myState = EState.Chase;
-        if (!_actionStart) _actionStart = true;
+        if (!_actionStart)
+        {
+            _actionStart = true;
+        }
     }
 
     protected virtual void AttackState1()
     {
         _myState = EState.Attack;
-        if (_lookAtPlayer) _lookAtPlayer = false;
-        _coolDown = true;
+        if (_lookAtPlayer)
+        {
+            _lookAtPlayer = false;
+        }
+        if (!_coolDown)
+        {
+            _coolDown = true;
+        }
     }
 
     protected virtual void AttackWaitState()
@@ -258,12 +276,12 @@ public class CEnemyFSM : MonoBehaviour
     #endregion
 
     #region 공격력 전달함수
-    // 애니메이션에 추가되는 함수로써, _attackRadius, _attackDistance의 값을 충족하면 데미지를 주게한다.
+    // 애니메이션에 추가되는 함수로써, _attackAngle, _attackDistance의 값을 충족하면 데미지를 주게한다.
     protected void AttackCheck()
     {
         for (int i = 0; i < _players.Count; i++)
         {
-            if (IsTargetInSight(_attackRadius, _players[i].transform) && IsInAttackDistance(_attackDistance, _players[i].transform))
+            if (IsTargetInSight(_attackAngle, _players[i].transform) && IsInAttackDistance(_attackDistance, _players[i].transform))
             {
                 _playerPara = _players[i].GetComponent<CPlayerPara>();
                 AttackCalculate();

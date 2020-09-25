@@ -13,8 +13,8 @@ public class CGoblinFSM : CEnemyFSM
     protected override void InitStat()
     {
         _moveSpeed = 5f;
-        _attackDistance = 3f;
-        _attackRadius = 10f;
+        _attackDistance = 5f;
+        _attackAngle = 10f;
         _anim = GetComponent<Animator>();
         _myPara = GetComponent<CEnemyPara>();
         _myPara.deadEvent.AddListener(CallDeadEvent);
@@ -32,7 +32,7 @@ public class CGoblinFSM : CEnemyFSM
         _deadState1 = Animator.StringToHash("Base Layer.Death1");
         _deadState2 = Animator.StringToHash("Base Layer.Death2");
         
-        _cooltime = 1f;
+        _cooltime = 0.5f;
         _skillCooltime1 = 5f;
         _originCooltime = _cooltime;
         _originSkillCooltime1 = _skillCooltime1;
@@ -87,9 +87,11 @@ public class CGoblinFSM : CEnemyFSM
 
     protected override void ChaseState()
     {
-        _runEnd = false;
-        _myState = EState.Chase;
-        if (!_actionStart) _actionStart = true;
+        if (_runEnd)
+        {
+            _runEnd = false;
+        }
+        base.ChaseState();
         if (_currentBaseState.fullPathHash != _deadState1 
             || _currentBaseState.fullPathHash != _deadState2)
             MoveState();

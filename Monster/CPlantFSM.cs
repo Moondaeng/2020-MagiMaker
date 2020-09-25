@@ -9,7 +9,7 @@ public class CPlantFSM : CEnemyFSM
     {
         _moveSpeed = 0f;
         _attackDistance = 5f;
-        _attackRadius = 10f;
+        _attackAngle = 10f;
         _anim = GetComponent<Animator>();
         _myPara = GetComponent<CEnemyPara>();
         _myPara.deadEvent.AddListener(CallDeadEvent);
