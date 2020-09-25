@@ -12,7 +12,6 @@ public class CRespawn : MonoBehaviour
     [SerializeField] bool _isRespawn;
     [Tooltip("몇 마리?")]
     [SerializeField] int[] _spawnNumber;
-    CManager _myManager;
     Transform[, ] _monsterPosition;
     int _sumOfSpawnNumber;
     int _maxOfSpawnNumber;
@@ -22,7 +21,6 @@ public class CRespawn : MonoBehaviour
 
     void Start()
     {
-        _myManager = GetComponent<CManager>();
         SumSpawnNumber();
         ScaleMonsterTransform();
     }
@@ -74,7 +72,7 @@ public class CRespawn : MonoBehaviour
             mon.GetComponent<CEnemyPara>().SetRespawn(gameObject, _monsterIndex + i, _monsterPosition[index, i].position);
             mon.SetActive(false);
             _monsters.Add(mon);
-            _myManager.AddNewMonsters(mon);
+            CManager.instance.AddNewMonsters(mon);
         }
     }
 
@@ -102,13 +100,14 @@ public class CRespawn : MonoBehaviour
         //    _deadMonsters = 0;
         //    if (!_isRespawn)
         //    {
-        //        _myManager.DestroyAllMonsters();
+        //        CManager.instance.DestroyAllMonsters();
         //        Destroy(transform.gameObject);
         //    }
         //}
 
     }
 
+    #region 미사용
     IEnumerator InitMonsters()
     {
         yield return new WaitForSeconds(_respawnDelay);
@@ -124,6 +123,7 @@ public class CRespawn : MonoBehaviour
             _monsters[i].SetActive(true);
         }
     }
+    #endregion
 
     private void OnTriggerEnter(Collider col)
     {

@@ -5,7 +5,6 @@ using UnityEngine;
 public class CGolemFSM : CEnemyFSM
 {
     #region 골렘만 필요한 Properties
-    int _attackCount;
     [SerializeField] GameObject _hand;
     [SerializeField] GameObject _rock;
     GameObject Rock;
@@ -16,9 +15,8 @@ public class CGolemFSM : CEnemyFSM
     
     protected override void InitStat()
     {
-        _attackCount = 0;
         _moveSpeed = 4f;
-        _attackDistance = 4f;
+        _attackDistance = 7f;
         _attackRadius = 20f;
 
         _anim = GetComponent<Animator>();
@@ -30,64 +28,59 @@ public class CGolemFSM : CEnemyFSM
         _idleState = Animator.StringToHash("Base Layer.Idle");
         _walkState = Animator.StringToHash("Base Layer.Walk");
         _attackState1 = Animator.StringToHash("Base Layer.Attack");
-        _attackState2 = Animator.StringToHash("Base Layer.Throw");
-        _skillState1 = Animator.StringToHash("Base Layer.Skill");
+        _waitState = Animator.StringToHash("Base Layer.AttackWait");
+        _skillState1 = Animator.StringToHash("Base Layer.Skill1");
+        _skillState2 = Animator.StringToHash("Base Layer.Skill2");
         _gethitState = Animator.StringToHash("Base Layer.GetHit");
         _deadState1 = Animator.StringToHash("Base Layer.Dead");
+
+        _cooltime = 1f;
+        _skillCooltime1 = 10f;
+        _skillCooltime2 = 15f;
+        _originCooltime = _cooltime;
+        _originSkillCooltime1 = _skillCooltime1;
+        _originSkillCooltime2 = _skillCooltime2;
     }
 
-    #region 통상적인 State 관련 함수들
+    #region State
     protected override void UpdateState()
     {
+        if (_actionStart)
+        {
+            _skillCooltime1 -= Time.deltaTime;
+            _skillCoolDown1 = true;
+            //_skillCooltime2 -= Time.deltaTime;
+            //_skillCoolDown2 = true;
+        }
         if (_currentBaseState.fullPathHash == _walkState) ChaseState();
         else if (_currentBaseState.fullPathHash == _attackState1) AttackState1();
-        else if (_currentBaseState.fullPathHash == _attackState2) AttackState2();
+        else if (_currentBaseState.fullPathHash == _skillState1) SkillState1();
+        else if (_currentBaseState.fullPathHash == _skillState2) SkillState2();
         else if (_currentBaseState.fullPathHash == _waitState) AttackWaitState();
+        else if (_currentBaseState.fullPathHash == _deadState1) DeadState1();
+
+        if (_skillCooltime1 < 0f)
+        {
+            _anim.SetTrigger("Skill1");
+            _skillCoolDown1 = false;
+        }
+        if (_skillCooltime2 < 0f)
+        {
+            _anim.SetTrigger("Skill2");
+            _skillCoolDown2 = false;
+        }
     }
 
-    private void ChaseState()
+    protected override void ChaseState()
     {
-        if (_currentBaseState.fullPathHash != _deadState1)
-        {
-            MoveState();
-        }
+        base.ChaseState();
+        if (_currentBaseState.fullPathHash != _deadState1) MoveState();
     }
-
-    private void AttackState1()
+    #region Skill
+    private void SkillState1()
     {
-        if (!_lookAtPlayer)
-        {
-            _lookAtPlayer = false;
-            transform.LookAt(_player.transform.position);
-        }
-        _coolDown = true;
-    }
-
-    private void AttackWaitState()
-    {
-        _cooltime -= Time.deltaTime;
-        _lookAtPlayer = true;
-        if (_cooltime < 0)
-        {
-            _coolDown = false;
-            _cooltime = _originCooltime;
-        }
-        else if (GetDistanceFromPlayer(_distances) > _attackDistance)
-        {
-            _coolDown = false;
-            _anotherAction = true;
-            _cooltime = _originCooltime;
-        }
-    }
-    #endregion
-
-    #region 스킬 관련 함수들
-    private void AttackState2()
-    {
-        if (!_lookAtPlayer)
-        {
-            _lookAtPlayer = false;
-        }
+        _myState = EState.Skill1;
+        _lookAtPlayer = false;
         if (_holding) Rock.transform.position = _hand.transform.position;
         else
         {
@@ -95,11 +88,31 @@ public class CGolemFSM : CEnemyFSM
             {
                 Rock.SendMessage("StartShot");
                 _shooting = false;
+                _skillCooltime1 = _originSkillCooltime1;
+                _skillCoolDown1 = false;
             }
         }
     }
-
-    private void CreateRock()
+    private void SkillState2()
+    {
+        _myState = EState.Skill2;
+        //if (_lookAtPlayer)
+        //{
+        //    _lookAtPlayer = false;
+        //}
+        //if (_holding) Rock.transform.position = _hand.transform.position;
+        //else
+        //{
+        //    if (_shooting)
+        //    {
+        //        Rock.SendMessage("StartShot");
+        //        _shooting = false;
+        //        _skillCooltime1 = _originSkillCooltime1;
+        //        _skillCoolDown1 = false;
+        //    }
+        //}
+    }
+    private void CreateRock() 
     {
         Rock = Instantiate(_rock, _hand.transform.position, Quaternion.identity) as GameObject;
         RockScript = Rock.GetComponent<ThrowObject>();
@@ -119,11 +132,14 @@ public class CGolemFSM : CEnemyFSM
         _shooting = true;
     }
     #endregion
+    #endregion
 
     protected override void Update()
     {
-        _anim.SetInteger("PlayerCount", _players.Count);
-        _anim.SetInteger("AttackCount", _attackCount);
+        _anim.SetBool("CoolDown", _coolDown);
+        _anim.SetBool("CoolDown1", _skillCoolDown1);
+        _anim.SetBool("CoolDown2", _skillCoolDown2);
+        _anim.SetBool("AnotherAction", _anotherAction);
         base.Update();
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static CGlobal;
 
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(BoxCollider))]
@@ -55,11 +56,24 @@ public class CEnemyFSM : MonoBehaviour
     protected float _originSkillCooltime3 { get; set; }
     #endregion
 
+    protected enum EState
+    {
+        Idle,
+        Chase,
+        Move,
+        Attack,
+        AttackWait,
+        Skill1,
+        Skill2,
+        Dead,
+    }
+
+    protected EState _myState;
+    protected EState _myOldState;
     protected List<GameObject> _players = new List<GameObject>(); // 플레이어들의 GameObject를 담는 리스트
     protected List<float> _distances = new List<float>(); // 플레이어와의 거리 정보를 담는 리스트
     #endregion
-
-    #region Start
+    
     void Start()
     {
         InitStat();
@@ -69,13 +83,14 @@ public class CEnemyFSM : MonoBehaviour
     {
 
     }
-    #endregion
-
-    #region 이동 관련
+    
+    #region State
     // 이동함수
     protected virtual void MoveState()
     {
-        TurnToDestination();
+        _anotherAction = false;
+        _lookAtPlayer = true;
+        _myState = EState.Move;
         MoveToDestination();
     }
 
@@ -95,10 +110,49 @@ public class CEnemyFSM : MonoBehaviour
             lookRotation, Time.deltaTime * _rotAnglePerSecond);
     }
 
-    // 공격 시, turn하지 않도록 bool값을 보정
-    protected void OnOffLookAtPlayer()
+    // chase의 경우를 제외하고 나머지 행동들에서 플레이어에게 turn을 하는가를 체크함.
+    // _lookAtPlayer는 UpdateState들의 state들에서 OnOff처리를 해야한다.
+    protected void IsLookPlayer()
     {
-        _lookAtPlayer |= _lookAtPlayer;
+        if (_lookAtPlayer) TurnToDestination();
+    }
+
+    protected virtual void ChaseState()
+    {
+        _myState = EState.Chase;
+        if (!_actionStart) _actionStart = true;
+    }
+
+    protected virtual void AttackState1()
+    {
+        _myState = EState.Attack;
+        if (_lookAtPlayer) _lookAtPlayer = false;
+        _coolDown = true;
+    }
+
+    protected virtual void AttackWaitState()
+    {
+        _myState = EState.AttackWait;
+        _cooltime -= Time.deltaTime;
+        _lookAtPlayer = true;
+        if (_cooltime < 0)
+        {
+            _coolDown = false;
+            _anotherAction = false;
+            _cooltime = _originCooltime;
+        }
+        else if (GetDistanceFromPlayer(_distances) > _attackDistance)
+        {
+            _coolDown = false;
+            _anotherAction = true;
+            _cooltime = _originCooltime;
+        }
+    }
+    
+    protected virtual void DeadState1()
+    {
+        _myState = EState.Dead;
+        _lookAtPlayer = false;
     }
     #endregion
 
@@ -185,19 +239,15 @@ public class CEnemyFSM : MonoBehaviour
         return distances[0];
     }
 
-    // chase의 경우를 제외하고 나머지 행동들에서 플레이어에게 turn을 하는가를 체크함.
-    // _lookAtPlayer는 UpdateState들의 state들에서 OnOff처리를 해야한다.
-    protected void IsLookPlayer()
-    {
-        if (_lookAtPlayer) transform.LookAt(_player.transform.position);
-    }
     #endregion
 
     #region 이벤트
+
     protected virtual void CallDeadEvent()
     {
         _anim.SetBool("Dead", true);
-        this.tag = "Untagged";
+        this.gameObject.tag = "Untagged";
+        this.gameObject.layer = LayerMask.NameToLayer("DeadBody");
         Invoke("RemoveMe", 3f);
     }
     protected virtual void RemoveMe()
@@ -221,10 +271,10 @@ public class CEnemyFSM : MonoBehaviour
         }
     }
 
-    // 대폭적인 추가 필요
+    // 기본 공격에 관한 체크
     protected void AttackCalculate()
     {
-        _playerPara.SetEnemyAttack(_myPara.GetRandomAttack(_playerPara._eType, _myPara._eType));
+        _playerPara.DamegedRegardDefence(_myPara.GetRandomAttack());
     }
     #endregion
 
@@ -234,8 +284,20 @@ public class CEnemyFSM : MonoBehaviour
 
     }
 
+    protected void DebugState()
+    {
+        if (_myOldState != _myState)
+        {
+            _myOldState = _myState;
+            Debug.Log(_myOldState);
+        }
+        else if (_myOldState == _myState)
+            return;
+    }
+
     protected virtual void Update()
     {
+        DebugState();
         _players = DetectPlayer(_players);
         _currentBaseState = _anim.GetCurrentAnimatorStateInfo(0);
         _distances = CalculateDistance(_players);

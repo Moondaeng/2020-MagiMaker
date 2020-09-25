@@ -7,7 +7,7 @@ public class CSkeletonFSM : CEnemyFSM
     protected override void InitStat()
     {
         _moveSpeed = 4f;
-        _attackDistance = 3f;
+        _attackDistance = 5f;
         _attackRadius = 20f;
         _anim = GetComponent<Animator>();
         _myPara = GetComponent<CEnemyPara>();
@@ -28,7 +28,7 @@ public class CSkeletonFSM : CEnemyFSM
         _gethitState = Animator.StringToHash("Base Layer.Hit");
         _deadState1 = Animator.StringToHash("Base Layer.Dead");
 
-        _cooltime = 1f;
+        _cooltime = .5f;
         _skillCooltime1 = 10f;
         _skillCooltime2 = 5f;
         _originCooltime = _cooltime;
@@ -48,10 +48,11 @@ public class CSkeletonFSM : CEnemyFSM
         }
 
         if (_currentBaseState.fullPathHash == _walkState)           ChaseState();
-        else if (_currentBaseState.fullPathHash == _attackState1)    AttackState();
+        else if (_currentBaseState.fullPathHash == _attackState1)    AttackState1();
         else if (_currentBaseState.fullPathHash == _waitState)      AttackWaitState();
         else if (_currentBaseState.fullPathHash == _skillState1)    SkillState1();
         else if (_currentBaseState.fullPathHash == _skillState2)    SkillState2();
+        else if (_currentBaseState.fullPathHash == _deadState1)    DeadState1();
 
         if (_skillCooltime1 < 0f)
         {
@@ -65,59 +66,33 @@ public class CSkeletonFSM : CEnemyFSM
         }
     }
 
-    private void ChaseState()
+    protected override void ChaseState()
     {
-        if (!_actionStart) _actionStart = true;
+        base.ChaseState();
         if (_currentBaseState.fullPathHash != _deadState1) MoveState();
     }
-
-    protected override void MoveState()
-    {
-        _anotherAction = false;
-        base.MoveState();
-    }
     
-    private void AttackState()
-    {
-        if (!_lookAtPlayer)
-        {
-            _lookAtPlayer = false;
-        }
-        _coolDown = true;
-    }
-    
-    private void AttackWaitState()
-    {
-        _cooltime -= Time.deltaTime;
-        _lookAtPlayer = true;
-        if (_cooltime < 0)
-        {
-            _coolDown = false;
-            _cooltime = _originCooltime;
-        }
-        else if (GetDistanceFromPlayer(_distances) > _attackDistance)
-        {
-            _coolDown = false;
-            _anotherAction = true;
-            _cooltime = _originCooltime;
-        }
-    }
-
     private void SkillState1()
     {
+        _myState = EState.Skill1;
+        _lookAtPlayer = false;
         _skillCooltime1 = _originSkillCooltime1;
         _skillCoolDown1 = true;
     }
 
     private void SkillState2()
     {
+        _myState = EState.Skill2;
+        _lookAtPlayer = false;
         _skillCooltime2 = _originSkillCooltime2;
         _skillCoolDown2 = true;
     }
+
     #endregion
 
     protected override void Update()
     {
+        if (_currentBaseState.fullPathHash == _deadState1) return;
         _anim.SetBool("CoolDown", _coolDown);
         _anim.SetBool("CoolDown1", _skillCoolDown1);
         _anim.SetBool("CoolDown2", _skillCoolDown2);

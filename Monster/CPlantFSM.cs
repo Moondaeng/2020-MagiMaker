@@ -4,12 +4,7 @@ using UnityEngine;
 
 public class CPlantFSM : CEnemyFSM
 {
-    #region 식물만 가지는 Properties
-    public GameObject Prefabs;
-    private GameObject currentPrefabObject;
-    private CMonsterSkillBase currentPrefabScript;
-    #endregion
-
+    CMonsterSkillDispenser _mySkill;
     protected override void InitStat()
     {
         _moveSpeed = 0f;
@@ -21,7 +16,8 @@ public class CPlantFSM : CEnemyFSM
 
         _spawnID = _myPara.GetComponent<CEnemyPara>()._spawnID;
         _myRespawn = _myPara.GetComponent<CEnemyPara>()._myRespawn;
-        
+        _mySkill = GetComponent<CMonsterSkillDispenser>();
+
         // 몬스터 마다 다른 행동양식들
         _idleState = Animator.StringToHash("Base Layer.Idle");
         _standState = Animator.StringToHash("Base Layer.Stand");
@@ -40,7 +36,13 @@ public class CPlantFSM : CEnemyFSM
         _originSkillCooltime2 = _skillCooltime2;
     }
 
-    #region 통상적인 State 관련 함수들
+    protected override void CallDeadEvent()
+    {
+        _anim.SetTrigger("DeathTrigger");
+        base.CallDeadEvent();
+    }
+
+    #region State 
     protected override void UpdateState()
     {
         if (_actionStart)
@@ -52,7 +54,7 @@ public class CPlantFSM : CEnemyFSM
         }
 
         if (_currentBaseState.fullPathHash == _standState)          StartState();
-        else if (_currentBaseState.fullPathHash == _attackState1)   AttackState();
+        else if (_currentBaseState.fullPathHash == _attackState1)   AttackState1();
         else if (_currentBaseState.fullPathHash == _waitState)      AttackWaitState();
         else if (_currentBaseState.fullPathHash == _skillState1)    SkillState1();
         else if (_currentBaseState.fullPathHash == _skillState2)    SkillState2();
@@ -73,31 +75,6 @@ public class CPlantFSM : CEnemyFSM
     {
         _actionStart = true;
     }
-    
-    private void AttackState()
-    {
-        if (!_lookAtPlayer)
-        {
-            _lookAtPlayer = false;
-        }
-        _coolDown = true;
-    }
-    
-    private void AttackWaitState()
-    {
-        _cooltime -= Time.deltaTime; 
-        _lookAtPlayer = true;
-        if (_cooltime < 0)
-        {
-            _coolDown = false;
-            _cooltime = _originCooltime;
-        }
-        else if (GetDistanceFromPlayer(_distances) > _attackDistance)
-        {
-            _coolDown = false;
-            _cooltime = _originCooltime;
-        }
-    }
 
     private void SkillState1()
     {
@@ -108,36 +85,18 @@ public class CPlantFSM : CEnemyFSM
 
     private void RangeSkillShot()
     {
-        Vector3 pos;
-        float yRot = transform.rotation.eulerAngles.y;
-        Vector3 forwardY = Quaternion.Euler(0.0f, yRot, 0.0f) * Vector3.forward;
-        Vector3 forward = transform.forward;
-        Vector3 right = transform.right;
-        Vector3 up = transform.up;
-        Quaternion rotation = Quaternion.identity;
-        currentPrefabObject = GameObject.Instantiate(Prefabs);
-        
-        // temporary effect, like a fireball
-        currentPrefabScript = currentPrefabObject.GetComponent<CMonsterSkillBase>();
-        // set the start point near the player
-        rotation = transform.rotation;
-        pos = transform.position + 2 * forward + 2 * up;
-
-        CMonsterSkillProjectile projectileScript = currentPrefabObject.GetComponentInChildren<CMonsterSkillProjectile>();
-        if (projectileScript != null)
-        {
-            // make sure we don't collide with other fire layers
-            projectileScript.ProjectileCollisionLayers &= (~UnityEngine.LayerMask.NameToLayer("MonsterSkillLayer"));
-        }
-
-        currentPrefabObject.transform.position = pos;
-        currentPrefabObject.transform.rotation = rotation;
+        _mySkill.BeginEffect(0);
     }
 
     private void SkillState2()
     {
         _skillCooltime2 = _originSkillCooltime2;
         _skillCoolDown2 = true;
+    }
+    
+    private void FiledSkill()
+    {
+        _mySkill.BeginEffect(1);
     }
     #endregion
 
