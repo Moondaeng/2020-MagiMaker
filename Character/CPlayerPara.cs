@@ -18,7 +18,7 @@ public class CPlayerPara : CharacterPara
     {
         get
         {
-            return (int)(((_attackMin * Inventory.AtkIncreaseRate) + Inventory.EquipAtkIncreaseSize)
+            return (int)((_attackMin + Inventory.EquipAtkIncreaseSize)
               * buffParameter.AttackCoef * buffParameter.AttackDebuffCoef);
         }
     }
@@ -26,7 +26,7 @@ public class CPlayerPara : CharacterPara
     {
         get
         {
-            return (int)(((_attackMax * Inventory.AtkIncreaseRate) + Inventory.EquipAtkIncreaseSize)
+            return (int)((_attackMax + Inventory.EquipAtkIncreaseSize)
               * buffParameter.AttackCoef * buffParameter.AttackDebuffCoef);
         }
     }

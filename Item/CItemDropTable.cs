@@ -113,8 +113,9 @@ public class CItemDropTable : MonoBehaviour
             _equipObjectLists[itemGrade].Add(item);
         }
         // 기타 케이스는 오류 간주
+        else
         {
-            Debug.Log("Can't Add Item By Item Code");
+            Debug.Log($"Can't Add Item By Item Code : {itemCode}");
         }
     }
 

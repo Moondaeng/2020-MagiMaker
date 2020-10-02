@@ -58,6 +58,7 @@ public class CPlayerSkill : CCharacterSkill
         for(int i = _skillList.Count; i < 42; i++)
         {
             _skillList.Add(new CSkillFormat(i, 0.5f + 0.5f * i, gameObject));
+            _skillList[i].SetSkillUseEvent(i, skillUseEvent);
         }
 
         // 스킬 등록
@@ -150,7 +151,6 @@ public class CPlayerSkill : CCharacterSkill
         }
 
         int num = GetRegisterNumber(_selectedElementNum, _selectedSkillNum);
-        Debug.Log($"{num}");
         _skillList?[num].Use(targetPos);
         // 스킬 사용 이벤트는 스킬 포맷에서 호출
         _selectedElementNum = -1;

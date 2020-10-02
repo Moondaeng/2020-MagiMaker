@@ -4,23 +4,49 @@ using UnityEngine;
 
 namespace Item
 {
+    /// <summary>
+    /// 효과 발동 이벤트 조건
+    /// </summary>
+    public enum EEquipEvent
+    {
+        None,
+        Always,
+        UseSkill,
+        KillMonster
+    }
+
+    /// <summary>
+    /// 이벤트 발동 횟수 계산 방식
+    /// </summary>
+    public enum EEquipEventCountOption
+    {
+        Accumalte,
+        Each_Over,
+        Each_Below
+    }
+
+    /// <summary>
+    /// 장비 강화 능력치
+    /// </summary>
+    public enum EEquipAbility
+    {
+        Attack,
+        AttackSpeed,
+        MaxHp,
+        HpRegen,
+        Defence,
+        Speed,
+        SkillCoolTime,
+        DamageReduceRate,
+        SkillRange
+    }
+
     [System.Serializable]
     public class CEquip : CItem
     {
-        /// <summary>
-        /// 패시브 효과 발동 조건
-        /// </summary>
-        public enum ECondition
-        {
-            Teleport,
-            UseSkill,
-            KillMonster
-        }
-
         [System.Serializable]
         public class EquipEffectWithChance
         {
-            public ECondition useEffectCondition;
             public CUseEffect useEffect;
             [Range(0f, 1f)] public float Chance;
         }
@@ -28,26 +54,29 @@ namespace Item
         [System.Serializable]
         public class EquipAbility
         {
-            public enum EAbility
-            {
-                Attack,
-                AttackSpeed,
-                MaxHp,
-                HpRegen,
-                Defence,
-                Speed,
-                SkillCoolTime,
-                DamageReduceRate,
-                SkillRange
-            }
 
-            public EAbility equipEffect;
+            public EEquipAbility equipEffect;
             public int value;
         }
 
         public List<EquipAbility> equipAbilities;
 
+        [Tooltip("패시브 발동 조건")]
+        public EEquipEvent PassiveCondition;
+        [Tooltip("패시브 발동 조건 횟수")]
+        public int PassiveUseCount;
+        [Tooltip("현재 패시브 발동 조건 횟수")]
+        protected int passiveCurrentCount;
         public List<EquipEffectWithChance> EquipEffectList;
+
+        [Tooltip("성장 조건")]
+        public EEquipEvent UpgradeCondition;
+        [Tooltip("성장 조건 횟수")]
+        public int UpgradeCount;
+        [Tooltip("현재 성장 조건 횟수")]
+        protected int UpgradeCurrentCount;
+        [Tooltip("성장 시 능력치")]
+        public List<EquipAbility> upgradeAbilities;
 
         public CEquip(string _itemName, int _itemCode, Sprite _itemImage)
             : base(_itemName, _itemCode, _itemImage)

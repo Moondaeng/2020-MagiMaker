@@ -86,6 +86,7 @@ public class CSkillFormat
 
     public void SetSkillUseEvent(int thisSkillIndex, SkillUseEvent useEvent)
     {
+        Debug.Log("Set Skill Use Event");
         _skillUseCallback = (targetPos) => useEvent.Invoke(thisSkillIndex, targetPos);
     }
 

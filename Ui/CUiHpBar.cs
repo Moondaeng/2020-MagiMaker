@@ -27,6 +27,7 @@ public class CUiHpBar : MonoBehaviour
     public void Register(CharacterPara cPara)
     {
         cPara.damageEvent.AddListener(Draw);
+        cPara.hpPercentEvent.AddListener(DrawFloat);
         _targetPercent = cPara._curHp / cPara._maxHp;
         _animationPercent = cPara._curHp / cPara._maxHp;
     }
@@ -34,6 +35,14 @@ public class CUiHpBar : MonoBehaviour
     public void Deregister(CharacterPara cPara)
     {
         cPara.damageEvent.RemoveListener(Draw);
+        cPara.hpPercentEvent.RemoveListener(DrawFloat);
+    }
+
+    public void DrawFloat(float percent)
+    {
+        _targetPercent = percent;
+        StopCoroutine("DrawHpAnimation");
+        StartCoroutine("DrawHpAnimation");
     }
 
     public void Draw(int curHp, int maxHp)
