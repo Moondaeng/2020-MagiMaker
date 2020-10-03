@@ -231,19 +231,71 @@ public class CInventory
     /// <param name="count"></param>
     private void CallItemEvent(Item.EEquipEvent condition, int count)
     {
-        Debug.Log("Call Item Event");
-
         foreach (var equip in _equipItems)
         {
             if(equip.PassiveCondition == condition)
             {
-                Debug.Log($"Passive added {count}");
+                ExecuteEquipPassive(equip, count);
             }
 
             if(equip.UpgradeCondition == condition)
             {
-                Debug.Log($"upgrade added {count}");
+                ExecuteEquipUpgrade(equip);
             }
+        }
+    }
+
+    /// <summary>
+    /// 장비 패시브를 추가 조건에 따라 실행
+    /// ex) n회에 한 번 실행 / n 이상일 때 실행 / n 이하일 때 실행
+    /// </summary>
+    /// <param name="equip">적용 장비</param>
+    /// <param name="count"></param>
+    private void ExecuteEquipPassive(Item.CEquip equip, int count)
+    {
+        switch (equip.PassiveConditionOption)
+        {
+            case Item.EEquipEventCountOption.Accumalte:
+                equip.passiveCurrentCount += count;
+                if(equip.passiveCurrentCount >= equip.PassiveUseCount)
+                {
+                    Debug.Log("Use Passive");
+                    equip.passiveCurrentCount = 0;
+                }
+                break;
+            case Item.EEquipEventCountOption.Each_Below:
+                if (equip.PassiveUseCount >= count)
+                {
+                    Debug.Log("Use Passive");
+                }
+                break;
+            case Item.EEquipEventCountOption.Each_Over:
+                if (equip.PassiveUseCount <= count)
+                {
+                    Debug.Log("Use Passive");
+                }
+                break;
+            default:
+                Debug.Log("Error case");
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 장비 성장
+    /// </summary>
+    /// <param name="equip"></param>
+    private void ExecuteEquipUpgrade(Item.CEquip equip)
+    {
+        if(equip.UpgradeCurrentCount >= equip.UpgradeCount)
+        {
+            return;
+        }
+
+        equip.UpgradeCurrentCount++;
+        if (equip.UpgradeCurrentCount == equip.UpgradeCount)
+        {
+            Debug.Log("Equip Upgrade");
         }
     }
 
