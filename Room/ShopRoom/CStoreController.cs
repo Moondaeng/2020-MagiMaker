@@ -8,7 +8,6 @@ public class CStoreController : MonoBehaviour
     private List<CSlotController> _slots;
     private int _positionX; //아이템 선택 위치
     private int _positionY;
-    private int _currentSlot;
     private int _currentSlot; //현재 슬롯
     private int _lastSlot;  //이전 슬롯
     private EArrow _arrow;
@@ -28,33 +27,8 @@ public class CStoreController : MonoBehaviour
         for (int i = 0; i < _slotRoot.childCount; i++)
         {
             var slot = _slotRoot.GetChild(i).GetComponent<CSlotController>();
-            //slot.SetItem(CItemDropTable.instance.DropRandomItem(CCreateMap.instance.createStageNumber));
+            slot.SetItem(CItemDropTable.instance.DropRandomItem(CCreateMap.instance.createStageNumber));
 
-            //debug 임시코드
-            GameObject testItem;
-            if (i % 2 == 0)
-            {
-                testItem = GameObject.Find("Item1");
-                if (testItem != null)
-                    slot.SetItem(testItem);
-                else
-                {
-                    Debug.Log("item is null");
-                    continue;
-                }
-            }
-            else
-            {
-                testItem = GameObject.Find("Item2");
-                if (testItem != null)
-                    slot.SetItem(testItem);
-                else
-                {
-                    Debug.Log("item is null");
-                    continue;
-                }
-            }
-            //임시코드 끝
             _slots.Add(slot);
         }
 
@@ -66,15 +40,92 @@ public class CStoreController : MonoBehaviour
     }
     private void Update()
     {
+        ChangeSlot(); //키보드 입력 시 슬롯 변경
+        WriteInformation(); //아이템 선택 시 정보창 띄워주기
+        BuyItem(); //엔터키 입력시 아이템 구매
+    }
+
+    private void WriteInformation()
+    {
+        var itemText = GameObject.Find("StoreItemNameText").GetComponent<TMPro.TextMeshProUGUI>();
+        var Extext = GameObject.Find("StoreItemExplanationText").GetComponent<TMPro.TextMeshProUGUI>(); //텍스트 컴포넌트
+        string sumExtext = null;
+
+        if (_slots[_currentSlot].item.GetComponent<CEquipComponent>() != null) //장비템
+        {
+            var itemComponent = _slots[_currentSlot].item.GetComponent<CEquipComponent>();
+
+            itemText.text = itemComponent.equipStat.ItemName;
+            
+            if(itemComponent.equipStat.As != 0)
+            {
+                sumExtext += "공격속도 : " + itemComponent.equipStat.As.ToString() + "\n";
+            }
+
+            if (itemComponent.equipStat.Atk != 0)
+            {
+                sumExtext += "공격력 : " + itemComponent.equipStat.Atk.ToString() + "\n";
+            }
+
+            if (itemComponent.equipStat.Def != 0)
+            {
+                sumExtext += "방어력 : " + itemComponent.equipStat.Def.ToString() + "\n";
+            }
+
+            if (itemComponent.equipStat.MaxHp != 0)
+            {
+                sumExtext += "최대 체력 : " + itemComponent.equipStat.MaxHp.ToString() + "\n";
+            }
+
+            if (itemComponent.equipStat.HpRegen != 0)
+            {
+                sumExtext += "초당 체력회복량 : " + itemComponent.equipStat.HpRegen.ToString() + "\n";
+            }
+
+            if (itemComponent.equipStat.Spd != 0)
+            {
+                sumExtext += "이동속도 : " + itemComponent.equipStat.Spd.ToString() + "\n";
+            }
+
+            if (itemComponent.equipStat._skillCoolTime != 0)
+            {
+                sumExtext += "스킬쿨타임 감소율 : " + itemComponent.equipStat._skillCoolTime.ToString() + "%" + "\n";
+            }
+
+            if (itemComponent.equipStat._damageTakenRate != 0)
+            {
+                sumExtext += "받는 피해량 감소율 : " + itemComponent.equipStat._damageTakenRate.ToString() + "%" + "\n";
+            }
+
+            if (itemComponent.equipStat._skillRange != 0)
+            {
+                sumExtext += "스킬 사거리 증가율 : " + itemComponent.equipStat._skillRange.ToString() + "%" + "\n";
+            }
+
+            Extext.text = sumExtext;
+        }
+        else //소비템
+        {
+            var itemComponent = _slots[_currentSlot].item.GetComponent<CConsumableComponent>();
+        }
+    }
+
+    private void CheckSoldOut()
+    {
         if (allBuyCheckFlag == true) //상점 품목 전부 구매 시
         {
-            for(int i = 0; i < _slots.Count; i++) //슬롯 전부 꺼버림
+            for (int i = 0; i < _slots.Count; i++) //슬롯 전부 꺼버림
             {
                 _slots[i].gameObject.SetActive(false);
             }
 
             return;
         }
+    }
+
+    private void ChangeSlot()
+    {
+        CheckSoldOut(); //상점 품절 체크
 
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
@@ -113,7 +164,7 @@ public class CStoreController : MonoBehaviour
         {
             switch (_arrow)
             {
-                case EArrow._left: 
+                case EArrow._left:
                     while (_slots[_currentSlot].transform.FindChild("Item").gameObject.activeSelf == false)
                     {
                         if (_positionX <= 0)
@@ -147,14 +198,15 @@ public class CStoreController : MonoBehaviour
                     break;
             }
         }
-         
+
         _slots[_lastSlot].transform.FindChild("Image").gameObject.SetActive(false);
         _slots[_currentSlot].transform.FindChild("Image").gameObject.SetActive(true);
         _lastSlot = _currentSlot;
+    }
 
-        //정보창 텍스트 띄워주는거 해야함
-
-        if(Input.GetKeyDown(KeyCode.Return)) //엔터키 입력 시 아이템 구매
+    private void BuyItem()
+    {
+        if (Input.GetKeyDown(KeyCode.Return)) //엔터키 입력 시 아이템 구매
         {
             Debug.Log("Buy Item"); //인벤토리에 넣는 코드 구현해야함
 
@@ -168,6 +220,8 @@ public class CStoreController : MonoBehaviour
                 if (_slots[i].transform.FindChild("Item").gameObject.activeSelf == true)
                 {
                     _currentSlot = i;
+                    _positionX = i % CConstants.SLOT_COLOUMN;
+                    _positionY = i / CConstants.SLOT_COLOUMN;
                     allBuyCheckFlag = false;
 
                     _slots[_lastSlot].transform.FindChild("Image").gameObject.SetActive(false);

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CItemDropTable : MonoBehaviour
@@ -12,15 +13,39 @@ public class CItemDropTable : MonoBehaviour
         [Range(0,1)] public float Unique;
     }
 
+    public enum ItemGrade
+    {
+        Normal, Special, Rare, Unique, Shop, Event
+    }
+
+    public static CItemDropTable instance = null;
+
     [SerializeField]
     private DropItemGradeChanceList[] DropItemChanceInStages = new DropItemGradeChanceList[6];
 
-    [SerializeField] private List<GameObject> _normalItemObjectList;
-    [SerializeField] private List<GameObject> _specialItemObjectList;
-    [SerializeField] private List<GameObject> _rareItemObjectList;
-    [SerializeField] private List<GameObject> _uniqueItemObjectList;
-    [SerializeField] private List<GameObject> _shopItemObjectList;
-    [SerializeField] private List<GameObject> _eventItemObjectList;
+    private List<GameObject>[] _equipObjectLists = new List<GameObject>[Enum.GetValues(typeof(ItemGrade)).Length];
+    private List<GameObject> _consumableObjectList = new List<GameObject>();
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+
+        for(int i = 0; i < _equipObjectLists.Length; i++)
+        {
+            _equipObjectLists[i] = new List<GameObject>();
+        }
+    }
+
+    public void ClearDropList()
+    {
+        foreach(var list in _equipObjectLists)
+        {
+            list.Clear();
+        }
+    }
 
     public static CItemDropTable instance = null;
 
@@ -45,59 +70,113 @@ public class CItemDropTable : MonoBehaviour
         chanceList[3] = chanceSum;
 
         // 랜덤한 리스트 선택
-        List<GameObject> itemList = null;
+        ItemGrade itemGrade = ItemGrade.Normal;
         float randomChance = UnityEngine.Random.Range(0f, 1f);
         if(randomChance < chanceList[0])
         {
-            itemList = _normalItemObjectList;
+            itemGrade = ItemGrade.Normal;
         }
         else if (randomChance < chanceList[1])
         {
-            itemList = _specialItemObjectList;
+            itemGrade = ItemGrade.Special;
         }
         else if (randomChance < chanceList[2])
         {
-            itemList = _rareItemObjectList;
+            itemGrade = ItemGrade.Rare;
         }
         else if (randomChance < chanceList[3])
         {
-            itemList = _uniqueItemObjectList;
+            itemGrade = ItemGrade.Unique;
         }
 
         // 확률 합이 1이 안 넘을 경우, 아이템을 드랍하지 않음
-        if(itemList == null)
+        // 드랍 테이블이 빈 경우 처리 방안 필요
+        return PopRandomItemByGrade(itemGrade);
+    }
+
+    /// <summary>
+    /// ItemCompoenent를 가지고 있는 item 추가
+    /// </summary>
+    /// <param name="item"></param>
+    public void AddItem(GameObject item)
+    {
+        if(item.GetComponent<CItemComponent>() == null)
         {
-            return null;
+            Debug.Log("Error - item hasn't CItemComponent");
+            return;
         }
+
+        int itemCode = item.GetComponent<CItemComponent>().Item.ItemCode / 100;
+        int itemType = itemCode % 10;
+        int itemGrade = itemCode / 10;
+
+        // 소비 아이템
+        if (itemType == 0)
+        {
+            _consumableObjectList.Add(item);
+        }
+        // 장비 아이템
+        else if (itemType == 1)
+        {
+            _equipObjectLists[itemGrade].Add(item);
+        }
+        // 기타 케이스는 오류 간주
         else
         {
-            return FindRandomItemInList(itemList);
-            // 드랍 테이블이 빈 경우 처리 방안 필요
+            Debug.Log($"Can't Add Item By Item Code : {itemCode}");
         }
     }
 
-    private GameObject FindRandomItemInList(List<GameObject> itemList)
+    public GameObject PopRandomItemByGrade(ItemGrade itemGrade)
     {
+        List<GameObject> itemList = _equipObjectLists[(int)itemGrade];
+
         if(itemList.Count == 0)
         {
             Debug.Log("Item List is empty");
             return null;
         }
 
-        int randInt = UnityEngine.Random.Range(0, itemList.Count);
-        if(randInt == itemList.Count)
+        return PopRandomItemInList(itemList);
+    }
+
+    public GameObject PopItemByItemCode(int itemCode)
+    {
+        itemCode /= 100;
+        int itemType = itemCode % 10;
+        int itemGrade = itemCode / 10;
+        GameObject item = null;
+
+        item = CItemManager.instance.GetItemObject(itemCode);
+        // 소비 아이템
+        if (itemType == 0)
         {
-            randInt--;
+            _consumableObjectList.Remove(item);
+        }
+        // 장비 아이템
+        else if(itemType == 1)
+        {
+            _equipObjectLists[itemGrade].Remove(item);
+        }
+        // 기타 케이스는 오류 간주
+        {
+            Debug.Log("Can't Pop Item By Item Code");
         }
 
-        var item = itemList[randInt];
-        itemList.RemoveAt(randInt);
-        
         return item;
     }
 
-    public GameObject FindItemByItemCode(int itemCode)
+    private GameObject FindRandomItemInList(List<GameObject> list)
     {
-        return null;
+        int randInt = UnityEngine.Random.Range(1, list.Count) - 1;
+        return list[randInt];
+    }
+
+    private GameObject PopRandomItemInList(List<GameObject> list)
+    {
+        int randInt = UnityEngine.Random.Range(1, list.Count) - 1;
+        var item = list[randInt];
+        list.RemoveAt(randInt);
+        return item;
     }
 }

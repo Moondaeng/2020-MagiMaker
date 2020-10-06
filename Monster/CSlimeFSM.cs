@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class CSlimeFSM : CEnemyFSM
 {
+    #region MonsterFSM에서 공유되는 것들
     protected override void InitStat()
     {
         _moveSpeed = 4f;
@@ -40,7 +41,9 @@ public class CSlimeFSM : CEnemyFSM
             }
         }
     }
+    #endregion
 
+    #region 통상적인 State 관련 함수들
     protected override void UpdateState()
     {
         if (_actionStart)
@@ -49,10 +52,10 @@ public class CSlimeFSM : CEnemyFSM
             _skillCoolDown1 = true;
         }
 
-        if (_currentBaseState.nameHash == _runState)           ChaseState();
-        else if (_currentBaseState.nameHash == _attackState1)    AttackState();
-        else if (_currentBaseState.nameHash == _waitState)      AttackWaitState();
-        else if (_currentBaseState.nameHash == _skillState1)    SkillState1();
+        if (_currentBaseState.fullPathHash == _runState)           ChaseState();
+        else if (_currentBaseState.fullPathHash == _attackState1)    AttackState();
+        else if (_currentBaseState.fullPathHash == _waitState)      AttackWaitState();
+        else if (_currentBaseState.fullPathHash == _skillState1)    SkillState1();
 
         if (_skillCooltime1 < 0f)
         {
@@ -64,7 +67,7 @@ public class CSlimeFSM : CEnemyFSM
     private void ChaseState()
     {
         if (!_actionStart) _actionStart = true;
-        if (_currentBaseState.nameHash != _deadState1) MoveState();
+        if (_currentBaseState.fullPathHash != _deadState1) MoveState();
     }
 
     protected override void MoveState()
@@ -83,11 +86,6 @@ public class CSlimeFSM : CEnemyFSM
         _coolDown = true;
     }
 
-    private void SkillState()
-    {
-
-    }
-    
     private void AttackWaitState()
     {
         _cooltime -= Time.deltaTime;
@@ -103,7 +101,9 @@ public class CSlimeFSM : CEnemyFSM
             _cooltime = _originCooltime;
         }
     }
+    #endregion
 
+    #region Skill 관련 State들
     private void SkillState1()
     {
         _skillCooltime1 = _originSkillCooltime1;
@@ -113,6 +113,7 @@ public class CSlimeFSM : CEnemyFSM
     {
         _skillCooltime2 = _originSkillCooltime2;
     }
+    #endregion
 
     protected override void Update()
     {

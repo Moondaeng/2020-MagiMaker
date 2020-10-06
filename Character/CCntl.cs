@@ -6,6 +6,7 @@ using System.Collections;
 [RequireComponent(typeof(Animator))]
 public class CCntl : MonoBehaviour
 {
+    #region Properties
     [SerializeField] public float _jumpPower = 12f;
     [Range(1f, 4f)] [SerializeField] float _gravityMultiplier = 3.5f;
     [SerializeField] float _groundCheckDistance = 0.5f;
@@ -15,6 +16,9 @@ public class CCntl : MonoBehaviour
     //[SerializeField] float _moveSpeedMultiplier = 1f;
 
     Animator _animator;
+    AnimatorStateInfo _currentBaseState;
+    CPlayerPara _myPara;
+    CStunExitCommand _myStun;
     Rigidbody _rigidbody;
     CapsuleCollider _capsule;
     BoxCollider _attack;
@@ -34,35 +38,63 @@ public class CCntl : MonoBehaviour
     Vector3 _groundNormal;
 
     // 애니메이션 상태값
-    bool _crouchCheck;
-    bool _rollCheck;
     bool _isGrounded;
     bool _jump;
-    bool _crouch;
     bool _roll;
+    private bool _isJumpInputed;
+    private bool _isRollInputed;
+
+    // 애니메이션 상태값 상태이상
+    bool _knockBack;
+    float _downTime;
+    public bool _getHit;
+    bool _stun;
 
     // 상수
     const float _halfF = .5f;
     const float _seatingTime = .2f;
+    Coroutine CO;
 
-    private bool _isJumpInputed;
+    static int _rollState;
+    static int _wakeUpState;
+    #endregion
 
+    #region __start__
     private void Start()
     {
         _animator = GetComponent<Animator>();
         _rigidbody = GetComponent<Rigidbody>();
+        _myPara = GetComponent<CPlayerPara>();
+        _myStun = GetComponent<CStunExitCommand>();
         _capsule = GetComponent<CapsuleCollider>();
         _attack = GetComponentInChildren<BoxCollider>();
+        _animator.SetFloat("Jump", -4f);
         _capsuleHeight = _capsule.height;
         _capsuleCenter = _capsule.center;
         _origGroundCheckDistance = _groundCheckDistance;
+        _rollState = Animator.StringToHash("Base Layer.Roll");
+        _wakeUpState = Animator.StringToHash("Base Layer.WakeUp");
     }
+    #endregion
 
+    #region 코루틴 모음집
     public IEnumerator COStunPause(float pauseTime)
     {
         yield return new WaitForSeconds(pauseTime);
     }
 
+    public IEnumerator COStun(float pauseTime)
+    {
+        _stun = true;
+        _myStun.Start((int)pauseTime * 3);
+        _animator.SetTrigger("StunTrigger");
+        yield return new WaitForSeconds(pauseTime);
+        SendMessage("EndTime");
+        ExitStun();
+    }
+    #endregion
+
+    #region CController Use these function
     public void Move(float inputX, float inputZ)
     {
         z = inputZ;
@@ -82,23 +114,31 @@ public class CCntl : MonoBehaviour
         }
     }
 
+    public void Skill()
+    {
+        _animator.SetTrigger("SkillTrigger");
+    }
+
     public void Jump()
     {
         _isJumpInputed = true;
     }
 
+    public void Roll()
+    {
+        _animator.SetTrigger("Roll");
+        GetStateFreeFromDamage();
+    }
+    #endregion
+
     private void Update()
     {
+        _currentBaseState = _animator.GetCurrentAnimatorStateInfo(0);
+        _inputVec = new Vector3(x, 0, z);
+
         CheckGroundStatus();
         // 법선임 hitcast 할 때 씀
         _inputVec = Vector3.ProjectOnPlane(_inputVec, _groundNormal);
-
-        //if (Input.GetKeyDown(KeyCode.Z))    _roll = true;
-        //else                            _roll = false;
-
-        //// 앉아다니기 모션 키 입력
-        //if (Input.GetKey(KeyCode.C))    _crouch = true;
-        //else                                _crouch = false;
 
         // 점프 모션 키 입력
         if (_isJumpInputed)
@@ -111,34 +151,12 @@ public class CCntl : MonoBehaviour
             _jump = false;
         }
 
-        //ScaleCapsuleForCrouching();
-        //ScaleCapsuleForRolling();
-        //PreventStandingInLowHeadroom();
         if (_isGrounded) HandleGroundedMovement();
         else HandleAirborneMovement();
 
         UpdateMovement();
     }
 
-    // RaycastHit을 이용한 땅에 붙어있는지 체크
-    void CheckGroundStatus()
-    {
-        RaycastHit hitInfo;
-        if (Physics.Raycast(transform.position + (Vector3.up * 0.1f),
-            Vector3.down, out hitInfo, _groundCheckDistance))
-        {
-            _groundNormal = hitInfo.normal;
-            _isGrounded = true;
-            _animator.applyRootMotion = true;
-        }
-        else
-        {
-            _isGrounded = false;
-            _groundNormal = hitInfo.normal;
-            _animator.applyRootMotion = false;
-        }
-    }
-    
     void HandleGroundedMovement()
     {
         // 점프 조건 1. 앉아 있지 않기 2. Idle 상태 3. 뛰는 상태
@@ -174,8 +192,9 @@ public class CCntl : MonoBehaviour
         _animator.SetFloat("Input Z", -(x));
         // 땅바닥에 있는가? -> 점프 체크
         _animator.SetBool("OnGround", _isGrounded);
-        // 구르기 체크
-        _animator.SetBool("Roll", _rollCheck);
+
+        _animator.SetBool("KnockBack", _knockBack);
+        _animator.SetBool("Stun", _stun);
 
         // 이동 키를 눌렀을 경우 체크
         if (x != 0 || z != 0) _animator.SetBool("Moving", true);
@@ -185,6 +204,26 @@ public class CCntl : MonoBehaviour
         if (!_isGrounded) _animator.SetFloat("Jump", _rigidbody.velocity.y);
         RotateTowardMovementDirection();
         GetCameraRelativeMovement();
+        CrowdControlAnimation();
+    }
+
+    // RaycastHit을 이용한 땅에 붙어있는지 체크
+    void CheckGroundStatus()
+    {
+        RaycastHit hitInfo;
+        if (Physics.Raycast(transform.position + (Vector3.up * 0.1f),
+            Vector3.down, out hitInfo, _groundCheckDistance))
+        {
+            _groundNormal = hitInfo.normal;
+            _isGrounded = true;
+            _animator.applyRootMotion = true;
+        }
+        else
+        {
+            _isGrounded = false;
+            _groundNormal = hitInfo.normal;
+            _animator.applyRootMotion = false;
+        }
     }
 
     // 구형보간 
@@ -213,6 +252,14 @@ public class CCntl : MonoBehaviour
         float h = Input.GetAxisRaw("Horizontal");
 
         _targetDirection = h * right + v * forward;
+    }
+
+    void CrowdControlAnimation()
+    {
+        if (_animator.GetCurrentAnimatorStateInfo(0).IsName("KnockBack"))
+        {
+            _knockBack = false;
+        }
     }
 
     // 점프할 발 체크 추후에 여기에 사운드 추가
@@ -249,4 +296,44 @@ public class CCntl : MonoBehaviour
             _rigidbody.velocity = v;
         }
     }
+
+    #region 상태이상 관리
+    public void CCController(string type, float level)
+    {
+        if (_myPara._invincibility) return;
+        switch (type)
+        {
+            case "KnockBack":
+                // 30프레임을 기준으로 입력한 레벨만큼 배수를 해서 초단위로 변경함
+                level = (1 / 30f) / level;
+                _knockBack = true;
+                GetStateFreeFromDamage();
+                _animator.SetFloat("KnockBackTime", level);
+                break;
+            case "Gethit":
+                _animator.SetTrigger("GetHit");
+                break;
+            case "Stun":
+                CO = StartCoroutine(COStun(level * 2.5f));
+                break;
+            case null:
+                break;
+        }
+
+    }
+
+    // 무적 판정을 넣어줌.
+    // Animation 상에서 실행시키는 Offinvincibility가 알아서 check 해제함
+    void GetStateFreeFromDamage()
+    {
+        _myPara._invincibility = true;
+        _myPara._invincibilityChecker = true;
+    }
+
+    public void ExitStun()
+    {
+        _stun = false;
+        StopCoroutine(CO);
+    }
+    #endregion
 }

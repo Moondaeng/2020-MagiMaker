@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class CRespawn : MonoBehaviour
 {
+    #region Properties
     List<GameObject> _monsters;
-
     [Tooltip("넣을 놈")]
     [SerializeField] GameObject[] _monPrefab;
     [Tooltip("리스폰인지 아닌지 체크")]
@@ -18,6 +18,7 @@ public class CRespawn : MonoBehaviour
     int _maxOfSpawnNumber;
     float _respawnDelay = 3f;
     int _deadMonsters = 0;
+    #endregion
 
     void Start()
     {
@@ -26,6 +27,7 @@ public class CRespawn : MonoBehaviour
         ScaleMonsterTransform();
     }
 
+    #region 스폰하는 몬스터 세팅
     void SumSpawnNumber()
     {
         _maxOfSpawnNumber = 0;
@@ -52,14 +54,15 @@ public class CRespawn : MonoBehaviour
             }
             i++;
         }
-
         _monsters = new List<GameObject>();
         for (int j = 0; j < _spawnNumber.Length; j++)
         {
             MakeMonsters(_monPrefab[j], j);
         }
     }
+    #endregion
 
+    #region 몬스터 만들기
     //프리팹으로 부터 몬스터를 만들어 관리하는 함수
     void MakeMonsters(GameObject monster, int index)
     {
@@ -84,6 +87,7 @@ public class CRespawn : MonoBehaviour
         }
         return _sumOfIndex;
     }
+    #endregion
 
     public void RemoveMonster(int spawnID)
     {
@@ -92,17 +96,16 @@ public class CRespawn : MonoBehaviour
         _monsters[spawnID].SetActive(false);
         //print(spawnID + " monster was killed");
         // 리스폰 트리거
-
-        if (_deadMonsters == _monsters.Count)
-        {
-            StartCoroutine(InitMonsters());
-            _deadMonsters = 0;
-            if (!_isRespawn)
-            {
-                _myManager.DestroyAllMonsters();
-                Destroy(transform.gameObject);
-            }
-        }
+        //if (_deadMonsters == _monsters.Count)
+        //{
+        //    StartCoroutine(InitMonsters());
+        //    _deadMonsters = 0;
+        //    if (!_isRespawn)
+        //    {
+        //        _myManager.DestroyAllMonsters();
+        //        Destroy(transform.gameObject);
+        //    }
+        //}
 
     }
 

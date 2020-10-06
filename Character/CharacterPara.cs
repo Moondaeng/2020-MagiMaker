@@ -4,6 +4,19 @@ using UnityEngine;
 using UnityEngine.Events;
 using System;
 
+/// <summary>
+/// 체력이 바뀌는 모든 이벤트(데미지, 힐 등)
+/// string : 체력에 변화를 준 대상(태그)
+/// int : 체력 변화량
+/// </summary>
+public class HpChanageEvent : UnityEvent<string, int> { }
+
+/// <summary>
+/// 체력 비율 호출 이벤트
+/// float : 체력 비율
+/// </summary>
+public class HpPercentEvent : UnityEvent<float> { }
+
 [System.Serializable]
 public class DamageEvent : UnityEvent<int, int>
 {
@@ -36,10 +49,12 @@ public class CharacterPara : MonoBehaviour
     {
         get { return (int)(_defense * buffParameter.DefenceCoef * buffParameter.DefenceDebuffCoef); }
     }
-    
+
     [System.NonSerialized]
     public UnityEvent deadEvent = new UnityEvent();
     public DamageEvent damageEvent = new DamageEvent();
+    public HpChanageEvent healEvent = new HpChanageEvent();
+    public HpPercentEvent hpPercentEvent = new HpPercentEvent();
 
     protected CBuffTimer _buffTimer;
     public CBuffPara buffParameter;
@@ -54,6 +69,10 @@ public class CharacterPara : MonoBehaviour
     {
         _buffTimer = gameObject.GetComponent<CBuffTimer>();
         buffParameter = new CBuffPara(_buffTimer);
+
+        // 파라미터가 다른 이벤트 처리
+        healEvent.AddListener((string tag, int amount) => hpPercentEvent?.Invoke((float)_curHp / _maxHp));
+
         InitPara();
     }
 
@@ -82,7 +101,7 @@ public class CharacterPara : MonoBehaviour
     // 방어력 계산식: 1000 / (950 + 10*방어력)
     public void DamegedRegardDefence(int enemyAttack)
     {
-        int damage = enemyAttack * 1000 / (950 + 10*TotalDefenece);
+        int damage = enemyAttack * 1000 / (950 + 10 * TotalDefenece);
         DamagedDisregardDefence(damage);
     }
 
@@ -105,6 +124,12 @@ public class CharacterPara : MonoBehaviour
             _isDead = true;
             deadEvent.Invoke();
         }
+    }
+
+    public virtual void Heal(string characterTag, int amount)
+    {
+        _curHp = (_curHp + amount > _maxHp) ? _maxHp : _curHp + amount;
+        healEvent?.Invoke(characterTag, amount);
     }
 
     #region ObsoleteCode

@@ -9,28 +9,12 @@ namespace Item
     public class CConsumable : CItem
     {
         [System.Serializable]
-        public class UseEffect
-        {
-            /// <summary>
-            /// 발동 효과
-            /// </summary>
-            public enum EType
-            {
-                Heal
-            }
-
-            public EType EffectType;
-            public float arg1;
-            public float arg2;
-            public float arg3;
-            public float arg4;
-        }
-
-        [System.Serializable]
         public class UseEffectWithChance
         {
             [Tooltip("소비 아이템 사용 효과")]
-            public UseEffect useEffect;
+            public CUseEffect useEffect;
+            [Tooltip("소비 아이템 사용 시 생성되는 오브젝트(투사체 등)")]
+            public GameObject useEffectObject;
             [Tooltip("효과 발동 확률")]
             [Range(0f, 1f)] public float Chance;
         }
@@ -48,7 +32,8 @@ namespace Item
 [RequireComponent(typeof(Rigidbody))]
 public class CConsumableComponent : CItemComponent
 {
-    public Item.CConsumable ConsumableStat;
+    [SerializeField]
+    private Item.CConsumable ConsumableStat;
 
     private void Awake()
     {

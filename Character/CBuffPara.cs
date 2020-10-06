@@ -40,6 +40,25 @@ public class CBuffPara
     }
 
     #region command buff
+    public void Buff(int BuffID, float time, float buffScale)
+    {
+        switch(BuffID)
+        {
+            case CBuffList.AttackBuff:
+                timer.Register(CBuffList.AttackBuff, time,
+                    (int notUsed) => StartBuffAttack(buffScale),
+                    (int notUsed) => EndBuffAttack(buffScale));
+                break;
+            case CBuffList.DefenceBuff:
+                timer.Register(CBuffList.DefenceBuff, time,
+                    (int notUsed) => StartBuffDefence(buffScale),
+                    (int notUsed) => EndBuffDefence(buffScale));
+                break;
+            default:
+                break;
+        }
+    }
+
     public void BuffAttack(float time, float buffScale)
     {
         timer.Register(CBuffList.AttackBuff, time,

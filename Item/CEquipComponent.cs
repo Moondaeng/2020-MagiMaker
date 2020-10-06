@@ -4,78 +4,81 @@ using UnityEngine;
 
 namespace Item
 {
+    /// <summary>
+    /// 효과 발동 이벤트 조건
+    /// </summary>
+    public enum EEquipEvent
+    {
+        None,
+        Always,
+        UseSkill,
+        KillMonster
+    }
+
+    /// <summary>
+    /// 이벤트 발동 횟수 계산 방식
+    /// </summary>
+    public enum EEquipEventCountOption
+    {
+        Accumulate,
+        Each_Over,
+        Each_Below
+    }
+
+    /// <summary>
+    /// 장비 강화 능력치
+    /// </summary>
+    public enum EEquipAbility
+    {
+        Attack,
+        AttackSpeed,
+        MaxHp,
+        HpRegen,
+        Defence,
+        Speed,
+        SkillCoolTime,
+        DamageReduceRate,
+        SkillRange
+    }
+
     [System.Serializable]
     public class CEquip : CItem
     {
         [System.Serializable]
-        public class EquipEffect
-        {
-            /// <summary>
-            /// 발동 효과
-            /// </summary>
-            public enum EType
-            {
-                Heal
-            }
-
-            /// <summary>
-            /// 패시브 효과 발동 조건
-            /// </summary>
-            public enum ECondition
-            {
-                Teleport,
-                UseSkill,
-                KillMonster
-            }
-
-            public EType EffectType;
-            public ECondition EffectCondition;
-            public float arg1;
-            public float arg2;
-            public float arg3;
-            public float arg4;
-        }
-
-        [System.Serializable]
         public class EquipEffectWithChance
         {
-            public EquipEffect equipEffect;
+            public CUseEffect useEffect;
             [Range(0f, 1f)] public float Chance;
         }
 
         [System.Serializable]
         public class EquipAbility
         {
-            public enum EAbility
-            {
-                Attack,
-                AttackSpeed,
-                MaxHp,
-                HpRegen,
-                Def,
-                Speed,
-                SkillCoolTime,
-                DamageReduceRate,
-                SkillRange
-            }
 
-            public EAbility equipEffect;
+            public EEquipAbility equipEffect;
             public int value;
         }
 
         public List<EquipAbility> equipAbilities;
 
-        public int As;     // 공격속도
-        public int Atk;    // 공격력
-        public int MaxHp;           // 최대 체력
-        public int HpRegen;   // 초당 체력 리젠
-        public int Def;           // 방어력
-        public int Spd;       // 이동속도
-        public int _skillCoolTime;   // 쿨타임
-        public int _damageTakenRate; // 받는 피해율
-        public int _skillRange;      // 스킬 범위
-
+        [Tooltip("패시브 발동 조건")]
+        public EEquipEvent PassiveCondition;
+        [Tooltip("패시브 발동 조건 적용 방식")]
+        public EEquipEventCountOption PassiveConditionOption;
+        [Tooltip("패시브 발동 조건 횟수")]
+        public int PassiveUseCount;
+        [Tooltip("현재 패시브 발동 조건 횟수"), HideInInspector]
+        public int passiveCurrentCount;
         public List<EquipEffectWithChance> EquipEffectList;
+
+        [Tooltip("성장 조건")]
+        public EEquipEvent UpgradeCondition;
+        [Tooltip("성장 조건 횟수")]
+        public int UpgradeCount;
+        [Tooltip("현재 성장 조건 횟수"), HideInInspector]
+        public int UpgradeCurrentCount;
+        [Tooltip("성장 시 능력치")]
+        public List<EquipAbility> upgradeAbilities;
 
         public CEquip(string _itemName, int _itemCode, Sprite _itemImage)
             : base(_itemName, _itemCode, _itemImage)
@@ -88,11 +91,12 @@ namespace Item
 [RequireComponent(typeof(Rigidbody))]
 public class CEquipComponent : CItemComponent
 {
-    public Item.CEquip equipStat;
+    [SerializeField]
+    private Item.CEquip equipStat;
 
     private void Awake()
     {
-        if(equipStat == null)
+        if (equipStat == null)
         {
             equipStat = new Item.CEquip("", 0, null);
         }

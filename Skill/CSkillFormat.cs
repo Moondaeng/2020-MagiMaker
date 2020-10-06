@@ -3,25 +3,100 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // 스킬을 등록해서 실행하는 포맷
+[System.Serializable]
 public class CSkillFormat
 {
-    private static CLogComponent _logger = new CLogComponent(ELogType.Skill);
     public delegate void RetentionSkill(GameObject user, Vector3 targetPos);
+    public delegate void SkillUseCallback(Vector3 targetPos);
 
     private GameObject _userObject;
     private CSkillTimer _timer;
     private RetentionSkill _usingSkill;
-    private bool _isCooldown;
+    private SkillUseCallback _skillUseCallback;
+
+    private int _currentStack;
+    public int MaxStack { private set; get; }
+
     private int _timerRegisterNumber;
+    [SerializeField]
     private float _cooldown;
+    [SerializeField]
+    private int _actionNumber;
+
+    public CSkillFormat()
+    {
+        MaxStack = 1;
+        _currentStack = 1;
+        _timerRegisterNumber = -1;
+        _actionNumber = 0;
+    }
 
     public CSkillFormat(int registerNumber, float cooldown, GameObject user)
     {
+        MaxStack = 1;
+        _currentStack = 1;
         _userObject = user;
         _timer = _userObject.GetComponent<CSkillTimer>();
-        _isCooldown = false;
         _timerRegisterNumber = registerNumber;
         _cooldown = cooldown;
+        _actionNumber = 0;
+    }
+
+    public CSkillFormat(int maxStack, int registerNumber, float cooldown, GameObject user)
+    {
+        MaxStack = maxStack;
+        _currentStack = MaxStack;
+        _userObject = user;
+        _timer = _userObject.GetComponent<CSkillTimer>();
+        _timerRegisterNumber = registerNumber;
+        _cooldown = cooldown;
+        _actionNumber = 0;
+    }
+
+    /// <summary>
+    /// 초기화되지 않은 RegisteredNumber 멤버 변수 설정
+    /// </summary>
+    /// <param name="initRegisteredNumber">설정값</param>
+    /// <returns></returns>
+    public bool InitRegisteredNumber(int initRegisteredNumber)
+    {
+        if(_timerRegisterNumber == -1)
+        {
+            _timerRegisterNumber = initRegisteredNumber;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public bool InitSkillUser(GameObject user)
+    {
+        if (_userObject == null)
+        {
+            _userObject = user;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public void SetSkillUseEvent(int thisSkillIndex, SkillUseEvent useEvent)
+    {
+        Debug.Log("Set Skill Use Event");
+        _skillUseCallback = (targetPos) => useEvent.Invoke(thisSkillIndex, targetPos);
+    }
+
+    /// <summary>
+    /// 캐릭터 행동 번호 설정
+    /// </summary>
+    /// <param name="actionNum"></param>
+    public void SetActionNumber(int characterActionNumber)
+    {
+        _actionNumber = characterActionNumber;
     }
 
     public void RegisterSkill(RetentionSkill register)
@@ -31,21 +106,29 @@ public class CSkillFormat
 
     public bool Use(Vector3 targetPos)
     {
-        if(_isCooldown)
+        if (0 >= _currentStack)
         {
             // 실행 거부
-            _logger.Log("Skill is Cooldown!");
+            Debug.Log($"Skill {_timerRegisterNumber} is Cooldown");
             return false;
         }
         else
         {
-            _isCooldown = true;
-            // 스킬 실행
+            _currentStack--;
+            // 여기에 행동 코드 추가
+            _skillUseCallback?.Invoke(targetPos);
             _usingSkill?.Invoke(_userObject, targetPos);
             _timer.Register(_timerRegisterNumber, _cooldown, EndCooldown);
             return true;
         }
     }
 
-    private void EndCooldown(int notUsed) =>_isCooldown = false;
+    private void EndCooldown(int notUsed)
+    {
+        _currentStack++;
+        if(_currentStack > MaxStack)
+        {
+            _currentStack = MaxStack;
+        }
+    }
 }

@@ -30,7 +30,7 @@ namespace Network
         public CPacketInterpreter(Network.CTcpClient tcpManger)
         {
             _tcpManager = tcpManger;
-            playerCommander = GameObject.Find("GameManager").GetComponent<CPlayerCommand>();
+            playerCommander = CPlayerCommand.instance;
         }
 
         public void PacketInterpret(byte[] data)

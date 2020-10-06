@@ -4,12 +4,17 @@ using UnityEngine;
 
 public class CGoblinFSM : CEnemyFSM
 {
+    #region 고블린만 가지는 Properties
     bool _runEnd;
     Vector3 _dest;
     float second = 1f;
+    #endregion
+    
     protected override void InitStat()
     {
         _moveSpeed = 5f;
+        _attackDistance = 3f;
+        _attackRadius = 10f;
         _anim = GetComponent<Animator>();
         _myPara = GetComponent<CEnemyPara>();
         _myPara.deadEvent.AddListener(CallDeadEvent);
@@ -32,7 +37,7 @@ public class CGoblinFSM : CEnemyFSM
         _originCooltime = _cooltime;
         _originSkillCooltime1 = _skillCooltime1;
     }
-
+    
     protected override void CallDeadEvent()
     {
         int n = Random.Range(0, 2);
@@ -50,19 +55,8 @@ public class CGoblinFSM : CEnemyFSM
         _myRespawn.GetComponent<CRespawn>().RemoveMonster(_spawnID);
         _anim.SetInteger("Dead", 0);
     }
-    
-    protected void AttackCheck()
-    {
-        for (int i = 0; i < _players.Count; i++)
-        {
-            if (IsTargetInSight(10f, _players[i].transform) && IsInAttackDistance(3f, _players[i].transform))
-            {
-                _playerPara = _players[i].GetComponent<CPlayerPara>();
-                AttackCalculate();
-            }
-        }
-    }
 
+    #region 통상적인 State관련 함수들
     protected override void UpdateState()
     {
         if (_actionStart)
@@ -70,12 +64,12 @@ public class CGoblinFSM : CEnemyFSM
             _skillCooltime1 -= Time.deltaTime;
             _skillCoolDown1 = true;
         }
-        if (_currentBaseState.nameHash == _walkState) ChaseState();
-        else if (_currentBaseState.nameHash == _attackState1
-            || _currentBaseState.nameHash == _attackState2) AttackState();
-        else if (_currentBaseState.nameHash == _waitState) AttackWaitState();
-        else if (_currentBaseState.nameHash == _skillWaitState1) SkillWaitState1();
-        else if (_currentBaseState.nameHash == _skillState1) SkillState1();
+        if (_currentBaseState.fullPathHash == _walkState) ChaseState();
+        else if (_currentBaseState.fullPathHash == _attackState1
+            || _currentBaseState.fullPathHash == _attackState2) AttackState();
+        else if (_currentBaseState.fullPathHash == _waitState) AttackWaitState();
+        else if (_currentBaseState.fullPathHash == _skillWaitState1) SkillWaitState1();
+        else if (_currentBaseState.fullPathHash == _skillState1) SkillState1();
 
         if (_skillCooltime1 < 0f)
         {
@@ -88,8 +82,8 @@ public class CGoblinFSM : CEnemyFSM
     {
         _runEnd = false;
         if (!_actionStart) _actionStart = true;
-        if (_currentBaseState.nameHash != _deadState1 
-            || _currentBaseState.nameHash != _deadState2)
+        if (_currentBaseState.fullPathHash != _deadState1 
+            || _currentBaseState.fullPathHash != _deadState2)
             MoveState();
     }
 
@@ -115,14 +109,16 @@ public class CGoblinFSM : CEnemyFSM
             _coolDown = false;
             _cooltime = _originCooltime;
         }
-        else if (GetDistanceFromPlayer(_distances) > 3f)
+        else if (GetDistanceFromPlayer(_distances) > _attackDistance)
         {
             _coolDown = false;
             _anotherAction = true;
             _cooltime = _originCooltime;
         }
     }
-    
+    #endregion
+
+    #region 스킬관련 함수들
     protected void SkillWaitState1()
     {
         _skill1 = false;
@@ -151,6 +147,7 @@ public class CGoblinFSM : CEnemyFSM
             second = 1f;
         }
     }
+    #endregion
 
     protected override void Update()
     {

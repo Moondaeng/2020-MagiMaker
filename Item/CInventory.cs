@@ -1,6 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
+
+public class ChangeConsumableEvent : UnityEvent<Sprite, string, int> { }
 
 [System.Serializable]
 public class CInventory
@@ -23,21 +27,78 @@ public class CInventory
     private List<ConsumableWithStack> _consumableItems;
     private int _selectedConsumableNumber;
 
-    public int EquipAtkIncreaseSize { get; private set; }
-    public float AtkIncreaseRate { get; private set; }
-    public int DefIncreaseSize { get; private set; }
-    public float ASIncreaseSize { get; private set; }
-    public float SpdIncreaseSize { get; private set; }
-    public float AvdIncreaseSize { get; private set; }
-    public float MaxHpIncreaseSize { get; private set; }
-    public float HpRegenIncreaseSize { get; private set; }
+    private GameObject _inventoryUser;
 
-
-    public CInventory(int equipCapacity = 10, int consumableCapacity = 3)
+    public int EquipAtkIncreaseSize
     {
+        get
+        {
+            return _equipAbilityIncreaseSizeArr[(int)Item.EEquipAbility.Attack];
+        }
+    }
+    public int DefIncreaseSize
+    {
+        get
+        {
+            return _equipAbilityIncreaseSizeArr[(int)Item.EEquipAbility.Defence];
+        }
+    }
+    public float ASIncreaseSize
+    {
+        get
+        {
+            return _equipAbilityIncreaseSizeArr[(int)Item.EEquipAbility.AttackSpeed];
+        }
+    }
+    public float SpdIncreaseSize
+    {
+        get
+        {
+            return _equipAbilityIncreaseSizeArr[(int)Item.EEquipAbility.Speed];
+        }
+    }
+    //public float AvdIncreaseSize
+    //{
+    //    get
+    //    {
+    //        return _equipAbilityIncreaseSizeArr[(int)Item.EEquipAbility.];
+    //    }
+    //}
+    public float MaxHpIncreaseSize
+    {
+        get
+        {
+            return _equipAbilityIncreaseSizeArr[(int)Item.EEquipAbility.MaxHp];
+        }
+    }
+    public float HpRegenIncreaseSize
+    {
+        get
+        {
+            return _equipAbilityIncreaseSizeArr[(int)Item.EEquipAbility.HpRegen];
+        }
+    }
+
+    private int[] _equipAbilityIncreaseSizeArr = new int[Enum.GetValues(typeof(Item.EEquipAbility)).Length];
+
+    public ChangeConsumableEvent changeConsumableEvent = new ChangeConsumableEvent();
+
+    public CInventory(GameObject userObject, int equipCapacity = 10, int consumableCapacity = 3)
+    {
+        _inventoryUser = userObject;
         _equipItems = new List<Item.CEquip>(equipCapacity);
         _consumableItems = new List<ConsumableWithStack>(consumableCapacity);
         _selectedConsumableNumber = 0;
+
+        RegisterEquipEvent();
+    }
+
+    private void RegisterEquipEvent()
+    {
+        var inventoryUserPara = _inventoryUser.GetComponent<CPlayerPara>();
+        var inventoryUserSkill = _inventoryUser.GetComponent<CPlayerSkill>();
+        //inventoryUserPara.healEvent.AddListener((string tag, int amount) => CallItemEvent(Item.EEquipEvent.Always, amount));
+        inventoryUserSkill.skillUseEvent.AddListener((int skillNum, Vector3 pos) => CallItemEvent(Item.EEquipEvent.UseSkill, 1));
     }
 
     /// <summary>
@@ -60,8 +121,6 @@ public class CInventory
         _equipItems.Add(newEquip);
         AddEquipAbility(newEquip);
 
-        RewindEquipUI();
-
         return true;
     }
 
@@ -80,8 +139,6 @@ public class CInventory
 
         DeleteEquipAbility(_equipItems[itemIndex]);
         _equipItems.RemoveAt(itemIndex);
-
-        RewindEquipUI();
 
         return true;
     }
@@ -107,7 +164,10 @@ public class CInventory
             _consumableItems.Add(new ConsumableWithStack(newItem, 1));
         }
 
-        RewindConsumableUI();
+        changeConsumableEvent.Invoke(
+            _consumableItems[_selectedConsumableNumber].consumable.ItemImage,
+            _consumableItems[_selectedConsumableNumber].consumable.ItemName,
+            _consumableItems[_selectedConsumableNumber].stack);
 
         return true;
     }
@@ -125,6 +185,11 @@ public class CInventory
             _selectedConsumableNumber = 0;
         }
         Debug.Log($"Current Consumable Number : {_selectedConsumableNumber}");
+
+        changeConsumableEvent.Invoke(
+            _consumableItems[_selectedConsumableNumber].consumable.ItemImage,
+            _consumableItems[_selectedConsumableNumber].consumable.ItemName,
+            _consumableItems[_selectedConsumableNumber].stack);
     }
 
     public void UseSelectedConsumable()
@@ -143,7 +208,95 @@ public class CInventory
             _selectedConsumableNumber = 0;
         }
 
-        RewindConsumableUI();
+        if(_consumableItems.Count == 0)
+        {
+            changeConsumableEvent.Invoke(
+                null,
+                "",
+                0);
+        }
+        else
+        {
+            changeConsumableEvent.Invoke(
+                _consumableItems[_selectedConsumableNumber].consumable.ItemImage,
+                _consumableItems[_selectedConsumableNumber].consumable.ItemName,
+                _consumableItems[_selectedConsumableNumber].stack);
+        }
+    }
+
+    /// <summary>
+    /// 해당 이벤트가 일어나면 장비 효과 발동(패시브, 성장)
+    /// </summary>
+    /// <param name="condition"></param>
+    /// <param name="count"></param>
+    private void CallItemEvent(Item.EEquipEvent condition, int count)
+    {
+        foreach (var equip in _equipItems)
+        {
+            if(equip.PassiveCondition == condition)
+            {
+                ExecuteEquipPassive(equip, count);
+            }
+
+            if(equip.UpgradeCondition == condition)
+            {
+                ExecuteEquipUpgrade(equip);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 장비 패시브를 추가 조건에 따라 실행
+    /// ex) n회에 한 번 실행 / n 이상일 때 실행 / n 이하일 때 실행
+    /// </summary>
+    /// <param name="equip">적용 장비</param>
+    /// <param name="count"></param>
+    private void ExecuteEquipPassive(Item.CEquip equip, int count)
+    {
+        switch (equip.PassiveConditionOption)
+        {
+            case Item.EEquipEventCountOption.Accumulate:
+                equip.passiveCurrentCount += count;
+                if(equip.passiveCurrentCount >= equip.PassiveUseCount)
+                {
+                    Debug.Log("Use Passive");
+                    equip.passiveCurrentCount = 0;
+                }
+                break;
+            case Item.EEquipEventCountOption.Each_Below:
+                if (equip.PassiveUseCount >= count)
+                {
+                    Debug.Log("Use Passive");
+                }
+                break;
+            case Item.EEquipEventCountOption.Each_Over:
+                if (equip.PassiveUseCount <= count)
+                {
+                    Debug.Log("Use Passive");
+                }
+                break;
+            default:
+                Debug.Log("Error case");
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 장비 성장
+    /// </summary>
+    /// <param name="equip"></param>
+    private void ExecuteEquipUpgrade(Item.CEquip equip)
+    {
+        if(equip.UpgradeCurrentCount >= equip.UpgradeCount)
+        {
+            return;
+        }
+
+        equip.UpgradeCurrentCount++;
+        if (equip.UpgradeCurrentCount == equip.UpgradeCount)
+        {
+            Debug.Log("Equip Upgrade");
+        }
     }
 
     private void SwapEquip(ref Item.CEquip lhs, ref Item.CEquip rhs)
@@ -159,41 +312,18 @@ public class CInventory
     /// </summary>
     private void AddEquipAbility(Item.CEquip equip)
     {
-        EquipAtkIncreaseSize += equip.Atk;
-        DefIncreaseSize += equip.Def;
-        ASIncreaseSize += equip.As;
-        SpdIncreaseSize += equip.Spd;
-        //AvdIncreaseSize += equip.avd;
-        MaxHpIncreaseSize += equip.MaxHp;
-        HpRegenIncreaseSize += equip.HpRegen;
-
-        // 패시브 효과 추가
-}
+        foreach(var ability in equip.equipAbilities)
+        {
+            _equipAbilityIncreaseSizeArr[(int)ability.equipEffect] += ability.value;
+        }
+    }
 
     private void DeleteEquipAbility(Item.CEquip equip)
     {
-        EquipAtkIncreaseSize -= equip.Atk;
-        DefIncreaseSize -= equip.Def;
-        ASIncreaseSize -= equip.As;
-        SpdIncreaseSize -= equip.Spd;
-        //AvdIncreaseSize -= equip.avd;
-        MaxHpIncreaseSize -= equip.MaxHp;
-        HpRegenIncreaseSize -= equip.HpRegen;
-
-        // 패시브 효과 제거
-    }
-
-    /// <summary>
-    /// 가방 내 장비 아이템의 이미지 갱신
-    /// </summary>
-    private void RewindEquipUI()
-    {
-
-    }
-
-    private void RewindConsumableUI()
-    {
-
+        foreach (var ability in equip.equipAbilities)
+        {
+            _equipAbilityIncreaseSizeArr[(int)ability.equipEffect] -= ability.value;
+        }
     }
 
     ///<summary>
@@ -226,7 +356,7 @@ public class CInventory
     {
         int useEffectIndex = SelectRandomEffect(consumable);
         Debug.Log($"useEffectIndex : {useEffectIndex}");
-        UseConsumableSelectedEffect(consumable, useEffectIndex);
+        UseConsumableSelectedEffect(consumable.UseEffectList[useEffectIndex].useEffect);
     }
 
     private int SelectRandomEffect(Item.CConsumable consumable)
@@ -262,22 +392,45 @@ public class CInventory
         return idx;
     }
 
-    private void UseConsumableSelectedEffect(Item.CConsumable consumable, int useEffectIndex)
+    private void UseConsumableSelectedEffect(CUseEffect useEffect)
     {
-        if(useEffectIndex == -1)
+        foreach(var damage in useEffect.DamageEffectList)
         {
-            Debug.Log("index error");
-            return;
+            switch(damage.type)
+            {
+                case CUseEffect.DamageType.damage:
+                    _inventoryUser.GetComponent<CPlayerPara>().DamagedDisregardDefence(damage.startDamage);
+                    break;
+                case CUseEffect.DamageType.heal:
+                    _inventoryUser.GetComponent<CPlayerPara>().DamagedDisregardDefence(-damage.startDamage);
+                    break;
+                default:
+                    break;
+            }
         }
-
-        switch (consumable.UseEffectList[useEffectIndex].useEffect.EffectType)
+        foreach(var cc in useEffect.CCEffectList)
         {
-            case Item.CConsumable.UseEffect.EType.Heal:
-                Debug.Log("Heal");
-                break;
-            default:
-                Debug.Log("not implement Effect");
-                break;
+            switch(cc.type)
+            {
+                case CUseEffect.CCType.stun:
+                    break;
+                case CUseEffect.CCType.slow:
+                    break;
+                default:
+                    break;
+            }
+        }
+        foreach (var buff in useEffect.BuffEffectList)
+        {
+            switch(buff.type)
+            {
+                case CUseEffect.BuffType.attackBuff:
+                    break;
+                case CUseEffect.BuffType.defenceBuff:
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
