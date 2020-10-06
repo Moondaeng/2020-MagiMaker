@@ -255,7 +255,7 @@ public class CInventory
     {
         switch (equip.PassiveConditionOption)
         {
-            case Item.EEquipEventCountOption.Accumalte:
+            case Item.EEquipEventCountOption.Accumulate:
                 equip.passiveCurrentCount += count;
                 if(equip.passiveCurrentCount >= equip.PassiveUseCount)
                 {

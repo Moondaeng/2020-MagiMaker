@@ -20,7 +20,7 @@ namespace Item
     /// </summary>
     public enum EEquipEventCountOption
     {
-        Accumalte,
+        Accumulate,
         Each_Over,
         Each_Below
     }
