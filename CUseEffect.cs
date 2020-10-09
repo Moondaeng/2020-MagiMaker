@@ -1,6 +1,73 @@
-﻿using System.Collections;
+﻿using System;
+using System.Text;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
+
+public static class CUseEffectExplain
+{
+    public static readonly Dictionary<CUseEffect.DamageType, string> DamageTypeExplainDict
+            = new Dictionary<CUseEffect.DamageType, string>
+        {
+            {CUseEffect.DamageType.damage, "데미지"},
+            {CUseEffect.DamageType.heal, "힐"},
+        };
+
+    public static readonly Dictionary<CUseEffect.CCType, string> CCTypeExplainDict
+            = new Dictionary<CUseEffect.CCType, string>
+        {
+            {CUseEffect.CCType.slow, "느려짐"},
+            {CUseEffect.CCType.stun, "기절"},
+        };
+
+    public static readonly Dictionary<CUseEffect.BuffType, string> BuffTypeExplainDict
+            = new Dictionary<CUseEffect.BuffType, string>
+        {
+            {CUseEffect.BuffType.attackBuff, "공격력 증가"},
+            {CUseEffect.BuffType.defenceBuff, "방어력 증가"},
+        };
+
+    public static string CreateUseEffectText(CUseEffect useEffect)
+    {
+        StringBuilder sb = new StringBuilder();
+        foreach(var damage in useEffect.DamageEffectList)
+        {
+            if(!DamageTypeExplainDict.TryGetValue(damage.type, out string text))
+            {
+                text = damage.type.ToString();
+                Debug.Log($"Warning : {damage.type.GetType().ToString()}'s {text} explain isn't setting");
+            }
+            sb.AppendLine("즉시 " + damage.startDamage + "만큼 " + text + "주고" + damage.dotPeriod + "동안 초당" + damage.dotDamage + "만큼 " + text);
+        }
+        foreach (var cc in useEffect.CCEffectList)
+        {
+            if (!CCTypeExplainDict.TryGetValue(cc.type, out string text))
+            {
+                text = cc.type.ToString();
+                Debug.Log($"Warning : {cc.type.GetType().ToString()}'s {text} explain isn't setting");
+            }
+            sb.AppendLine(cc.time + "초 " + text);
+        }
+        foreach (var buff in useEffect.BuffEffectList)
+        {
+            if (!BuffTypeExplainDict.TryGetValue(buff.type, out string text))
+            {
+                text = buff.type.ToString();
+                Debug.Log($"Warning : {buff.type.GetType().ToString()}'s {text} explain isn't setting");
+            }
+            sb.AppendLine(buff.time + "초 동안 " + buff.effectPersent + "% " + text);
+        }
+        return sb.ToString();
+    }
+
+    public static string CreateUseEffectListText(List<UseEffectWithChance> useEffects)
+    {
+        StringBuilder sb = new StringBuilder();
+        
+        return sb.ToString();
+    }
+}
 
 /*
  * 효과 정의 클래스
@@ -72,4 +139,18 @@ public class CUseEffect
     public List<CCEffect> CCEffectList;
     [SerializeField]
     public List<BuffEffect> BuffEffectList;
+}
+
+/// <summary>
+/// 확률적으로 효과 사용
+/// </summary>
+[System.Serializable]
+public class UseEffectWithChance
+{
+    [Tooltip("사용 효과")]
+    public CUseEffect useEffect;
+    [Tooltip("사용 시 생성하는 오브젝트(투사체 등)")]
+    public GameObject useEffectObject;
+    [Tooltip("효과 발동 확률")]
+    [Range(0f, 1f)] public float Chance;
 }

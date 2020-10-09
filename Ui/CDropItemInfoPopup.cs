@@ -45,10 +45,10 @@ public class CDropItemInfoPopup : MonoBehaviour
 
     public void DrawEquipExplain(Item.CEquip equip)
     {
-        foreach(var ability in equip.equipAbilities)
-        {
-            _itemExplain.text += _equipAbilityExplainArr[(int)ability.equipEffect] + ability.value + "\n";
-        }
+        _itemExplain.text += Item.CEquipExplainText.CreateAbilityText(equip.equipAbilities);
+        _itemExplain.text += Item.CEquipExplainText.CreatePassiveText(
+            equip.PassiveCondition, equip.PassiveUseCount, equip.PassiveConditionOption);
+        _itemExplain.text += Item.CEquipExplainText.CreateUpgradeText(equip.UpgradeCondition, equip.UpgradeCount, equip.upgradeAbilities);
     }
 
     public void DrawConsumableExplain(Item.CConsumable consumable)
@@ -74,5 +74,10 @@ public class CDropItemInfoPopup : MonoBehaviour
         {
             DrawConsumableExplain(item as Item.CConsumable);
         }
+    }
+
+    private void DrawUseEffectText()
+    {
+
     }
 }
