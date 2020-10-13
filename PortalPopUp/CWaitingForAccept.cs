@@ -42,9 +42,9 @@ public class CWaitingForAccept : MonoBehaviour
         {
             _waitingForOtherPlayer.SetActive(false);
 
-            UsePortal usePortal = instance._portal.GetComponent<UsePortal>();
+            CPortalManager portalManager = GameObject.Find("PortalManager").GetComponent<CPortalManager>();
             _player1Accept = EAccept._waiting; // 디버깅용
-            usePortal.MoveToNextRoom();
+            portalManager.MoveToNextRoom();
         }
     }
 

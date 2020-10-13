@@ -10,8 +10,6 @@ public class CSlotController : MonoBehaviour
     {
         this.item = item;
 
-        Debug.Log("bug");
-
         if(item == null)
         {
             for (int i = 0; i < transform.childCount; i++)

@@ -27,9 +27,14 @@ public class CController : MonoBehaviour
 
     private GameObject _viewingObject;
 
+    static public CController instance;
+
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
+
+        if (instance == null)
+            instance = this;
 
         // 조작 관리
         keyDictionary = new Dictionary<KeyCode, Action>
@@ -177,19 +182,7 @@ public class CController : MonoBehaviour
         var npc = _viewingObject.GetComponent<CEventRoomNpcClick>();
         if (npc != null)
         {
-<<<<<<< HEAD
-            var npc = hit.transform.gameObject.GetComponent<CEventRoomNpcClick>();
-
-            if (npc != null)
-            {
-                CEventRoomNpcClick.instance.UseNPC();
-            }
-
-            var item = hit.transform.gameObject.GetComponent<CEquipComponent>();
-
-            if (item != null)
-=======
-            //CEventRoomNpcClick.instance.UseNPC();
+            CEventRoomNpcClick.instance.UseNPC();
         }
 
         var itemComponent = _viewingObject.GetComponent<CItemComponent>();
@@ -197,7 +190,6 @@ public class CController : MonoBehaviour
         {
             bool canAddItem = false;
             if (itemComponent.Item is Item.CEquip)
->>>>>>> a61cd1855e2c045ac12a1cf948cb08d8ede0c189
             {
                 canAddItem = playerPara.Inventory.AddEquip(itemComponent.Item as Item.CEquip);
             }

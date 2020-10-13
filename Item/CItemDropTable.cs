@@ -47,14 +47,6 @@ public class CItemDropTable : MonoBehaviour
         }
     }
 
-    public static CItemDropTable instance = null;
-
-    private void Start()
-    {
-        if (instance == null)
-            instance = this;
-    }
-
     public GameObject DropRandomItem(int stage)
     {
         Debug.Log("Drop Random Item");
