@@ -25,14 +25,19 @@ public class CCharacterSkill : MonoBehaviour
 
     protected virtual void Awake()
     {
-        _skillList = new List<CSkillFormat>();
         _selectedSkillNum = 0;
 
-        for (int i = 0; i < _skillList.Count; i++)
+        if (_skillList != null)
         {
-            _skillList[i].InitRegisteredNumber(i);
-            _skillList[i].InitSkillUser(gameObject);
-            _skillList[i].SetSkillUseEvent(i, skillUseEvent);
+            for (int i = 0; i < _skillList.Count; i++)
+            {
+                _skillList[i].InitRegisteredNumber(i);
+                _skillList[i].InitSkillUser(gameObject);
+            }
+        }
+        else
+        {
+            _skillList = new List<CSkillFormat>();
         }
     }
 
@@ -66,8 +71,59 @@ public class CCharacterSkill : MonoBehaviour
             return;
         }
 
-        _skillList[_selectedSkillNum].Use(targetPos);
+        if(_skillList[_selectedSkillNum].Use(targetPos))
+        {
+            // CCntl의 행동 코드
+            skillUseEvent?.Invoke(_selectedSkillNum, targetPos);
+            CreateSkillObject(_skillList[_selectedSkillNum].skillObject, targetPos);
+        }
         _selectedSkillNum = 0;
+    }
+
+    // 스킬 오브젝트 생성
+    protected void CreateSkillObject(GameObject skillObject, Vector3 targetPos)
+    {
+        if(skillObject == null)
+        {
+            Debug.Log("Skill Object not setting");
+            return;
+        }
+
+        // 회전 설정
+        var userPos = gameObject.transform.position;
+        var objectivePos = targetPos - userPos;
+        Quaternion lookRotation = Quaternion.LookRotation(objectivePos);
+
+        // 오브젝트 생성
+        var projectile = Instantiate(skillObject, userPos + Vector3.up, lookRotation);
+        projectile.tag = gameObject.tag;
+
+        InitToSkillObject(skillObject, targetPos);
+    }
+
+    /// <summary>
+    /// 대상에 맞는 스킬 레이어로 변환한다
+    /// </summary>
+    /// <returns></returns>
+    protected virtual int TranslateLayerCharacterToSkill()
+    {
+        return LayerMask.NameToLayer("PlayerSkill");
+    }
+
+    protected void InitToSkillObject(GameObject skillObject, Vector3 targetPos)
+    {
+        var hitObjectBase = skillObject.GetComponent<CHitObjectBase>();
+        hitObjectBase.SetObjectLayer(TranslateLayerCharacterToSkill());
+
+        if (hitObjectBase is CProjectileBase)
+        {
+            // 유저 스탯에 비례해 스킬 발사
+            var userStat = GetComponent<CharacterPara>();
+
+            // 공격력 등 필요한 정보 넣기
+            //projectileBase.userAttackPower = userStat._attackMax;
+            // 원소 관련 정보
+        }
     }
 
     protected virtual void CallSkillUseEvent(int skillIndex, Vector3 targetPos)

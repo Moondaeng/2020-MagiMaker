@@ -18,6 +18,8 @@ public class CController : MonoBehaviour
     private Network.CTcpClient _network;
     //public CGameEvent gameEvent;
 
+    public static CController instance;
+
     public GameObject player;
 
     private CCntl _playerControl;
@@ -30,6 +32,11 @@ public class CController : MonoBehaviour
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
+
+        if (instance == null)
+        {
+            instance = this;
+        }
 
         // 조작 관리
         keyDictionary = new Dictionary<KeyCode, Action>

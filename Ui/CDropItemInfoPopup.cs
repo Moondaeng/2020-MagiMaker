@@ -47,7 +47,7 @@ public class CDropItemInfoPopup : MonoBehaviour
     {
         _itemExplain.text += Item.CEquipExplainText.CreateAbilityText(equip.equipAbilities);
         _itemExplain.text += Item.CEquipExplainText.CreatePassiveText(
-            equip.PassiveCondition, equip.PassiveUseCount, equip.PassiveConditionOption);
+            equip.PassiveCondition, equip.PassiveUseCount, equip.PassiveConditionOption, equip.EquipEffectList);
         _itemExplain.text += Item.CEquipExplainText.CreateUpgradeText(equip.UpgradeCondition, equip.UpgradeCount, equip.upgradeAbilities);
     }
 

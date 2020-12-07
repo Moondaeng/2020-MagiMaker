@@ -30,8 +30,9 @@ public class CProjectileSkill : MonoBehaviour
         Quaternion lookRotation = Quaternion.LookRotation(objectivePos);
 
         // 투사체 생성
-        var projectile = Instantiate(ProjectileModel, userPos, lookRotation);
-        //projectile.SendMessage("SetTargetPos", targetPos);
+        var projectile = Instantiate(ProjectileModel, userPos + Vector3.up, lookRotation);
+        projectile.SendMessage("SetTargetPos", targetPos);
+        projectile.layer = LayerMask.NameToLayer("PlayerSkill");
         projectile.tag = user.tag;
 
         // 유저 스탯에 비례해 스킬 발사

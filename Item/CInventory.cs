@@ -227,8 +227,8 @@ public class CInventory
     /// <summary>
     /// 해당 이벤트가 일어나면 장비 효과 발동(패시브, 성장)
     /// </summary>
-    /// <param name="condition"></param>
-    /// <param name="count"></param>
+    /// <param name="condition">패시브 발동 조건</param>
+    /// <param name="count">패시브 조건 인자</param>
     private void CallItemEvent(Item.EEquipEvent condition, int count)
     {
         foreach (var equip in _equipItems)
@@ -356,7 +356,8 @@ public class CInventory
     {
         int useEffectIndex = SelectRandomEffect(consumable);
         Debug.Log($"useEffectIndex : {useEffectIndex}");
-        UseConsumableSelectedEffect(consumable.UseEffectList[useEffectIndex].useEffect);
+        _inventoryUser.GetComponent<CPlayerPara>().TakeUseEffect(
+            _inventoryUser.tag, consumable.UseEffectList[useEffectIndex].useEffect);
     }
 
     private int SelectRandomEffect(Item.CConsumable consumable)
@@ -390,47 +391,5 @@ public class CInventory
         }
 
         return idx;
-    }
-
-    private void UseConsumableSelectedEffect(CUseEffect useEffect)
-    {
-        foreach(var damage in useEffect.DamageEffectList)
-        {
-            switch(damage.type)
-            {
-                case CUseEffect.DamageType.damage:
-                    _inventoryUser.GetComponent<CPlayerPara>().DamagedDisregardDefence(damage.startDamage);
-                    break;
-                case CUseEffect.DamageType.heal:
-                    _inventoryUser.GetComponent<CPlayerPara>().DamagedDisregardDefence(-damage.startDamage);
-                    break;
-                default:
-                    break;
-            }
-        }
-        foreach(var cc in useEffect.CCEffectList)
-        {
-            switch(cc.type)
-            {
-                case CUseEffect.CCType.stun:
-                    break;
-                case CUseEffect.CCType.slow:
-                    break;
-                default:
-                    break;
-            }
-        }
-        foreach (var buff in useEffect.BuffEffectList)
-        {
-            switch(buff.type)
-            {
-                case CUseEffect.BuffType.attackBuff:
-                    break;
-                case CUseEffect.BuffType.defenceBuff:
-                    break;
-                default:
-                    break;
-            }
-        }
     }
 }

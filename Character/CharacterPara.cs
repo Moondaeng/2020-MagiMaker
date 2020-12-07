@@ -98,6 +98,67 @@ public class CharacterPara : MonoBehaviour
         UpdateAfterReceiveAttack();
     }
 
+    public void TakeUseEffect(string giverTag, CUseEffect useEffect)
+    {
+        if(CheckTag(giverTag))
+        {
+            Debug.Log("Check Tag");
+        }
+
+        foreach (var damage in useEffect.DamageEffectList)
+        {
+            switch (damage.type)
+            {
+                case CUseEffect.DamageType.damage:
+                    DamagedDisregardDefence(damage.startDamage);
+                    break;
+                case CUseEffect.DamageType.heal:
+                    DamagedDisregardDefence(-damage.startDamage);
+                    break;
+                default:
+                    break;
+            }
+        }
+        foreach (var cc in useEffect.CCEffectList)
+        {
+            switch (cc.type)
+            {
+                case CUseEffect.CCType.stun:
+                    break;
+                case CUseEffect.CCType.slow:
+                    break;
+                default:
+                    break;
+            }
+        }
+        foreach (var buff in useEffect.BuffEffectList)
+        {
+            switch (buff.type)
+            {
+                case CUseEffect.BuffType.attackBuff:
+                    buffParameter.BuffAttack(buff.time, buff.effectPersent);
+                    break;
+                case CUseEffect.BuffType.defenceBuff:
+                    buffParameter.BuffDefence(buff.time, buff.effectPersent);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    protected virtual bool CheckTag(string giverTag)
+    {
+        if(giverTag == gameObject.tag)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     // 방어력 계산식: 1000 / (950 + 10*방어력)
     public void DamegedRegardDefence(int enemyAttack)
     {

@@ -9,6 +9,7 @@ public class CSkillFormat
     public delegate void RetentionSkill(GameObject user, Vector3 targetPos);
     public delegate void SkillUseCallback(Vector3 targetPos);
 
+    // CharacterSkill에서 자동으로 설정하는 변수들
     private GameObject _userObject;
     private CSkillTimer _timer;
     private RetentionSkill _usingSkill;
@@ -18,10 +19,12 @@ public class CSkillFormat
     public int MaxStack { private set; get; }
 
     private int _timerRegisterNumber;
-    [SerializeField]
+    [SerializeField, Tooltip("스킬 쿨다운")]
     private float _cooldown;
-    [SerializeField]
+    [SerializeField, Tooltip("스킬 사용 시 취할 모션 번호")]
     private int _actionNumber;
+    [SerializeField, Tooltip("스킬 사용 시 나가는 오브젝트")]
+    public GameObject skillObject;
 
     public CSkillFormat()
     {
@@ -76,6 +79,7 @@ public class CSkillFormat
         if (_userObject == null)
         {
             _userObject = user;
+            _timer = _userObject.GetComponent<CSkillTimer>();
             return true;
         }
         else
@@ -116,8 +120,8 @@ public class CSkillFormat
         {
             _currentStack--;
             // 여기에 행동 코드 추가
-            _skillUseCallback?.Invoke(targetPos);
-            _usingSkill?.Invoke(_userObject, targetPos);
+            //_skillUseCallback?.Invoke(targetPos);
+            //_usingSkill?.Invoke(_userObject, targetPos);
             _timer.Register(_timerRegisterNumber, _cooldown, EndCooldown);
             return true;
         }
