@@ -5,8 +5,25 @@ using UnityEngine.UI;
 
 public class CAcceptClickEvent : MonoBehaviour
 {
-//<<<<<</*<*/ HEAD
+    //<<<<<</*<*/ HEAD
     //public GameObject _waitingForOtherPlayer;
+    private GameObject _popUp;
+    private void Start()
+    {
+        _popUp = gameObject.transform.parent.gameObject;
+    }
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Y))
+            ClickAccept();
+        else if (Input.GetKeyDown(KeyCode.N))
+            ClickCancel();
+    }
+    
+    public void ClickCancel()
+    {
+        _popUp.SetActive(false);
+    }
 
     public void ClickAccept()
     {

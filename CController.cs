@@ -24,19 +24,25 @@ public class CController : MonoBehaviour
 
     private CCntl _playerControl;
 
-    float x;
-    float z;
+    public float x;
+    public float z;
 
     private GameObject _viewingObject;
+
+    static public CController instance;
 
     private void Awake()
     {
         DontDestroyOnLoad(gameObject);
 
         if (instance == null)
+<<<<<<< HEAD
         {
             instance = this;
         }
+=======
+            instance = this;
+>>>>>>> 75b813ff00aed03628b8b7372cd95b1ba335bd52
 
         // 조작 관리
         keyDictionary = new Dictionary<KeyCode, Action>
@@ -69,12 +75,22 @@ public class CController : MonoBehaviour
 
     void Update()
     {
+        if (CGlobal.useNPC)
+        {
+            z = 0;
+            x = 0;
+            _playerControl.Move(x, z);
+            return;
+        }
+
+
         z = Input.GetAxisRaw("Horizontal");
         x = -(Input.GetAxisRaw("Vertical"));
         if (player != null)
         {
             _playerControl = player.GetComponent<CCntl>();
         }
+
         _playerControl.Move(x, z);
         ViewInteractionPopup();
 
@@ -95,7 +111,7 @@ public class CController : MonoBehaviour
         player = controlCharacter;
         _playerUi.SetUiTarget(controlCharacter);
     }
-    
+
     private void Attack()
     {
         _playerControl.Attack();
@@ -170,7 +186,7 @@ public class CController : MonoBehaviour
 
     private void GetItem()
     {
-        if(_viewingObject == null)
+        if (_viewingObject == null)
         {
             return;
         }
@@ -184,7 +200,7 @@ public class CController : MonoBehaviour
         var npc = _viewingObject.GetComponent<CEventRoomNpcClick>();
         if (npc != null)
         {
-            //CEventRoomNpcClick.instance.UseNPC();
+            CEventRoomNpcClick.instance.UseNPC();
         }
 
         var itemComponent = _viewingObject.GetComponent<CItemComponent>();
@@ -207,7 +223,7 @@ public class CController : MonoBehaviour
             }
         }
     }
-    
+
     private void SkillSelect(int index)
     {
         player.GetComponent<CCharacterSkill>().SkillSelect(index);

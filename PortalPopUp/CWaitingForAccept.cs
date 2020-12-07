@@ -15,9 +15,9 @@ public class CWaitingForAccept : MonoBehaviour
     public EAccept _player2Accept;
     public EAccept _player3Accept;
     public EAccept _player4Accept;
-    public GameObject _portal;
-    public GameObject _waitingForOtherPlayer;
-    public GameObject _portalPopUp;
+    [HideInInspector] public GameObject _portal;
+    [HideInInspector] public GameObject _waitingForOtherPlayer;
+    [HideInInspector] public GameObject _portalPopUp;
     public static CWaitingForAccept instance = null;
 
     // Start is called before the first frame update
@@ -42,9 +42,9 @@ public class CWaitingForAccept : MonoBehaviour
         {
             _waitingForOtherPlayer.SetActive(false);
 
-            UsePortal usePortal = instance._portal.GetComponent<UsePortal>();
+            CPortalManager portalManager = GameObject.Find("PortalManager").GetComponent<CPortalManager>();
             _player1Accept = EAccept._waiting; // 디버깅용
-            usePortal.MoveToNextRoom();
+            portalManager.MoveToNextRoom();
         }
     }
 

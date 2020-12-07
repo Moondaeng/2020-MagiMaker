@@ -6,40 +6,45 @@ public class CEventRoomNpcClick : MonoBehaviour
 {
     private GameObject _eventRoom;
     private GameObject _popUp;
+    public static CEventRoomNpcClick instance = null;
+    private CController _controller;
+    public Stack<GameObject> _stackPopUp;
     // Start is called before the first frame update
     void Start()
     {
+        if (instance == null)
+            instance = this;
+
+        instance._stackPopUp = new Stack<GameObject>();
+
         _eventRoom = gameObject.transform.parent.gameObject;
-        _popUp = _eventRoom.transform.Find("PopUp").gameObject;
+        _popUp = _eventRoom.transform.Find("NPCPopUp").gameObject;
         _popUp.SetActive(false);
+        _controller = GameObject.Find("Controller").GetComponent<CController>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
-            ClickNPC();
-
-        if (Input.GetKeyDown(KeyCode.Escape))
-            _popUp.SetActive(false);
+        CanclePopUp();
     }
 
-    void ClickNPC()
+    public void CanclePopUp()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-        RaycastHit hit;
-
-        Physics.Raycast(ray, out hit);
-
-        if (hit.collider.gameObject.tag == "NPC")//마우스 가져간 대상이 상인 캐릭터인 경우
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
-            UseNPC();
+            GameObject popUp = instance._stackPopUp.Pop();
+            popUp.SetActive(false);
+
+            if (instance._stackPopUp.Count == 0)
+                CGlobal.useNPC = false;
         }
     }
 
-    void UseNPC()
+    public void UseNPC()
     {
         _popUp.SetActive(true);
+        instance._stackPopUp.Push(_popUp);
+        CGlobal.useNPC = true;
     }
 }

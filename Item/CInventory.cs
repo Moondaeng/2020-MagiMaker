@@ -29,6 +29,18 @@ public class CInventory
 
     private GameObject _inventoryUser;
 
+    private int _gold;
+
+    public int GetGold()
+    {
+        return _gold;
+    }
+
+    public void SetGold(int gold)
+    {
+        _gold += gold;
+    }
+
     public int EquipAtkIncreaseSize
     {
         get
@@ -83,12 +95,14 @@ public class CInventory
 
     public ChangeConsumableEvent changeConsumableEvent = new ChangeConsumableEvent();
 
-    public CInventory(GameObject userObject, int equipCapacity = 10, int consumableCapacity = 3)
+    public CInventory(GameObject userObject, int equipCapacity = 10, int consumableCapacity = 3, int gold = 0)
     {
         _inventoryUser = userObject;
         _equipItems = new List<Item.CEquip>(equipCapacity);
         _consumableItems = new List<ConsumableWithStack>(consumableCapacity);
         _selectedConsumableNumber = 0;
+
+        _gold = gold;
 
         RegisterEquipEvent();
     }
