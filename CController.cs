@@ -22,8 +22,8 @@ public class CController : MonoBehaviour
 
     private CCntl _playerControl;
 
-    float x;
-    float z;
+    public float x;
+    public float z;
 
     private GameObject _viewingObject;
 
@@ -67,12 +67,22 @@ public class CController : MonoBehaviour
 
     void Update()
     {
+        if (CGlobal.useNPC)
+        {
+            z = 0;
+            x = 0;
+            _playerControl.Move(x, z);
+            return;
+        }
+
+
         z = Input.GetAxisRaw("Horizontal");
         x = -(Input.GetAxisRaw("Vertical"));
         if (player != null)
         {
             _playerControl = player.GetComponent<CCntl>();
         }
+
         _playerControl.Move(x, z);
         ViewInteractionPopup();
 
@@ -93,7 +103,7 @@ public class CController : MonoBehaviour
         player = controlCharacter;
         _playerUi.SetUiTarget(controlCharacter);
     }
-    
+
     private void Attack()
     {
         _playerControl.Attack();
@@ -168,7 +178,7 @@ public class CController : MonoBehaviour
 
     private void GetItem()
     {
-        if(_viewingObject == null)
+        if (_viewingObject == null)
         {
             return;
         }

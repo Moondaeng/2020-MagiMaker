@@ -41,16 +41,16 @@ public class CCreateMap : MonoBehaviour
 
     private void Start()
     {
-        startRoom = Resources.Load("Room/StartRoom1") as GameObject;
-        bossRoom = Resources.Load("Room/BossRoom1") as GameObject;
-        shopRoom = Resources.Load("Room/ShopRoom1") as GameObject;
+        startRoom = Resources.Load("Room/StartRoom0") as GameObject;
+        bossRoom = Resources.Load("Room/BossRoom0") as GameObject;
+        shopRoom = Resources.Load("Room/ShopRoom0") as GameObject;
 
         _portals = new List<CPortal>();
 
         if (instance == null)
             instance = this;
 
-        _stageNumber = 1;
+        _stageNumber = 0;
         _skillEliteCount = 0;
         _eventCount = 0;
         _shopCount = 0;
@@ -83,16 +83,9 @@ public class CCreateMap : MonoBehaviour
     }
 
     public void NotifyPortal()
-    {
-        Debug.Log("before Foreach");
-
+    { 
         for (int i = 0; i < _portals.Count; i++)
             _portals[i].OpenNClosePortal();
-    }
-
-    private void Update()
-    {
-        //CtrlPortal(); //스테이지 클리어 하는 즉시 포탈 true로 바꿔줌
     }
 
     public int GetStageNumber()
@@ -373,13 +366,24 @@ public class CCreateMap : MonoBehaviour
         //debug용 보고싶은 맵 있으면 여기다 가져다 두면 됨.
         if (roomCount == 1)
         {
-            GameObject temproom = Resources.Load("Room/EventRoom1_0") as GameObject;
+            GameObject temproom = Resources.Load("Room/ShopRoom0") as GameObject;
             Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
             _roomCount++;
             AddPortal();
             NotifyPortal();
             return;
         }
+        //이것도 마찬가지로 디버그용
+        //if (roomCount == 2)
+        //{
+        //    GameObject temproom = Resources.Load("Room/EventRoom0_1") as GameObject;
+        //    Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
+        //    _roomCount++;
+        //    AddPortal();
+        //    NotifyPortal();
+        //    return;
+        //}
+
         InstantiateRoom(roomArr[roomCount, roadCount].RoomType);
     }
 
@@ -442,6 +446,9 @@ public class CCreateMap : MonoBehaviour
         RemovePortal();
         _tempRoomNode = _rooms.First;
         Object.Destroy(_tempRoomNode.Value);
+
+        //debug 용 태그로 방지우기
+        //Object.Destroy(GameObject.FindGameObjectWithTag("DeleteRoom"));
         _rooms.RemoveFirst();
         return;
     }
@@ -480,35 +487,4 @@ public class CCreateMap : MonoBehaviour
     {
         return _roomCount;
     }
-
-    //public void CtrlPortal() //포탈 오브젝트 클리어 조건 만족시 true 아닐 경우 false
-    //{
-    //    GameObject[] portalMom = GameObject.FindGameObjectsWithTag("PORTAL_MOM");
-
-    //    if (CGlobal.isClear == false) //클리어 아직 안됬을 경우
-    //    {
-    //        if (CGlobal.isPortalActive == true)
-    //        {
-    //            foreach (GameObject ob in portalMom)
-    //            {
-    //                ob.transform.Find("Portal").gameObject.SetActive(false);
-    //                ob.transform.Find("PortalText").gameObject.SetActive(false);
-    //            }
-
-    //            CGlobal.isPortalActive = false;
-    //        }
-    //        return;
-    //    }
-
-    //    //클리어 됬을 경우
-    //    if (portalMom != null)
-    //        foreach (GameObject ob in portalMom)
-    //        {
-    //            ob.transform.Find("Portal").gameObject.SetActive(true);
-    //            ob.transform.Find("PortalText").gameObject.SetActive(true);
-    //        }
-
-    //    CGlobal.isPortalActive = true;
-
-    //}
 }

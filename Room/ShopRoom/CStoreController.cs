@@ -1,9 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CStoreController : MonoBehaviour
 {
+    public static CStoreController instance;
+
+    [System.NonSerialized]
+    public GameObject _confirmPurchaseIntentionPopup; //구매 재확인 팝업
+
     private Transform _slotRoot;
     private List<CSlotController> _slots;
 
@@ -12,7 +18,7 @@ public class CStoreController : MonoBehaviour
     private int _currentSlot; //현재 슬롯
     private int _lastSlot;  //이전 슬롯
 
-    private GameObject _notEnoughGoldPopUp; //골드 부족합니다 팝업
+    private GameObject _notEnoughGoldPopUp; //골드 부족합니다 팝업  
     private EArrow _arrow;
     private static string[] _equipAbilityExplainArr //아이템 능력치 한글명
     = new string[] {
@@ -26,6 +32,10 @@ public class CStoreController : MonoBehaviour
             "받는 피해량 감소율",
             "스킬 사거리 증가율"
     };
+
+    private GameObject _player;
+    private CPlayerPara _playerPara;
+
     enum EArrow
     {
         _left,
@@ -35,6 +45,9 @@ public class CStoreController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        if (instance == null)
+            instance = this;
+
         _slotRoot = transform.FindChild("SlotGroup");
         _slots = new List<CSlotController>();
 
@@ -51,14 +64,56 @@ public class CStoreController : MonoBehaviour
         _lastSlot = 0;
         _arrow = EArrow._right;
 
-        _notEnoughGoldPopUp = GameObject.Find("NotEnoughGoldPopUp");
-        _notEnoughGoldPopUp.SetActive(false);
+        _notEnoughGoldPopUp = GameObject.Find("NotEnoughGoldPopUp").transform.FindChild("Canvas").gameObject;
+        _confirmPurchaseIntentionPopup = GameObject.Find("ConfirmPurchaseIntentionPopUp");
+        _confirmPurchaseIntentionPopup.SetActive(false);
+
+        _player = CController.instance.player;
+        _playerPara = _player.GetComponent<CPlayerPara>();
+
+        //debug용 추후 삭제
+        _playerPara.Inventory.SetGold(500);
+
+        ShowInventoryGold();
     }
     private void Update()
     {
         ChangeSlot(); //키보드 입력 시 슬롯 변경
         WriteInformation(); //아이템 선택 시 정보창 띄워주기
         BuyItem(); //엔터키 입력시 아이템 구매
+    }
+
+    private void ShowInventoryGold()
+    {
+        int inventoryGold = _playerPara.Inventory.GetGold();
+        var GoldTMP = GameObject.Find("LeftGold").GetComponent<TMPro.TextMeshProUGUI>();
+        GoldTMP.text = GoldTMP.text.Substring(0, 6); //남은 골드 텍스트 남겨두고 뒤에 숫자 자르기
+        GoldTMP.text += inventoryGold;
+    }
+
+    private void ConfirmPurchaseIntention(GameObject slot)
+    {
+        //esc 로 끌때 바깥거보다 먼저 안꺼지게 처리 필요함 플래그 이용
+        //커서 옮기기도 처리 필요함
+
+        //선택한 슬롯의 아이템 이미지와 가격 옮기기
+        _confirmPurchaseIntentionPopup.SetActive(true);
+        CEventRoomNpcClick.instance._stackPopUp.Push(_confirmPurchaseIntentionPopup);
+
+        string guidanceMessage;
+
+        GameObject buyingSlot = GameObject.Find("BuyingSlot");
+
+        Sprite itemImage = slot.transform.FindChild("Item").GetComponent<Image>().sprite;
+        buyingSlot.transform.FindChild("Item").GetComponent<Image>().sprite = itemImage;
+
+        string itemPrice = slot.transform.FindChild("Price").GetComponent<TMPro.TextMeshProUGUI>().text;
+        buyingSlot.transform.FindChild("Price").GetComponent<TMPro.TextMeshProUGUI>().text = itemPrice;
+
+        var itemComponent = slot.GetComponent<CSlotController>().item.GetComponent<CEquipComponent>();
+        var equip = itemComponent.Item as Item.CEquip;
+        guidanceMessage = "'" + equip.ItemName + "' 아이템을 구매하시겠습니까?";
+        _confirmPurchaseIntentionPopup.transform.GetChild(0).FindChild("GuidanceMessage").GetComponent<TMPro.TextMeshProUGUI>().text = guidanceMessage;
     }
 
     private void WriteInformation()
@@ -79,7 +134,7 @@ public class CStoreController : MonoBehaviour
                 sumExtext += _equipAbilityExplainArr[(int)ability.equipEffect] + ability.value;
                 if (ability.equipEffect == Item.EEquipAbility.DamageReduceRate || ability.equipEffect == Item.EEquipAbility.SkillCoolTime || ability.equipEffect == Item.EEquipAbility.SkillRange)
                     sumExtext += "%";
-                sumExtext = "\n";
+                sumExtext += "\n";
             }
             Extext.text = sumExtext;
         }
@@ -105,6 +160,27 @@ public class CStoreController : MonoBehaviour
     {
         if (CheckSoldOut())
             return; //상점 품절 체크
+
+        if (_confirmPurchaseIntentionPopup.activeSelf == true) //구매 재확인 팝업 켜져있을경우
+        {
+            if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow))
+            {
+                Image yesButton = _confirmPurchaseIntentionPopup.transform.GetChild(0).FindChild("Yes").GetComponent<Image>();
+                Image noButton = _confirmPurchaseIntentionPopup.transform.GetChild(0).FindChild("No").GetComponent<Image>();
+
+                if (yesButton.enabled == true)
+                {
+                    yesButton.enabled = false;
+                    noButton.enabled = true;
+                }
+                else
+                {
+                    yesButton.enabled = true;
+                    noButton.enabled = false;
+                }
+            }
+            return;   
+        }
 
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
@@ -185,76 +261,92 @@ public class CStoreController : MonoBehaviour
 
     private void BuyItem()
     {
-        if (Input.GetKeyDown(KeyCode.Return)) //엔터키 입력 시 아이템 구매
-        {
-            GameObject slot = _slots[_currentSlot].gameObject;
+        GameObject slot = _slots[_currentSlot].gameObject;
 
+        if (_confirmPurchaseIntentionPopup.activeSelf == true)
+        {
+            if (Input.GetKeyDown(KeyCode.Return)) //구매 재확인 팝업에서 예 아니오 중 하나 선택
+            {
+                Image yesButton = _confirmPurchaseIntentionPopup.transform.GetChild(0).FindChild("Yes").GetComponent<Image>();
+                Image noButton = _confirmPurchaseIntentionPopup.transform.GetChild(0).FindChild("No").GetComponent<Image>();
+
+                if (yesButton.enabled == true)
+                {
+                    //예 버튼 누른경우. 아이템 구매 그대로 쓰고 false
+                    if(!MoveItemToInventory(slot.GetComponent<CItemComponent>())) //아이템 인벤토리로 이동
+                    { //이동 실패한 경우(아이템칸 부족) 추후 구현...
+
+                    }
+
+                    UseGoldInInventory(slot.transform.FindChild("Price").GetComponent<TMPro.TextMeshProUGUI>().text); //인벤토리에서 골드 사용
+
+                    RemoveItemNMoveCursor(slot); //아이템 상점에서 빼고 커서 이동
+
+                    ShowInventoryGold();
+
+                    _confirmPurchaseIntentionPopup.SetActive(false);
+                    CEventRoomNpcClick.instance._stackPopUp.Pop();
+                }
+                else if (noButton.enabled == true)
+                {
+                    _confirmPurchaseIntentionPopup.SetActive(false);
+                    CEventRoomNpcClick.instance._stackPopUp.Pop();
+                }            
+            }
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Return)) //엔터키 입력 시 아이템 구매 확인 팝업
+        {
             if (_notEnoughGoldPopUp.activeSelf) //골드 부족함 팝업이 켜져 있는 경우 엔터키 다시 누르면 꺼지게 하기
             {
                 _notEnoughGoldPopUp.SetActive(false);
+                CEventRoomNpcClick.instance._stackPopUp.Pop();
+                return;
             }
             else
                 if (!CheckEnoughGold(slot))
             {
-                StartCoroutine("DisplayNotEnoughGoldPopUp"); //시간 지나면 꺼지는 골드 부족함 팝업 띄우기
+                _notEnoughGoldPopUp.SetActive(true);
+                CEventRoomNpcClick.instance._stackPopUp.Push(_notEnoughGoldPopUp); //골드 부족함 팝업 띄우기
                 return;
             }
 
-            MoveItemToInventory(slot.GetComponent<CItemComponent>()); //아이템 인벤토리로 이동
-
-            UseGoldInInventory(slot); //인벤토리에서 골드 사용
-
-            RemoveItemNMoveCursor(slot); //아이템 상점에서 빼고 커서 이동
+            ConfirmPurchaseIntention(slot);       
         }
-    }
-
-    IEnumerator DisplayNotEnoughGoldPopUp()
-    {
-        //팝업 띄우기
-        _notEnoughGoldPopUp.SetActive(true);
-
-        yield return new WaitForSeconds(1.0f);
-
-        //팝업 끄기
-        _notEnoughGoldPopUp.SetActive(false);
     }
 
     private bool CheckEnoughGold(GameObject slot)
     {
         //인벤토리 골드와 상점판매가 비교후 리턴
-        GameObject player = CController.instance.player;
-        var playerPara = player.GetComponent<CPlayerPara>();
-        int inventoryGold = playerPara.Inventory.GetGold();
+        int inventoryGold = _playerPara.Inventory.GetGold();
         string shopPrice = slot.transform.FindChild("Price").GetComponent<TMPro.TextMeshProUGUI>().text;
 
-        if (inventoryGold > int.Parse(shopPrice))
+        if (inventoryGold >= int.Parse(shopPrice))
             return true;
 
         return false;
     }
 
-    private void MoveItemToInventory(CItemComponent itemComponent)
+    private bool MoveItemToInventory(CItemComponent itemComponent)
     {
-        GameObject player = CController.instance.player;
-        var playerPara = player.GetComponent<CPlayerPara>();
+        bool check = false;
 
         if (itemComponent != null)
         {
             if (itemComponent.Item is Item.CEquip) //장비템
-                playerPara.Inventory.AddEquip(itemComponent.Item as Item.CEquip);
+                check = _playerPara.Inventory.AddEquip(itemComponent.Item as Item.CEquip);
 
             else if (itemComponent.Item is Item.CConsumable) //소비템
-                playerPara.Inventory.AddConsumableItem(itemComponent.Item as Item.CConsumable);
+                check = _playerPara.Inventory.AddConsumableItem(itemComponent.Item as Item.CConsumable);
         }
+
+        return check;
     }
 
-    private void UseGoldInInventory(GameObject slot)
-    {
-        string shopPrice = slot.transform.FindChild("Price").GetComponent<TMPro.TextMeshProUGUI>().text;
-
-        GameObject player = CController.instance.player;
-        var playerPara = player.GetComponent<CPlayerPara>();
-        playerPara.Inventory.SetGold(-int.Parse(shopPrice));
+    private void UseGoldInInventory(string shopPrice)
+    { 
+        _playerPara.Inventory.SetGold(-int.Parse(shopPrice));
     }
 
     private void RemoveItemNMoveCursor(GameObject slot)
