@@ -7,7 +7,6 @@ public class CPlantFSM : CEnemyFSM
     #region 식물만 가지는 Properties
     public GameObject Prefabs;
     private GameObject currentPrefabObject;
-    private CMonsterSkillBase currentPrefabScript;
     #endregion
 
     protected override void InitStat()
@@ -118,17 +117,15 @@ public class CPlantFSM : CEnemyFSM
         currentPrefabObject = GameObject.Instantiate(Prefabs);
         
         // temporary effect, like a fireball
-        currentPrefabScript = currentPrefabObject.GetComponent<CMonsterSkillBase>();
         // set the start point near the player
         rotation = transform.rotation;
         pos = transform.position + 2 * forward + 2 * up;
 
-        CMonsterSkillProjectile projectileScript = currentPrefabObject.GetComponentInChildren<CMonsterSkillProjectile>();
-        if (projectileScript != null)
-        {
-            // make sure we don't collide with other fire layers
-            projectileScript.ProjectileCollisionLayers &= (~UnityEngine.LayerMask.NameToLayer("MonsterSkillLayer"));
-        }
+        //if (projectileScript != null)
+        //{
+        //    // make sure we don't collide with other fire layers
+        //    projectileScript.ProjectileCollisionLayers &= (~UnityEngine.LayerMask.NameToLayer("MonsterSkillLayer"));
+        //}
 
         currentPrefabObject.transform.position = pos;
         currentPrefabObject.transform.rotation = rotation;

@@ -366,8 +366,9 @@ public class CCreateMap : MonoBehaviour
         //debug용 보고싶은 맵 있으면 여기다 가져다 두면 됨.
         if (roomCount == 1)
         {
-            GameObject temproom = Resources.Load("Room/ShopRoom0") as GameObject;
+            GameObject temproom = Resources.Load("Room/NormalRoom0_1") as GameObject;
             Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
+            _rooms.AddLast(temproom);
             _roomCount++;
             AddPortal();
             NotifyPortal();

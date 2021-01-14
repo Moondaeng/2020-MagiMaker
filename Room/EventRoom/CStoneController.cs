@@ -27,12 +27,20 @@ public class CStoneController : MonoBehaviour
 
         if (transform.position.y >= transform.localScale.y / 2 - 0.2) //돌의 높이
             _upFinish = true;
+
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.tag == "WALL")
         {
+            Destroy(gameObject);
+        }
+
+        if (other.tag == "Player")
+        {
+            CController.instance.player.GetComponent<CPlayerPara>().DamagedDisregardDefence(CConstants.EVENT_ROLLING_STONE_DAMAGE);
+            Debug.Log("Rolling stone");
             Destroy(gameObject);
         }
     }
