@@ -33,8 +33,11 @@ public class CEventRoomNpcClick : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            GameObject popUp = instance._stackPopUp.Pop();
-            popUp.SetActive(false);
+            if (instance._stackPopUp.Count != 0)
+            {
+                GameObject popUp = instance._stackPopUp.Pop();
+                popUp.SetActive(false);
+            }
 
             if (instance._stackPopUp.Count == 0)
                 CGlobal.useNPC = false;

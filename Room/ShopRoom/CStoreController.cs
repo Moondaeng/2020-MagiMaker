@@ -273,7 +273,7 @@ public class CStoreController : MonoBehaviour
                 if (yesButton.enabled == true)
                 {
                     //예 버튼 누른경우. 아이템 구매 그대로 쓰고 false
-                    if(!MoveItemToInventory(slot.GetComponent<CItemComponent>())) //아이템 인벤토리로 이동
+                    if(!MoveItemToInventory(slot.GetComponent<CSlotController>().item.GetComponent<CItemComponent>())) //아이템 인벤토리로 이동
                     { //이동 실패한 경우(아이템칸 부족) 추후 구현...
 
                     }

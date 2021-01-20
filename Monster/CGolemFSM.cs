@@ -19,7 +19,7 @@ public class CGolemFSM : CEnemyFSM
         _attackCount = 0;
         _moveSpeed = 4f;
         _attackDistance = 4f;
-        _attackRadius = 20f;
+        //_attackRadius = 20f;
 
         _anim = GetComponent<Animator>();
         _myPara = GetComponent<CEnemyPara>();
