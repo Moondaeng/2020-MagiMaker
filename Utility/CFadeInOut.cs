@@ -19,8 +19,6 @@ public class CFadeInOut : MonoBehaviour
         if (instance == null)
             instance = this;
 
-        fadeImg = GameObject.Find("FadeInOut").GetComponent<Image>();
-
         PlayFadeIn();
     }
 

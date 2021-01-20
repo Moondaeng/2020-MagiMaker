@@ -1,13 +1,22 @@
-﻿using System.Collections;
+﻿using System.Text;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Item
 {
+    public static class CConsumableExplainText
+    {
+        public static string CreateExplainText(CConsumable consumable)
+        {
+            return "사용 시 " + CUseEffectExplain.CreateUseEffectText(consumable.UseEffectList);
+        }
+    }
+
     [System.Serializable]
     public class CConsumable : CItem
     {
-        public List<UseEffectWithChance> UseEffectList;
+        public CUseEffect UseEffectList;
 
         public CConsumable(string _itemName, int _itemCode, Sprite _itemImage)
             : base(_itemName, _itemCode, _itemImage)

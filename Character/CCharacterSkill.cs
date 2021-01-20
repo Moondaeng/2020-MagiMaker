@@ -18,6 +18,16 @@ public class CCharacterSkill : MonoBehaviour
     protected CProjectileSkill _projectileSkill;
     protected CBuffSkill _buffSkill;
 
+    public int SelectedSkillNum
+    {
+        get { return _selectedSkillNum; }
+        protected set 
+        {
+            _selectedSkillNum = value;
+            skillSelectEvent?.Invoke(_selectedSkillNum);
+        }
+    }
+
     protected int _selectedSkillNum;
 
     public SkillSelectEvent skillSelectEvent = new SkillSelectEvent();
@@ -43,8 +53,6 @@ public class CCharacterSkill : MonoBehaviour
 
     protected virtual void Start()
     {
-        _projectileSkill = GameObject.Find("SkillScript").GetComponent<CProjectileSkill>();
-        _buffSkill = GameObject.Find("SkillScript").GetComponent<CBuffSkill>();
     }
 
     /// <summary>
@@ -59,8 +67,7 @@ public class CCharacterSkill : MonoBehaviour
             return;
         }
 
-        _selectedSkillNum = index + 1;
-        skillSelectEvent.Invoke(_selectedSkillNum);
+        SelectedSkillNum = index + 1;
     }
 
     public virtual void UseSkillToPosition(Vector3 targetPos)
@@ -77,7 +84,24 @@ public class CCharacterSkill : MonoBehaviour
             skillUseEvent?.Invoke(_selectedSkillNum, targetPos);
             CreateSkillObject(_skillList[_selectedSkillNum].skillObject, targetPos);
         }
-        _selectedSkillNum = 0;
+        SelectedSkillNum = 0;
+    }
+
+    public virtual void UseSkillToPosition(int skillNum, Vector3 targetPos)
+    {
+        if (skillNum == -1)
+        {
+            Debug.Log("Skill Not Selected");
+            return;
+        }
+
+        if (_skillList[skillNum].Use(targetPos))
+        {
+            // CCntl의 행동 코드
+            skillUseEvent?.Invoke(skillNum, targetPos);
+            CreateSkillObject(_skillList[skillNum].skillObject, targetPos);
+        }
+        SelectedSkillNum = 0;
     }
 
     // 스킬 오브젝트 생성
@@ -105,18 +129,18 @@ public class CCharacterSkill : MonoBehaviour
     /// 대상에 맞는 스킬 레이어로 변환한다
     /// </summary>
     /// <returns></returns>
-    protected virtual int TranslateLayerCharacterToSkill()
+    protected virtual int TranslateLayerCharacterToSkill(bool isAttack)
     {
-        return LayerMask.NameToLayer("PlayerSkill");
+        return isAttack == true ? LayerMask.NameToLayer("PlayerSkill") : LayerMask.NameToLayer("MonsterSkill");
     }
 
     protected void InitToSkillObject(GameObject skillObject, Vector3 targetPos)
     {
         var hitObjectBase = skillObject.GetComponent<CHitObjectBase>();
-        hitObjectBase.SetObjectLayer(TranslateLayerCharacterToSkill());
 
         if (hitObjectBase is CProjectileBase)
         {
+            hitObjectBase.SetObjectLayer(TranslateLayerCharacterToSkill(true));
             // 유저 스탯에 비례해 스킬 발사
             var userStat = GetComponent<CharacterPara>();
 
@@ -124,10 +148,15 @@ public class CCharacterSkill : MonoBehaviour
             //projectileBase.userAttackPower = userStat._attackMax;
             // 원소 관련 정보
         }
+        if (hitObjectBase is CBuffBase)
+        {
+            hitObjectBase.SetObjectLayer(TranslateLayerCharacterToSkill(false));
+        }
     }
 
     protected virtual void CallSkillUseEvent(int skillIndex, Vector3 targetPos)
     {
         skillUseEvent.Invoke(skillIndex, targetPos);
+        CreateSkillObject(_skillList[_selectedSkillNum].skillObject, targetPos);
     }
 }

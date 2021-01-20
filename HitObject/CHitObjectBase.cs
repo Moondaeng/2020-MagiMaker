@@ -193,8 +193,13 @@ public class CHitObjectBase : MonoBehaviour
         GetComponent<Collider>().isTrigger = true;
     }
 
-    protected virtual void OnTriggerEnter(Collider other)
+    protected virtual void OnCollisionEnter(Collision collision)
     {
-        other.GetComponent<CharacterPara>().TakeUseEffect(gameObject.tag, useEffect);
+        Debug.Log("Hit Collision");
+        var cPara = collision.collider.GetComponent<CharacterPara>();
+        if (cPara != null)
+        {
+            cPara.TakeUseEffect(useEffect);
+        }
     }
 }

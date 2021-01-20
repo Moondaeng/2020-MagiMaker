@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEditorInternal;
 using UnityEngine;
 using TMPro;
 using static System.Console;
@@ -16,7 +15,7 @@ public class CCreateMap : MonoBehaviour
     private GameObject bossRoom;
     private GameObject shopRoom;
 
-    private List<CPortal> _portals; 
+    private List<CPortal> _portals;
     #endregion
 
     #region roomQueue
@@ -74,7 +73,7 @@ public class CCreateMap : MonoBehaviour
         GameObject[] portalMom = GameObject.FindGameObjectsWithTag("PORTAL_MOM");
 
         foreach (GameObject ob in portalMom)
-            _portals.Add(ob.transform.FindChild("Portal").GetComponent<CPortal>());
+            _portals.Add(ob.transform.Find("Portal").GetComponent<CPortal>());
     }
 
     public void RemovePortal()
@@ -83,7 +82,7 @@ public class CCreateMap : MonoBehaviour
     }
 
     public void NotifyPortal()
-    { 
+    {
         for (int i = 0; i < _portals.Count; i++)
             _portals[i].OpenNClosePortal();
     }
@@ -363,26 +362,38 @@ public class CCreateMap : MonoBehaviour
 
     public void CreateRoom(CRoom[,] roomArr, int roomCount, int roadCount)
     {
+        if(_roomCount == 1)
+        {
+            GameObject temproom = Resources.Load("Room/NormalRoom0_0") as GameObject;
+            var temp = Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
+            _rooms.AddLast(temp);
+            _roomCount++;
+            AddPortal();
+            NotifyPortal();
+            return;
+        }
         //debug용 보고싶은 맵 있으면 여기다 가져다 두면 됨.
-        if (roomCount == 1)
+        if (roomCount == 2)
         {
             GameObject temproom = Resources.Load("Room/ShopRoom0") as GameObject;
-            Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
+            var temp = Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
+            _rooms.AddLast(temp);
             _roomCount++;
             AddPortal();
             NotifyPortal();
             return;
         }
         //이것도 마찬가지로 디버그용
-        //if (roomCount == 2)
-        //{
-        //    GameObject temproom = Resources.Load("Room/EventRoom0_1") as GameObject;
-        //    Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
-        //    _roomCount++;
-        //    AddPortal();
-        //    NotifyPortal();
-        //    return;
-        //}
+        if (roomCount == 3)
+        {
+            GameObject temproom = Resources.Load("Room/EventRoom0_1") as GameObject;
+            var temp = Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
+            _rooms.AddLast(temp);
+            _roomCount++;
+            AddPortal();
+            NotifyPortal();
+            return;
+        }
 
         InstantiateRoom(roomArr[roomCount, roadCount].RoomType);
     }

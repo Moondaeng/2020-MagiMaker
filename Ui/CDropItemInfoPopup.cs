@@ -9,16 +9,6 @@ public class CDropItemInfoPopup : MonoBehaviour
 {
     public static CDropItemInfoPopup instance;
 
-    private static string[] _equipAbilityExplainArr 
-        = new string[] {
-            "공격력",
-            "방어력",
-            "공격속도",
-            "이동속도",
-            "체력",
-            "체젠"
-        };
-
     private int _currentViewingItemID;
     private Image _itemImage;
     private Text _itemName;
@@ -45,14 +35,12 @@ public class CDropItemInfoPopup : MonoBehaviour
 
     public void DrawEquipExplain(Item.CEquip equip)
     {
-        _itemExplain.text += Item.CEquipExplainText.CreateAbilityText(equip.equipAbilities);
-        _itemExplain.text += Item.CEquipExplainText.CreatePassiveText(
-            equip.PassiveCondition, equip.PassiveUseCount, equip.PassiveConditionOption, equip.EquipEffectList);
-        _itemExplain.text += Item.CEquipExplainText.CreateUpgradeText(equip.UpgradeCondition, equip.UpgradeCount, equip.upgradeAbilities);
+        _itemExplain.text += Item.CEquipExplainText.CreateExplainText(equip);
     }
 
     public void DrawConsumableExplain(Item.CConsumable consumable)
     {
+        _itemExplain.text += "사용 시 " + CUseEffectExplain.CreateUseEffectText(consumable.UseEffectList);
     }
 
     public void DrawItemInfo(Item.CItem item)

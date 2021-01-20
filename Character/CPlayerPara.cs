@@ -19,7 +19,7 @@ public class CPlayerPara : CharacterPara
         get
         {
             return (int)((_attackMin + Inventory.EquipAtkIncreaseSize)
-              * buffParameter.AttackCoef * buffParameter.AttackDebuffCoef);
+              * _buffCoef[(int)EBuffAbility.Attack] * _debuffCoef[(int)EBuffAbility.Attack]);
         }
     }
     public override int TotalAttackMax
@@ -27,7 +27,7 @@ public class CPlayerPara : CharacterPara
         get
         {
             return (int)((_attackMax + Inventory.EquipAtkIncreaseSize)
-              * buffParameter.AttackCoef * buffParameter.AttackDebuffCoef);
+              * _buffCoef[(int)EBuffAbility.Attack] * _debuffCoef[(int)EBuffAbility.Attack]);
         }
     }
     public override int TotalDefenece
@@ -35,10 +35,10 @@ public class CPlayerPara : CharacterPara
         get
         {
             return (int)(_defense + Inventory.DefIncreaseSize
-              * buffParameter.DefenceCoef * buffParameter.DefenceDebuffCoef);
+              * _buffCoef[(int)EBuffAbility.Defence] * _debuffCoef[(int)EBuffAbility.Defence]);
         }
     }
-    public int TotalMaxHp
+    public override int TotalMaxHp
     {
         get { return (int)(_maxHp + Inventory.MaxHpIncreaseSize); }
     }
@@ -61,8 +61,6 @@ public class CPlayerPara : CharacterPara
         _attackMin = 50;
         _attackMax = 80;
         _defense = 30;
-        _eLevel = 0;
-        _eType = EElementType.none;
         _isAnotherAction = false;
         _isStunned = false;
         _isDead = false;
@@ -74,7 +72,6 @@ public class CPlayerPara : CharacterPara
     {
         if (_invincibility) return;
         print(name + "'s HP: " + _curHp);
-        damageEvent?.Invoke(_curHp, _maxHp);
 
         if (_curHp <= 0)
         {

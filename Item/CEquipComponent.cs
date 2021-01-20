@@ -73,8 +73,8 @@ namespace Item
         {
             {EEquipEvent.None, new Tuple<string, string, string>("없음", "", "") },
             {EEquipEvent.Always, new Tuple<string, string, string>("항상", "", "") },
-            {EEquipEvent.UseSkill, new Tuple<string, string, string>("스킬", "회", "사용") },
-            {EEquipEvent.KillMonster, new Tuple<string, string, string>("몬스터", "회", "처치") },
+            {EEquipEvent.UseSkill, new Tuple<string, string, string>("스킬", "회", " 사용") },
+            {EEquipEvent.KillMonster, new Tuple<string, string, string>("몬스터", "회", " 처치") },
         };
 
         /// <summary>
@@ -89,7 +89,18 @@ namespace Item
             {EEquipEventCountOption.Each_Over, new Tuple<string, string>("한 번에 ", " 이상")},
         };
 
-        public static string CreateAbilityText(List<CEquip.EquipAbility> equipAbilities)
+        public static string CreateExplainText(CEquip equip)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(CreateAbilityText(equip.equipAbilities));
+            sb.Append(CreatePassiveText(
+                equip.PassiveCondition, equip.PassiveUseCount, equip.PassiveConditionOption, equip.passiveEffect)
+            );
+            sb.Append(CreateUpgradeText(equip.UpgradeCondition, equip.UpgradeCount, equip.upgradeAbilities));
+            return sb.ToString();
+        }
+
+        private static string CreateAbilityText(List<CEquip.EquipAbility> equipAbilities)
         {
             StringBuilder sb = new StringBuilder();
             foreach (var ability in equipAbilities)
@@ -104,8 +115,8 @@ namespace Item
             return sb.ToString();
         }
 
-        public static string CreatePassiveText(
-            EEquipEvent passiveCondition, int passiveCount, EEquipEventCountOption passiveCountOption, List<UseEffectWithChance> useEffects)
+        private static string CreatePassiveText(
+            EEquipEvent passiveCondition, int passiveCount, EEquipEventCountOption passiveCountOption, CUseEffect passiveEffect)
         {
             if (passiveCondition == Item.EEquipEvent.None)
             {
@@ -130,14 +141,13 @@ namespace Item
                 .Append(passiveCount + passiveExplain.Item2 + " ")
                 .Append(passiveOptionExplain.Item2)
                 .Append(passiveExplain.Item3 + " ")
-                .Append("시 효과 발동\n");
-
-            sb.Append(CUseEffectExplain.CreateUseEffectListText(useEffects));
+                .Append("시 ")
+                .Append(CUseEffectExplain.CreateUseEffectText(passiveEffect));
 
             return sb.ToString();
         }
 
-        public static string CreateUpgradeText(EEquipEvent upgradeCondition, int upgradeRequireCount, List<CEquip.EquipAbility> upgradeAbilities)
+        private static string CreateUpgradeText(EEquipEvent upgradeCondition, int upgradeRequireCount, List<CEquip.EquipAbility> upgradeAbilities)
         {
             if (upgradeCondition == EEquipEvent.None)
             {
@@ -178,7 +188,7 @@ namespace Item
         public int PassiveUseCount;
         [Tooltip("현재 패시브 발동 조건 횟수"), HideInInspector]
         public int passiveCurrentCount;
-        public List<UseEffectWithChance> EquipEffectList;
+        public CUseEffect passiveEffect;
 
         [Tooltip("성장 조건")]
         public EEquipEvent UpgradeCondition;

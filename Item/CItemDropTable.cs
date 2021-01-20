@@ -86,6 +86,19 @@ public class CItemDropTable : MonoBehaviour
         return PopRandomItemByGrade(itemGrade);
     }
 
+    public GameObject DropConsumable()
+    {
+        List<GameObject> itemList = _consumableObjectList;
+
+        if (itemList.Count == 0)
+        {
+            Debug.Log("Item List is empty");
+            return null;
+        }
+
+        return FindRandomItemInList(itemList);
+    }
+
     /// <summary>
     /// ItemCompoenent를 가지고 있는 item 추가
     /// </summary>

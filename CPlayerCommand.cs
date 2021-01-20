@@ -5,17 +5,18 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class CPlayerCommand : MonoBehaviour
 {
-    private static CLogComponent _logger;
     public static CPlayerCommand instance;
 
+    // 0번은 조작할 캐릭터, 나머지는 더미 캐릭터
     public List<GameObject> players = new List<GameObject>();
     [SerializeField]
     public int activePlayersCount;
+    // id만 바꾸고 조종 시 스왑을 이용해서 움직이기
     [SerializeField]
     public int ControlCharacterId;
 
     private CController _controller;
-    private UnityStandardAssets.Cameras.FreeLookCam _camera;
+    private CMouseFollower _camera;
     private COtherPlayerUiManager _othersUiList;
     private bool _isObservingMode = false;
 
@@ -26,16 +27,15 @@ public class CPlayerCommand : MonoBehaviour
             instance = this;
         }
 
-        _logger = new CLogComponent(ELogType.Ctrl);
-        _controller = GameObject.Find("Controller").GetComponent<CController>();
+        _controller = CController.instance;
         _othersUiList = GameObject.Find("UiScript").GetComponent<COtherPlayerUiManager>();
-        _camera = GameObject.Find("FreeLookCameraRig").GetComponent<UnityStandardAssets.Cameras.FreeLookCam>();
+        _camera = GameObject.Find("FreeLookCameraRig").GetComponent<CMouseFollower>();
     }
 
     private void Start()
     {
-        activePlayersCount = 1;
-        SetMyCharacter(0);
+        //SetActivePlayers(4);
+        //SetMyCharacter(0);
     }
 
     // 캐릭터 활성화
@@ -52,11 +52,13 @@ public class CPlayerCommand : MonoBehaviour
         for (int i = 0; i < playerCount; i++)
         {
             players[i].SetActive(true);
-            _othersUiList.AddOtherPlayerUi(players[i]);
+            //_othersUiList.AddOtherPlayerUi(players[i]);
             //_othersUiList.AddOtherPlayerUi(players[i].transform.GetChild(0).gameObject);
         }
     }
 
+    #region use with CCntl
+    /*
     // 해당 캐릭터 내 캐릭터로 선택
     public void SetMyCharacter(int charId)
     {
@@ -102,9 +104,111 @@ public class CPlayerCommand : MonoBehaviour
 
         Teleport(charId, nowPos);
         var charSkill = character.GetComponent<CCharacterSkill>();
-        var charState = character.GetComponent<CCntl>();
         //charSkill.UseSkillToPosition(skillNumber, targetPos);
     }
+    */
+    #endregion
+
+    // 더미 캐릭터(MultiDoll)를 이용한 방법
+    #region use with Dummy
+    // 캐릭터는 바꾸지 않고 조종 번호만 바꿈
+    public void SetMyCharacter(int charId)
+    {
+        Debug.Log("setting Character : " + charId);
+
+        // 더미 캐릭터 위치와 조종 캐릭터 위치 스왑
+        var temp = players[GetDummyCharacterId(charId)].transform.position;
+        players[GetDummyCharacterId(charId)].transform.position = players[0].transform.position;
+        players[0].transform.position = temp;
+
+        Debug.Log($"{ControlCharacterId} is changed to {charId}");
+        ControlCharacterId = charId;
+    }
+
+    // 더미 캐릭터 실제 번호 가져오기
+    public int GetDummyCharacterId(int charId)
+    {
+        if (charId == 0 && ControlCharacterId != 0)
+        {
+            return ControlCharacterId;
+        }
+        else
+        {
+            return charId == ControlCharacterId ? 0 : charId;
+        }
+    }
+
+    // 캐릭터 이동
+    public void Move(int charId, Vector3 movePos)
+    {
+        if (charId == ControlCharacterId)
+        {
+            Debug.Log("Can't Control Playable Character");
+            return;
+        }
+        var character = players?[charId];
+        if (character == null) return;
+
+        character = players[GetDummyCharacterId(charId)];
+
+        var playerState = character.GetComponent<CMultiDoll>();
+        Debug.Log($"dummy {GetDummyCharacterId(charId)} go to {movePos.x}, {movePos.y}, {movePos.z}");
+        playerState.MoveTo(movePos);
+    }
+
+    // 캐릭터 강제 이동
+    public void Teleport(int charId, Vector3 movePos)
+    {
+        var character = players?[charId];
+        if (character == null) return;
+
+        character = players[GetDummyCharacterId(charId)];
+
+        character.transform.position = movePos;
+    }
+
+    // 구르기 명령
+    public void Roll(int charId, Vector3 nowPos, Vector3 movePos)
+    {
+        if (charId == ControlCharacterId)
+        {
+            Debug.Log("Can't Control Playable Character");
+            return;
+        }
+        var character = players?[charId];
+        if (character == null) return;
+
+        character = players[GetDummyCharacterId(charId)];
+
+        Teleport(charId, nowPos);
+        var playerState = character.GetComponent<CMultiDoll>();
+        playerState.RollTo(movePos);
+    }
+
+    // 스킬 사용 명령
+    public void UseSkill(int charId, int skillNumber, Vector3 nowPos, Vector3 targetPos)
+    {
+        if (charId == ControlCharacterId)
+        {
+            Debug.Log("Can't Control Playable Character");
+            return;
+        }
+        Debug.Log($"Use Skill {charId} {skillNumber}");
+        var character = players?[charId];
+        if (character == null) return;
+
+        character = players[GetDummyCharacterId(charId)];
+
+        Teleport(charId, nowPos);
+        var charSkill = character.GetComponent<CCharacterSkill>();
+        charSkill.UseSkillToPosition(skillNumber, targetPos);
+    }
+
+    // For Test
+    public void Follow(int charId) => Move(charId, players[0].transform.position);
+    public void Call(int charId) => Teleport(charId, players[0].transform.position);
+    public void SkillTo(int charId) => UseSkill(charId, 0, players[charId].transform.position, players[0].transform.position);
+    #endregion
 
     // 해당 캐릭터에게 데미지 주기
     public void DamageToCharacter(int charId, int damageScale)

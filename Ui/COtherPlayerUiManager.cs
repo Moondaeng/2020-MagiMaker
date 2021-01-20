@@ -67,7 +67,7 @@ public class COtherPlayerUiManager : MonoBehaviour
 
         // 체력바
         playerUiData.hpBar.transform.SetParent(_uiCanvasTransform, false);
-        playerUiData.target.GetComponent<CharacterPara>().damageEvent.AddListener(
+        playerUiData.target.GetComponent<CharacterPara>().hpDrawEvent.AddListener(
             playerUiData.hpBar.GetComponent<CUiHpBar>().Draw);
 
         _otherPlayerUiList.AddLast(playerUiData);

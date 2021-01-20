@@ -9,8 +9,15 @@ public class CPortalManager : MonoBehaviour
     GameObject PortalAcceptParent;
     GameObject FadeController;
 
+    public static CPortalManager instance;
+
     private void Start()
     {
+        if (instance == null)
+        {
+            instance = this;
+        }
+
         player = GameObject.FindGameObjectsWithTag("Player");
         PortalAcceptParent = GameObject.Find("PortalPopUp");
         FadeController = GameObject.Find("FadeController");
@@ -22,7 +29,6 @@ public class CPortalManager : MonoBehaviour
     {
         FadeController.transform.Find("FadeCanvas").gameObject.SetActive(true);
         CFadeInOut.instance.PlayFadeFlow(); //다음 방 넘어갈 때, 페이드 아웃 방 생성 이후 페이드 인
-
         StartCoroutine(RefreshWorld());
     }
 
@@ -31,6 +37,10 @@ public class CPortalManager : MonoBehaviour
         yield return new WaitForSeconds(1.0f);
 
         Transform ParentTransform = player[0].transform; //최상위 오브젝트 찾기 -> 캐릭터 옮기기
+        CPlayerCommand.instance.Teleport(0, new Vector3(0,1,0));
+        CPlayerCommand.instance.Teleport(1, new Vector3(0,1,4));
+        CPlayerCommand.instance.Teleport(2, new Vector3(4,1,0));
+        CPlayerCommand.instance.Teleport(3, new Vector3(4,1,4));
 
         ParentTransform.position = new Vector3(0, 1, 0);
 

@@ -23,22 +23,33 @@ public class CInventory
     }
 
     private List<Item.CEquip> _equipItems;
-
     private List<ConsumableWithStack> _consumableItems;
     private int _selectedConsumableNumber;
+
+    public List<Item.CEquip> EquipItems
+    {
+        get
+        {
+            return _equipItems;
+        }
+    }
+    public List<ConsumableWithStack> ConsumableItems
+    {
+        get
+        {
+            return _consumableItems;
+        }
+    }
 
     private GameObject _inventoryUser;
 
     private int _gold;
 
-    public int GetGold()
+    #region Property
+    public int Gold
     {
-        return _gold;
-    }
-
-    public void SetGold(int gold)
-    {
-        _gold += gold;
+        get { return _gold; }
+        set { _gold = value; }
     }
 
     public int EquipAtkIncreaseSize
@@ -90,6 +101,7 @@ public class CInventory
             return _equipAbilityIncreaseSizeArr[(int)Item.EEquipAbility.HpRegen];
         }
     }
+    #endregion
 
     private int[] _equipAbilityIncreaseSizeArr = new int[Enum.GetValues(typeof(Item.EEquipAbility)).Length];
 
@@ -146,11 +158,16 @@ public class CInventory
     {
         if (itemIndex < 0 || _equipItems.Count <= itemIndex)
         {
+            Debug.Log("Can't Delete Equip Item");
             return false;
         }
 
         // 귀속 아이템 여부 판단
 
+        // 버리기 처리
+        var itemObject = CItemManager.instance.GetItemObject(_equipItems[itemIndex].ItemCode);
+        itemObject.SetActive(true);
+        itemObject.transform.position = _inventoryUser.transform.position;
         DeleteEquipAbility(_equipItems[itemIndex]);
         _equipItems.RemoveAt(itemIndex);
 
@@ -273,20 +290,20 @@ public class CInventory
                 equip.passiveCurrentCount += count;
                 if(equip.passiveCurrentCount >= equip.PassiveUseCount)
                 {
-                    Debug.Log("Use Passive");
+                    _inventoryUser.GetComponent<CPlayerPara>().TakeUseEffect(equip.passiveEffect);
                     equip.passiveCurrentCount = 0;
                 }
                 break;
             case Item.EEquipEventCountOption.Each_Below:
                 if (equip.PassiveUseCount >= count)
                 {
-                    Debug.Log("Use Passive");
+                    _inventoryUser.GetComponent<CPlayerPara>().TakeUseEffect(equip.passiveEffect);
                 }
                 break;
             case Item.EEquipEventCountOption.Each_Over:
                 if (equip.PassiveUseCount <= count)
                 {
-                    Debug.Log("Use Passive");
+                    _inventoryUser.GetComponent<CPlayerPara>().TakeUseEffect(equip.passiveEffect);
                 }
                 break;
             default:
@@ -368,42 +385,41 @@ public class CInventory
 
     private void UseConsumable(Item.CConsumable consumable)
     {
-        int useEffectIndex = SelectRandomEffect(consumable);
-        Debug.Log($"useEffectIndex : {useEffectIndex}");
-        _inventoryUser.GetComponent<CPlayerPara>().TakeUseEffect(
-            _inventoryUser.tag, consumable.UseEffectList[useEffectIndex].useEffect);
+        //int useEffectIndex = SelectRandomEffect(consumable);
+        //Debug.Log($"useEffectIndex : {useEffectIndex}");
+        _inventoryUser.GetComponent<CPlayerPara>().TakeUseEffect(consumable.UseEffectList);
     }
+    
+    //private int SelectRandomEffect(Item.CConsumable consumable)
+    //{
+    //    if(consumable.UseEffectList.Count == 0)
+    //    {
+    //        Debug.Log("No Use Effect");
+    //        return -1;
+    //    }
+    //    else if(consumable.UseEffectList.Count == 1)
+    //    {
+    //        return 0;
+    //    }
 
-    private int SelectRandomEffect(Item.CConsumable consumable)
-    {
-        if(consumable.UseEffectList.Count == 0)
-        {
-            Debug.Log("No Use Effect");
-            return -1;
-        }
-        else if(consumable.UseEffectList.Count == 1)
-        {
-            return 0;
-        }
+    //    Debug.Log("Get Random Effect");
+    //    float chanceSum = 0f;
+    //    List<float> chanceSumList = new List<float>(consumable.UseEffectList.Count);
+    //    foreach (var elem in consumable.UseEffectList)
+    //    {
+    //        chanceSum += elem.Chance;
+    //        chanceSumList.Add(chanceSum);
+    //    }
+    //    Debug.Log("set chance");
 
-        Debug.Log("Get Random Effect");
-        float chanceSum = 0f;
-        List<float> chanceSumList = new List<float>(consumable.UseEffectList.Count);
-        foreach (var elem in consumable.UseEffectList)
-        {
-            chanceSum += elem.Chance;
-            chanceSumList.Add(chanceSum);
-        }
-        Debug.Log("set chance");
+    //    // 임의 효과 선택
+    //    float randomChance = UnityEngine.Random.Range(0f, 1f);
+    //    int idx = 0;
+    //    while (idx < chanceSumList.Count - 1 && randomChance >= chanceSumList[idx])
+    //    {
+    //        idx++;
+    //    }
 
-        // 임의 효과 선택
-        float randomChance = UnityEngine.Random.Range(0f, 1f);
-        int idx = 0;
-        while (idx < chanceSumList.Count - 1 && randomChance >= chanceSumList[idx])
-        {
-            idx++;
-        }
-
-        return idx;
-    }
+    //    return idx;
+    //}
 }

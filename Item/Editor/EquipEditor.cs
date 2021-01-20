@@ -18,7 +18,7 @@ public class EquipEditor : Editor
     SerializedProperty passiveCondition;
     SerializedProperty passiveConditionOption;
     SerializedProperty passiveUseCount;
-    SerializedProperty EquipEffectList;
+    SerializedProperty passiveEffect;
 
     // 성장 능력치 관련 GUI 필드
     SerializedProperty upgradeCondition;
@@ -90,7 +90,7 @@ public class EquipEditor : Editor
         passiveCondition = equip.FindPropertyRelative("PassiveCondition");
         passiveConditionOption = equip.FindPropertyRelative("PassiveConditionOption");
         passiveUseCount = equip.FindPropertyRelative("PassiveUseCount");
-        EquipEffectList = equip.FindPropertyRelative("EquipEffectList");
+        passiveEffect = equip.FindPropertyRelative("passiveEffect");
 
         //EquipEffectList = new ReorderableList(serializedObject,
         //    equip.FindPropertyRelative("EquipEffectList"),
@@ -119,7 +119,7 @@ public class EquipEditor : Editor
             EditorGUILayout.PropertyField(passiveUseCount, GUIContent.none);
         EditorGUILayout.EndHorizontal();
         
-        EditorGUILayout.PropertyField(EquipEffectList, true);
+        EditorGUILayout.PropertyField(passiveEffect, true);
 
         //EquipEffectList.DoLayoutList();
     }

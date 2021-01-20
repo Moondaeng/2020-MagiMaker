@@ -16,7 +16,6 @@ public class JsonConvert : MonoBehaviour
         public int _attackMax;
         public int _defense;
         public int _eLevel;
-        public CharacterPara.EElementType _eType;
         public int _rewardMoney;
     }
 
@@ -61,12 +60,9 @@ public class JsonConvert : MonoBehaviour
         JsonToObject jtc = LoadJsonFile<JsonToObject>(Application.dataPath, StatName);
         
         mon._maxHp = jtc._maxHp;
-        mon._curHp = mon._maxHp;
         mon._attackMin = jtc._attackMin;
         mon._attackMax = jtc._attackMax;
         mon._defense = jtc._defense;
-        mon._eLevel = jtc._eLevel;
-        mon._eType = jtc._eType;
         mon._rewardMoney = jtc._rewardMoney;
     }
 }

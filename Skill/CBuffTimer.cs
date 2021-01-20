@@ -4,13 +4,13 @@ using UnityEngine;
 
 public struct BuffStack
 {
-    public bool stackable;
-    public int stack;
+    public int MaxStack;
+    public int currentStack;
 
-    public BuffStack(bool isStackable, int initStack)
+    public BuffStack(int maxStack, int increaseStack)
     {
-        stackable = isStackable;
-        stack = initStack;
+        MaxStack = maxStack;
+        currentStack = increaseStack;
     }
 }
 
@@ -28,32 +28,46 @@ public class CBuffTimer : CTimer<BuffStack, int>
 
         if(cancel == null) return;
 
-        cancel.Value.endCallback(cancel.Value.data.stack);
+        cancel.Value.endCallback(cancel.Value.data.currentStack);
         TimerEnd?.Invoke(cancel.Value.key);
         observeList.Remove(cancel);
     }
 
-    public void Register(int regNum, float time, int stack, Callback startFunc, Callback endFunc)
+    public void Register(int regNum, float time, int maxStack, int increaseStack, Callback startFunc, Callback endFunc)
     {
-        Register(regNum, time, startFunc, endFunc, new BuffStack(true, stack));
+        Register(regNum, time, startFunc, endFunc, new BuffStack(maxStack, increaseStack));
     }
 
     // 스택 없는 버프 추가
     public void Register(int regNum, float time, Callback startFunc, Callback endFunc)
     {
-        Register(regNum, time, startFunc, endFunc, new BuffStack(false, 1));
+        Register(regNum, time, startFunc, endFunc, new BuffStack(1, 1));
     }
 
-    public bool? IsStackableBuff(int registeredNumber)
+    public bool IsStackableBuff(int registeredNumber)
     {
         var observed = FindByRegisterNumber(registeredNumber);
-        return observed?.Value.data.stackable;
+        if(observed == null)
+        {
+            return false;
+        }
+        else
+        {
+            if(observed.Value.data.MaxStack == 1)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
     }
 
     public int GetBuffStack(int registeredNumber)
     {
         var observed = FindByRegisterNumber(registeredNumber);
-        return observed == null ? -1 : observed.Value.data.stack;
+        return observed == null ? -1 : observed.Value.data.currentStack;
     }
 
     public List<int> GetRegisterNumberList()
@@ -69,35 +83,30 @@ public class CBuffTimer : CTimer<BuffStack, int>
 
     protected override void ExcuteStartCallback(LinkedListNode<CObserved> observedObject)
     {
-        observedObject.Value.startCallback?.Invoke(observedObject.Value.data.stack);
+        observedObject.Value.startCallback?.Invoke(observedObject.Value.data.currentStack);
     }
 
     protected override void ExcuteEndCallback(LinkedListNode<CObserved> observedObject)
     {
-        observedObject.Value.endCallback?.Invoke(observedObject.Value.data.stack);
+        observedObject.Value.endCallback?.Invoke(observedObject.Value.data.currentStack);
     }
 
     protected override void Remove(LinkedListNode<CObserved> cObservedNode)
     {
-        if (cObservedNode.Value.data.stackable == false)
+        if (cObservedNode.Value.data.MaxStack == 1)
         {
             base.Remove(cObservedNode);
         }
         else
         {
-            if (cObservedNode.Value.data.stack <= 0)
-            {
-                Debug.LogFormat("Buff Timer Error - stack is {0}", cObservedNode.Value.data.stack);
-            }
-
-            if (cObservedNode.Value.data.stack <= 1)
+            if (cObservedNode.Value.data.currentStack <= 1)
             {
                 base.Remove(cObservedNode);
             }
             else
             {
                 ExcuteEndCallback(cObservedNode);
-                cObservedNode.Value.data.stack--;
+                cObservedNode.Value.data.currentStack--;
                 cObservedNode.Value.current = cObservedNode.Value.max;
                 ExcuteStartCallback(cObservedNode);
             }
@@ -116,11 +125,15 @@ public class CBuffTimer : CTimer<BuffStack, int>
         
         observed.Value.current = updataTime;
         observed.Value.max = updataTime;
-        if (observed.Value.data.stackable)
+        if (observed.Value.data.MaxStack >= 1)
         {
             ExcuteEndCallback(observed);
-            observed.Value.data.stack += updateData.stack;
-            Debug.LogFormat("buff stack : {0}", observed.Value.data.stack);
+            int addedStack = observed.Value.data.currentStack += updateData.currentStack;
+            observed.Value.data.currentStack = 
+                addedStack > observed.Value.data.MaxStack 
+                ? observed.Value.data.MaxStack
+                : addedStack;
+            Debug.LogFormat("buff stack : {0}", observed.Value.data.currentStack);
             ExcuteStartCallback(observed);
         }
     }

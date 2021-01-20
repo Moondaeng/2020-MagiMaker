@@ -77,3 +77,6 @@ public static class CConstants
     public const int SLOT_COLOUMN = 4;
     #endregion //CStoreController에서 커서 이동에 필요한 상수들
 }
+public class Constants : MonoBehaviour
+{
+}
