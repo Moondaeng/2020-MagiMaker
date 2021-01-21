@@ -172,7 +172,7 @@ public class CController : MonoBehaviour
         }
         else
         {
-            CDropItemInfoPopup.instance.gameObject.SetActive(false);
+            //CDropItemInfoPopup.instance.gameObject.SetActive(false);
         }
     }
 

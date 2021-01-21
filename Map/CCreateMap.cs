@@ -71,6 +71,7 @@ public class CCreateMap : MonoBehaviour
 
     public void AddPortal()
     {
+        
         GameObject[] portalMom = GameObject.FindGameObjectsWithTag("PORTAL_MOM");
 
         foreach (GameObject ob in portalMom)
@@ -79,13 +80,17 @@ public class CCreateMap : MonoBehaviour
 
     public void RemovePortal()
     {
-        _portals.RemoveRange(0, _portals.Count);
+        //_portals.RemoveRange(0, _portals.Count);
+        _portals.Clear();
     }
 
     public void NotifyPortal()
-    { 
-        for (int i = 0; i < _portals.Count; i++)
-            _portals[i].OpenNClosePortal();
+    {
+        foreach (CPortal portal in _portals)
+        {
+            if(portal != null)
+            portal.OpenNClosePortal();
+        }
     }
 
     public int GetStageNumber()
@@ -366,8 +371,8 @@ public class CCreateMap : MonoBehaviour
         //debug용 보고싶은 맵 있으면 여기다 가져다 두면 됨.
         if (roomCount == 1)
         {
-            GameObject temproom = Resources.Load("Room/EventRoom0_4") as GameObject;
-            Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
+            GameObject temproom = Resources.Load("Room/ItemEliteRoom0_0") as GameObject;
+            temproom = Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
             _rooms.AddLast(temproom);
             _roomCount++;
             AddPortal();
@@ -446,6 +451,7 @@ public class CCreateMap : MonoBehaviour
     {
         RemovePortal();
         _tempRoomNode = _rooms.First;
+        Debug.Log("DestroyRoom : " + _tempRoomNode.Value);
         Object.Destroy(_tempRoomNode.Value);
 
         //debug 용 태그로 방지우기
