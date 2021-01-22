@@ -30,11 +30,14 @@ public class CPortalManager : MonoBehaviour
     {
         yield return new WaitForSeconds(1.0f);
 
+        CCreateMap.instance.DestroyRoom();//오브젝트 삭제
+
+        yield return new WaitForSeconds(1.0f); //삭제 후 잠시 대기(삭제되는 오브젝트 참조하는 경우가 생겼음)
+
         Transform ParentTransform = player[0].transform; //최상위 오브젝트 찾기 -> 캐릭터 옮기기
 
         ParentTransform.position = new Vector3(0, 1, 0);
 
-        CCreateMap.instance.DestroyRoom();//오브젝트 삭제
         //방 배치
         int whichPortalSelect = 0;
 

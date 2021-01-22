@@ -34,10 +34,19 @@ public class CSpawnStone : MonoBehaviour
             StartCoroutine(SpawnStone(r.Next(3, 6), 2));
             StartCoroutine(SpawnStone(r.Next(3, 6), 3));
             StartCoroutine(SpawnStone(r.Next(3, 6), 4));
-            StartCoroutine(SpawnStone(r.Next(3, 6), 5));
 
             _timer = 0;
         }
+    }
+
+    private void OnDestroy()
+    {
+        Debug.Log("Destroy Stone");
+
+        GameObject[] gameObjects = GameObject.FindGameObjectsWithTag("EventRoomStone");
+
+        foreach (GameObject gameObject in gameObjects)
+            Object.Destroy(gameObject);
     }
 
     IEnumerator SpawnStone(int sec, int pos)
@@ -46,8 +55,8 @@ public class CSpawnStone : MonoBehaviour
         StartCoroutine(OnMagicCircle(pos));
         yield return new WaitForSeconds(1);
         _stone = Resources.Load("Stone") as GameObject;
-        Instantiate(_stone, new Vector3(_stoneSpawner.transform.position.x + 2.5f * pos, _stoneSpawner.transform.position.y,
-            _stoneSpawner.transform.position.z) - new Vector3(0, _stone.transform.localScale.y / 2, 0), Quaternion.identity);
+        Transform stoneSpawnerChild = _stoneSpawner.transform.GetChild(pos);
+        Instantiate(_stone, stoneSpawnerChild.position , Quaternion.identity);
     }
 
     IEnumerator OnMagicCircle(int pos)  //돌이 생성되기 1초전 마법진 빛나줌.

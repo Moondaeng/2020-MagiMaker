@@ -16,7 +16,7 @@ public class CCreateMap : MonoBehaviour
     private GameObject bossRoom;
     private GameObject shopRoom;
 
-    private List<CPortal> _portals; 
+    private List<CPortal> _portals;
     #endregion
 
     #region roomQueue
@@ -37,6 +37,7 @@ public class CCreateMap : MonoBehaviour
     private CRoom[,] _roomArr;
     private LinkedList<GameObject> _rooms;
     private LinkedListNode<GameObject> _tempRoomNode;
+    private int _portalMomCount; //포탈맘 사용할때 태그를 이용해서 오브젝트를 받아오는데, 이 때 사라져야할 전방 포탈들도 가져와서 전 방 포탈들을 따로 하드코딩으로 제외하기 위한 변수
     #endregion
 
     private void Start()
@@ -57,6 +58,7 @@ public class CCreateMap : MonoBehaviour
         _noRoomFlag = true;
         _roomTypeFlag = CGlobal.ERoomType._empty;
         _roomCount = 0; //방의 개수가 12개가 넘어가면 멈춰줄 변수
+        _portalMomCount = 0;
 
         _roomArr = new CRoom[CConstants.ROOM_PER_STAGE, CConstants.MAX_ROAD];
         for (int i = 0; i < CConstants.ROOM_PER_STAGE; i++)
@@ -71,11 +73,11 @@ public class CCreateMap : MonoBehaviour
 
     public void AddPortal()
     {
-        
+
         GameObject[] portalMom = GameObject.FindGameObjectsWithTag("PORTAL_MOM");
 
-        foreach (GameObject ob in portalMom)
-            _portals.Add(ob.transform.FindChild("Portal").GetComponent<CPortal>());
+        for (int i = _portalMomCount; i < portalMom.Length; i++)
+            _portals.Add(portalMom[i].transform.FindChild("Portal").GetComponent<CPortal>());
     }
 
     public void RemovePortal()
@@ -88,8 +90,8 @@ public class CCreateMap : MonoBehaviour
     {
         foreach (CPortal portal in _portals)
         {
-            if(portal != null)
-            portal.OpenNClosePortal();
+            if (portal != null)
+                portal.OpenNClosePortal();
         }
     }
 
@@ -371,7 +373,7 @@ public class CCreateMap : MonoBehaviour
         //debug용 보고싶은 맵 있으면 여기다 가져다 두면 됨.
         if (roomCount == 1)
         {
-            GameObject temproom = Resources.Load("Room/ItemEliteRoom0_0") as GameObject;
+            GameObject temproom = Resources.Load("Room/EventRoom0_0") as GameObject;
             temproom = Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
             _rooms.AddLast(temproom);
             _roomCount++;
@@ -464,30 +466,32 @@ public class CCreateMap : MonoBehaviour
     {
         GameObject[] portalMom = GameObject.FindGameObjectsWithTag("PORTAL_MOM");
 
-        foreach (GameObject ob in portalMom)
+        for (int i = _portalMomCount; i < portalMom.Length; i++)         
         {
-            Transform portal = ob.transform.Find("Portal");
-            Transform text = ob.transform.Find("PortalText").Find("Text");
+            Transform portal = portalMom[i].transform.Find("Portal");
+            Transform text = portalMom[i].transform.Find("PortalText").Find("Text");
 
             switch (portal.tag)
             {
                 case "LEFT_PORTAL":
                     text.GetComponent<TextMeshProUGUI>().text = _roomArr[roomCount, 0].RoomType.ToString().Substring(1);
                     if (_roomArr[roomCount, 0].RoomType == CGlobal.ERoomType._empty)
-                        GameObject.Destroy(ob);
+                        GameObject.Destroy(portalMom[i]);
                     break;
                 case "PORTAL":
                     text.GetComponent<TextMeshProUGUI>().text = _roomArr[roomCount, 1].RoomType.ToString().Substring(1);
                     if (_roomArr[roomCount, 1].RoomType == CGlobal.ERoomType._empty)
-                        GameObject.Destroy(ob);
+                        GameObject.Destroy(portalMom[i]);
                     break;
                 case "RIGHT_PORTAL":
                     text.GetComponent<TextMeshProUGUI>().text = _roomArr[roomCount, 2].RoomType.ToString().Substring(1);
                     if (_roomArr[roomCount, 2].RoomType == CGlobal.ERoomType._empty)
-                        GameObject.Destroy(ob);
+                        GameObject.Destroy(portalMom[i]);
                     break;
             }
         }
+
+        //_portalMomCount = portalMom.Length - _portalMomCount; // 이후에 find tag가 제거되야할 포탈들도 검색해버리는 문제 해결용
     }
 
     public int getRoomCount()

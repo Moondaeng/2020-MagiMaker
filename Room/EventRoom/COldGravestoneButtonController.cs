@@ -56,13 +56,14 @@ public class COldGravestoneButtonController : MonoBehaviour
         Debug.Log("Summon Enemies");
 
         CGlobal.isEvent = true; //적이 소환됬으므로 포탈 대기 상태
+        CGlobal.useNPC = false; //팝업 꺼지므로 플레이어 이동 안막힘
         CCreateMap.instance.NotifyPortal(); //플래그 바뀐 상태 방송하기
 
         _popUp.SetActive(false);
         Destroy(_oldGravestone);
 
-        CGlobal.isEvent = false; //몹을 다 잡아서 이벤트 끝난 경우
-        CCreateMap.instance.NotifyPortal();
+        //CGlobal.isEvent = false; //몹을 다 잡아서 이벤트 끝난 경우
+        //CCreateMap.instance.NotifyPortal();
     }
 
     public void ClickCancel()
