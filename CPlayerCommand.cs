@@ -34,7 +34,7 @@ public class CPlayerCommand : MonoBehaviour
 
     private void Start()
     {
-        //SetActivePlayers(4);
+        //SetActivePlayers(3);
         //SetMyCharacter(0);
     }
 
@@ -52,9 +52,8 @@ public class CPlayerCommand : MonoBehaviour
         for (int i = 0; i < playerCount; i++)
         {
             players[i].SetActive(true);
-            //_othersUiList.AddOtherPlayerUi(players[i]);
-            //_othersUiList.AddOtherPlayerUi(players[i].transform.GetChild(0).gameObject);
         }
+        _othersUiList.ActiveOtherPlayerUi(playerCount);
     }
 
     #region use with CCntl
@@ -116,26 +115,26 @@ public class CPlayerCommand : MonoBehaviour
     {
         Debug.Log("setting Character : " + charId);
 
+        SwapCharacterPos(charId);
+        SwapCharacterId(charId);
+    }
+
+    private void SwapCharacterPos(int charId)
+    {
         // 더미 캐릭터 위치와 조종 캐릭터 위치 스왑
-        var temp = players[GetDummyCharacterId(charId)].transform.position;
-        players[GetDummyCharacterId(charId)].transform.position = players[0].transform.position;
-        players[0].transform.position = temp;
+        var temp = players[charId].transform.position;
+        players[charId].transform.position = players[ControlCharacterId].transform.position;
+        players[ControlCharacterId].transform.position = temp;
+    }
+
+    private void SwapCharacterId(int charId)
+    {
+        GameObject temp = players[ControlCharacterId];
+        players[ControlCharacterId] = players[charId];
+        players[charId] = temp;
 
         Debug.Log($"{ControlCharacterId} is changed to {charId}");
         ControlCharacterId = charId;
-    }
-
-    // 더미 캐릭터 실제 번호 가져오기
-    public int GetDummyCharacterId(int charId)
-    {
-        if (charId == 0 && ControlCharacterId != 0)
-        {
-            return ControlCharacterId;
-        }
-        else
-        {
-            return charId == ControlCharacterId ? 0 : charId;
-        }
     }
 
     // 캐릭터 이동
@@ -149,10 +148,10 @@ public class CPlayerCommand : MonoBehaviour
         var character = players?[charId];
         if (character == null) return;
 
-        character = players[GetDummyCharacterId(charId)];
+        character = players[charId];
 
         var playerState = character.GetComponent<CMultiDoll>();
-        Debug.Log($"dummy {GetDummyCharacterId(charId)} go to {movePos.x}, {movePos.y}, {movePos.z}");
+        Debug.Log($"dummy {charId} go to {movePos.x}, {movePos.y}, {movePos.z}");
         playerState.MoveTo(movePos);
     }
 
@@ -162,7 +161,7 @@ public class CPlayerCommand : MonoBehaviour
         var character = players?[charId];
         if (character == null) return;
 
-        character = players[GetDummyCharacterId(charId)];
+        character = players[charId];
 
         character.transform.position = movePos;
     }
@@ -178,7 +177,7 @@ public class CPlayerCommand : MonoBehaviour
         var character = players?[charId];
         if (character == null) return;
 
-        character = players[GetDummyCharacterId(charId)];
+        character = players[charId];
 
         Teleport(charId, nowPos);
         var playerState = character.GetComponent<CMultiDoll>();
@@ -197,7 +196,7 @@ public class CPlayerCommand : MonoBehaviour
         var character = players?[charId];
         if (character == null) return;
 
-        character = players[GetDummyCharacterId(charId)];
+        character = players[charId];
 
         Teleport(charId, nowPos);
         var charSkill = character.GetComponent<CCharacterSkill>();

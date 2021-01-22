@@ -8,7 +8,7 @@ using UnityEngine.UI;
  */
 public class CUiHpBar : MonoBehaviour
 {
-    public Image HpBarImage;
+    [SerializeField] private Image HpBarImage;
 
     private float _targetPercent;
     private float _animationPercent;
@@ -20,7 +20,6 @@ public class CUiHpBar : MonoBehaviour
 
     void Start()
     {
-        HpBarImage = gameObject.GetComponent<Image>();
         _animationPercent = _targetPercent;
     }
 
