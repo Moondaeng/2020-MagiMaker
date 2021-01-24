@@ -184,8 +184,21 @@ public class CharacterPara : MonoBehaviour
     }
 
     #region UseEffect
+    public void TakeUseEffectHandleList(List<CUseEffectHandle> effects)
+    {
+        foreach(var effect in effects)
+        {
+            effect.TakeUseEffect(this);
+        }
+    }
+
     public void TakeUseEffect(CUseEffect effect)
     {
+        if (effect == null)
+        {
+            return;
+        }
+
         ApplyInstantEffect(effect.instantEffect);
         ApplyConditionalEffect(effect.conditionalEffect);
         ApplyPersistEffect(effect.persistEffect);
@@ -209,13 +222,13 @@ public class CharacterPara : MonoBehaviour
         int effectStack = _buffTimer.GetBuffStack(conditionalEffect.conditionEffectId);
         if (effectStack >= 1)
         {
-            // 스택 관련 옵션 지정
+            // 스택 관련 옵션 지정 - 클래스라 값이 누적되는지 확인 필요
             if(conditionalEffect.isRelationStack)
             {
-                conditionalEffect.instantEffect.MultiplyPersant(effectStack * conditionalEffect.stackBonusRate);
+                conditionalEffect.effect.instantEffect.MultiplyPersant(effectStack * conditionalEffect.stackBonusRate);
             }
 
-            ApplyInstantEffect(conditionalEffect.instantEffect);
+            TakeUseEffect(conditionalEffect.effect);
         }
     }
 
@@ -224,34 +237,19 @@ public class CharacterPara : MonoBehaviour
     // 해결 방안 2 : Timer에는 id만 보내고 실제 내용은 CharacterPara에 LinkedList 만들어서 관리하기
     protected void ApplyPersistEffect(CUseEffect.PersistEffect persistEffect)
     {
-        CUseEffect.PersistCustomEffect effectInfo;
-        if (persistEffect.isUseDefined)
-        {
-            if(!CUseEffect.DefinedPersistEffectDict.TryGetValue(persistEffect.definedEffect, out effectInfo))
-            {
-                Debug.Log($"Error : {persistEffect.definedEffect.GetType()}'s {persistEffect.definedEffect} is not Setting");
-                // 에러 방지를 위해 Null Custom Info 추가
-                effectInfo = persistEffect.customInfo;
-            }
-        }
-        else
-        {
-            effectInfo = persistEffect.customInfo;
-        }
-
         // 초기화 값이 들어가는거 방지용
-        if(effectInfo.id == 0)
+        if (persistEffect.id == 0)
         {
             return;
         }
 
-        _buffTimer.Register(effectInfo.id, persistEffect.time, effectInfo.maxStack, persistEffect.increaseStack,
-            (int buffStack) => StartPersistEffect(effectInfo, buffStack),
-            (int buffStack) => EndPersistEffect(effectInfo, buffStack));
+        _buffTimer.Register(persistEffect.id, persistEffect.time, persistEffect.maxStack, persistEffect.increaseStack,
+            (int buffStack) => StartPersistEffect(persistEffect, buffStack),
+            (int buffStack) => EndPersistEffect(persistEffect, buffStack));
     }
 
     // 지속 효과 시작
-    protected void StartPersistEffect(CUseEffect.PersistCustomEffect persistEffect, int stack)
+    protected void StartPersistEffect(CUseEffect.PersistEffect persistEffect, int stack)
     {
         // 지속 데미지(힐) 관련은 CCharacterPara에서 Update or Coroutine으로 관리
         // Coroutine 사용 이유 : 체력 변화는 오직 CCharacterPara 안에서만 일어나는 일
@@ -274,7 +272,7 @@ public class CharacterPara : MonoBehaviour
     }
 
     // 지속 효과 끝
-    protected void EndPersistEffect(CUseEffect.PersistCustomEffect persistEffect, int stack)
+    protected void EndPersistEffect(CUseEffect.PersistEffect persistEffect, int stack)
     {
         // 지속 데미지(힐) 관련은 CCharacterPara에서 Update or Coroutine으로 관리
         // Coroutine 사용 이유 : 체력 변화는 오직 CCharacterPara 안에서만 일어나는 일
@@ -353,15 +351,15 @@ public class CharacterPara : MonoBehaviour
         }
     }
 
-    protected void StackAccumalateEffect(int id, CUseEffect.StackAccumulateEffect effect)
+    protected void StackAccumalateEffect(int id, CUseEffect.StackAccumulateEffect stackAccumEffect)
     {
-        if(effect.threshold == 0)
+        if(stackAccumEffect.threshold == 0)
         {
             return;
         }
 
         int effectStack = _buffTimer.GetBuffStack(id);
-        if (effectStack >= effect.threshold)
+        if (effectStack >= stackAccumEffect.threshold)
         {
             PersistStack persistStack;
             // 이미 효과가 발동됐는지 확인
@@ -374,10 +372,10 @@ public class CharacterPara : MonoBehaviour
             // 발동되지 않은 경우 다음 한계치 설정하기
             // 발동했을 때의 스택 계산 : effectStack > operateStack + n * limit인 operateStack + n * limit의 최대치
             // ex) 6에서 발동하는데 처음 발동한 스택이 12인 경우, 그리고 다음 발동 스택이 18인 경우 이전 발동 스택은 12로 계산되며 6은 발동하면 안 됨
-            int previousOperatedStack = effect.threshold;
-            while (previousOperatedStack + effect.thresholdAdd <= effectStack)
+            int previousOperatedStack = stackAccumEffect.threshold;
+            while (previousOperatedStack + stackAccumEffect.thresholdAdd <= effectStack)
             {
-                previousOperatedStack += effect.thresholdAdd;
+                previousOperatedStack += stackAccumEffect.thresholdAdd;
             }
             if (persistStack == null)
             {
@@ -388,8 +386,7 @@ public class CharacterPara : MonoBehaviour
                 persistStack.operatedStack = previousOperatedStack;
             }
 
-            ApplyInstantEffect(effect.instantEffect);
-            ApplyPersistEffect(effect.persistEffect);
+            TakeUseEffect(stackAccumEffect.effect);
         }
     }
     #endregion

@@ -12,14 +12,26 @@ public class ConsumableEditor : Editor
     SerializedProperty itemImage;
     SerializedProperty itemCode;
 
-    SerializedProperty UseEffectList;
+    ReorderableList UseEffectList;
 
 
     private void OnEnable()
     {
         consumable = serializedObject.FindProperty("ConsumableStat");
         SetItemInformation();
-        UseEffectList = consumable.FindPropertyRelative("UseEffectList");
+        UseEffectList = new ReorderableList(serializedObject,
+            consumable.FindPropertyRelative("UseEffectList"),
+            true, true, true, true);
+        UseEffectList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
+        {
+            var element = UseEffectList.serializedProperty.GetArrayElementAtIndex(index);
+            rect.y += 2;
+            EditorGUI.PropertyField(rect, element);
+        };
+        UseEffectList.drawHeaderCallback = (Rect rect) =>
+        {
+            EditorGUI.LabelField(rect, "Use Effect List");
+        };
     }
 
     public override void OnInspectorGUI()
@@ -27,10 +39,11 @@ public class ConsumableEditor : Editor
         serializedObject.Update();
         DrawItemInfor();
         EditorGUILayout.LabelField("Use Effect", EditorStyles.boldLabel);
-        EditorGUILayout.PropertyField(UseEffectList, true);
+        UseEffectList.DoLayoutList();
         serializedObject.ApplyModifiedProperties();
     }
 
+        //EditorGUILayout.PropertyField(passiveEffect, true);
     private void SetItemInformation()
     {
         itemName = consumable.FindPropertyRelative("_itemName");

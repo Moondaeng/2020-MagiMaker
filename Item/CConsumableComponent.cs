@@ -9,14 +9,23 @@ namespace Item
     {
         public static string CreateExplainText(CConsumable consumable)
         {
-            return "사용 시 " + CUseEffectExplain.CreateUseEffectText(consumable.UseEffectList);
+            if (consumable.UseEffectList.Count == 0)
+            {
+                return "";
+            }
+            else
+            {
+                return "사용 시 " + CUseEffectHandleExplain.CreateUseEffectListText(consumable.UseEffectList);
+            }
         }
+
+        
     }
 
     [System.Serializable]
     public class CConsumable : CItem
     {
-        public CUseEffect UseEffectList;
+        public List<CUseEffectHandle> UseEffectList;
 
         public CConsumable(string _itemName, int _itemCode, Sprite _itemImage)
             : base(_itemName, _itemCode, _itemImage)

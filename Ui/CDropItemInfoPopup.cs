@@ -40,7 +40,7 @@ public class CDropItemInfoPopup : MonoBehaviour
 
     public void DrawConsumableExplain(Item.CConsumable consumable)
     {
-        _itemExplain.text += "사용 시 " + CUseEffectExplain.CreateUseEffectText(consumable.UseEffectList);
+        _itemExplain.text += Item.CConsumableExplainText.CreateExplainText(consumable);
     }
 
     public void DrawItemInfo(Item.CItem item)

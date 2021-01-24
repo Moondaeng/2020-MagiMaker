@@ -116,7 +116,7 @@ namespace Item
         }
 
         private static string CreatePassiveText(
-            EEquipEvent passiveCondition, int passiveCount, EEquipEventCountOption passiveCountOption, CUseEffect passiveEffect)
+            EEquipEvent passiveCondition, int passiveCount, EEquipEventCountOption passiveCountOption, List<CUseEffectHandle> passiveEffect)
         {
             if (passiveCondition == Item.EEquipEvent.None)
             {
@@ -142,7 +142,7 @@ namespace Item
                 .Append(passiveOptionExplain.Item2)
                 .Append(passiveExplain.Item3 + " ")
                 .Append("시 ")
-                .Append(CUseEffectExplain.CreateUseEffectText(passiveEffect));
+                .Append(CUseEffectHandleExplain.CreateUseEffectListText(passiveEffect));
 
             return sb.ToString();
         }
@@ -188,7 +188,7 @@ namespace Item
         public int PassiveUseCount;
         [Tooltip("현재 패시브 발동 조건 횟수"), HideInInspector]
         public int passiveCurrentCount;
-        public CUseEffect passiveEffect;
+        public List<CUseEffectHandle> passiveEffect;
 
         [Tooltip("성장 조건")]
         public EEquipEvent UpgradeCondition;

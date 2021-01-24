@@ -121,7 +121,7 @@ public class CStoreController : MonoBehaviour
             var itemComponent = _slots[_currentSlot].item.GetComponent<CConsumableComponent>();
             var consumable = itemComponent.Item as Item.CConsumable;
             itemText.text = consumable.ItemName;
-            Extext.text = CUseEffectExplain.CreateUseEffectText(consumable.UseEffectList);
+            Extext.text = Item.CConsumableExplainText.CreateExplainText(consumable);
         }
     }
 

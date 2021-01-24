@@ -152,86 +152,40 @@ public class ChangeAbilityInfoDrawer : PropertyDrawer
     }
 }
 
-/*
-[CustomPropertyDrawer(typeof(UseEffectWithChance))]
-public class UseEffectWithChanceDrawer : PropertyDrawer
-{
-    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-    {
-        var useEffectProperty = property.FindPropertyRelative("useEffect");
-        var useEffectObjectProperty = property.FindPropertyRelative("useEffectObject");
-        var chanceProperty = property.FindPropertyRelative("Chance");
+//[CustomEditor(typeof(CRandomUseEffect))]
+//public class RandomUseEffectEditor : Editor
+//{
+//    ReorderableList effectWithChanceList;
 
-        EditorGUILayout.PropertyField(useEffectProperty);
-        EditorGUILayout.PropertyField(useEffectObjectProperty);
-        EditorGUILayout.Slider(chanceProperty, 0, 1);
-        
-        using (new EditorGUI.PropertyScope(position, label, property))
-        {
-            //썸네일의 영역을 확보하기 위해서 라벨 영역의 폭을 줄입니다
+//    private void OnEnable()
+//    {
+//        var prop = serializedObject.FindProperty("effects");
 
-            position.height = EditorGUIUtility.singleLineHeight;
+//        effectWithChanceList = new ReorderableList(serializedObject, prop,
+//            true, true, true, true);
+//        effectWithChanceList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
+//        {
+//            //var element = effectWithChanceList.serializedProperty.GetArrayElementAtIndex(index);
+//            var element = prop.GetArrayElementAtIndex(index);
+//            rect.y += 2;
+//            EditorGUI.PropertyField(rect, element);
+//            //EditorGUI.PropertyField(
+//            //    new Rect(rect.x, rect.y, 200, EditorGUIUtility.singleLineHeight),
+//            //    element.FindPropertyRelative("effect"), GUIContent.none);
+//            //EditorGUI.PropertyField(
+//            //    new Rect(rect.x + 200, rect.y, rect.width - 200, EditorGUIUtility.singleLineHeight),
+//            //    element.FindPropertyRelative("chance"), GUIContent.none);
+//        };
+//        effectWithChanceList.drawHeaderCallback = (Rect rect) =>
+//        {
+//            EditorGUI.LabelField(rect, prop.displayName);
+//        };
+//    }
 
-            var useEffectRect = new Rect(position)
-            {
-            };
-
-            var useEffectObjectRect = new Rect(useEffectRect)
-            {
-                y = useEffectRect.y + EditorGUIUtility.singleLineHeight + 2
-            };
-
-            var chanceRect = new Rect(useEffectObjectRect)
-            {
-                y = useEffectObjectRect.y + EditorGUIUtility.singleLineHeight + 2
-            };
-
-            //각 프로퍼티의 SerializedProperty를 구합니다
-            var useEffectProperty = property.FindPropertyRelative("useEffect");
-            var useEffectObjectProperty = property.FindPropertyRelative("useEffectObject");
-            var chanceProperty = property.FindPropertyRelative("Chance");
-
-            //각 프로퍼티의 GUI을 표시
-
-            EditorGUI.PropertyField(useEffectRect, useEffectProperty);
-            EditorGUI.PropertyField(useEffectObjectRect, useEffectObjectProperty);
-            EditorGUI.Slider(chanceRect, chanceProperty, 0, 1);
-        }
-    }
-}
-*/
-
-/*
-[CustomPropertyDrawer(typeof(UseEffectList))]
-public class UseEffectListDrawer : PropertyDrawer
-{
-    ReorderableList list;
-
-    // Draw the property inside the given rect
-    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
-    {
-        if (list == null)
-        {
-            list = BuildUseEffectsReorderableList(property.FindPropertyRelative("UseEffects"));
-        }
-        list.DoLayoutList();
-    }
-
-    private ReorderableList BuildUseEffectsReorderableList(SerializedProperty property)
-    {
-        ReorderableList list = new ReorderableList(property.serializedObject, property, true, true, true, true);
-        list.elementHeight = 60;
-        list.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) => {
-            rect.height -= 4;
-            rect.y += 2;
-            EditorGUI.PropertyField(rect, property.GetArrayElementAtIndex(index));
-        };
-        list.drawHeaderCallback = (Rect rect) =>
-        {
-            EditorGUI.LabelField(rect, "Use Effect List");
-        };
-
-        return list;
-    }
-}
-*/
+//    public override void OnInspectorGUI()
+//    {
+//        serializedObject.Update();
+//        effectWithChanceList.DoLayoutList();
+//        serializedObject.ApplyModifiedProperties();
+//    }
+//}

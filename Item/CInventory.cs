@@ -290,20 +290,20 @@ public class CInventory
                 equip.passiveCurrentCount += count;
                 if(equip.passiveCurrentCount >= equip.PassiveUseCount)
                 {
-                    _inventoryUser.GetComponent<CPlayerPara>().TakeUseEffect(equip.passiveEffect);
+                    _inventoryUser.GetComponent<CPlayerPara>().TakeUseEffectHandleList(equip.passiveEffect);
                     equip.passiveCurrentCount = 0;
                 }
                 break;
             case Item.EEquipEventCountOption.Each_Below:
                 if (equip.PassiveUseCount >= count)
                 {
-                    _inventoryUser.GetComponent<CPlayerPara>().TakeUseEffect(equip.passiveEffect);
+                    _inventoryUser.GetComponent<CPlayerPara>().TakeUseEffectHandleList(equip.passiveEffect);
                 }
                 break;
             case Item.EEquipEventCountOption.Each_Over:
                 if (equip.PassiveUseCount <= count)
                 {
-                    _inventoryUser.GetComponent<CPlayerPara>().TakeUseEffect(equip.passiveEffect);
+                    _inventoryUser.GetComponent<CPlayerPara>().TakeUseEffectHandleList(equip.passiveEffect);
                 }
                 break;
             default:
@@ -387,7 +387,7 @@ public class CInventory
     {
         //int useEffectIndex = SelectRandomEffect(consumable);
         //Debug.Log($"useEffectIndex : {useEffectIndex}");
-        _inventoryUser.GetComponent<CPlayerPara>().TakeUseEffect(consumable.UseEffectList);
+        _inventoryUser.GetComponent<CPlayerPara>().TakeUseEffectHandleList(consumable.UseEffectList);
     }
     
     //private int SelectRandomEffect(Item.CConsumable consumable)
