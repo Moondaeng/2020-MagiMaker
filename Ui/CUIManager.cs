@@ -16,8 +16,8 @@ public class CUIManager : MonoBehaviour
     // Scene Canvas 설정 - Ui가 제대로 추가될 수 있도록 설정
     public Transform UiCanvasTransform;
 
-    private CSkillUIManager _skillUIManager;
-    private CBuffTimerListUI _buffTimerUiList;
+    [SerializeField] private CSkillUIManager _skillUIManager;
+    [SerializeField] private CBuffTimerListUI _buffTimerUiList;
     private CConsumableItemViewer _consumableViewer;
     private COtherPlayerUiManager _otherPlayerUi;
 
@@ -32,7 +32,6 @@ public class CUIManager : MonoBehaviour
         }
         // 하위 UI 관리
         _skillUIManager = gameObject.GetComponent<CSkillUIManager>();
-        _buffTimerUiList = gameObject.GetComponent<CBuffTimerListUI>();
         _consumableViewer = CConsumableItemViewer.instance;
         _otherPlayerUi = gameObject.GetComponent<COtherPlayerUiManager>();
     }
@@ -72,7 +71,6 @@ public class CUIManager : MonoBehaviour
     // 기본 Canvas 설정(초기화용)
     private void SetSceneCanvas()
     {
-        _buffTimerUiList.SetCanvas(UiCanvasTransform);
         _otherPlayerUi.SetCanvas(UiCanvasTransform);
     }
 }

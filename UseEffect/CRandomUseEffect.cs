@@ -13,7 +13,11 @@ public static class CRandomUseEffectExplain
         }
 
         StringBuilder sb = new StringBuilder();
-        
+        foreach(var effectWithChance in randomEffect.Effects)
+        {
+            sb.Append($"{effectWithChance.persantChance}% 확률로 " + 
+                CUseEffectExplain.CreateUseEffectText(effectWithChance.effect));
+        }
         return sb.ToString();
     }
 }
@@ -21,10 +25,19 @@ public static class CRandomUseEffectExplain
 public class CRandomUseEffect : CUseEffectHandle
 {
     [System.Serializable]
-    private class UseEffectWithChance
+    public class UseEffectWithChance
     {
         public CUseEffect effect;
-        public float chance;
+        public int persantChance;
+    }
+
+    // Effects를 통해 접근하면 effects를 get으로 접근함에도 불구하고 하위 멤버를 수정할 수 있으니 주의 필요
+    public List<UseEffectWithChance> Effects
+    {
+        get
+        {
+            return effects;
+        }
     }
 
     [SerializeField]
@@ -32,7 +45,12 @@ public class CRandomUseEffect : CUseEffectHandle
 
     public override void TakeUseEffect(CharacterPara cPara)
     {
-        cPara.TakeUseEffect(effects[SelectRandomEffect()].effect);
+        int selectEffect = SelectRandomEffect();
+        if (selectEffect == -1)
+        {
+            return;
+        }
+        cPara.TakeUseEffect(effects[selectEffect].effect);
     }
 
     public int SelectRandomEffect()
@@ -48,23 +66,24 @@ public class CRandomUseEffect : CUseEffectHandle
         }
 
         Debug.Log("Get Random Effect");
-        float chanceSum = 0f;
-        List<float> chanceSumList = new List<float>(effects.Count);
+        int chanceSum = 0;
+        List<int> chanceSumList = new List<int>(effects.Count);
         foreach (var effect in effects)
         {
-            chanceSum += effect.chance;
+            chanceSum += effect.persantChance;
             chanceSumList.Add(chanceSum);
         }
-        Debug.Log("set chance");
 
         // 임의 효과 선택
-        float randomChance = UnityEngine.Random.Range(0f, 1f);
+        int randomChance = UnityEngine.Random.Range(0, 100);
+        Debug.Log($"random number is {randomChance}");
         int idx = 0;
         while (idx < chanceSumList.Count - 1 && randomChance >= chanceSumList[idx])
         {
             idx++;
         }
 
+        Debug.Log($"select {idx} effect");
         return idx;
     }
 }

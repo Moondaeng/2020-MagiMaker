@@ -6,6 +6,12 @@ using UnityEngine;
 
 public static class CUseEffectExplain
 {
+    #region 정의된 사용 효과 관련
+    public static Dictionary<int, string> DefinedUseEffectNameDict
+        = new Dictionary<int, string>();
+
+    #endregion
+
     private static readonly Dictionary<EBuffAbility, string> AbilityNameDict
             = new Dictionary<EBuffAbility, string>
         {
@@ -72,7 +78,7 @@ public static class CUseEffectExplain
         {
             sb.Append(persist.TickPeriod + "초 마다");
             sb.Append(Math.Abs(persist.TickHpChangeAmount) + "만큼 ");
-            sb.AppendLine(persist.TickHpChangeAmount > 0 ? "힐" : "데미지");
+            sb.AppendLine(persist.TickHpChangeAmount > 0 ? "<b>힐</b>" : "<b>데미지</b>");
         }
 
         if (persist.changeAbilities.Count > 0)
@@ -110,8 +116,12 @@ public static class CUseEffectExplain
 
         StringBuilder sb = new StringBuilder();
 
-        // 지정된 효과의 경우 이름을 받아서 발동
-        sb.Append(conditional.conditionEffectId + "상태인 경우 ");
+        if (!DefinedUseEffectNameDict.TryGetValue(conditional.conditionEffectId, out var effectName))
+        {
+            effectName = conditional.conditionEffectId.ToString();
+        }
+
+        sb.Append(effectName + "상태인 경우 ");
         sb.Append(CreateUseEffectText(conditional.effect));
         if(conditional.isRelationStack)
         {
@@ -239,6 +249,9 @@ public class CUseEffect : CUseEffectHandle
         [Tooltip("스택 충족 시 발동 효과")]
         public CUseEffect effect;
     }
+
+    public bool IsUseEffectName;
+    public string EffectName;
 
     public InstantEffect instantEffect;
     public PersistEffect persistEffect;

@@ -10,6 +10,8 @@ public class CUiHpBar : MonoBehaviour
 {
     [SerializeField] private Image HpBarImage;
 
+    private CharacterPara drawTarget;
+
     private float _targetPercent;
     private float _animationPercent;
 
@@ -21,6 +23,27 @@ public class CUiHpBar : MonoBehaviour
     void Start()
     {
         _animationPercent = _targetPercent;
+    }
+
+    public void SetActive(bool isActive)
+    {
+        if (isActive == false)
+        {
+            StopAllCoroutines();
+        }
+        gameObject.SetActive(isActive);
+    }
+
+    public void Change(CharacterPara cPara)
+    {
+        if (drawTarget != null)
+        {
+            drawTarget.hpDrawEvent.RemoveListener(Draw);
+        }
+        drawTarget = cPara;
+        cPara.hpDrawEvent.AddListener(Draw);
+        _targetPercent = cPara.CurrentHp / cPara.TotalMaxHp;
+        _animationPercent = cPara.CurrentHp / cPara.TotalMaxHp;
     }
 
     public void Register(CharacterPara cPara)
@@ -39,7 +62,10 @@ public class CUiHpBar : MonoBehaviour
     {
         _targetPercent = (float)curHp / (float)maxHp;
         StopCoroutine("DrawHpAnimation");
-        StartCoroutine("DrawHpAnimation");
+        if (gameObject.activeSelf)
+        {
+            StartCoroutine("DrawHpAnimation");
+        }
     }
 
     private IEnumerator DrawHpAnimation()

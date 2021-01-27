@@ -28,7 +28,7 @@ public static class CUseEffectHandleExplain
         }
         else if (effect is CRandomUseEffect)
         {
-            return "";
+            return CRandomUseEffectExplain.CreateRandomUseEffectText(effect as CRandomUseEffect);
         }
         else if (effect is CMakeObjectUseEffect)
         {

@@ -21,7 +21,7 @@ public class RandomUseEffectEditor : Editor
                 element.FindPropertyRelative("effect"), GUIContent.none);
             EditorGUI.PropertyField(
                 new Rect(rect.x + 200, rect.y, rect.width - 200, EditorGUIUtility.singleLineHeight),
-                element.FindPropertyRelative("chance"), GUIContent.none);
+                element.FindPropertyRelative("persantChance"), GUIContent.none);
         };
         effectWithChanceList.drawHeaderCallback = (Rect rect) =>
         {

@@ -75,6 +75,7 @@ public class CRespawn : MonoBehaviour
             mon.SetActive(false);
             _monsters.Add(mon);
             _myManager.AddNewMonsters(mon);
+            mon.GetComponent<CEnemyPara>().monsterHitEvent.AddListener(_myManager.MonsterHit);
         }
     }
 

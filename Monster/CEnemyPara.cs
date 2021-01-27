@@ -2,9 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class CEnemyPara : CharacterPara
 {
+    public class MonsterHitEvent : UnityEvent<CEnemyPara> { }
+    [System.NonSerialized] public MonsterHitEvent monsterHitEvent = new MonsterHitEvent();
+
     public string _name;
     string _originTag = "Monster";
     [HideInInspector] public GameObject _myRespawn;
@@ -37,5 +41,19 @@ public class CEnemyPara : CharacterPara
     {
         base.UpdateAfterReceiveAttack();
         Debug.Log(_curHp); 
+    }
+
+    public override void TakeUseEffect(CUseEffect effect)
+    {
+        if (effect == null)
+        {
+            return;
+        }
+
+        monsterHitEvent.Invoke(this);
+
+        ApplyInstantEffect(effect.instantEffect);
+        ApplyConditionalEffect(effect.conditionalEffect);
+        ApplyPersistEffect(effect.persistEffect);
     }
 }

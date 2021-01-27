@@ -76,7 +76,7 @@ public class CharacterPara : MonoBehaviour
     [SerializeField]
     protected int _curHp;
 
-    public int _maxHp { get; set; }
+    public int _maxHp;
     public int _attackMin { get; set; }
     public int _attackMax { get; set; }
     public int _defense { get; set; }
@@ -192,7 +192,7 @@ public class CharacterPara : MonoBehaviour
         }
     }
 
-    public void TakeUseEffect(CUseEffect effect)
+    public virtual void TakeUseEffect(CUseEffect effect)
     {
         if (effect == null)
         {

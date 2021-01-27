@@ -21,12 +21,17 @@ public class CItemManager : MonoBehaviour
 
     void Start()
     {
+        DefinedUseEffectSetting();
+
         // 아이템 프리팹 폴더에서 로드
         GameObject[] items = Resources.LoadAll<GameObject>("Item");
         foreach(var item in items)
         {
             var itemClone = Instantiate(item);
+            itemClone.transform.SetParent(gameObject.transform);
             itemClone.SetActive(true);
+            // 설정 누락 등 검사
+            TestFault(itemClone);
             _itemDict.Add(itemClone.GetComponent<CItemComponent>().Item.ItemCode, itemClone);
             itemClone.SetActive(false);
         }
@@ -36,6 +41,49 @@ public class CItemManager : MonoBehaviour
         {
             CItemDropTable.instance.AddItem(item);
         }
+    }
+
+    // 정의된 UseEffect 설정
+    private void DefinedUseEffectSetting()
+    {
+        GameObject[] definedEffects = Resources.LoadAll<GameObject>("UseEffect");
+        foreach (var effect in definedEffects)
+        {
+            var effectClone = Instantiate(effect);
+            effect.SetActive(true);
+            var prop = effectClone.GetComponent<CUseEffect>();
+            CUseEffectExplain.DefinedUseEffectNameDict.Add(prop.persistEffect.id, prop.EffectName);
+            effect.SetActive(false);
+        }
+    }
+
+    private void TestFault(GameObject item)
+    {
+        List<CUseEffectHandle> effects = null;
+        if (item.GetComponent<CEquipComponent>() != null)
+        {
+            effects = (item.GetComponent<CEquipComponent>().Item as Item.CEquip).passiveEffect;
+        }
+        else if (item.GetComponent<CConsumableComponent>() != null)
+        {
+            effects = (item.GetComponent<CConsumableComponent>().Item as Item.CConsumable).UseEffectList;
+        }
+        if (effects != null && CheckUseEffectOmission(effects))
+        {
+            Debug.LogError($"{item.name}'s UseEffect is omission");
+        }
+    }
+
+    private bool CheckUseEffectOmission(List<CUseEffectHandle> effects)
+    {
+        for(int i = 0; i < effects.Count; i++)
+        {
+            if(effects[i] == null)
+            {
+                return true;
+            }
+        }
+        return false;
     }
     
     public GameObject GetItemObject(int itemCode)

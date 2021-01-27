@@ -59,6 +59,7 @@ public class COtherPlayerUiManager : MonoBehaviour
 
     public void SetUiTarget(GameObject target, int uiNumber)
     {
+        Debug.Log($"{target.name} ui {uiNumber}");
         var hpBar = _otherPlayerUiArr[uiNumber].GetComponent<CUiHpBar>();
         var buffTimerListUi = _otherPlayerUiArr[uiNumber].GetComponent<CBuffTimerListUI>();
 
@@ -88,7 +89,6 @@ public class COtherPlayerUiManager : MonoBehaviour
         // 버프 리스트
         playerUiData.buffList.RegisterTimer(player);
         playerUiData.buffList.timerDrawer = timerDrawer;
-        playerUiData.buffList.SetCanvas(_uiCanvasTransform);
         //playerUiData.buffList.timerUiTransform.SquareSize = uiPos.buffSquareSize;
         //playerUiData.buffList.timerUiTransform.SpaceSize = uiPos.buffSpaceSize;
 
