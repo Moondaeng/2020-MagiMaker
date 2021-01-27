@@ -67,6 +67,7 @@ public class CSkullButtonController : MonoBehaviour
         Debug.Log("Get Item!");
         Debug.Log("Lose Max HP");
         _popUp.SetActive(false);
+        CGlobal.useNPC = false;
         Destroy(_skull);
     }
     
@@ -75,11 +76,13 @@ public class CSkullButtonController : MonoBehaviour
         Debug.Log("Get Element!");
         Debug.Log("Lose Max HP");
         _popUp.SetActive(false);
+        CGlobal.useNPC = false;
         Destroy(_skull);
     }
 
     public void ClickCancel()
     {
         _popUp.SetActive(false);
+        CGlobal.useNPC = false;
     }
 }

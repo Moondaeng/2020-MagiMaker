@@ -7,6 +7,7 @@ public class COldGravestoneButtonController : MonoBehaviour
 {
     private GameObject _oldGravestone;
     private GameObject _popUp;
+    private GameObject _monsterGroup;
     private int _choose; //0이면 첫번째 선택 1이면 2번째 선택
     private Color _color;
     private void Start()
@@ -17,6 +18,8 @@ public class COldGravestoneButtonController : MonoBehaviour
 
         _popUp.transform.GetChild(0).GetComponent<Image>().color = Color.white; //1번째 선택 처음에 되있음. 하이라이트 = 흰색
         _popUp.transform.GetChild(1).GetComponent<Image>().color = Color.grey;
+
+        _monsterGroup = GameObject.Find("MonsterGroup");
     }
 
     private void Update()
@@ -53,7 +56,11 @@ public class COldGravestoneButtonController : MonoBehaviour
     public void ClickRandomItem()
     {
         Debug.Log("Get Item!");
-        Debug.Log("Summon Enemies");
+
+        for(int i = 0; i < _monsterGroup.transform.childCount; i++)
+        {
+            _monsterGroup.transform.GetChild(i).gameObject.SetActive(true);
+        }
 
         CGlobal.isEvent = true; //적이 소환됬으므로 포탈 대기 상태
         CGlobal.useNPC = false; //팝업 꺼지므로 플레이어 이동 안막힘
@@ -61,13 +68,11 @@ public class COldGravestoneButtonController : MonoBehaviour
 
         _popUp.SetActive(false);
         Destroy(_oldGravestone);
-
-        //CGlobal.isEvent = false; //몹을 다 잡아서 이벤트 끝난 경우
-        //CCreateMap.instance.NotifyPortal();
     }
 
     public void ClickCancel()
     {
         _popUp.SetActive(false);
+        CGlobal.useNPC = false; //팝업 꺼지므로 플레이어 이동 안막힘
     }
 }

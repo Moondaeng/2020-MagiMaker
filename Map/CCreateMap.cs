@@ -252,8 +252,57 @@ public class CCreateMap : MonoBehaviour
 
     }
 
+    public void CreateStageVerTuto()
+    {
+        int randomRoad; //랜덤한 갈림길 개수
+        int selectRoomType; //랜덤으로 방 종류 뽑기
+        int roadCount;  //갈림길 숫자
+
+        if (_roomCount > 5) //방 전부 생성됬을경우 대기
+            return;
+
+        if (_roomCount == 0)
+        {
+            _roomArr[0, 0].RoomType = CGlobal.ERoomType._start;
+            InstantiateRoom(_roomArr[_roomCount, 0].RoomType); //시작방 생성
+        }
+
+        if (_roomCount == 1)
+        {
+            _roomArr[1, 0].RoomType = CGlobal.ERoomType._normal; //일반방 넣기
+        }
+
+        if (_roomCount == 2)
+        {
+            _roomArr[2, 0].RoomType = CGlobal.ERoomType._event; //이벤트방 넣기
+        }
+
+        if (_roomCount == 3)
+        {
+            _roomArr[3, 0].RoomType = CGlobal.ERoomType._itemElite; //아이템 엘리트방 넣기
+        }
+
+        if (_roomCount == 4)
+        {
+            _roomArr[4, 0].RoomType = CGlobal.ERoomType._shop; //상점방 넣기
+        }
+
+        if (_roomCount == 6 - 1)
+        {
+            _roomArr[6 - 1, 0].RoomType = CGlobal.ERoomType._boss; //보스방 따로 넣기
+        }
+
+        MakePortalText(_roomCount);
+    }
+
     public void CreateStage()
     {
+        if (CGlobal.isTutorial)  //튜토리얼만 임의로 생성
+        {
+            CreateStageVerTuto();
+            return;
+        }
+
         if (_roomCount >= CConstants.ROOM_PER_STAGE) //방 12개 전부 생성 시 대기
             return;
 

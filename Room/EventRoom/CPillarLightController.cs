@@ -8,23 +8,27 @@ public class CPillarLightController : MonoBehaviour
     System.Random r;
     SphereCollider sphereCollider;
     Light light;
+    GameObject _directionalLight;
 
     // Start is called before the first frame update
     void Start()
     {
         _pillarGroup = gameObject;
         r = new System.Random();
+        _directionalLight = GameObject.Find("Directional Light");
 
         StartCoroutine("PillarLightEvent");
     }
 
     IEnumerator PillarLightEvent()
     {
+        //_directionalLight.SetActive(false);
         yield return new WaitForSeconds(4.0f);
         for (int i = 0; i < 3; i++)
         {
             yield return StartCoroutine("ExtendSphereCollider");
         }
+        //_directionalLight.SetActive(true);
     }
 
     IEnumerator ExtendSphereCollider()
@@ -36,15 +40,19 @@ public class CPillarLightController : MonoBehaviour
 
         sphereCollider.enabled = true;
         light.intensity = 7;
-        while (sphereCollider.radius < 1.5f)
+        while (sphereCollider.radius < 5f)
         {
             sphereCollider.radius += 0.1f;
             yield return new WaitForSeconds(0.1f);
         }
+        
+        yield return new WaitForSeconds(3f);
+       
 
-        yield return new WaitForSeconds(2.8f);
         light.intensity = 0;
         sphereCollider.radius = 0.1f;
         sphereCollider.enabled = false;
+
+        yield return new WaitForSeconds(1.0f);
     }
 }

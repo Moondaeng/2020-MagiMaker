@@ -72,8 +72,13 @@ public class CharacterPara : MonoBehaviour
 
         // 파라미터가 다른 이벤트 처리
         healEvent.AddListener((string tag, int amount) => hpPercentEvent?.Invoke((float)_curHp / _maxHp));
-
+        deadEvent.AddListener(CheckMonsterCount);
         InitPara();
+    }
+    
+    public void CheckMonsterCount()
+    {
+        CGlobal.CheckMonsterCount = true; //다른 스크립트에서 이걸보고 확인
     }
 
     public virtual void InitPara()

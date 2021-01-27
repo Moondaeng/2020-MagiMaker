@@ -5,11 +5,20 @@ using UnityEngine;
 public class CFlameThrowerGroupController : MonoBehaviour
 {
     [Tooltip("불 회전하는 속도")]
-    public float degreePerSecond = 3F;
-    // Update is called once per frame
-    void Update()
+    public float degreePerSecond;
+    public Vector3 _flamethrowerDir; 
+
+    private void Start()
     {
-        float speed = degreePerSecond * Time.deltaTime;
-        transform.Rotate(Vector3.up * speed);
+        degreePerSecond = UnityEngine.Random.Range(3, 10);
+        switch (UnityEngine.Random.Range(0, 2))
+        {
+            case 0:
+                _flamethrowerDir = Vector3.up;
+                break;
+            case 1:
+                _flamethrowerDir = Vector3.down;
+                break;
+        }
     }
 }

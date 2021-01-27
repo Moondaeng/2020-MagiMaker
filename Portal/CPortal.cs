@@ -7,7 +7,7 @@ public abstract class CPortal : MonoBehaviour
     GameObject PortalAcceptParent;
     GameObject FadeController;
 
-    private void Start()
+    protected virtual void Start()
     {
         PortalAcceptParent = GameObject.Find("PortalPopUp");
         FadeController = GameObject.Find("FadeController");
