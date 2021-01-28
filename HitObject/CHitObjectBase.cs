@@ -39,6 +39,8 @@ public class CHitObjectBase : MonoBehaviour
 
     private bool _isLayerSetting = false;
 
+    private int _recentCollisionInstanceID = 0;
+
     private IEnumerator CleanupEverythingCoRoutine()
     {
         // 2 extra seconds just to make sure animation and graphics have finished ending
@@ -69,7 +71,7 @@ public class CHitObjectBase : MonoBehaviour
 
     protected virtual void Awake()
     {
-        GetComponent<Collider>().isTrigger = false;
+        //GetComponent<Collider>().isTrigger = false;
         Starting = true;
         //// 수정 필요한 부분
         //int fireLayer = LayerMask.NameToLayer("PlayerSkill");
@@ -189,17 +191,38 @@ public class CHitObjectBase : MonoBehaviour
 
     public void SetObjectLayer(int layer)
     {
-        gameObject.layer = layer;
-        GetComponent<Collider>().isTrigger = true;
+        //gameObject.layer = layer;
+        //GetComponent<Collider>().isTrigger = true;
     }
 
-    protected virtual void OnCollisionEnter(Collision collision)
+    protected virtual void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Hit Collision");
-        var cPara = collision.collider.GetComponent<CharacterPara>();
+        int recentCollisionID = other.gameObject.GetInstanceID();
+        if (_recentCollisionInstanceID == recentCollisionID)
+        {
+            return;
+        }
+        _recentCollisionInstanceID = recentCollisionID;
+        Debug.Log($"Hit Collision - {_recentCollisionInstanceID}");
+        var cPara = other.GetComponent<CharacterPara>();
         if (cPara != null)
         {
             cPara.TakeUseEffect(useEffect);
         }
     }
+
+    protected void OnTriggerExit(Collider other)
+    {
+        Debug.Log("Exit Collision");
+    }
+
+    //protected virtual void OnCollisionEnter(Collision collision)
+    //{
+    //    Debug.Log("Hit Collision");
+    //    var cPara = collision.collider.GetComponent<CharacterPara>();
+    //    if (cPara != null)
+    //    {
+    //        cPara.TakeUseEffect(useEffect);
+    //    }
+    //}
 }

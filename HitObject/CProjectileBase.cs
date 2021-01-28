@@ -65,10 +65,10 @@ public class CProjectileBase : CHitObjectBase
         base.Update();
     }
 
-    protected override void OnCollisionEnter(Collision collision)
+    protected override void OnTriggerEnter(Collider other)
     {
-        base.OnCollisionEnter(collision);
-        Debug.Log($"Hit {collision.gameObject.name}");
+        base.OnTriggerEnter(other);
+        //Debug.Log($"Hit {collision.gameObject.name}");
 
         // destroy particle systems after a slight delay
         if (ProjectileDestroyParticleSystemsOnCollision != null)
@@ -85,4 +85,25 @@ public class CProjectileBase : CHitObjectBase
 
         Destroy(gameObject, 0.5f);
     }
+
+    //protected override void OnCollisionEnter(Collision collision)
+    //{
+    //    base.OnCollisionEnter(collision);
+    //    Debug.Log($"Hit {collision.gameObject.name}");
+
+    //    // destroy particle systems after a slight delay
+    //    if (ProjectileDestroyParticleSystemsOnCollision != null)
+    //    {
+    //        foreach (ParticleSystem p in ProjectileDestroyParticleSystemsOnCollision)
+    //        {
+    //            GameObject.Destroy(p, 0.1f);
+    //        }
+    //    }
+
+    //    //ProjectileExplosionParticleSystem.transform.position = c.contacts[0].point;
+    //    ProjectileExplosionParticleSystem.Play();
+    //    CHitObjectBase.CreateExplosion(gameObject.transform.position, ProjectileExplosionRadius, ProjectileExplosionForce);
+
+    //    Destroy(gameObject, 0.5f);
+    //}
 }

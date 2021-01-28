@@ -9,13 +9,14 @@ using UnityEngine.UI;
 public class CUiHpBar : MonoBehaviour
 {
     [SerializeField] private Image HpBarImage;
+    [SerializeField] private Image HpBarDamaged;
 
     private CharacterPara drawTarget;
 
     private float _targetPercent;
     private float _animationPercent;
 
-    private const int ANIM_DRAW_FRAME_COUNT = 30;
+    [SerializeField] private int ANIM_DRAW_FRAME_COUNT = 30;
 
     public static readonly WaitForEndOfFrame WaitForEndOfFrame = new WaitForEndOfFrame();
     public static readonly WaitForFixedUpdate WaitForFixedUpdate = new WaitForFixedUpdate();
@@ -61,6 +62,7 @@ public class CUiHpBar : MonoBehaviour
     public void Draw(int curHp, int maxHp)
     {
         _targetPercent = (float)curHp / (float)maxHp;
+        HpBarImage.fillAmount = _targetPercent;
         StopCoroutine("DrawHpAnimation");
         if (gameObject.activeSelf)
         {
@@ -74,10 +76,10 @@ public class CUiHpBar : MonoBehaviour
         for(int i = 0; i < ANIM_DRAW_FRAME_COUNT; i++)
         {
             _animationPercent += interpolatePercent;
-            HpBarImage.fillAmount = _animationPercent;
+            HpBarDamaged.fillAmount = _animationPercent;
             yield return WaitForFixedUpdate;
         }
         _animationPercent = _targetPercent;
-        HpBarImage.fillAmount = _animationPercent;
+        HpBarDamaged.fillAmount = _animationPercent;
     }
 }
