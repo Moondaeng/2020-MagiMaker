@@ -153,6 +153,7 @@ public class CharacterPara : MonoBehaviour
         _buffTimer = gameObject.GetComponent<CBuffTimer>();
         buffParameter = new CBuffPara(_buffTimer);
 
+        // 파라미터가 다른 이벤트 처리
         InitPara();
     }
 

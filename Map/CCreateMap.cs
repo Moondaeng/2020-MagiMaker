@@ -36,6 +36,7 @@ public class CCreateMap : MonoBehaviour
     private CRoom[,] _roomArr;
     private LinkedList<GameObject> _rooms;
     private LinkedListNode<GameObject> _tempRoomNode;
+    private int _portalMomCount; //포탈맘 사용할때 태그를 이용해서 오브젝트를 받아오는데, 이 때 사라져야할 전방 포탈들도 가져와서 전 방 포탈들을 따로 하드코딩으로 제외하기 위한 변수
     #endregion
 
     private void Start()
@@ -56,6 +57,7 @@ public class CCreateMap : MonoBehaviour
         _noRoomFlag = true;
         _roomTypeFlag = CGlobal.ERoomType._empty;
         _roomCount = 0; //방의 개수가 12개가 넘어가면 멈춰줄 변수
+        _portalMomCount = 0;
 
         _roomArr = new CRoom[CConstants.ROOM_PER_STAGE, CConstants.MAX_ROAD];
         for (int i = 0; i < CConstants.ROOM_PER_STAGE; i++)
@@ -70,21 +72,26 @@ public class CCreateMap : MonoBehaviour
 
     public void AddPortal()
     {
+
         GameObject[] portalMom = GameObject.FindGameObjectsWithTag("PORTAL_MOM");
 
-        foreach (GameObject ob in portalMom)
-            _portals.Add(ob.transform.Find("Portal").GetComponent<CPortal>());
+        for (int i = _portalMomCount; i < portalMom.Length; i++)
+            _portals.Add(portalMom[i].transform.Find("Portal").GetComponent<CPortal>());
     }
 
     public void RemovePortal()
     {
-        _portals.RemoveRange(0, _portals.Count);
+        //_portals.RemoveRange(0, _portals.Count);
+        _portals.Clear();
     }
 
     public void NotifyPortal()
     {
-        for (int i = 0; i < _portals.Count; i++)
-            _portals[i].OpenNClosePortal();
+        foreach (CPortal portal in _portals)
+        {
+            if (portal != null)
+                portal.OpenNClosePortal();
+        }
     }
 
     public int GetStageNumber()
@@ -244,8 +251,57 @@ public class CCreateMap : MonoBehaviour
 
     }
 
+    public void CreateStageVerTuto()
+    {
+        int randomRoad; //랜덤한 갈림길 개수
+        int selectRoomType; //랜덤으로 방 종류 뽑기
+        int roadCount;  //갈림길 숫자
+
+        if (_roomCount > 5) //방 전부 생성됬을경우 대기
+            return;
+
+        if (_roomCount == 0)
+        {
+            _roomArr[0, 0].RoomType = CGlobal.ERoomType._start;
+            InstantiateRoom(_roomArr[_roomCount, 0].RoomType); //시작방 생성
+        }
+
+        if (_roomCount == 1)
+        {
+            _roomArr[1, 0].RoomType = CGlobal.ERoomType._normal; //일반방 넣기
+        }
+
+        if (_roomCount == 2)
+        {
+            _roomArr[2, 0].RoomType = CGlobal.ERoomType._event; //이벤트방 넣기
+        }
+
+        if (_roomCount == 3)
+        {
+            _roomArr[3, 0].RoomType = CGlobal.ERoomType._itemElite; //아이템 엘리트방 넣기
+        }
+
+        if (_roomCount == 4)
+        {
+            _roomArr[4, 0].RoomType = CGlobal.ERoomType._shop; //상점방 넣기
+        }
+
+        if (_roomCount == 6 - 1)
+        {
+            _roomArr[6 - 1, 0].RoomType = CGlobal.ERoomType._boss; //보스방 따로 넣기
+        }
+
+        MakePortalText(_roomCount);
+    }
+
     public void CreateStage()
     {
+        if (CGlobal.isTutorial)  //튜토리얼만 임의로 생성
+        {
+            CreateStageVerTuto();
+            return;
+        }
+
         if (_roomCount >= CConstants.ROOM_PER_STAGE) //방 12개 전부 생성 시 대기
             return;
 
@@ -375,9 +431,9 @@ public class CCreateMap : MonoBehaviour
         //debug용 보고싶은 맵 있으면 여기다 가져다 두면 됨.
         if (roomCount == 2)
         {
-            GameObject temproom = Resources.Load("Room/ShopRoom0") as GameObject;
-            var temp = Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
-            _rooms.AddLast(temp);
+            GameObject temproom = Resources.Load("Room/EventRoom0_0") as GameObject;
+            temproom = Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
+            _rooms.AddLast(temproom);
             _roomCount++;
             AddPortal();
             NotifyPortal();
@@ -456,6 +512,7 @@ public class CCreateMap : MonoBehaviour
     {
         RemovePortal();
         _tempRoomNode = _rooms.First;
+        Debug.Log("DestroyRoom : " + _tempRoomNode.Value);
         Object.Destroy(_tempRoomNode.Value);
 
         //debug 용 태그로 방지우기
@@ -468,30 +525,32 @@ public class CCreateMap : MonoBehaviour
     {
         GameObject[] portalMom = GameObject.FindGameObjectsWithTag("PORTAL_MOM");
 
-        foreach (GameObject ob in portalMom)
+        for (int i = _portalMomCount; i < portalMom.Length; i++)         
         {
-            Transform portal = ob.transform.Find("Portal");
-            Transform text = ob.transform.Find("PortalText").Find("Text");
+            Transform portal = portalMom[i].transform.Find("Portal");
+            Transform text = portalMom[i].transform.Find("PortalText").Find("Text");
 
             switch (portal.tag)
             {
                 case "LEFT_PORTAL":
                     text.GetComponent<TextMeshProUGUI>().text = _roomArr[roomCount, 0].RoomType.ToString().Substring(1);
                     if (_roomArr[roomCount, 0].RoomType == CGlobal.ERoomType._empty)
-                        GameObject.Destroy(ob);
+                        GameObject.Destroy(portalMom[i]);
                     break;
                 case "PORTAL":
                     text.GetComponent<TextMeshProUGUI>().text = _roomArr[roomCount, 1].RoomType.ToString().Substring(1);
                     if (_roomArr[roomCount, 1].RoomType == CGlobal.ERoomType._empty)
-                        GameObject.Destroy(ob);
+                        GameObject.Destroy(portalMom[i]);
                     break;
                 case "RIGHT_PORTAL":
                     text.GetComponent<TextMeshProUGUI>().text = _roomArr[roomCount, 2].RoomType.ToString().Substring(1);
                     if (_roomArr[roomCount, 2].RoomType == CGlobal.ERoomType._empty)
-                        GameObject.Destroy(ob);
+                        GameObject.Destroy(portalMom[i]);
                     break;
             }
         }
+
+        //_portalMomCount = portalMom.Length - _portalMomCount; // 이후에 find tag가 제거되야할 포탈들도 검색해버리는 문제 해결용
     }
 
     public int getRoomCount()

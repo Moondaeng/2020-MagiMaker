@@ -40,6 +40,7 @@ public class CEventRoomNpcClick : MonoBehaviour
                 GameObject popUp = instance._stackPopUp.Pop();
                 popUp.SetActive(false);
             }
+
             if (instance._stackPopUp.Count == 0)
             {
                 CGlobal.useNPC = false;
