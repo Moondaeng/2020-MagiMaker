@@ -19,6 +19,8 @@ public class CController : MonoBehaviour
 
     private CConsumableItemViewer _consumableViewer;
 
+    [SerializeField] GameObject MousePointer;
+
     private CUIManager _playerUi;
     private CGameEvent gameEvent;
 
@@ -84,6 +86,15 @@ public class CController : MonoBehaviour
 
     void Update()
     {
+        int layerMask = 1 << LayerMask.NameToLayer("Player");
+        layerMask = ~layerMask;
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
+        {
+            MousePointer.transform.position = hit.point;
+        }
+
         ViewInteractionPopup();
 
         z = Input.GetAxisRaw("Horizontal");

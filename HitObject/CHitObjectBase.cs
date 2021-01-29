@@ -71,12 +71,7 @@ public class CHitObjectBase : MonoBehaviour
 
     protected virtual void Awake()
     {
-        //GetComponent<Collider>().isTrigger = false;
         Starting = true;
-        //// 수정 필요한 부분
-        //int fireLayer = LayerMask.NameToLayer("PlayerSkill");
-        //if (fireLayer >= 0 && fireLayer < 32)
-        //    UnityEngine.Physics.IgnoreLayerCollision(fireLayer, fireLayer);
     }
 
     protected virtual void Start()
@@ -191,29 +186,36 @@ public class CHitObjectBase : MonoBehaviour
 
     public void SetObjectLayer(int layer)
     {
-        //gameObject.layer = layer;
+        gameObject.layer = layer;
         //GetComponent<Collider>().isTrigger = true;
     }
 
     protected virtual void OnTriggerEnter(Collider other)
     {
+        if (!IsTriggeredRecently(other))
+        {
+            GetUseEffect(other);
+        }
+    }
+
+    protected bool IsTriggeredRecently(Collider other)
+    {
         int recentCollisionID = other.gameObject.GetInstanceID();
         if (_recentCollisionInstanceID == recentCollisionID)
         {
-            return;
+            return true;
         }
-        _recentCollisionInstanceID = recentCollisionID;
+        return false;
+    }
+
+    protected void GetUseEffect(Collider other)
+    {
         Debug.Log($"Hit Collision - {_recentCollisionInstanceID}");
         var cPara = other.GetComponent<CharacterPara>();
         if (cPara != null)
         {
             cPara.TakeUseEffect(useEffect);
         }
-    }
-
-    protected void OnTriggerExit(Collider other)
-    {
-        Debug.Log("Exit Collision");
     }
 
     //protected virtual void OnCollisionEnter(Collision collision)

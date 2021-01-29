@@ -113,16 +113,11 @@ public class CCharacterSkill : MonoBehaviour
             return;
         }
 
-        // 회전 설정
-        var userPos = gameObject.transform.position;
-        var objectivePos = targetPos - userPos;
-        Quaternion lookRotation = Quaternion.LookRotation(objectivePos);
-
         // 오브젝트 생성
-        var projectile = Instantiate(skillObject, userPos + Vector3.up, lookRotation);
+        var projectile = Instantiate(skillObject);
         projectile.tag = gameObject.tag;
 
-        InitToSkillObject(skillObject, targetPos);
+        InitToSkillObject(projectile, targetPos);
     }
 
     /// <summary>
@@ -140,6 +135,11 @@ public class CCharacterSkill : MonoBehaviour
 
         if (hitObjectBase is CProjectileBase)
         {
+            var userPos = gameObject.transform.position;
+            var objectivePos = targetPos - userPos;
+            Quaternion lookRotation = Quaternion.LookRotation(objectivePos);
+            skillObject.transform.position = userPos + Vector3.up;
+            skillObject.transform.rotation = lookRotation;
             hitObjectBase.SetObjectLayer(TranslateLayerCharacterToSkill(true));
             // 유저 스탯에 비례해 스킬 발사
             var userStat = GetComponent<CharacterPara>();
@@ -148,9 +148,15 @@ public class CCharacterSkill : MonoBehaviour
             //projectileBase.userAttackPower = userStat._attackMax;
             // 원소 관련 정보
         }
-        if (hitObjectBase is CBuffBase)
+        else if (hitObjectBase is CBuffBase)
         {
             hitObjectBase.SetObjectLayer(TranslateLayerCharacterToSkill(false));
+            skillObject.transform.position = targetPos;
+        }
+        else if (hitObjectBase is CFieldSkillBase)
+        {
+            hitObjectBase.SetObjectLayer(TranslateLayerCharacterToSkill(true));
+            skillObject.transform.position = targetPos;
         }
     }
 
