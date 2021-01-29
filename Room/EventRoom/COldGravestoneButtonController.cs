@@ -55,12 +55,12 @@ public class COldGravestoneButtonController : MonoBehaviour
     }
     public void ClickRandomItem()
     {
-        Debug.Log("Get Item!");
+        GameObject item = CItemDropTable.instance.DropRandomItem(CCreateMap.instance.GetStageNumber());
+        item = Instantiate(item, _oldGravestone.transform.position, _oldGravestone.transform.rotation);
+        item.SetActive(true);
 
-        for(int i = 0; i < _monsterGroup.transform.childCount; i++)
-        {
+        for (int i = 0; i < _monsterGroup.transform.childCount; i++)
             _monsterGroup.transform.GetChild(i).gameObject.SetActive(true);
-        }
 
         CGlobal.isEvent = true; //적이 소환됬으므로 포탈 대기 상태
         CGlobal.useNPC = false; //팝업 꺼지므로 플레이어 이동 안막힘
@@ -68,6 +68,9 @@ public class COldGravestoneButtonController : MonoBehaviour
 
         _popUp.SetActive(false);
         Destroy(_oldGravestone);
+
+        //debug
+        GameObject.Find("EventRoom0_0(Clone)").GetComponent<CEventRoomMonsterCheck>().SendMessage("ForceDeadMonster");
     }
 
     public void ClickCancel()

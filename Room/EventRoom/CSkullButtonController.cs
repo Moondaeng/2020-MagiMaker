@@ -61,10 +61,13 @@ public class CSkullButtonController : MonoBehaviour
                     ClickCancel();
                     break;
             }
-    }
+}
     public void ClickRandomItem()
     {
-        Debug.Log("Get Item!");
+        GameObject item = CItemDropTable.instance.DropRandomItem(CCreateMap.instance.GetStageNumber());
+        item = Instantiate(item, _skull.transform.position, _skull.transform.rotation);
+        item.SetActive(true);
+
         Debug.Log("Lose Max HP");
         _popUp.SetActive(false);
         CGlobal.useNPC = false;

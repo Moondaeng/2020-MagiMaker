@@ -4,23 +4,45 @@ using UnityEngine;
 
 public class CEventRoomMonsterCheck : MonoBehaviour
 {
-    // Update is called once per frame
-    void Update()
-    {
-        if (CGlobal.CheckMonsterCount)
-            StartCoroutine("CheckMonsterCount");
-    }
 
     private void Start()
     {
         GameObject[] monsters = GameObject.FindGameObjectsWithTag("Monster");
         foreach (GameObject monster in monsters)
             monster.SetActive(false);
+
+        CEventManager._instance._eventEvent.AddListener(CheckMonsterCount);
     }
 
-    IEnumerator CheckMonsterCount()
+    public void ForceDeadMonster()
+    {        //debug
+        Debug.Log("ForceDeadMonster");
+        StartCoroutine("ForceDeadMonsterCoru");
+    }
+
+    IEnumerator ForceDeadMonsterCoru()
     {
-        yield return new WaitForSeconds(1.0f); //오브젝트 삭제 대기
+        yield return new WaitForSeconds(2.0f);
+
+        GameObject _monsterGroup = GameObject.Find("MonsterGroup");
+
+        for (int i = 0; i < _monsterGroup.transform.childCount; i++)
+            _monsterGroup.transform.GetChild(i).gameObject.GetComponent<CharacterPara>().deadEvent.Invoke();
+    }
+
+    public void CheckMonsterCount()
+    {
+        StartCoroutine("CheckMonsterCountCoru");
+    }
+
+    private void OnDestroy()
+    {
+        CEventManager._instance._eventEvent.RemoveListener(CheckMonsterCount);
+    }
+
+    IEnumerator CheckMonsterCountCoru()
+    {
+        yield return new WaitForSeconds(5.0f); //오브젝트 삭제 대기
 
         GameObject[] monsters = GameObject.FindGameObjectsWithTag("Monster");
 
@@ -29,7 +51,5 @@ public class CEventRoomMonsterCheck : MonoBehaviour
             CGlobal.isEvent = false;
             CCreateMap.instance.NotifyPortal();
         }
-
-        CGlobal.CheckMonsterCount = false;
     }
 }
