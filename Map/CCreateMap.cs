@@ -422,7 +422,7 @@ public class CCreateMap : MonoBehaviour
         //debug용 보고싶은 맵 있으면 여기다 가져다 두면 됨.
         if (roomCount == 1)
         {
-            GameObject temproom = Resources.Load("Room/EventRoom0_0") as GameObject;
+            GameObject temproom = Resources.Load("Room/ShopRoom0") as GameObject;
             temproom = Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
             _rooms.AddLast(temproom);
             _roomCount++;
@@ -539,8 +539,6 @@ public class CCreateMap : MonoBehaviour
                     break;
             }
         }
-
-        //_portalMomCount = portalMom.Length - _portalMomCount; // 이후에 find tag가 제거되야할 포탈들도 검색해버리는 문제 해결용
     }
 
     public int getRoomCount()

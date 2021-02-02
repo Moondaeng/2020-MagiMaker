@@ -130,6 +130,7 @@ public class CParitcleSkillBase : MonoBehaviour
             #region Nonused
             case AttackType.damage:
                 p.DamagedDisregardDefence(_attackPower * a.arg1);
+                Debug.Log(_attackPower * a.arg1);
                 //if (_skillUsingUser.tag == "Player")
                 //    return;
                 break;

@@ -18,7 +18,7 @@ public class CTestContorller : MonoBehaviour
         keyDictionary = new Dictionary<KeyCode, Action>
         {
             {KeyCode.KeypadPlus, () => {
-                    var item = CItemDropTable.instance.PopRandomItemByGrade(CItemDropTable.ItemGrade.Normal);
+                    var item = CItemDropTable.instance.PopRandomItemByGrade(CItemDropTable.ItemGrade.Normal, CConstants.EQUIP_ITEM_TYPE);
                     item.SetActive(true);
                     item.transform.position = GetHitPoint();                    
                 } },

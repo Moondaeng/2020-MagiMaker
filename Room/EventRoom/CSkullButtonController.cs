@@ -64,7 +64,7 @@ public class CSkullButtonController : MonoBehaviour
 }
     public void ClickRandomItem()
     {
-        GameObject item = CItemDropTable.instance.DropRandomItem(CCreateMap.instance.GetStageNumber());
+        GameObject item = CItemDropTable.instance.DropRandomItem(CCreateMap.instance.GetStageNumber(), CConstants.EQUIP_ITEM_TYPE);
         item = Instantiate(item, _skull.transform.position, _skull.transform.rotation);
         item.SetActive(true);
 

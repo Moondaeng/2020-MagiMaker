@@ -78,4 +78,7 @@ public static class CConstants
     #endregion //CStoreController에서 커서 이동에 필요한 상수들
 
     public const int EVENT_ROLLING_STONE_DAMAGE = 100;
+
+    public static int EQUIP_ITEM_TYPE = 1;
+    public static int CONSUM_ITEM_TYPE = 0;
 }
