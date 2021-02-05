@@ -275,7 +275,7 @@ public class CEnemyFSM : MonoBehaviour
     }
     protected virtual void RemoveMe()
     {
-        _myRespawn.GetComponent<CRespawn>().RemoveMonster(_spawnID);
+        //_myRespawn.GetComponent<CRespawn>().RemoveMonster(_spawnID);
         _anim.SetBool("Dead", false);
     }
 

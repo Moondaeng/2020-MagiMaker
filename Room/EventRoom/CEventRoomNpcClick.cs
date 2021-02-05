@@ -24,28 +24,28 @@ public class CEventRoomNpcClick : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        CanclePopUp();
-    }
-
-    public void CanclePopUp()
-    {
 #if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.Backspace))
 #else
         if (Input.GetKeyDown(KeyCode.Escape))
 #endif
         {
-            if (instance._stackPopUp.Count != 0)
-            {
-                GameObject popUp = instance._stackPopUp.Pop();
-                popUp.SetActive(false);
-            }
+            CanclePopUp();
+        }
+    }
 
-            if (instance._stackPopUp.Count == 0)
-            {
-                CGlobal.useNPC = false;
-                CWindowFacade.instance.SetOtherWindowMode(false);
-            }
+    public void CanclePopUp()
+    {
+        if (instance._stackPopUp.Count != 0)
+        {
+            GameObject popUp = instance._stackPopUp.Pop();
+            popUp.SetActive(false);
+        }
+
+        if (instance._stackPopUp.Count == 0)
+        {
+            CGlobal.useNPC = false;
+            CWindowFacade.instance.SetOtherWindowMode(false);
         }
     }
 

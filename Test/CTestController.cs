@@ -11,7 +11,7 @@ public class CTestController : MonoBehaviour
     public CPlayerCommand commander;
     public CUIManager ui;
     public CWaitingForAccept waiting;
-    public CManager monsterManager;
+    public CMonsterManager monsterManager;
 
     private void Awake()
     {
@@ -70,7 +70,6 @@ public class CTestController : MonoBehaviour
         {
             return;
         }
-
 
         if (Input.GetKeyDown(KeyCode.Delete))
         {

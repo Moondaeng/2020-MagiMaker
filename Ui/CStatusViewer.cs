@@ -3,8 +3,8 @@ using UnityEngine.UI;
 
 public class CStatusViewer : MonoBehaviour
 {
-    [SerializeField] private Text name;
-    [SerializeField] private Text title;
+    [SerializeField] private Text nameText;
+    [SerializeField] private Text titleText;
     [SerializeField] private CUiHpBar hpBar;
     [SerializeField] private CBuffTimerListUI buffListUi;
 
@@ -12,8 +12,8 @@ public class CStatusViewer : MonoBehaviour
 
     public void SetActive(bool isActive)
     {
-        name.gameObject.SetActive(isActive);
-        title.gameObject.SetActive(isActive);
+        nameText.gameObject.SetActive(isActive);
+        titleText.gameObject.SetActive(isActive);
         hpBar.SetActive(isActive);
         buffListUi.SetActive(isActive);
     }
@@ -30,7 +30,7 @@ public class CStatusViewer : MonoBehaviour
     public void Register(CharacterPara cPara)
     {
         Debug.Log("Register");
-        name.text = cPara.name;
+        nameText.text = cPara.name;
         hpBar.Register(cPara);
         buffListUi.RegisterTimer(cPara.gameObject);
         target = cPara;
@@ -39,7 +39,7 @@ public class CStatusViewer : MonoBehaviour
     public void Deregister(CharacterPara cPara)
     {
         Debug.Log("Deregister");
-        name.text = "";
+        nameText.text = "";
         hpBar.Deregister(cPara);
         buffListUi.DeregisterTimer(cPara.gameObject);
         target = null;

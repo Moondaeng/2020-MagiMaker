@@ -68,7 +68,6 @@ public class CProjectileBase : CHitObjectBase
     protected override void OnTriggerEnter(Collider other)
     {
         base.OnTriggerEnter(other);
-        //Debug.Log($"Hit {collision.gameObject.name}");
 
         // destroy particle systems after a slight delay
         if (ProjectileDestroyParticleSystemsOnCollision != null)

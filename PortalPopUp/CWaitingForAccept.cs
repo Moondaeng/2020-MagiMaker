@@ -36,6 +36,11 @@ public class CWaitingForAccept : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!_waitingForOtherPlayer.activeSelf)
+        {
+            return;
+        }
+
         // 승낙, 거절 버튼
         if (Input.GetKeyDown(KeyCode.T))
         {

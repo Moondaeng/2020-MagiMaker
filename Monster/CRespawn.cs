@@ -12,7 +12,7 @@ public class CRespawn : MonoBehaviour
     [SerializeField] bool _isRespawn;
     [Tooltip("몇 마리?")]
     [SerializeField] int[] _spawnNumber;
-    CManager _myManager;
+    CMonsterManager _myManager;
     Transform[, ] _monsterPosition;
     int _sumOfSpawnNumber;
     int _maxOfSpawnNumber;
@@ -22,7 +22,7 @@ public class CRespawn : MonoBehaviour
 
     void Start()
     {
-        _myManager = GetComponent<CManager>();
+        _myManager = GetComponent<CMonsterManager>();
         SumSpawnNumber();
         ScaleMonsterTransform();
     }
@@ -74,7 +74,7 @@ public class CRespawn : MonoBehaviour
             mon.GetComponent<CEnemyPara>().SetRespawn(gameObject, _monsterIndex + i, _monsterPosition[index, i].position);
             mon.SetActive(false);
             _monsters.Add(mon);
-            _myManager.AddNewMonsters(mon);
+            _myManager.AddMonsterInfo(mon);
             mon.GetComponent<CEnemyPara>().monsterHitEvent.AddListener(_myManager.MonsterHit);
         }
     }

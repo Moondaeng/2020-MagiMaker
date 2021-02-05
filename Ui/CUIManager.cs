@@ -30,14 +30,14 @@ public class CUIManager : MonoBehaviour
         {
             instance = this;
         }
-        // 하위 UI 관리
-        _skillUIManager = gameObject.GetComponent<CSkillUIManager>();
-        _consumableViewer = CConsumableItemViewer.instance;
-        _otherPlayerUi = gameObject.GetComponent<COtherPlayerUiManager>();
     }
 
     private void Start()
     {
+        // 하위 UI 관리
+        _skillUIManager = gameObject.GetComponent<CSkillUIManager>();
+        _consumableViewer = CConsumableItemViewer.instance;
+        _otherPlayerUi = gameObject.GetComponent<COtherPlayerUiManager>();
         SetSceneCanvas();
     }
 

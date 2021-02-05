@@ -8,7 +8,7 @@ public class CFlamethrowerFireController : MonoBehaviour
     {
         if(other.tag == "Player")
         {
-            CController.instance.player.GetComponent<CPlayerPara>().DamagedDisregardDefence(1);
+            CController.instance.player.GetComponent<CPlayerPara>().DamagedDisregardDefence(100);
             Debug.Log("aaa");
         }
     }

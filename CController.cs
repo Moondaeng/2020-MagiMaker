@@ -41,8 +41,6 @@ public class CController : MonoBehaviour
 
     private void Awake()
     {
-        DontDestroyOnLoad(gameObject);
-
         if (instance == null)
         {
             instance = this;
@@ -86,14 +84,14 @@ public class CController : MonoBehaviour
 
     void Update()
     {
-        int layerMask = 1 << LayerMask.NameToLayer("Player");
-        layerMask = ~layerMask;
-        RaycastHit hit;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
-        {
-            MousePointer.transform.position = hit.point;
-        }
+        //int layerMask = 1 << LayerMask.NameToLayer("Player");
+        //layerMask = ~layerMask;
+        //RaycastHit hit;
+        //Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        //if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
+        //{
+        //    MousePointer.transform.position = hit.point;
+        //}
 
         ViewInteractionPopup();
 

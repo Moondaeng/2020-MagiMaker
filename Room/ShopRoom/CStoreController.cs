@@ -41,6 +41,7 @@ public class CStoreController : MonoBehaviour
 
         for (int i = 0; i < _slotRoot.childCount; i++)
         {
+            Debug.Log("get item");
             var slot = _slotRoot.GetChild(i).GetComponent<CSlotController>();
             slot.SetItem(CItemDropTable.instance.DropRandomItem(CCreateMap.instance.GetStageNumber()));
 

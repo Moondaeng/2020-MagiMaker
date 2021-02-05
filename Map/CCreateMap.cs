@@ -418,37 +418,10 @@ public class CCreateMap : MonoBehaviour
 
     public void CreateRoom(CRoom[,] roomArr, int roomCount, int roadCount)
     {
-        if(_roomCount == 1)
-        {
-            GameObject temproom = Resources.Load("Room/NormalRoom0_0") as GameObject;
-            var temp = Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
-            _rooms.AddLast(temp);
-            _roomCount++;
-            AddPortal();
-            NotifyPortal();
-            return;
-        }
         //debug용 보고싶은 맵 있으면 여기다 가져다 두면 됨.
-        if (roomCount == 2)
+        if (_roomCount == 1)
         {
-            GameObject temproom = Resources.Load("Room/EventRoom0_0") as GameObject;
-            temproom = Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
-            _rooms.AddLast(temproom);
-            _roomCount++;
-            AddPortal();
-            NotifyPortal();
-            return;
-        }
-        //이것도 마찬가지로 디버그용
-        if (roomCount == 3)
-        {
-            GameObject temproom = Resources.Load("Room/EventRoom0_1") as GameObject;
-            var temp = Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
-            _rooms.AddLast(temp);
-            _roomCount++;
-            AddPortal();
-            NotifyPortal();
-            return;
+            CreateExplicitRoom("NormalRoom0_2");
         }
 
         InstantiateRoom(roomArr[roomCount, roadCount].RoomType);
@@ -557,4 +530,16 @@ public class CCreateMap : MonoBehaviour
     {
         return _roomCount;
     }
+
+    #region Debug
+    private void CreateExplicitRoom(string RoomName)
+    {
+        GameObject temproom = Resources.Load("Room/" + RoomName) as GameObject;
+        var temp = Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
+        _rooms.AddLast(temp);
+        _roomCount++;
+        AddPortal();
+        NotifyPortal();
+    }
+    #endregion
 }

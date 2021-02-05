@@ -17,7 +17,7 @@ public class CSpawnStone : MonoBehaviour
         _timer = 0.0f;
         _stoneSpawner = gameObject;
 
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < transform.childCount; i++)
             _stoneSpawner.transform.GetChild(i).gameObject.SetActive(false);
     }
 

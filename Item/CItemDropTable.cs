@@ -92,7 +92,7 @@ public class CItemDropTable : MonoBehaviour
 
         if (itemList.Count == 0)
         {
-            Debug.Log("Item List is empty");
+            Debug.Log("Consumable Item List is empty");
             return null;
         }
 
@@ -138,7 +138,7 @@ public class CItemDropTable : MonoBehaviour
 
         if(itemList.Count == 0)
         {
-            Debug.Log("Item List is empty");
+            Debug.Log($"{itemGrade} Item List is empty");
             return null;
         }
 

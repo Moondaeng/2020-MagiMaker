@@ -86,7 +86,7 @@ public class CHitObjectBase : MonoBehaviour
         startTimeMultiplier = 1.0f / StartTime;
 
         // if this effect has an explosion force, apply that now
-        CreateExplosion(gameObject.transform.position, ForceRadius, ForceAmount);
+        //CreateExplosion(gameObject.transform.position, ForceRadius, ForceAmount);
 
         // start any particle system that is not in the list of manual start particle systems
         StartParticleSystems();

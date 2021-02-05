@@ -65,7 +65,7 @@ public class CPlayerPara : CharacterPara
         _isStunned = false;
         _isDead = false;
         _invincibility = false;
-        _originColor = _obj.material.color;
+        //_originColor = _obj.material.color;
     }
     
     protected override void UpdateAfterReceiveAttack()
