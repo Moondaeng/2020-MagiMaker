@@ -7,7 +7,6 @@ public class CEventRoomNpcClick : MonoBehaviour
     private GameObject _eventRoom;
     private GameObject _popUp;
     public static CEventRoomNpcClick instance = null;
-    private CController _controller;
     public Stack<GameObject> _stackPopUp;
     // Start is called before the first frame update
     void Start()
@@ -20,27 +19,33 @@ public class CEventRoomNpcClick : MonoBehaviour
         _eventRoom = gameObject.transform.parent.gameObject;
         _popUp = _eventRoom.transform.Find("NPCPopUp").gameObject;
         _popUp.SetActive(false);
-        _controller = GameObject.Find("Controller").GetComponent<CController>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        CanclePopUp();
+#if UNITY_EDITOR
+        if (Input.GetKeyDown(KeyCode.Backspace))
+#else
+        if (Input.GetKeyDown(KeyCode.Escape))
+#endif
+        {
+            CanclePopUp();
+        }
     }
 
     public void CanclePopUp()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (instance._stackPopUp.Count != 0)
         {
-            if (instance._stackPopUp.Count != 0)
-            {
-                GameObject popUp = instance._stackPopUp.Pop();
-                popUp.SetActive(false);
-            }
+            GameObject popUp = instance._stackPopUp.Pop();
+            popUp.SetActive(false);
+        }
 
-            if (instance._stackPopUp.Count == 0)
-                CGlobal.useNPC = false;
+        if (instance._stackPopUp.Count == 0)
+        {
+            CGlobal.useNPC = false;
+            CWindowFacade.instance.SetOtherWindowMode(false);
         }
     }
 
@@ -49,5 +54,6 @@ public class CEventRoomNpcClick : MonoBehaviour
         _popUp.SetActive(true);
         instance._stackPopUp.Push(_popUp);
         CGlobal.useNPC = true;
+        CWindowFacade.instance.SetOtherWindowMode(true);
     }
 }

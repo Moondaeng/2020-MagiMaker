@@ -1,13 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Events;
 
 public class COtherPlayerUiManager : MonoBehaviour
 {
-    private static CLogComponent _logger;
-
     /*
      * 다른 플레이어 캐릭터 UI 그릴 위치 설정
      */
@@ -29,6 +25,8 @@ public class COtherPlayerUiManager : MonoBehaviour
         public GameObject hpBar;
     }
 
+    [SerializeField] private List<GameObject> _otherPlayerUiArr;
+
     public GameObject timerDrawer;
     public GameObject hpBar;
     public OtherPlayerUiPosition uiPos;
@@ -39,8 +37,6 @@ public class COtherPlayerUiManager : MonoBehaviour
     private void Awake()
     {
         _otherPlayerUiList = new LinkedList<OtherPlayerUiData>();
-
-        _logger = new CLogComponent(ELogType.UI);
     }
 
     public void SetCanvas(Transform canvasTransform)
@@ -48,6 +44,38 @@ public class COtherPlayerUiManager : MonoBehaviour
         _uiCanvasTransform = canvasTransform;
     }
 
+    public void ActiveOtherPlayerUi(int playerCount)
+    {
+        for (int i = 0; i < playerCount - 1; i++)
+        {
+            _otherPlayerUiArr[i].SetActive(true);
+            SetUiTarget(CPlayerCommand.instance.players[i + 1], i);
+        }
+        for (int i = playerCount-1; i < _otherPlayerUiArr.Count; i++)
+        {
+            _otherPlayerUiArr[i].SetActive(false);
+        }
+    }
+
+    public void SetUiTarget(GameObject target, int uiNumber)
+    {
+        Debug.Log($"{target.name} ui {uiNumber}");
+        var hpBar = _otherPlayerUiArr[uiNumber].GetComponent<CUiHpBar>();
+        var buffTimerListUi = _otherPlayerUiArr[uiNumber].GetComponent<CBuffTimerListUI>();
+
+        if (target == null)
+        {
+            return;
+        }
+
+        // 현재 타겟 설정
+        buffTimerListUi.RegisterTimer(target);
+        hpBar.Register(target.GetComponent<CharacterPara>());
+    }
+
+    // 플레이어 나갔을 때 UI 끄기 함수 필요
+
+    #region obsolate Code
     // 다른 플레이어 Ui 추가
     public void AddOtherPlayerUi(GameObject player)
     {
@@ -61,13 +89,12 @@ public class COtherPlayerUiManager : MonoBehaviour
         // 버프 리스트
         playerUiData.buffList.RegisterTimer(player);
         playerUiData.buffList.timerDrawer = timerDrawer;
-        playerUiData.buffList.SetCanvas(_uiCanvasTransform);
         //playerUiData.buffList.timerUiTransform.SquareSize = uiPos.buffSquareSize;
         //playerUiData.buffList.timerUiTransform.SpaceSize = uiPos.buffSpaceSize;
 
         // 체력바
         playerUiData.hpBar.transform.SetParent(_uiCanvasTransform, false);
-        playerUiData.target.GetComponent<CharacterPara>().damageEvent.AddListener(
+        playerUiData.target.GetComponent<CharacterPara>().hpDrawEvent.AddListener(
             playerUiData.hpBar.GetComponent<CUiHpBar>().Draw);
 
         _otherPlayerUiList.AddLast(playerUiData);
@@ -83,7 +110,7 @@ public class COtherPlayerUiManager : MonoBehaviour
             return;
         }
 
-        _logger.Log("delete");
+        Debug.Log("delete");
 
         // 이전에 Ui 관련 전부 빼기
         Destroy(otherPlayerNode.Value.buffList);
@@ -121,6 +148,7 @@ public class COtherPlayerUiManager : MonoBehaviour
     {
        
     }
+    #endregion
 
     // Ui 그리고 있는 대상인지 탐색
     private LinkedListNode<OtherPlayerUiData> FindOtherPlayerUiTarget(GameObject otherPlayer)

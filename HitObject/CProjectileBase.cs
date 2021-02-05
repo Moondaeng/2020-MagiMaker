@@ -6,111 +6,103 @@ using UnityEngine;
  * 모든 투사체형 공격 클래스
  * 
  */
-public class CProjectileBase : MonoBehaviour
+public class CProjectileBase : CHitObjectBase
 {
-    // 공격에 해당하는 모든 경우들
-    // 데미지, 스턴 등
-    public enum AttackType
-    {
-        damage, stun
-    }
+    [Tooltip("충돌 및 물리에 사용할 충돌체 개체")]
+    public GameObject ProjectileColliderObject;
 
-    // 공격에 해당하는 경우들에 필요한 정보들 구조체
-    // 데미지 - 데미지 계수 / 스턴 - 시간 / 슬로우 - 슬로우량, 시간 등
-    // 필요에 따라 추가하기
-    [System.Serializable]
-    public struct AttackArgumentsList
-    {
-        public AttackType type;
-        public float arg1;
-        public float arg2;
-    }
+    [Tooltip("충돌시 재생할 사운드")]
+    public AudioSource ProjectileCollisionSound;
 
-    public List<AttackArgumentsList> AttackArguments;
+    [Tooltip("충돌시 재생할 파티클 시스템")]
+    public ParticleSystem ProjectileExplosionParticleSystem;
 
-    public float range = 30f;
-    public float speed = 10f;
-    
-    public float userAttackPower = 15f;
+    [Tooltip("충돌시 폭발 반경")]
+    public float ProjectileExplosionRadius = 50.0f;
+
+    [Tooltip("충돌시 폭발의 힘")]
+    public float ProjectileExplosionForce = 50.0f;
+
+    [Tooltip("관통여부.")]
+    public bool isPenetrate;
+
+    [Tooltip("사전에 발사하는 애니메이션 있는 경우 선택적 지연")]
+    public float ProjectileColliderDelay = 0.0f;
+
+    [Tooltip("콜라이더 움직이는 속도")]
+    public float ProjectileColliderSpeed = 450.0f;
+
+    [Tooltip("충돌체가 갈 방향")]
+    public Vector3 ProjectileDirection = Vector3.forward;
+
+    [Tooltip("충돌체가 충돌 할 수있는 레이어.")]
+    public LayerMask ProjectileCollisionLayers = Physics.AllLayers;
+
+    [Tooltip("충돌시 파괴 할 입자 시스템.")]
+    public ParticleSystem[] ProjectileDestroyParticleSystemsOnCollision;
 
     public Vector3 TargetPos;
 
-    private float lifeTime;
-
-    // Start is called before the first frame update
-    void Start()
+    private IEnumerator SendCollisionAfterDelay()
     {
-        lifeTime = range / speed;
-        Invoke("Death", lifeTime);
+        yield return new WaitForSeconds(ProjectileColliderDelay);
+
+        Vector3 dir = ProjectileDirection * ProjectileColliderSpeed;
+        dir = ProjectileColliderObject.transform.rotation * dir;
+        ProjectileColliderObject.GetComponent<Rigidbody>().velocity = dir;
+    }
+
+    protected override void Start()
+    {
+        base.Start();
+
+        StartCoroutine(SendCollisionAfterDelay());
     }
 
     // Update is called once per frame
-    void Update()
+    protected override void Update()
     {
-        //transform.position = transform.position + transform.rotation.eulerAngles.normalized * speed * Time.deltaTime;
-        transform.position = Vector3.MoveTowards(transform.position, TargetPos, speed * Time.deltaTime);
+        base.Update();
     }
 
-    // 발사 위치 지정
-    public void SetTargetPos(Vector3 targetPos)
+    protected override void OnTriggerEnter(Collider other)
     {
-        // 주어진 지점까지만 가기
-        //TargetPos = targetPos;
-        // 주어진 지점을 기반으로 최대 거리까지 늘리기
-        Vector3 targetDistanceVector = transform.position - targetPos;
-        float scaleDistance = range / targetDistanceVector.magnitude;
-        TargetPos = transform.position - Vector3.Scale(targetDistanceVector, Vector3.one * scaleDistance);
-    }
+        base.OnTriggerEnter(other);
 
-    // 자동 소멸
-    private void Death()
-    {
-        //Debug.Log("Projectile Death");
-        Destroy(gameObject);
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (gameObject.tag == "Player" || gameObject.tag == "Allies")
+        // destroy particle systems after a slight delay
+        if (ProjectileDestroyParticleSystemsOnCollision != null)
         {
-            if(other.CompareTag("Monster"))
+            foreach (ParticleSystem p in ProjectileDestroyParticleSystemsOnCollision)
             {
-                // 이벤트 처리 : 네트워크한테 충돌 알림
-
-                Debug.Log("Monster Hit");
-                // 몬스터 타격 관련 함수
-                var enemyPara = other.GetComponent<CharacterPara>();
-                foreach (var attackArg in AttackArguments)
-                {
-                    switch(attackArg.type)
-                    {
-                        case AttackType.damage:
-                            enemyPara.SetEnemyAttack(userAttackPower * attackArg.arg1);
-                            break;
-                        case AttackType.stun:
-                            Debug.Log("stun");
-                            break;
-                    }
-                }
-                Death();
+                GameObject.Destroy(p, 0.1f);
             }
         }
-        else if (gameObject.tag == "Monster")
-        {
 
-        }
+        //ProjectileExplosionParticleSystem.transform.position = c.contacts[0].point;
+        ProjectileExplosionParticleSystem.Play();
+        CHitObjectBase.CreateExplosion(gameObject.transform.position, ProjectileExplosionRadius, ProjectileExplosionForce);
+
+        Destroy(gameObject, 0.5f);
     }
 
-    //// 충돌 시 효과
-    //private void OnCollisionEnter(Collision collision)
+    //protected override void OnCollisionEnter(Collision collision)
     //{
-    //    if(gameObject.tag == "Player" || gameObject.tag == "Alies")
-    //    {
+    //    base.OnCollisionEnter(collision);
+    //    Debug.Log($"Hit {collision.gameObject.name}");
 
-    //    }
-    //    else if(gameObject.tag == "Monster")
+    //    // destroy particle systems after a slight delay
+    //    if (ProjectileDestroyParticleSystemsOnCollision != null)
     //    {
-
+    //        foreach (ParticleSystem p in ProjectileDestroyParticleSystemsOnCollision)
+    //        {
+    //            GameObject.Destroy(p, 0.1f);
+    //        }
     //    }
+
+    //    //ProjectileExplosionParticleSystem.transform.position = c.contacts[0].point;
+    //    ProjectileExplosionParticleSystem.Play();
+    //    CHitObjectBase.CreateExplosion(gameObject.transform.position, ProjectileExplosionRadius, ProjectileExplosionForce);
+
+    //    Destroy(gameObject, 0.5f);
     //}
 }

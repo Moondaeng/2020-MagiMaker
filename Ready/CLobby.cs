@@ -59,14 +59,9 @@ public class CLobby : MonoBehaviour
             CClientInfo.ThisUser = new CClientInfo.User(1, "test", 5);
         }
 
-        var obj = GameObject.Find("Network");
-        if (obj)
-        {
-            _tcpManager = obj.GetComponent<Network.CTcpClient>();
-            _tcpManager.SetPacketInterpret(PacketInterpret);
-            RefreshRoom();
-        }
-        //tcpClient = (Network.CTcpClient)FindObjectOfType(typeof(Network.CTcpClient));
+        _tcpManager = Network.CTcpClient.instance;
+        _tcpManager.SetPacketInterpret(PacketInterpret);
+        RefreshRoom();
 
         if (RefreshBtn != null)
         {

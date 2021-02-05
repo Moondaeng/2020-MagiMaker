@@ -1,6 +1,9 @@
 ﻿/*
  * 능력치 버프 및 디버프 관리 클래스(지속 힐 / 데미지는 미포함)
  */
+using System.Collections.Generic;
+using UnityEngine;
+
 [System.Serializable]
 public class CBuffPara
 {
@@ -75,14 +78,14 @@ public class CBuffPara
 
     public void BuffAttackStack(float time, float stackBuffScale, int stack)
     {
-        timer.Register(CBuffList.AttackBuff, time, stack,
+        timer.Register(CBuffList.AttackBuff, time, 5, stack,
             (int buffStack) => StartBuffAttackStack(stackBuffScale, buffStack),
             (int buffStack) => EndBuffAttackStack(stackBuffScale, buffStack));
     }
 
     public void BuffDefenceStack(float time, float stackBuffScale, int stack)
     {
-        timer.Register(CBuffList.DefenceBuff, time, stack,
+        timer.Register(CBuffList.DefenceBuff, time, 5, stack,
             (int buffStack) => StartBuffDefenceStack(stackBuffScale, buffStack),
             (int buffStack) => EndBuffDefenceStack(stackBuffScale, buffStack));
     }

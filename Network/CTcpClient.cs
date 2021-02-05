@@ -40,11 +40,25 @@ namespace Network
 
         private void Awake()
         {
-            DontDestroyOnLoad(gameObject);
             if (instance == null)
             {
                 instance = this;
             }
+            else
+            {
+                Destroy(gameObject);
+            }
+            DontDestroyOnLoad(gameObject);
+
+            StartClient();
+
+#if UNITY_EDITOR
+            string[] args = Environment.GetCommandLineArgs();
+            CClientInfo.ThisUser = new CClientInfo.User(0, "a4", 0);
+#else
+            string[] args = Environment.GetCommandLineArgs();
+            CClientInfo.ThisUser = new CClientInfo.User(0, args[1], 0);
+#endif
         }
 
         private void Start()

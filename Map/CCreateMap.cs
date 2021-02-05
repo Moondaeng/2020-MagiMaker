@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEditorInternal;
 using UnityEngine;
 using TMPro;
 using static System.Console;
@@ -77,7 +76,7 @@ public class CCreateMap : MonoBehaviour
         GameObject[] portalMom = GameObject.FindGameObjectsWithTag("PORTAL_MOM");
 
         for (int i = _portalMomCount; i < portalMom.Length; i++)
-            _portals.Add(portalMom[i].transform.FindChild("Portal").GetComponent<CPortal>());
+            _portals.Add(portalMom[i].transform.Find("Portal").GetComponent<CPortal>());
     }
 
     public void RemovePortal()
@@ -420,26 +419,10 @@ public class CCreateMap : MonoBehaviour
     public void CreateRoom(CRoom[,] roomArr, int roomCount, int roadCount)
     {
         //debug용 보고싶은 맵 있으면 여기다 가져다 두면 됨.
-        if (roomCount == 1)
+        if (_roomCount == 1)
         {
-            GameObject temproom = Resources.Load("Room/EventRoom0_50") as GameObject;
-            temproom = Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
-            _rooms.AddLast(temproom);
-            _roomCount++;
-            AddPortal();
-            NotifyPortal();
-            return;
+            CreateExplicitRoom("NormalRoom0_2");
         }
-        //이것도 마찬가지로 디버그용
-        //if (roomCount == 2)
-        //{
-        //    GameObject temproom = Resources.Load("Room/EventRoom0_1") as GameObject;
-        //    Object.Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
-        //    _roomCount++;
-        //    AddPortal();
-        //    NotifyPortal();
-        //    return;
-        //}
 
         InstantiateRoom(roomArr[roomCount, roadCount].RoomType);
     }
@@ -539,10 +522,24 @@ public class CCreateMap : MonoBehaviour
                     break;
             }
         }
+
+        //_portalMomCount = portalMom.Length - _portalMomCount; // 이후에 find tag가 제거되야할 포탈들도 검색해버리는 문제 해결용
     }
 
     public int getRoomCount()
     {
         return _roomCount;
     }
+
+    #region Debug
+    private void CreateExplicitRoom(string RoomName)
+    {
+        GameObject temproom = Resources.Load("Room/" + RoomName) as GameObject;
+        var temp = Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
+        _rooms.AddLast(temp);
+        _roomCount++;
+        AddPortal();
+        NotifyPortal();
+    }
+    #endregion
 }

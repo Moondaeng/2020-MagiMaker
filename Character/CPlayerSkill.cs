@@ -57,14 +57,8 @@ public class CPlayerSkill : CCharacterSkill
         // 콤보 스킬 포맷 등록
         for(int i = _skillList.Count; i < 42; i++)
         {
-            _skillList.Add(new CSkillFormat(i, 0.5f + 0.5f * i, gameObject));
-            _skillList[i].SetSkillUseEvent(i, skillUseEvent);
+            _skillList.Add(new CSkillFormat(i, 5f + 0.5f * i, gameObject));
         }
-
-        // 스킬 등록
-        _skillList[0].RegisterSkill(_projectileSkill.Fireball);
-        _skillList[1].RegisterSkill(_buffSkill.AttackUp);
-        _skillList[2].RegisterSkill(_buffSkill.DefenceUp);
 
         // 주원소, 부원소 배우기
         SetMainElement(0, SkillElement.Fire);
@@ -150,11 +144,11 @@ public class CPlayerSkill : CCharacterSkill
             return;
         }
 
-        int num = GetRegisterNumber(_selectedElementNum, _selectedSkillNum);
-        _skillList?[num].Use(targetPos);
-        // 스킬 사용 이벤트는 스킬 포맷에서 호출
+        _selectedSkillNum = GetRegisterNumber(_selectedElementNum, _selectedSkillNum);
+
+        base.UseSkillToPosition(targetPos);
+        
         _selectedElementNum = -1;
-        _selectedSkillNum = 0;
         elementSelectEvent.Invoke(_selectedElementNum);
     }
 

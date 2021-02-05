@@ -18,7 +18,7 @@ public class EquipEditor : Editor
     SerializedProperty passiveCondition;
     SerializedProperty passiveConditionOption;
     SerializedProperty passiveUseCount;
-    SerializedProperty EquipEffectList;
+    ReorderableList passiveEffect;
 
     // 성장 능력치 관련 GUI 필드
     SerializedProperty upgradeCondition;
@@ -90,24 +90,20 @@ public class EquipEditor : Editor
         passiveCondition = equip.FindPropertyRelative("PassiveCondition");
         passiveConditionOption = equip.FindPropertyRelative("PassiveConditionOption");
         passiveUseCount = equip.FindPropertyRelative("PassiveUseCount");
-        EquipEffectList = equip.FindPropertyRelative("EquipEffectList");
 
-        //EquipEffectList = new ReorderableList(serializedObject,
-        //    equip.FindPropertyRelative("EquipEffectList"),
-        //    true, true, true, true);
-        //EquipEffectList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) => {
-        //    var element = EquipEffectList.serializedProperty.GetArrayElementAtIndex(index);
-        //    rect.y += 2;
-        //    EditorGUI.PropertyField(
-        //        new Rect(rect.x, rect.y, 200, EditorGUIUtility.singleLineHeight),
-        //        element.FindPropertyRelative("useEffect"), GUIContent.none);
-        //    EditorGUI.PropertyField(
-        //        new Rect(rect.x + 200, rect.y, rect.width - 200, EditorGUIUtility.singleLineHeight),
-        //        element.FindPropertyRelative("Chance"), GUIContent.none);
-        //};
-        //EquipEffectList.drawHeaderCallback = (Rect rect) => {
-        //    EditorGUI.LabelField(rect, "Passive Effect");
-        //};
+        passiveEffect = new ReorderableList(serializedObject,
+            equip.FindPropertyRelative("passiveEffect"),
+            true, true, true, true);
+        passiveEffect.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
+        {
+            var element = passiveEffect.serializedProperty.GetArrayElementAtIndex(index);
+            rect.y += 2;
+            EditorGUI.PropertyField(rect, element);
+        };
+        passiveEffect.drawHeaderCallback = (Rect rect) =>
+        {
+            EditorGUI.LabelField(rect, "Passive Effect");
+        };
     }
 
     private void DrawPassive()
@@ -118,10 +114,8 @@ public class EquipEditor : Editor
             EditorGUILayout.PropertyField(passiveConditionOption, GUIContent.none);
             EditorGUILayout.PropertyField(passiveUseCount, GUIContent.none);
         EditorGUILayout.EndHorizontal();
-        
-        EditorGUILayout.PropertyField(EquipEffectList, true);
 
-        //EquipEffectList.DoLayoutList();
+        passiveEffect.DoLayoutList();
     }
 
     private void Information()

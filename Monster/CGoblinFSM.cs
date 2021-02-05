@@ -14,7 +14,7 @@ public class CGoblinFSM : CEnemyFSM
     {
         _moveSpeed = 5f;
         _attackDistance = 3f;
-        //_attackRadius = 10f;
+        _attackRadius = 10f;
         _anim = GetComponent<Animator>();
         _myPara = GetComponent<CEnemyPara>();
         _myPara.deadEvent.AddListener(CallDeadEvent);

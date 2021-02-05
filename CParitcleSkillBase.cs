@@ -41,7 +41,7 @@ public class CParitcleSkillBase : MonoBehaviour
     }
 
     public List<AttackArgumentsList> AttackArguments;
-    [HideInInspector] public int _attackPower;
+    public int _attackPower = 100;
     #endregion
 
     private IEnumerator CleanupEverythingCoRoutine()
@@ -129,6 +129,7 @@ public class CParitcleSkillBase : MonoBehaviour
         {
             #region Nonused
             case AttackType.damage:
+                _attackPower = 1;
                 p.DamagedDisregardDefence(_attackPower * a.arg1);
                 Debug.Log(_attackPower * a.arg1);
                 //if (_skillUsingUser.tag == "Player")

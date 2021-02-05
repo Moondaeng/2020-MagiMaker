@@ -11,30 +11,40 @@ public class CController : MonoBehaviour
 {
     delegate void Action();
 
+    #region 컨트롤러 모드 관리
+    private bool _isControlMode = true;
     private Dictionary<KeyCode, Action> keyDictionary;
+    private CMouseFollower _camera;
+    #endregion
+
     private CConsumableItemViewer _consumableViewer;
 
+    [SerializeField] GameObject MousePointer;
+
     private CUIManager _playerUi;
-    private Network.CTcpClient _network;
-    //public CGameEvent gameEvent;
+    private CGameEvent gameEvent;
+
+    public static CController instance;
 
     public GameObject player;
 
     private CCntl _playerControl;
 
-    public float x;
-    public float z;
+    // 이동 패킷 관련
+    private const float moveTraceTime = 0.1f;
+    private Vector3 previousPlayerPos;
+
+    float x;
+    float z;
 
     private GameObject _viewingObject;
 
-    static public CController instance;
-
     private void Awake()
     {
-        DontDestroyOnLoad(gameObject);
-
         if (instance == null)
+        {
             instance = this;
+        }
 
         // 조작 관리
         keyDictionary = new Dictionary<KeyCode, Action>
@@ -51,42 +61,50 @@ public class CController : MonoBehaviour
             {KeyCode.Z, Roll },
             {KeyCode.Mouse1, UseSkill },
         };
-
-        //gameEvent = GameObject.Find("GameEvent").GetComponent<CGameEvent>();
     }
 
     void Start()
     {
+        // Singleton 선언해놓은 클래스들 받는 변수
         _playerUi = CUIManager.instance;
+        gameEvent = CGameEvent.instance;
+        _camera = CMouseFollower.instance;
 
         if (player != null)
         {
             _playerControl = player.GetComponent<CCntl>();
+            SetControlCharacter(player);
+            previousPlayerPos = player.transform.position;
+            StartCoroutine("MoveTracer");
         }
+
+        // Callback 전달
+        CWindowFacade.instance.SetControlLockCallback = SetControlLock;
     }
 
     void Update()
     {
-        if (CGlobal.useNPC)
-        {
-            z = 0;
-            x = 0;
-            _playerControl.Move(x, z);
-            return;
-        }
+        //int layerMask = 1 << LayerMask.NameToLayer("Player");
+        //layerMask = ~layerMask;
+        //RaycastHit hit;
+        //Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        //if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
+        //{
+        //    MousePointer.transform.position = hit.point;
+        //}
 
+        ViewInteractionPopup();
 
         z = Input.GetAxisRaw("Horizontal");
         x = -(Input.GetAxisRaw("Vertical"));
-        if (player != null)
+
+        // 모드에 따라 조작되는 키
+        if(_isControlMode)
         {
-            _playerControl = player.GetComponent<CCntl>();
+            _playerControl.Move(x, z);
         }
 
-        _playerControl.Move(x, z);
-        ViewInteractionPopup();
-
-        if (Input.anyKeyDown)
+        if (Input.anyKeyDown && _isControlMode)
         {
             foreach (var dic in keyDictionary)
             {
@@ -98,10 +116,37 @@ public class CController : MonoBehaviour
         }
     }
 
+    IEnumerator MoveTracer()
+    {
+        while(true)
+        {
+            // 비교
+            var differ = previousPlayerPos - player.transform.position;
+            if(differ.magnitude > 0.01f)
+            {
+                // 전송 - 이동 명령
+                //Debug.Log($"move character {previousPlayerPos.x}, {previousPlayerPos.y}, {previousPlayerPos.z}" +
+                //    $"to {player.transform.position.x}, {player.transform.position.y}, {player.transform.position.z}");
+                gameEvent.PlayerMoveStart(previousPlayerPos, player.transform.position);
+            }
+
+            // 과거 위치 갱신
+            previousPlayerPos = player.transform.position;
+            yield return new WaitForSeconds(moveTraceTime);
+        }
+    }
+
     public void SetControlCharacter(GameObject controlCharacter)
     {
         player = controlCharacter;
         _playerUi.SetUiTarget(controlCharacter);
+        CWindowFacade.instance.SetTarget(controlCharacter);
+    }
+
+    private void SetControlLock(bool isLock)
+    {
+        _camera.SetLockCursor(!isLock);
+        _isControlMode = !isLock;
     }
 
     private void Attack()
@@ -160,7 +205,7 @@ public class CController : MonoBehaviour
             var npc = _viewingObject.GetComponent<CEventRoomNpcClick>();
             if (npc != null)
             {
-                //CEventRoomNpcClick.instance.UseNPC();
+                CInterationPopup.instance.gameObject.SetActive(true);
             }
 
             var itemComponent = _viewingObject.GetComponent<CItemComponent>();
@@ -172,13 +217,14 @@ public class CController : MonoBehaviour
         }
         else
         {
-            //CDropItemInfoPopup.instance.gameObject.SetActive(false);
+            CDropItemInfoPopup.instance.gameObject.SetActive(false);
+            CInterationPopup.instance.gameObject.SetActive(false);
         }
     }
 
     private void GetItem()
     {
-        if (_viewingObject == null)
+        if(_viewingObject == null)
         {
             return;
         }
@@ -215,7 +261,7 @@ public class CController : MonoBehaviour
             }
         }
     }
-
+    
     private void SkillSelect(int index)
     {
         player.GetComponent<CCharacterSkill>().SkillSelect(index);
@@ -230,7 +276,6 @@ public class CController : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
         {
-            print("I'm looking at " + hit.transform.name);
             player.GetComponent<CPlayerSkill>().UseSkillToPosition(hit.point);
         }
     }

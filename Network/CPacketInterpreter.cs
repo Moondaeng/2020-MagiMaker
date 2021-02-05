@@ -18,8 +18,8 @@ namespace Network
         private const int _moveCorrection = 413;
         private const int _actionCommand = 510;
         private const int _GetItem = 610;
-        private const int _UsePortal = 611;
-        private const int _PortalAccept = 612;
+        private const int _PortalAccept = 611;
+        private const int _UsePortal = 612;
         private const int _PortalTeleport = 613;
         private const int _UsePortalPopup = 614;
 
@@ -56,6 +56,15 @@ namespace Network
                     break;
                 case _actionCommand:
                     InterpretActionCommand(packet);
+                    break;
+                case _UsePortal:
+                    InterpretUsePortal(packet);
+                    break;
+                case _PortalAccept:
+                    InterpretPortalAccept(packet);
+                    break;
+                case _PortalTeleport:
+                    InterpretPortalTeleport(packet);
                     break;
             }
         }
@@ -195,17 +204,28 @@ namespace Network
 
             id = packet.ReadInt32();
 
+            CWaitingForAccept.instance.SetActivePortalPopup(true);
             //playerCommander.UseSkill((int)id, (int)actionNumber, now, dest);
         }
 
         private void InterpretPortalAccept(CPacket packet)
         {
             Int32 id;
+            Int32 accept;
 
             Debug.Log("Get Item");
 
             id = packet.ReadInt32();
-            
+            accept = packet.ReadInt32();
+
+            if (accept == 0)
+            {
+                CWaitingForAccept.instance.SetPortalUseSelect(id, CWaitingForAccept.EAccept._accept);
+            }
+            else if (accept == 1)
+            {
+                CWaitingForAccept.instance.SetPortalUseSelect(id, CWaitingForAccept.EAccept._cancle);
+            }
         }
 
         private void InterpretPortalTeleport(CPacket packet)

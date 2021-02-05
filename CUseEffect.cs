@@ -1,75 +1,264 @@
-﻿using System.Collections;
+﻿using System;
+using System.Text;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-/*
- * 효과 정의 클래스
- */
-[System.Serializable]
-public class CUseEffect
+public static class CUseEffectExplain
 {
-    // 공격에 해당하는 모든 경우들
-    // 데미지, 스턴 등
-    public enum DamageType
+    #region 정의된 사용 효과 관련
+    public static Dictionary<int, string> DefinedUseEffectNameDict
+        = new Dictionary<int, string>();
+
+    #endregion
+
+    private static readonly Dictionary<EBuffAbility, string> AbilityNameDict
+            = new Dictionary<EBuffAbility, string>
+        {
+            {EBuffAbility.Attack, "공격력"},
+            {EBuffAbility.Defence, "방어력"},
+            {EBuffAbility.AttackSpeed, "공격속도"},
+            {EBuffAbility.MoveSpeed, "이동속도"},
+        };
+
+    public static string CreateUseEffectText(CUseEffect useEffect)
     {
-        damage, heal
+        if (useEffect == null)
+        {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        string instantEffectExplain = CreateInstantEffectText(useEffect.instantEffect);
+        if(instantEffectExplain != "")
+        {
+            sb.AppendLine(instantEffectExplain);
+        }
+        string persistEffectExplain = CreatePersistEffectText(useEffect.persistEffect);
+        if (persistEffectExplain != "")
+        {
+            sb.AppendLine(persistEffectExplain);
+        }
+        string conditionalEffectExplain = CreateConditionalEffectText(useEffect.conditionalEffect);
+        if (conditionalEffectExplain != "")
+        {
+            sb.AppendLine(conditionalEffectExplain);
+        }
+        return sb.ToString();
     }
 
-    // 공격에 해당하는 경우들에 필요한 정보들 구조체
-    // 데미지 - 데미지 계수 / 스턴 - 시간 / 슬로우 - 슬로우량, 시간 등
-    // 필요에 따라 추가하기
+    private static string CreateInstantEffectText(CUseEffect.InstantEffect instantEffect)
+    {
+        StringBuilder sb = new StringBuilder();
 
+        // 체력 변화 관련
+        string hpChangeText = instantEffect.hpChangeAmount > 0 ? "회복" : "데미지";
+        if(instantEffect.hpChangeAmount != 0)
+        {
+            sb.Append("즉시 ");
+            sb.Append(Math.Abs(instantEffect.hpChangeAmount));
+            sb.Append("만큼 " + hpChangeText);
+        }
+
+        return sb.ToString();
+    }
+
+    private static string CreatePersistEffectText(CUseEffect.PersistEffect persist)
+    {
+        if (persist == null || persist.time <= 0)
+        {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.Append(persist.time + "초 동안 ");
+
+        if (persist.TickPeriod != 0 && persist.TickHpChangeAmount != 0)
+        {
+            sb.Append(persist.TickPeriod + "초 마다");
+            sb.Append(Math.Abs(persist.TickHpChangeAmount) + "만큼 ");
+            sb.AppendLine(persist.TickHpChangeAmount > 0 ? "<b>힐</b>" : "<b>데미지</b>");
+        }
+
+        if (persist.changeAbilities.Count > 0)
+        {
+            foreach (var ability in persist.changeAbilities)
+            {
+                if (ability.increaseBase == 0 && ability.increasePerStack == 0)
+                {
+                    continue;
+                }
+
+                if (!AbilityNameDict.TryGetValue(ability.ability, out string abilityName))
+                {
+                    abilityName = "??";
+                }
+                string increasePerStackStr = ability.increasePerStack != 1 ? ability.increasePerStack.ToString() : "";
+                sb.Append(abilityName + " " + ability.increaseBase + "+" + increasePerStackStr + "n% 만큼 ");
+                sb.AppendLine(ability.isBuff ? "증가" : "감소");
+            }
+        }
+
+        sb.Append("최대 " + persist.maxStack + "중첩");
+
+        CreateStackAccumulateEffectText(persist.stackAccumulateEffect);
+
+        return sb.ToString();
+    }
+
+    private static string CreateConditionalEffectText(CUseEffect.ConditionalEffect conditional)
+    {
+        if (conditional == null || conditional.conditionEffectId == 0)
+        {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        if (!DefinedUseEffectNameDict.TryGetValue(conditional.conditionEffectId, out var effectName))
+        {
+            effectName = conditional.conditionEffectId.ToString();
+        }
+
+        sb.Append(effectName + "상태인 경우 ");
+        sb.Append(CreateUseEffectText(conditional.effect));
+        if(conditional.isRelationStack)
+        {
+            sb.AppendLine("중첩된 횟수만큼 " + conditional.stackBonusRate + "% 효과 증폭");
+        }
+
+        return sb.ToString();
+    }
+
+    private static string CreateStackAccumulateEffectText(CUseEffect.StackAccumulateEffect stackAccumulateEffect)
+    {
+        if(stackAccumulateEffect.threshold == 0)
+        {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.Append(stackAccumulateEffect.threshold);
+        sb.Append("번 중첩 시 다음 효과 발생");
+        sb.Append(CreateUseEffectText(stackAccumulateEffect.effect));
+
+        return sb.ToString();
+    }
+}
+
+public enum EBuffAbility
+{
+    Attack,
+    Defence,
+    MoveSpeed,
+    AttackSpeed
+}
+
+// CUseEffect(클래스명 고민 중) 개선안 
+[System.Serializable]
+public class CUseEffect : CUseEffectHandle
+{
     [System.Serializable]
-    public struct DamageEffect
+    public class ChangeAbilityInfo
     {
-        public DamageType type;
-        [Tooltip("즉발로 입히는 데미지량")]
-        public int startDamage;
-        [Tooltip("초당 데미지(DoT)량")]
-        public int dotDamage;
-        [Tooltip("DoT 데미지 지속시간")]
-        public float dotPeriod;
+        public EBuffAbility ability;
+        public bool isBuff;
+        public float increaseBase;
+        public float increasePerStack;
+
+        public ChangeAbilityInfo(EBuffAbility _ability, bool _isBuff, float _increaseBase, float _increasePerStack)
+        {
+            ability = _ability;
+            isBuff = _isBuff;
+            increaseBase = _increaseBase;
+            increasePerStack = _increasePerStack;
+        }
     }
 
-    public enum CCType
-    {
-        stun, slow
-    }
-
+    // 즉발 효과
     [System.Serializable]
-    public struct CCEffect
+    public class InstantEffect
     {
-        public CCType type;
-        [Tooltip("지속 시간")]
+        [Tooltip("체력 감소/회복 수치")]
+        public int hpChangeAmount;
+        public bool isCleanse;
+
+        public InstantEffect MultiplyPersant(float persant)
+        {
+            hpChangeAmount = (int)((float)hpChangeAmount * (1.00 + (persant * 0.01)));
+            return this;
+        }
+    }
+
+    // 지속 효과
+    [System.Serializable]
+    public class PersistEffect
+    {
         public float time;
-        [Tooltip("효과 퍼센트")]
-        public int effectPersent;
+        // 특정 효과를 선택하지 않는다면 커스터마이징 필요
+        // 타이머 상에 등록될 번호 - 등록 번호가 같으면 같은 번호의 효과 삭제 후 적용
+        [Tooltip("타이머 상에 등록될 번호")]
+        public int id;
+
+        [Tooltip("체력 감소/회복 수치")]
+        public int TickHpChangeAmount;
+        [Tooltip("틱 발동 주기")]
+        public float TickPeriod;
+
+        // 스턴 등 ON / OFF 형식의 CC
+        // public ECCEffect cc;
+
+        // 능력치 변화
+        public List<ChangeAbilityInfo> changeAbilities;
+
+        // 특수 기능은 따로 클래스를 파서 만듦
+
+        // 스택 표기
+        [Range(1, 10)]
+        public int increaseStack;
+        [Tooltip("최대 스택")]
+        public int maxStack;
+        [Tooltip("스택 추가 효과")]
+        public StackAccumulateEffect stackAccumulateEffect;
     }
 
-    // 아군을 돕는 행위 관련 모든 경우들
-    // 힐, 버프 등
-    public enum BuffType
-    {
-        attackBuff, defenceBuff
-    }
-
-    // 공격에 해당하는 경우들에 필요한 정보들 구조체
-    // 데미지 - 데미지 계수 / 스턴 - 시간 / 슬로우 - 슬로우량, 시간 등
-    // 필요에 따라 추가하기
     [System.Serializable]
-    public struct BuffEffect
+    public class StackAccumulateEffect
     {
-        public BuffType type;
-        [Tooltip("지속 시간")]
-        public float time;
-        [Tooltip("효과 퍼센트")]
-        public float effectPersent;
+        [Tooltip("스택 최소 발동 수치")]
+        public int threshold;
+        [Tooltip("발동 수치 추가량")]
+        public int thresholdAdd;
+
+        [Tooltip("스택 충족 시 발동 효과")]
+        public CUseEffect effect;
     }
 
-    [SerializeField]
-    public List<DamageEffect> DamageEffectList;
-    [SerializeField]
-    public List<CCEffect> CCEffectList;
-    [SerializeField]
-    public List<BuffEffect> BuffEffectList;
+    [System.Serializable]
+    public class ConditionalEffect
+    {
+        public int conditionEffectId;
+
+        [Tooltip("스택과 상관 있는지")]
+        public bool isRelationStack;
+        [Tooltip("스택에 따른 효과 강화 비율")]
+        public float stackBonusRate;
+
+        [Tooltip("스택 충족 시 발동 효과")]
+        public CUseEffect effect;
+    }
+
+    public bool IsUseEffectName;
+    public string EffectName;
+
+    public InstantEffect instantEffect;
+    public PersistEffect persistEffect;
+    public ConditionalEffect conditionalEffect;
+
+    public override void TakeUseEffect(CharacterPara cPara)
+    {
+        cPara.TakeUseEffect(this);
+    }
 }

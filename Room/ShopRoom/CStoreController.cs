@@ -20,18 +20,6 @@ public class CStoreController : MonoBehaviour
 
     private GameObject _notEnoughGoldPopUp; //골드 부족합니다 팝업  
     private EArrow _arrow;
-    private static string[] _equipAbilityExplainArr //아이템 능력치 한글명
-    = new string[] {
-            "공격력",
-            "공격속도",
-            "최대 체력",
-            "초당 체력 회복",
-            "방어력",
-            "이동속도",
-            "스킬 쿨타임 감소율",
-            "받는 피해량 감소율",
-            "스킬 사거리 증가율"
-    };
 
     private GameObject _player;
     private CPlayerPara _playerPara;
@@ -48,11 +36,12 @@ public class CStoreController : MonoBehaviour
         if (instance == null)
             instance = this;
 
-        _slotRoot = transform.FindChild("SlotGroup");
+        _slotRoot = transform.Find("SlotGroup");
         _slots = new List<CSlotController>();
 
         for (int i = 0; i < _slotRoot.childCount - 2; i++)
         {
+            Debug.Log("get item");
             var slot = _slotRoot.GetChild(i).GetComponent<CSlotController>();
             slot.SetItem(CItemDropTable.instance.DropRandomItem(CCreateMap.instance.GetStageNumber(), CConstants.EQUIP_ITEM_TYPE));
 
@@ -72,7 +61,7 @@ public class CStoreController : MonoBehaviour
         _lastSlot = 0;
         _arrow = EArrow._right;
 
-        _notEnoughGoldPopUp = GameObject.Find("NotEnoughGoldPopUp").transform.FindChild("Canvas").gameObject;
+        _notEnoughGoldPopUp = GameObject.Find("NotEnoughGoldPopUp").transform.Find("Canvas").gameObject;
         _confirmPurchaseIntentionPopup = GameObject.Find("ConfirmPurchaseIntentionPopUp");
         _confirmPurchaseIntentionPopup.SetActive(false);
 
@@ -80,7 +69,7 @@ public class CStoreController : MonoBehaviour
         _playerPara = _player.GetComponent<CPlayerPara>();
 
         //debug용 추후 삭제
-        _playerPara.Inventory.SetGold(500);
+        _playerPara.Inventory.Gold += 500;
 
         ShowInventoryGold();
     }
@@ -93,7 +82,7 @@ public class CStoreController : MonoBehaviour
 
     private void ShowInventoryGold()
     {
-        int inventoryGold = _playerPara.Inventory.GetGold();
+        int inventoryGold = _playerPara.Inventory.Gold;
         var GoldTMP = GameObject.Find("LeftGold").GetComponent<TMPro.TextMeshProUGUI>();
         GoldTMP.text = GoldTMP.text.Substring(0, 6); //남은 골드 텍스트 남겨두고 뒤에 숫자 자르기
         GoldTMP.text += inventoryGold;
@@ -111,50 +100,43 @@ public class CStoreController : MonoBehaviour
 
         GameObject buyingSlot = GameObject.Find("BuyingSlot");
 
-        Sprite itemImage = slot.transform.FindChild("Item").GetComponent<Image>().sprite;
-        buyingSlot.transform.FindChild("Item").GetComponent<Image>().sprite = itemImage;
+        Sprite itemImage = slot.transform.Find("Item").GetComponent<Image>().sprite;
+        buyingSlot.transform.Find("Item").GetComponent<Image>().sprite = itemImage;
 
-        string itemPrice = slot.transform.FindChild("Price").GetComponent<TMPro.TextMeshProUGUI>().text;
-        buyingSlot.transform.FindChild("Price").GetComponent<TMPro.TextMeshProUGUI>().text = itemPrice;
+        string itemPrice = slot.transform.Find("Price").GetComponent<TMPro.TextMeshProUGUI>().text;
+        buyingSlot.transform.Find("Price").GetComponent<TMPro.TextMeshProUGUI>().text = itemPrice;
 
         var itemComponent = slot.GetComponent<CSlotController>().item.GetComponent<CEquipComponent>();
         var equip = itemComponent.Item as Item.CEquip;
         guidanceMessage = "'" + equip.ItemName + "' 아이템을 구매하시겠습니까?";
-        _confirmPurchaseIntentionPopup.transform.GetChild(0).FindChild("GuidanceMessage").GetComponent<TMPro.TextMeshProUGUI>().text = guidanceMessage;
+        _confirmPurchaseIntentionPopup.transform.GetChild(0).Find("GuidanceMessage").GetComponent<TMPro.TextMeshProUGUI>().text = guidanceMessage;
     }
 
     private void WriteInformation()
     {
         var itemText = GameObject.Find("StoreItemNameText").GetComponent<TMPro.TextMeshProUGUI>();
         var Extext = GameObject.Find("StoreItemExplanationText").GetComponent<TMPro.TextMeshProUGUI>(); //텍스트 컴포넌트
-        string sumExtext = null;
 
         if (_slots[_currentSlot].item.GetComponent<CEquipComponent>() != null) //장비템
         {
             var itemComponent = _slots[_currentSlot].item.GetComponent<CEquipComponent>();
             var equip = itemComponent.Item as Item.CEquip;
-
             itemText.text = equip.ItemName;
-
-            foreach (var ability in equip.equipAbilities)
-            {
-                sumExtext += _equipAbilityExplainArr[(int)ability.equipEffect] + ability.value;
-                if (ability.equipEffect == Item.EEquipAbility.DamageReduceRate || ability.equipEffect == Item.EEquipAbility.SkillCoolTime || ability.equipEffect == Item.EEquipAbility.SkillRange)
-                    sumExtext += "%";
-                sumExtext += "\n";
-            }
-            Extext.text = sumExtext;
+            Extext.text = Item.CEquipExplainText.CreateExplainText(equip);
         }
         else //소비템
         {
             var itemComponent = _slots[_currentSlot].item.GetComponent<CConsumableComponent>();
+            var consumable = itemComponent.Item as Item.CConsumable;
+            itemText.text = consumable.ItemName;
+            Extext.text = Item.CConsumableExplainText.CreateExplainText(consumable);
         }
     }
 
     private bool CheckSoldOut()
     {
         for (int i = 0; i < _slotRoot.childCount; i++) //켜진게 하나라도 있으면 품절아님
-            if (_slots[_currentSlot].transform.FindChild("Item").gameObject.activeSelf == true)
+            if (_slots[_currentSlot].transform.Find("Item").gameObject.activeSelf == true)
                 return false;
 
         for (int i = 0; i < _slots.Count; i++) //슬롯 전부 꺼버림
@@ -172,8 +154,8 @@ public class CStoreController : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow))
             {
-                Image yesButton = _confirmPurchaseIntentionPopup.transform.GetChild(0).FindChild("Yes").GetComponent<Image>();
-                Image noButton = _confirmPurchaseIntentionPopup.transform.GetChild(0).FindChild("No").GetComponent<Image>();
+                Image yesButton = _confirmPurchaseIntentionPopup.transform.GetChild(0).Find("Yes").GetComponent<Image>();
+                Image noButton = _confirmPurchaseIntentionPopup.transform.GetChild(0).Find("No").GetComponent<Image>();
 
                 if (yesButton.enabled == true)
                 {
@@ -222,12 +204,12 @@ public class CStoreController : MonoBehaviour
             _currentSlot = _positionX + _positionY * CConstants.SLOT_COLOUMN;
         }
 
-        if (_slots[_currentSlot].transform.FindChild("Item").gameObject.activeSelf == false) //상점에 존재하는 상품이 아닌경우 커서 위치 바꿔야함
+        if (_slots[_currentSlot].transform.Find("Item").gameObject.activeSelf == false) //상점에 존재하는 상품이 아닌경우 커서 위치 바꿔야함
         {
             switch (_arrow)
             {
                 case EArrow._left:
-                    while (_slots[_currentSlot].transform.FindChild("Item").gameObject.activeSelf == false)
+                    while (_slots[_currentSlot].transform.Find("Item").gameObject.activeSelf == false)
                     {
                         if (_positionX <= 0)
                             _positionX += CConstants.SLOT_COLOUMN - 1;
@@ -239,7 +221,7 @@ public class CStoreController : MonoBehaviour
                     break;
 
                 case EArrow._right:
-                    while (_slots[_currentSlot].transform.FindChild("Item").gameObject.activeSelf == false)
+                    while (_slots[_currentSlot].transform.Find("Item").gameObject.activeSelf == false)
                     {
                         if (_positionX >= CConstants.SLOT_COLOUMN - 1)
                             _positionX -= CConstants.SLOT_COLOUMN - 1;
@@ -251,7 +233,7 @@ public class CStoreController : MonoBehaviour
                     break;
 
                 case EArrow._up:
-                    while (_slots[_currentSlot].transform.FindChild("Item").gameObject.activeSelf == false)
+                    while (_slots[_currentSlot].transform.Find("Item").gameObject.activeSelf == false)
                     {
                         _positionY = (_positionY == 0 ? 1 : 0);
 
@@ -261,8 +243,8 @@ public class CStoreController : MonoBehaviour
             }
         }
 
-        _slots[_lastSlot].transform.FindChild("Image").gameObject.SetActive(false);
-        _slots[_currentSlot].transform.FindChild("Image").gameObject.SetActive(true);
+        _slots[_lastSlot].transform.Find("Image").gameObject.SetActive(false);
+        _slots[_currentSlot].transform.Find("Image").gameObject.SetActive(true);
         _lastSlot = _currentSlot;
     }
 
@@ -274,18 +256,18 @@ public class CStoreController : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Return)) //구매 재확인 팝업에서 예 아니오 중 하나 선택
             {
-                Image yesButton = _confirmPurchaseIntentionPopup.transform.GetChild(0).FindChild("Yes").GetComponent<Image>();
-                Image noButton = _confirmPurchaseIntentionPopup.transform.GetChild(0).FindChild("No").GetComponent<Image>();
+                Image yesButton = _confirmPurchaseIntentionPopup.transform.GetChild(0).Find("Yes").GetComponent<Image>();
+                Image noButton = _confirmPurchaseIntentionPopup.transform.GetChild(0).Find("No").GetComponent<Image>();
 
                 if (yesButton.enabled == true)
                 {
                     //예 버튼 누른경우. 아이템 구매 그대로 쓰고 false
                     if(!MoveItemToInventory(slot.GetComponent<CSlotController>().item.GetComponent<CItemComponent>())) //아이템 인벤토리로 이동
                     { //이동 실패한 경우(아이템칸 부족) 추후 구현...
-
+                        Debug.Log("item not buying");
                     }
 
-                    UseGoldInInventory(slot.transform.FindChild("Price").GetComponent<TMPro.TextMeshProUGUI>().text); //인벤토리에서 골드 사용
+                    UseGoldInInventory(slot.transform.Find("Price").GetComponent<TMPro.TextMeshProUGUI>().text); //인벤토리에서 골드 사용
 
                     RemoveItemNMoveCursor(slot); //아이템 상점에서 빼고 커서 이동
 
@@ -326,8 +308,8 @@ public class CStoreController : MonoBehaviour
     private bool CheckEnoughGold(GameObject slot)
     {
         //인벤토리 골드와 상점판매가 비교후 리턴
-        int inventoryGold = _playerPara.Inventory.GetGold();
-        string shopPrice = slot.transform.FindChild("Price").GetComponent<TMPro.TextMeshProUGUI>().text;
+        int inventoryGold = _playerPara.Inventory.Gold;
+        string shopPrice = slot.transform.Find("Price").GetComponent<TMPro.TextMeshProUGUI>().text;
 
         if (inventoryGold >= int.Parse(shopPrice))
             return true;
@@ -353,7 +335,7 @@ public class CStoreController : MonoBehaviour
 
     private void UseGoldInInventory(string shopPrice)
     { 
-        _playerPara.Inventory.SetGold(-int.Parse(shopPrice));
+        _playerPara.Inventory.Gold -= int.Parse(shopPrice);
     }
 
     private void RemoveItemNMoveCursor(GameObject slot)
@@ -363,14 +345,14 @@ public class CStoreController : MonoBehaviour
 
         //아이템 구매시 커서 이동
         for (int i = 0; i < _slots.Count; i++) //리스트 가장 앞쪽부터 확인해서 커서 옮김
-            if (_slots[i].transform.FindChild("Item").gameObject.activeSelf == true)
+            if (_slots[i].transform.Find("Item").gameObject.activeSelf == true)
             {
                 _currentSlot = i;
                 _positionX = i % CConstants.SLOT_COLOUMN;
                 _positionY = i / CConstants.SLOT_COLOUMN;
 
-                _slots[_lastSlot].transform.FindChild("Image").gameObject.SetActive(false);
-                _slots[_currentSlot].transform.FindChild("Image").gameObject.SetActive(true);
+                _slots[_lastSlot].transform.Find("Image").gameObject.SetActive(false);
+                _slots[_currentSlot].transform.Find("Image").gameObject.SetActive(true);
                 _lastSlot = _currentSlot;
                 break;
             }

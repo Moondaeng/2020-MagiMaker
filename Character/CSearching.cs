@@ -10,36 +10,35 @@ public class CSearching : MonoBehaviour
     List<GameObject> _monster;
     CPlayerPara _myPara;
     CEnemyPara _enemyPara;
-    CManager _manager;
+    CMonsterManager _manager;
 
     private void Start()
     {
         _myPara = GetComponent<CPlayerPara>();
-        _respawn = GameObject.FindGameObjectWithTag("Respawn");
-        _manager = _respawn.GetComponent<CManager>();
+        _manager = CMonsterManager.instance;
         _distance = new List<float>();
     }
 
     private void SearchMonster(float searchLength)
     {
-        for (int i = 0; i < _manager._monsters.Count; i++)
-        {
-            float distance = Vector3.Distance(transform.position, _manager._monsters[i].transform.position);
-            _distance.Add(distance);
-        }
+        //for (int i = 0; i < _manager._monsters.Count; i++)
+        //{
+        //    float distance = Vector3.Distance(transform.position, _manager._monsters[i].transform.position);
+        //    _distance.Add(distance);
+        //}
     }
     
     protected void AttackCheck()
     {
         SearchMonster(5f);
-        for (int i = 0; i < _manager._monsters.Count; i++)
-        {
-            if (IsTargetInSight(30f, _manager._monsters[i].transform) && _distance[i] < 5f)
-            {
-                _enemyPara = _manager._monsters[i].transform.gameObject.GetComponent<CEnemyPara>();
-                _enemyPara.SetEnemyAttack(_myPara._attackMax);
-            }
-        }
+        //for (int i = 0; i < _manager._monsters.Count; i++)
+        //{
+        //    if (IsTargetInSight(30f, _manager._monsters[i].transform) && _distance[i] < 5f)
+        //    {
+        //        _enemyPara = _manager._monsters[i].transform.gameObject.GetComponent<CEnemyPara>();
+        //        _enemyPara.SetEnemyAttack(_myPara._attackMax);
+        //    }
+        //}
     }
 
     protected bool IsTargetInSight(float SightAngle, Transform Target)
@@ -60,8 +59,7 @@ public class CSearching : MonoBehaviour
     {
         if (_manager == null)
         {
-            _respawn = GameObject.FindGameObjectWithTag("Respawn");
-            _manager = _respawn.GetComponent<CManager>();
+            _manager = CMonsterManager.instance;
         }
     }
 }

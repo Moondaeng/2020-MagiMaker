@@ -6,7 +6,6 @@ using static CGlobal;
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(BoxCollider))]
 [RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(CEnemyPara))]
 
 public class CEnemyFSM : MonoBehaviour
 {
@@ -15,6 +14,7 @@ public class CEnemyFSM : MonoBehaviour
     protected AnimatorStateInfo _currentBaseState;     // 기본 레이어에 사용되는 애니메이터의 현재 상테에 대한 참조
     protected GameObject _player;
     protected CEnemyPara _myPara;
+    //protected CBossPara _myBossPara;
     protected CPlayerPara _playerPara;
     [HideInInspector] public GameObject _myRespawn;
 
@@ -24,12 +24,14 @@ public class CEnemyFSM : MonoBehaviour
     protected bool _skillCoolDown1, _skillCoolDown2, _skillCoolDown3; // 스킬 쿨타임 판단
     protected bool _anotherAction; // 공격 사용 후, 플레이어의 거리가 멀어지면 chase 아니면, 그대로 공격하게 하는걸 판단
     protected bool _actionStart; // 플레이어와 조우 전에, 스킬의 쿨타임이 미리 도는 것을 방지하려는 것
+    protected bool _getHit;
 
     public int _spawnID { get; set; } // CRespawn에서 판별한 SpawnID
     protected float _rotAnglePerSecond = 360f; //1초에 플레이어의 방향을 360도 회전
     public float _moveSpeed { get; set; } //초당 ~미터의 속도로 이동
     public float _attackDistance { get; set; } // 공격 거리 (적과의 거리)
     protected float _attackAngle { get; set; } // 공격 범위
+
 
     #region 모션들
     protected static int _idleState { get; set; }
@@ -54,6 +56,7 @@ public class CEnemyFSM : MonoBehaviour
     protected float _originSkillCooltime2 { get; set; }
     protected float _skillCooltime3 { get; set; }
     protected float _originSkillCooltime3 { get; set; }
+    protected float _attackRadius { get; set; } // 공격 범위
     #endregion
 
     protected enum EState
@@ -65,6 +68,7 @@ public class CEnemyFSM : MonoBehaviour
         AttackWait,
         Skill1,
         Skill2,
+        Skill3,
         Dead,
     }
 
@@ -103,7 +107,7 @@ public class CEnemyFSM : MonoBehaviour
     // 목표 방향으로 이동하는 함수
     protected virtual void MoveToDestination()
     {
-        transform.position = Vector3.MoveTowards(transform.position,
+        transform.position = Vector3.MoveTowards(transform.position - new Vector3(0f, transform.position.y, 0f),
             _player.transform.position, _moveSpeed * Time.deltaTime);
     }
 
@@ -111,7 +115,8 @@ public class CEnemyFSM : MonoBehaviour
     protected virtual void TurnToDestination()
     {
         Quaternion lookRotation =
-            Quaternion.LookRotation(_player.transform.position - transform.position);
+            Quaternion.LookRotation((_player.transform.position - new Vector3(0f, _player.transform.position.y, 0f))
+            - (transform.position - new Vector3(0f, transform.position.y, 0f)));
         transform.rotation = Quaternion.RotateTowards(transform.rotation,
             lookRotation, Time.deltaTime * _rotAnglePerSecond);
     }
@@ -270,9 +275,15 @@ public class CEnemyFSM : MonoBehaviour
     }
     protected virtual void RemoveMe()
     {
-        _myRespawn.GetComponent<CRespawn>().RemoveMonster(_spawnID);
+        //_myRespawn.GetComponent<CRespawn>().RemoveMonster(_spawnID);
         _anim.SetBool("Dead", false);
     }
+
+    protected virtual void CallHitEvent()
+    {
+        _getHit = true;
+    }
+
     #endregion
 
     #region 공격력 전달함수
@@ -292,7 +303,7 @@ public class CEnemyFSM : MonoBehaviour
     // 기본 공격에 관한 체크
     protected void AttackCalculate()
     {
-        //_playerPara.DamegedRegardDefence(_myPara.GetRandomAttack());
+        _playerPara.DamegedRegardDefence((int)_myPara.GetRandomAttack());
     }
     #endregion
 
@@ -324,7 +335,6 @@ public class CEnemyFSM : MonoBehaviour
         if (_players.Count > 1)
         {
             _anim.SetFloat("DistanceFromPlayer", GetDistanceFromPlayer(_distances));
-            IsLookPlayer();
             UpdateState();
         }
         // 솔플용
@@ -333,7 +343,6 @@ public class CEnemyFSM : MonoBehaviour
             _player = _players[0];
             _playerPara = _players[0].GetComponent<CPlayerPara>();
             _anim.SetFloat("DistanceFromPlayer", _distances[0]);
-            IsLookPlayer();
             UpdateState();
         }
         else if (_players.Count == 0)

@@ -258,6 +258,43 @@ namespace Network
 
             return packet;
         }
+
+        public static CPacket CreatePortalVote(int accept)
+        {
+            byte messageSize = 4;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            Debug.Log("Portal Vote");
+            packet.WriteHeader(messageSize, (int)601);
+            packet.Write(accept);
+
+            return packet;
+        }
+
+        public static CPacket CreatePortalPopup()
+        {
+            byte messageSize = 0;
+            
+            Debug.Log("Portal Popup");
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)602);
+
+            return packet;
+        }
+
+        public static CPacket CreatePortalTeleport()
+        {
+            byte messageSize = 0;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)603);
+
+            return packet;
+        }
         #endregion
 
         public static CPacket CreateShutdownPacket()

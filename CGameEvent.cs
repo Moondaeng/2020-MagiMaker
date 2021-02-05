@@ -14,6 +14,7 @@ namespace NEvent
     public class ActionStart : UnityEvent<int, Vector3, Vector3> { }
 }
 
+[DisallowMultipleComponent]
 public class CGameEvent : MonoBehaviour
 {
     public NEvent.MoveStart PlayerMoveStartEvent;
@@ -25,27 +26,25 @@ public class CGameEvent : MonoBehaviour
     private Network.CTcpClient _tcpManager;
     private Network.CPacketInterpreter _inGameInterpreter;
 
+    public static CGameEvent instance;
+
     private CPlayerCommand _playerCommand;
 
     private void Awake()
     {
-        DontDestroyOnLoad(gameObject);
+        if (instance == null)
+        {
+            instance = this;
+        }
+
         PlayerMoveStartEvent = new NEvent.MoveStart();
         PlayerMoveStopEvent = new NEvent.MoveStop();
     }
 
     private void Start()
     {
-        GameObject tcpObject = GameObject.Find("Network");
-        if(tcpObject != null)
-        {
-            _tcpManager = tcpObject.GetComponent<Network.CTcpClient>();
-        }
-        GameObject commanderObject = GameObject.Find("GameManager");
-        if(commanderObject != null)
-        {
-            _playerCommand = commanderObject.GetComponent<CPlayerCommand>();
-        }
+        _tcpManager = Network.CTcpClient.instance;
+        _playerCommand = CPlayerCommand.instance;
 
         // 연결되면 패킷 받을거 설정
         if (_tcpManager != null && _tcpManager.IsConnect == true)
@@ -66,7 +65,7 @@ public class CGameEvent : MonoBehaviour
         else if(_playerCommand != null)
         {
             Debug.Log("Network not Connected");
-            _playerCommand.SetMyCharacter(0);
+            //_playerCommand.SetMyCharacter(0);
         }
     }
 
