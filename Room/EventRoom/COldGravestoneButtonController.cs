@@ -42,6 +42,7 @@ public class COldGravestoneButtonController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Return)) //엔터 입력시
         {
+            CEventRoomNpcClick.instance.CanclePopUp();
             switch(_choose)
             {
                 case 0:
