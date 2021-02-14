@@ -141,10 +141,10 @@ public class CParticleConstant : CParitcleSkillBase
     
     protected override void Start()
     {
-        _myControl = _skillUsingUser.GetComponent<CCntl>();
-        _myControl.SkillExitEvent.AddListener(Stop);
-        forward = _skillUsingUser.transform.forward;
-        up = _skillUsingUser.transform.up;
+        //_myControl = _skillUsingUser.GetComponent<CCntl>();
+        //if (_myControl != null) _myControl.SkillExitEvent.AddListener(Stop);
+        //forward = _skillUsingUser.transform.forward;
+        //up = _skillUsingUser.transform.up;
         if (_audioSource != null)
         {
             _audioSource.Play();
@@ -250,11 +250,11 @@ public class CParticleConstant : CParitcleSkillBase
 
     protected override void Update()
     {
-        if (_staffAnchor)
-        {
-            transform.rotation = _skillUsingUser.transform.rotation;
-            transform.position = _skillUsingUser.GetComponent<CCntl>().staff.transform.position;
-        }
+        //if (_staffAnchor)
+        //{
+        //    transform.rotation = _skillUsingUser.transform.rotation;
+        //    transform.position = _skillUsingUser.GetComponent<CCntl>().staff.transform.position;
+        //}
         if (Stopping)
         {
             // increase the stop time

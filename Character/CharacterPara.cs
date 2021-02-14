@@ -10,6 +10,11 @@ public class DamageEvent : UnityEvent<int, int>
 
 }
 
+public class HitEvent : UnityEvent<int>
+{
+
+}
+
 [RequireComponent(typeof(CBuffTimer))]
 public class CharacterPara : MonoBehaviour
 {
@@ -23,6 +28,7 @@ public class CharacterPara : MonoBehaviour
     public bool _isDead { get; set; }
     public int _rewardMoney { get; set; }
     public int _spawnID { get; set; }
+    [Tooltip("히트 애니메이션 출력\n최대체력 비율")] public float _hitGauge;
 
     public virtual int TotalAttackMin
     {
@@ -39,6 +45,8 @@ public class CharacterPara : MonoBehaviour
 
     [System.NonSerialized]
     public UnityEvent deadEvent = new UnityEvent();
+    public HitEvent hitGaugeEvent = new HitEvent();
+    public UnityEvent hitEvent = new UnityEvent();
     public DamageEvent damageEvent = new DamageEvent();
 
     protected CBuffTimer _buffTimer;
@@ -59,7 +67,7 @@ public class CharacterPara : MonoBehaviour
 
     public virtual void InitPara()
     {
-
+        hitGaugeEvent.AddListener(HitGaugeCalculate);
     }
     
     public int GetRandomAttack()
@@ -82,6 +90,7 @@ public class CharacterPara : MonoBehaviour
             enemyAttack = _curHp;
         }
         _curHp -= enemyAttack;
+        hitGaugeEvent?.Invoke(enemyAttack);
         UpdateAfterReceiveAttack();
     }
 
@@ -97,6 +106,16 @@ public class CharacterPara : MonoBehaviour
             _curHp = 0;
             _isDead = true;
             deadEvent.Invoke();
+        }
+    }
+
+    public virtual void HitGaugeCalculate (int attackDamage)
+    {
+        float result = (attackDamage * 100f) / _maxHp;
+        if (result > _hitGauge)
+        {
+            Debug.Log("Hit Event Before");
+            hitEvent.Invoke();
         }
     }
 

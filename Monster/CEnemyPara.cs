@@ -13,6 +13,7 @@ public class CEnemyPara : CharacterPara
 
     public override void InitPara()
     {
+        base.InitPara();
         _isStunned = false;
         _isDead = false;
         _curHp = _maxHp;

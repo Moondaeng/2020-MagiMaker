@@ -92,8 +92,7 @@ public class CGoblinFSM : CEnemyFSM
             _runEnd = false;
         }
         base.ChaseState();
-        if (_currentBaseState.fullPathHash != _deadState1 
-            || _currentBaseState.fullPathHash != _deadState2)
+        if (_currentBaseState.fullPathHash != _deadState1 || _currentBaseState.fullPathHash != _deadState2)
             MoveState();
     }
     
@@ -137,6 +136,8 @@ public class CGoblinFSM : CEnemyFSM
         _anim.SetBool("CoolDown1", _skillCoolDown1);
         _anim.SetBool("RunEnd", _runEnd);
         _anim.SetBool("AnotherAction", _anotherAction);
+        if (_currentBaseState.fullPathHash != _deadState1 || _currentBaseState.fullPathHash != _deadState2)
+            IsLookPlayer();
         base.Update();
     }
 }

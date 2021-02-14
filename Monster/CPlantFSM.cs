@@ -105,6 +105,8 @@ public class CPlantFSM : CEnemyFSM
         _anim.SetBool("CoolDown", _coolDown);
         _anim.SetBool("CoolDown1", _skillCoolDown1);
         _anim.SetBool("CoolDown2", _skillCoolDown2);
+        if (_currentBaseState.fullPathHash != _deadState1)
+            IsLookPlayer();
         base.Update();
     }
 }

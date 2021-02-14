@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 // 투사체형 발사 스킬군
 // 스킬 제작 경과에 따라 다른 스킬군과 코드 합체할 수도 있음
@@ -75,7 +76,6 @@ public class CProjectileSkill : MonoBehaviour
                     {
                         startPos = user.GetComponent<CCntl>().staff.transform.position;
                         _prefabObject.transform.position = startPos;
-                        Debug.Log(startPos);
                     }
                     else
                     {

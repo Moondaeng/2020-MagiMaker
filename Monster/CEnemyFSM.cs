@@ -3,10 +3,49 @@ using System.Collections.Generic;
 using UnityEngine;
 using static CGlobal;
 
-[RequireComponent(typeof(Animator))]
-[RequireComponent(typeof(BoxCollider))]
-[RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(CEnemyPara))]
+public delegate void DebugingDelegate();
+
+// 상태들을 클래스화 함. TypeSafe Enum Pattern
+public class EState
+{
+    public static readonly EState Idle = new EState("Idle");
+    public static readonly EState Chase = new EState("Chase");
+    public static readonly EState Move = new EState("Move");
+    public static readonly EState Attack = new EState("Attack");
+    public static readonly EState AttackWait = new EState("AttackWait");
+    public static readonly EState Skill1 = new EState("Skill1");
+    public static readonly EState Skill2 = new EState("Skill2");
+    public static readonly EState Skill3 = new EState("Skill3");
+    public static readonly EState Dead = new EState("Dead");
+    public static readonly EState Defend = new EState("Defend");
+
+    public override string ToString()
+    {
+        return Value;
+    }
+
+    protected EState(string value)
+    {
+        this.Value = value;
+    }
+
+    public string Value { get; private set; }
+}
+
+public class DebugingMyState
+{
+    private EState _stateName;
+
+    public DebugingMyState(EState name)
+    {
+        this._stateName = name;
+    }
+
+    public void DisplayToConsole()
+    {
+        Debug.Log(this._stateName);
+    }
+}
 
 public class CEnemyFSM : MonoBehaviour
 {
@@ -15,6 +54,7 @@ public class CEnemyFSM : MonoBehaviour
     protected AnimatorStateInfo _currentBaseState;     // 기본 레이어에 사용되는 애니메이터의 현재 상테에 대한 참조
     protected GameObject _player;
     protected CEnemyPara _myPara;
+    protected CBossPara _myBossPara;
     protected CPlayerPara _playerPara;
     [HideInInspector] public GameObject _myRespawn;
 
@@ -24,13 +64,14 @@ public class CEnemyFSM : MonoBehaviour
     protected bool _skillCoolDown1, _skillCoolDown2, _skillCoolDown3; // 스킬 쿨타임 판단
     protected bool _anotherAction; // 공격 사용 후, 플레이어의 거리가 멀어지면 chase 아니면, 그대로 공격하게 하는걸 판단
     protected bool _actionStart; // 플레이어와 조우 전에, 스킬의 쿨타임이 미리 도는 것을 방지하려는 것
+    protected bool _getHit;      // 히트 애니메이션 관련 bool
 
-    public int _spawnID { get; set; } // CRespawn에서 판별한 SpawnID
+    public int _spawnID { get; set; } // CRespawn에서 판별한 SpawnID 폐기예정
     protected float _rotAnglePerSecond = 360f; //1초에 플레이어의 방향을 360도 회전
     public float _moveSpeed { get; set; } //초당 ~미터의 속도로 이동
     public float _attackDistance { get; set; } // 공격 거리 (적과의 거리)
     protected float _attackAngle { get; set; } // 공격 범위
-
+    
     #region 모션들
     protected static int _idleState { get; set; }
     protected static int _standState { get; set; }
@@ -55,21 +96,9 @@ public class CEnemyFSM : MonoBehaviour
     protected float _skillCooltime3 { get; set; }
     protected float _originSkillCooltime3 { get; set; }
     #endregion
-
-    protected enum EState
-    {
-        Idle,
-        Chase,
-        Move,
-        Attack,
-        AttackWait,
-        Skill1,
-        Skill2,
-        Dead,
-    }
-
-    protected EState _myState;
-    protected EState _myOldState;
+    
+    protected EState _myState = EState.Idle;
+    protected EState _myOldState = EState.Idle;
     protected List<GameObject> _players = new List<GameObject>(); // 플레이어들의 GameObject를 담는 리스트
     protected List<float> _distances = new List<float>(); // 플레이어와의 거리 정보를 담는 리스트
     #endregion
@@ -97,23 +126,40 @@ public class CEnemyFSM : MonoBehaviour
             _lookAtPlayer = true;
         }
         _myState = EState.Move;
-        MoveToDestination();
+        MoveToDestination(transform.position - new Vector3(0f, transform.position.y, 0f), _player.transform.position);
     }
 
     // 목표 방향으로 이동하는 함수
     protected virtual void MoveToDestination()
     {
-        transform.position = Vector3.MoveTowards(transform.position,
+        transform.position = Vector3.MoveTowards(transform.position - new Vector3(0f, transform.position.y, 0f),
             _player.transform.position, _moveSpeed * Time.deltaTime);
+    }
+
+    protected virtual void MoveToDestination(Vector3 MyPosition, Vector3 TargetPostion)
+    {
+        transform.position = Vector3.MoveTowards(MyPosition, _player.transform.position, _moveSpeed * Time.deltaTime);
+    }
+
+    protected virtual void MoveToDestination(Vector3 MyPosition, Vector3 TargetPostion, float Speed)
+    {
+        transform.position = Vector3.MoveTowards(MyPosition, _player.transform.position, Speed * Time.deltaTime);
     }
 
     // 목표 방향으로 회전하는 함수
     protected virtual void TurnToDestination()
     {
         Quaternion lookRotation =
-            Quaternion.LookRotation(_player.transform.position - transform.position);
+            Quaternion.LookRotation((_player.transform.position - new Vector3(0f, _player.transform.position.y, 0f))
+            - (transform.position - new Vector3(0f, transform.position.y, 0f)));
         transform.rotation = Quaternion.RotateTowards(transform.rotation,
             lookRotation, Time.deltaTime * _rotAnglePerSecond);
+    }
+
+    protected virtual void TurnToDestination(Vector3 MyPosition, Vector3 TargetPosition)
+    {
+        Quaternion lookRotation = Quaternion.LookRotation(TargetPosition - MyPosition);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, Time.deltaTime * _rotAnglePerSecond);
     }
 
     // chase의 경우를 제외하고 나머지 행동들에서 플레이어에게 turn을 하는가를 체크함.
@@ -126,18 +172,43 @@ public class CEnemyFSM : MonoBehaviour
         }
     }
 
+    protected virtual void IdleState()
+    {
+        if (_myState != EState.Idle)
+        {
+            _myState = EState.Idle;
+        }
+        if (!_lookAtPlayer)
+        {
+            _lookAtPlayer = true;
+        }
+    }
+
     protected virtual void ChaseState()
     {
-        _myState = EState.Chase;
+        if (_myState != EState.Chase)
+        {
+            _myState = EState.Chase;
+        }
+        
         if (!_actionStart)
         {
             _actionStart = true;
+        }
+
+        if (!_lookAtPlayer)
+        {
+            _lookAtPlayer = true;
         }
     }
 
     protected virtual void AttackState1()
     {
-        _myState = EState.Attack;
+        _cooltime = _originCooltime;
+        if (_myState != EState.Attack)
+        {
+            _myState = EState.Attack;
+        }
         if (_lookAtPlayer)
         {
             _lookAtPlayer = false;
@@ -150,7 +221,10 @@ public class CEnemyFSM : MonoBehaviour
 
     protected virtual void AttackWaitState()
     {
-        _myState = EState.AttackWait;
+        if (_myState != EState.AttackWait)
+        {
+            _myState = EState.AttackWait;
+        }
         _cooltime -= Time.deltaTime;
         _lookAtPlayer = true;
         if (_cooltime < 0)
@@ -169,7 +243,10 @@ public class CEnemyFSM : MonoBehaviour
     
     protected virtual void DeadState1()
     {
-        _myState = EState.Dead;
+        if (_myState != EState.Dead)
+        {
+            _myState = EState.Dead;
+        }
         _lookAtPlayer = false;
     }
     #endregion
@@ -273,6 +350,12 @@ public class CEnemyFSM : MonoBehaviour
         _myRespawn.GetComponent<CRespawn>().RemoveMonster(_spawnID);
         _anim.SetBool("Dead", false);
     }
+
+    protected virtual void CallHitEvent()
+    {
+        _getHit = true;
+    }
+
     #endregion
 
     #region 공격력 전달함수
@@ -284,15 +367,23 @@ public class CEnemyFSM : MonoBehaviour
             if (IsTargetInSight(_attackAngle, _players[i].transform) && IsInAttackDistance(_attackDistance, _players[i].transform))
             {
                 _playerPara = _players[i].GetComponent<CPlayerPara>();
-                AttackCalculate();
+                //Debug.Log(_players[i].name);
+                AttackCalculate(_playerPara);
             }
         }
     }
 
     // 기본 공격에 관한 체크
-    protected void AttackCalculate()
+    protected void AttackCalculate(CPlayerPara c)
     {
-        _playerPara.DamegedRegardDefence(_myPara.GetRandomAttack());
+        if (_myPara != null)
+        {
+            c.DamegedRegardDefence(_myPara.RandomAttackDamage());
+        }
+        else
+        {
+            c.DamegedRegardDefence(_myBossPara.RandomAttackDamage());
+        }
     }
     #endregion
 
@@ -302,29 +393,37 @@ public class CEnemyFSM : MonoBehaviour
 
     }
 
-    protected void DebugState()
+    
+    protected virtual void DebugState()
     {
         if (_myOldState != _myState)
         {
+            DebugingMyState oldState = new DebugingMyState(_myState);
+            void displayLog() => oldState.DisplayToConsole();
+            displayLog();
             _myOldState = _myState;
-            Debug.Log(_myOldState);
         }
         else if (_myOldState == _myState)
+        {
             return;
+        }
     }
 
     protected virtual void Update()
     {
-        DebugState();
+        //DebugState();
         _players = DetectPlayer(_players);
         _currentBaseState = _anim.GetCurrentAnimatorStateInfo(0);
         _distances = CalculateDistance(_players);
         _anim.SetInteger("PlayerCount", _players.Count);
+        if (_currentBaseState.fullPathHash != _deadState1)
+        {
+            IsLookPlayer();
+        }
         // 다인큐용
         if (_players.Count > 1)
         {
             _anim.SetFloat("DistanceFromPlayer", GetDistanceFromPlayer(_distances));
-            IsLookPlayer();
             UpdateState();
         }
         // 솔플용
@@ -333,7 +432,6 @@ public class CEnemyFSM : MonoBehaviour
             _player = _players[0];
             _playerPara = _players[0].GetComponent<CPlayerPara>();
             _anim.SetFloat("DistanceFromPlayer", _distances[0]);
-            IsLookPlayer();
             UpdateState();
         }
         else if (_players.Count == 0)

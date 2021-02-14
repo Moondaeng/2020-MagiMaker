@@ -22,8 +22,8 @@ public class CProjectileBase : MonoBehaviour
     public struct AttackArgumentsList
     {
         public AttackType type;
-        public float arg1;
-        public float arg2;
+        public int arg1;
+        public int arg2;
     }
 
     public List<AttackArgumentsList> AttackArguments;
@@ -31,7 +31,7 @@ public class CProjectileBase : MonoBehaviour
     public float range = 30f;
     public float speed = 10f;
     
-    public float userAttackPower = 15f;
+    public int userAttackPower = 15;
 
     public Vector3 TargetPos;
 
@@ -85,7 +85,7 @@ public class CProjectileBase : MonoBehaviour
                     switch(attackArg.type)
                     {
                         case AttackType.damage:
-                            enemyPara.SetEnemyAttack(userAttackPower * attackArg.arg1);
+                            enemyPara.DamegedRegardDefence(userAttackPower * attackArg.arg1);
                             break;
                         case AttackType.stun:
                             Debug.Log("stun");

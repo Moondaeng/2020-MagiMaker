@@ -1,18 +1,20 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class CGolemFSM : CEnemyFSM
 {
     #region 골렘만 필요한 Properties
-    [SerializeField] GameObject _hand;
-    [SerializeField] GameObject _rock;
+    [SerializeField] readonly GameObject _hand;
+    [SerializeField] readonly GameObject _rock;
     GameObject Rock;
     ThrowObject RockScript;
     bool _holding;
     bool _shooting;
     #endregion
     
+
     protected override void InitStat()
     {
         _moveSpeed = 4f;
@@ -22,6 +24,7 @@ public class CGolemFSM : CEnemyFSM
         _anim = GetComponent<Animator>();
         _myPara = GetComponent<CEnemyPara>();
         _myPara.deadEvent.AddListener(CallDeadEvent);
+        _myPara.hitEvent.AddListener(CallHitEvent);
         _spawnID = _myPara.GetComponent<CEnemyPara>()._spawnID;
         _myRespawn = _myPara.GetComponent<CEnemyPara>()._myRespawn;
 
@@ -71,6 +74,11 @@ public class CGolemFSM : CEnemyFSM
         }
     }
 
+    private void ChaseWaitState()
+    {
+
+    }
+
     protected override void ChaseState()
     {
         base.ChaseState();
@@ -96,23 +104,8 @@ public class CGolemFSM : CEnemyFSM
     private void SkillState2()
     {
         _myState = EState.Skill2;
-        //if (_lookAtPlayer)
-        //{
-        //    _lookAtPlayer = false;
-        //}
-        //if (_holding) Rock.transform.position = _hand.transform.position;
-        //else
-        //{
-        //    if (_shooting)
-        //    {
-        //        Rock.SendMessage("StartShot");
-        //        _shooting = false;
-        //        _skillCooltime1 = _originSkillCooltime1;
-        //        _skillCoolDown1 = false;
-        //    }
-        //}
     }
-    private void CreateRock() 
+    private void CreateRock()
     {
         Rock = Instantiate(_rock, _hand.transform.position, Quaternion.identity) as GameObject;
         RockScript = Rock.GetComponent<ThrowObject>();
@@ -131,15 +124,20 @@ public class CGolemFSM : CEnemyFSM
         _holding = false;
         _shooting = true;
     }
+    
     #endregion
     #endregion
-
+    
     protected override void Update()
     {
         _anim.SetBool("CoolDown", _coolDown);
         _anim.SetBool("CoolDown1", _skillCoolDown1);
         _anim.SetBool("CoolDown2", _skillCoolDown2);
         _anim.SetBool("AnotherAction", _anotherAction);
+        _anim.SetBool("Hit", _getHit);
+        if (_getHit)  _getHit = false;
+        if (_currentBaseState.fullPathHash != _deadState1)
+            IsLookPlayer();
         base.Update();
     }
 }

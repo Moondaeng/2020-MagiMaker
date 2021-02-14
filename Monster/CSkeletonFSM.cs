@@ -29,8 +29,8 @@ public class CSkeletonFSM : CEnemyFSM
         _deadState1 = Animator.StringToHash("Base Layer.Dead");
 
         _cooltime = .5f;
-        _skillCooltime1 = 10f;
-        _skillCooltime2 = 5f;
+        _skillCooltime1 = Random.Range(8f, 12f);
+        _skillCooltime2 = Random.Range(4f, 6f);
         _originCooltime = _cooltime;
         _originSkillCooltime1 = _skillCooltime1;
         _originSkillCooltime2 = _skillCooltime2;
@@ -47,7 +47,8 @@ public class CSkeletonFSM : CEnemyFSM
             _skillCoolDown2 = true;
         }
 
-        if (_currentBaseState.fullPathHash == _walkState)           ChaseState();
+        if (_currentBaseState.fullPathHash == _idleState) IdleState();
+        else if (_currentBaseState.fullPathHash == _walkState)           ChaseState();
         else if (_currentBaseState.fullPathHash == _attackState1)    AttackState1();
         else if (_currentBaseState.fullPathHash == _waitState)      AttackWaitState();
         else if (_currentBaseState.fullPathHash == _skillState1)    SkillState1();
@@ -65,7 +66,7 @@ public class CSkeletonFSM : CEnemyFSM
             _skillCoolDown2 = false;
         }
     }
-
+    
     protected override void ChaseState()
     {
         base.ChaseState();
@@ -74,19 +75,68 @@ public class CSkeletonFSM : CEnemyFSM
     
     private void SkillState1()
     {
-        _myState = EState.Skill1;
-        _lookAtPlayer = false;
+        if (_myState != EState.Skill1)
+        {
+            _myState = EState.Skill1;
+        }
+        if (_lookAtPlayer)
+        {
+            _lookAtPlayer = false;
+        }
+       
         _skillCooltime1 = _originSkillCooltime1;
         _skillCoolDown1 = true;
     }
 
+    private void Skill2AttackCheck()
+    {
+        for (int i = 0; i < _players.Count; i++)
+        {
+            if (IsTargetInSight(_attackAngle, _players[i].transform) && IsInAttackDistance(_attackDistance, _players[i].transform))
+            {
+                var DamagedPlayerPara = _players[i].GetComponent<CPlayerPara>();
+                Skill2AttackDamage(DamagedPlayerPara);
+            }
+        }
+    }
+    
+    private void Skill2AttackDamage(CPlayerPara c)
+    {
+        c.DamegedRegardDefence((_myPara.RandomAttackDamage() * 15 / 10));
+    }
+
+    private void Skill2AttackCheck2()
+    {
+        bool exist = false;
+        for (int i = 0; i < _players.Count; i++)
+        {
+            if (IsTargetInSight(_attackAngle, _players[i].transform) && IsInAttackDistance(_attackDistance, _players[i].transform))
+            {
+                var DamagedPlayerPara = _players[i].GetComponent<CPlayerPara>();
+                Skill2AttackDamage2(DamagedPlayerPara);
+            }
+        }
+    }
+    
+    private void Skill2AttackDamage2(CPlayerPara c)
+    {
+        c.DamegedRegardDefence(_myPara.RandomAttackDamage() * 2);
+    }
+
     private void SkillState2()
     {
-        _myState = EState.Skill2;
-        _lookAtPlayer = false;
+        if (_myState != EState.Skill2)
+        {
+            _myState = EState.Skill2;
+        }
+        if (_lookAtPlayer)
+        {
+            _lookAtPlayer = false;
+        }
         _skillCooltime2 = _originSkillCooltime2;
         _skillCoolDown2 = true;
     }
+
 
     #endregion
 
@@ -97,6 +147,8 @@ public class CSkeletonFSM : CEnemyFSM
         _anim.SetBool("CoolDown1", _skillCoolDown1);
         _anim.SetBool("CoolDown2", _skillCoolDown2);
         _anim.SetBool("AnotherAction", _anotherAction);
+        if (_currentBaseState.fullPathHash != _deadState1)
+            IsLookPlayer();
         base.Update();
     }
 }

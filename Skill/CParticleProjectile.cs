@@ -52,8 +52,10 @@ public class CParticleProjectile : CParitcleSkillBase, ICollisionHandler
 
     public void HandleCollision(GameObject obj, Collision c)
     {
+        //if (c.gameObject.tag == "Player" && _skillUsingUser.tag == "Player") return;
+        //else if (c.gameObject.tag == "Monster" && _skillUsingUser.tag == "Monster") return;
         if (collided) return;
-        
+
         collided = true;
         Stop();
         
@@ -75,8 +77,8 @@ public class CParticleProjectile : CParitcleSkillBase, ICollisionHandler
             _explosion.transform.position = c.contacts[0].point;
             _explosion.Play();
             CreateExplosion(c.contacts[0].point, _explosionRadius, _explosionForce);
-
-            if (c.gameObject.tag == "player")
+            _projectileColliderObject.SetActive(false);
+            if (c.gameObject.tag == "Player" && _skillUsingUser.tag == "Monster")
             {
                 CPlayerPara p = c.gameObject.GetComponent<CPlayerPara>();
                 foreach (AttackArgumentsList a in AttackArguments)
@@ -84,7 +86,7 @@ public class CParticleProjectile : CParitcleSkillBase, ICollisionHandler
                     SwitchInType(a, p);
                 }
             }
-            else if (c.gameObject.tag == "Monster")
+            else if (c.gameObject.tag == "Monster" && _skillUsingUser.tag == "Player")
             {
                 CEnemyPara e = c.gameObject.GetComponent<CEnemyPara>();
                 foreach (AttackArgumentsList a in AttackArguments)
@@ -92,12 +94,16 @@ public class CParticleProjectile : CParitcleSkillBase, ICollisionHandler
                     SwitchInType(a, e);
                 }
             }
-            // 몬스터 타격 관련 함수
-            
-            if (CollisionDelegate != null)
+            else if (c.gameObject.tag == "Boss" && _skillUsingUser.tag == "Player")
             {
-                CollisionDelegate(this, c.contacts[0].point);
+                CBossPara b = c.gameObject.GetComponent<CBossPara>();
+                foreach (AttackArgumentsList a in AttackArguments)
+                {
+                    SwitchInType(a, b);
+                }
             }
+
+            CollisionDelegate?.Invoke(this, c.contacts[0].point);
         }
     }
 }
