@@ -4,22 +4,25 @@ using UnityEngine;
 
 /*
  * 플레이어 오브젝트 조작 인터페이스 클래스
- * 
+ *
  */
+
 [DisallowMultipleComponent]
 public class CController : MonoBehaviour
 {
-    delegate void Action();
+    private delegate void Action();
 
     #region 컨트롤러 모드 관리
+
     private bool _isControlMode = true;
     private Dictionary<KeyCode, Action> keyDictionary;
     private CMouseFollower _camera;
-    #endregion
+
+    #endregion 컨트롤러 모드 관리
 
     private CConsumableItemViewer _consumableViewer;
 
-    [SerializeField] GameObject MousePointer;
+    [SerializeField] private GameObject MousePointer;
 
     private CUIManager _playerUi;
     private CGameEvent gameEvent;
@@ -32,10 +35,11 @@ public class CController : MonoBehaviour
 
     // 이동 패킷 관련
     private const float moveTraceTime = 0.1f;
+
     private Vector3 previousPlayerPos;
 
-    float x;
-    float z;
+    private float x;
+    private float z;
 
     private GameObject _viewingObject;
 
@@ -63,7 +67,7 @@ public class CController : MonoBehaviour
         };
     }
 
-    void Start()
+    private void Start()
     {
         // Singleton 선언해놓은 클래스들 받는 변수
         _playerUi = CUIManager.instance;
@@ -82,7 +86,7 @@ public class CController : MonoBehaviour
         CWindowFacade.instance.SetControlLockCallback = SetControlLock;
     }
 
-    void Update()
+    private void Update()
     {
         //int layerMask = 1 << LayerMask.NameToLayer("Player");
         //layerMask = ~layerMask;
@@ -99,7 +103,7 @@ public class CController : MonoBehaviour
         x = -(Input.GetAxisRaw("Vertical"));
 
         // 모드에 따라 조작되는 키
-        if(_isControlMode)
+        if (_isControlMode)
         {
             _playerControl.Move(x, z);
         }
@@ -116,13 +120,13 @@ public class CController : MonoBehaviour
         }
     }
 
-    IEnumerator MoveTracer()
+    private IEnumerator MoveTracer()
     {
-        while(true)
+        while (true)
         {
             // 비교
             var differ = previousPlayerPos - player.transform.position;
-            if(differ.magnitude > 0.01f)
+            if (differ.magnitude > 0.01f)
             {
                 // 전송 - 이동 명령
                 //Debug.Log($"move character {previousPlayerPos.x}, {previousPlayerPos.y}, {previousPlayerPos.z}" +
@@ -224,7 +228,7 @@ public class CController : MonoBehaviour
 
     private void GetItem()
     {
-        if(_viewingObject == null)
+        if (_viewingObject == null)
         {
             return;
         }
@@ -261,7 +265,7 @@ public class CController : MonoBehaviour
             }
         }
     }
-    
+
     private void SkillSelect(int index)
     {
         player.GetComponent<CCharacterSkill>().SkillSelect(index);

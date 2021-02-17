@@ -225,6 +225,6 @@ public class CPlayerCommand : MonoBehaviour
         if (character == null) return;
 
         var charStat = character.GetComponent<CharacterPara>();
-        charStat.buffParameter.Buff(CBuffList.AttackBuff, buffTime, buffScale);
+        //charStat.buffParameter.Buff(CBuffList.AttackBuff, buffTime, buffScale);
     }
 }

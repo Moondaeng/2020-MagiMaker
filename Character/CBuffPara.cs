@@ -1,9 +1,8 @@
 ﻿/*
  * 능력치 버프 및 디버프 관리 클래스(지속 힐 / 데미지는 미포함)
  */
-using System.Collections.Generic;
-using UnityEngine;
 
+[System.Obsolete]
 [System.Serializable]
 public class CBuffPara
 {
@@ -14,7 +13,7 @@ public class CBuffPara
         MoveSpeed,
         AttackSpeed
     }
-    
+
     public float AttackCoef { get; private set; }
     public float DefenceCoef { get; private set; }
     public float MoveSpeedCoef { get; private set; }
@@ -43,20 +42,23 @@ public class CBuffPara
     }
 
     #region command buff
+
     public void Buff(int BuffID, float time, float buffScale)
     {
-        switch(BuffID)
+        switch (BuffID)
         {
             case CBuffList.AttackBuff:
                 timer.Register(CBuffList.AttackBuff, time,
                     (int notUsed) => StartBuffAttack(buffScale),
                     (int notUsed) => EndBuffAttack(buffScale));
                 break;
+
             case CBuffList.DefenceBuff:
                 timer.Register(CBuffList.DefenceBuff, time,
                     (int notUsed) => StartBuffDefence(buffScale),
                     (int notUsed) => EndBuffDefence(buffScale));
                 break;
+
             default:
                 break;
         }
@@ -89,11 +91,17 @@ public class CBuffPara
             (int buffStack) => StartBuffDefenceStack(stackBuffScale, buffStack),
             (int buffStack) => EndBuffDefenceStack(stackBuffScale, buffStack));
     }
-    #endregion
+
+    #endregion command buff
+
     #region implement buff
+
     protected void StartBuffAttack(float buffScale) => AttackCoef *= buffScale;
+
     protected void EndBuffAttack(float buffScale) => AttackCoef /= buffScale;
+
     protected void StartBuffDefence(float buffScale) => DefenceCoef *= buffScale;
+
     protected void EndBuffDefence(float buffScale) => DefenceCoef /= buffScale;
 
     protected void StartBuffAttackStack(float stackBuffScale, int stack)
@@ -101,20 +109,24 @@ public class CBuffPara
         float buffScale = 1.0f + stackBuffScale * stack;
         AttackCoef *= buffScale;
     }
+
     protected void EndBuffAttackStack(float stackBuffScale, int stack)
     {
         float buffScale = 1.0f + stackBuffScale * stack;
         AttackCoef /= buffScale;
     }
+
     protected void StartBuffDefenceStack(float stackBuffScale, int stack)
     {
         float buffScale = 1.0f + stackBuffScale * stack;
         DefenceCoef *= buffScale;
     }
+
     protected void EndBuffDefenceStack(float stackBuffScale, int stack)
     {
         float buffScale = 1.0f + stackBuffScale * stack;
         DefenceCoef /= buffScale;
     }
-    #endregion
+
+    #endregion implement buff
 }

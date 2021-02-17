@@ -422,6 +422,7 @@ public class CCreateMap : MonoBehaviour
         if (_roomCount == 1)
         {
             CreateExplicitRoom("NormalRoom0_2");
+            return;
         }
 
         InstantiateRoom(roomArr[roomCount, roadCount].RoomType);

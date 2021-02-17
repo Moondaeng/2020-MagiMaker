@@ -1,27 +1,29 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class SkillSelectEvent : UnityEvent<int> { }
+
 public class SkillUseEvent : UnityEvent<int, Vector3> { }
 
 /*
  * 모든 캐릭터의 스킬과 스킬 관련 정보를 저장하는 컴포넌트
  * 아이템 추가에 따라 데미지 증폭, 쿨다운 감소 등을 여기서 관리
  */
+
 [RequireComponent(typeof(CSkillTimer))]
 public class CCharacterSkill : MonoBehaviour
 {
     [SerializeField]
     protected List<CSkillFormat> _skillList;
+
     protected CProjectileSkill _projectileSkill;
     protected CBuffSkill _buffSkill;
 
     public int SelectedSkillNum
     {
         get { return _selectedSkillNum; }
-        protected set 
+        protected set
         {
             _selectedSkillNum = value;
             skillSelectEvent?.Invoke(_selectedSkillNum);
@@ -51,17 +53,13 @@ public class CCharacterSkill : MonoBehaviour
         }
     }
 
-    protected virtual void Start()
-    {
-    }
-
     /// <summary>
     /// 스킬 선택
     /// </summary>
     /// <param name="index"></param>
     public virtual void SkillSelect(int index)
     {
-        if(index < 0 || index >= _skillList.Count)
+        if (index < 0 || index >= _skillList.Count)
         {
             Debug.Log("Skill Select Error");
             return;
@@ -78,7 +76,7 @@ public class CCharacterSkill : MonoBehaviour
             return;
         }
 
-        if(_skillList[_selectedSkillNum].Use(targetPos))
+        if (_skillList[_selectedSkillNum].Use(targetPos))
         {
             // CCntl의 행동 코드
             skillUseEvent?.Invoke(_selectedSkillNum, targetPos);
@@ -105,19 +103,17 @@ public class CCharacterSkill : MonoBehaviour
     }
 
     // 스킬 오브젝트 생성
-    protected void CreateSkillObject(GameObject skillObject, Vector3 targetPos)
+    protected void CreateSkillObject(GameObject SkillPrefab, Vector3 targetPos)
     {
-        if(skillObject == null)
+        if (SkillPrefab == null)
         {
             Debug.Log("Skill Object not setting");
             return;
         }
 
         // 오브젝트 생성
-        var projectile = Instantiate(skillObject);
-        projectile.tag = gameObject.tag;
-
-        InitToSkillObject(projectile, targetPos);
+        var skillObj = CSkillObjectPool.instance.GetAvailableSkillObject(SkillPrefab);
+        InitToSkillObject(skillObj, targetPos);
     }
 
     /// <summary>
@@ -129,35 +125,40 @@ public class CCharacterSkill : MonoBehaviour
         return isAttack == true ? LayerMask.NameToLayer("PlayerSkill") : LayerMask.NameToLayer("MonsterSkill");
     }
 
-    protected void InitToSkillObject(GameObject skillObject, Vector3 targetPos)
+    protected void InitToSkillObject(GameObject skillObj, Vector3 targetPos)
     {
-        var hitObjectBase = skillObject.GetComponent<CHitObjectBase>();
+        skillObj.SetActive(true);
+        skillObj.tag = gameObject.tag;
 
+        var hitObjectBase = skillObj.GetComponent<CHitObjectBase>();
         if (hitObjectBase is CProjectileBase)
         {
-            var userPos = gameObject.transform.position;
+            var userPos = transform.position;
             var objectivePos = targetPos - userPos;
             Quaternion lookRotation = Quaternion.LookRotation(objectivePos);
-            skillObject.transform.position = userPos + Vector3.up;
-            skillObject.transform.rotation = lookRotation;
+            skillObj.transform.position = userPos + Vector3.up;
+            skillObj.transform.rotation = lookRotation;
             hitObjectBase.SetObjectLayer(TranslateLayerCharacterToSkill(true));
             // 유저 스탯에 비례해 스킬 발사
             var userStat = GetComponent<CharacterPara>();
+            skillObj.GetComponent<CUseEffectHandle>().EnhanceEffectByStat(userStat);
 
             // 공격력 등 필요한 정보 넣기
+
             //projectileBase.userAttackPower = userStat._attackMax;
             // 원소 관련 정보
         }
         else if (hitObjectBase is CBuffBase)
         {
             hitObjectBase.SetObjectLayer(TranslateLayerCharacterToSkill(false));
-            skillObject.transform.position = targetPos;
+            skillObj.transform.position = targetPos;
         }
         else if (hitObjectBase is CFieldSkillBase)
         {
             hitObjectBase.SetObjectLayer(TranslateLayerCharacterToSkill(true));
-            skillObject.transform.position = targetPos;
+            skillObj.transform.position = targetPos;
         }
+        hitObjectBase.IsInit = true;
     }
 
     protected virtual void CallSkillUseEvent(int skillIndex, Vector3 targetPos)

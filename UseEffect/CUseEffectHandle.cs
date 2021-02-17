@@ -32,11 +32,12 @@ public static class CUseEffectHandleExplain
         }
         else if (effect is CMakeObjectUseEffect)
         {
+            Debug.LogWarning("Warning : no return value");
             return "";
         }
         else
         {
-            Debug.Log("Error - undefined effect type");
+            Debug.LogWarning("Warning : undefined effect type");
             return "";
         }
     }
@@ -45,4 +46,5 @@ public static class CUseEffectHandleExplain
 public abstract class CUseEffectHandle : MonoBehaviour
 {
     public abstract void TakeUseEffect(CharacterPara cPara);
+    public abstract void EnhanceEffectByStat(CharacterPara userStatus);
 }

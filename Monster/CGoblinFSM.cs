@@ -13,8 +13,8 @@ public class CGoblinFSM : CEnemyFSM
     protected override void InitStat()
     {
         _moveSpeed = 5f;
-        _attackDistance = 3f;
-        _attackRadius = 10f;
+        _attackDistance = 5f;
+        _attackAngle = 10f;
         _anim = GetComponent<Animator>();
         _myPara = GetComponent<CEnemyPara>();
         _myPara.deadEvent.AddListener(CallDeadEvent);
@@ -32,7 +32,7 @@ public class CGoblinFSM : CEnemyFSM
         _deadState1 = Animator.StringToHash("Base Layer.Death1");
         _deadState2 = Animator.StringToHash("Base Layer.Death2");
         
-        _cooltime = 1f;
+        _cooltime = 0.5f;
         _skillCooltime1 = 5f;
         _originCooltime = _cooltime;
         _originSkillCooltime1 = _skillCooltime1;
@@ -40,13 +40,18 @@ public class CGoblinFSM : CEnemyFSM
     
     protected override void CallDeadEvent()
     {
+        _anim.SetTrigger("DeathTrigger");
         int n = Random.Range(0, 2);
-        if (n == 0)
+        if (n == 0 && _currentBaseState.fullPathHash != _deadState1)
         {
             _anim.SetInteger("Dead", 1);
         }
-        else { _anim.SetInteger("Dead", 2); }
+        else if (n == 1 && _currentBaseState.fullPathHash != _deadState2)
+        {
+            _anim.SetInteger("Dead", 2);
+        }
         this.tag = "Untagged";
+        this.gameObject.layer = LayerMask.NameToLayer("DeadBody");
         Invoke("RemoveMe", 2f);
     }
 
@@ -56,7 +61,7 @@ public class CGoblinFSM : CEnemyFSM
         _anim.SetInteger("Dead", 0);
     }
 
-    #region 통상적인 State관련 함수들
+    #region State
     protected override void UpdateState()
     {
         if (_actionStart)
@@ -66,10 +71,12 @@ public class CGoblinFSM : CEnemyFSM
         }
         if (_currentBaseState.fullPathHash == _walkState) ChaseState();
         else if (_currentBaseState.fullPathHash == _attackState1
-            || _currentBaseState.fullPathHash == _attackState2) AttackState();
+            || _currentBaseState.fullPathHash == _attackState2) AttackState1();
         else if (_currentBaseState.fullPathHash == _waitState) AttackWaitState();
         else if (_currentBaseState.fullPathHash == _skillWaitState1) SkillWaitState1();
         else if (_currentBaseState.fullPathHash == _skillState1) SkillState1();
+        else if (_currentBaseState.fullPathHash == _deadState1 || _currentBaseState.fullPathHash == _deadState2) DeadState1();
+        
 
         if (_skillCooltime1 < 0f)
         {
@@ -78,44 +85,17 @@ public class CGoblinFSM : CEnemyFSM
         }
     }
 
-    protected void ChaseState()
+    protected override void ChaseState()
     {
-        _runEnd = false;
-        if (!_actionStart) _actionStart = true;
-        if (_currentBaseState.fullPathHash != _deadState1 
-            || _currentBaseState.fullPathHash != _deadState2)
+        if (_runEnd)
+        {
+            _runEnd = false;
+        }
+        base.ChaseState();
+        if (_currentBaseState.fullPathHash != _deadState1 || _currentBaseState.fullPathHash != _deadState2)
             MoveState();
     }
-
-    protected override void MoveState()
-    {
-        _anotherAction = false;
-        base.MoveState();
-    }
-
-    protected void AttackState()
-    {
-        if (!_lookAtPlayer)
-            transform.LookAt(_player.transform.position
-                - new Vector3(0f, _player.transform.position.y, 0f));
-        _coolDown = true;
-    }
     
-    private void AttackWaitState()
-    {
-        _cooltime -= Time.deltaTime;
-        if (_cooltime < 0)
-        {
-            _coolDown = false;
-            _cooltime = _originCooltime;
-        }
-        else if (GetDistanceFromPlayer(_distances) > _attackDistance)
-        {
-            _coolDown = false;
-            _anotherAction = true;
-            _cooltime = _originCooltime;
-        }
-    }
     #endregion
 
     #region 스킬관련 함수들
@@ -156,6 +136,8 @@ public class CGoblinFSM : CEnemyFSM
         _anim.SetBool("CoolDown1", _skillCoolDown1);
         _anim.SetBool("RunEnd", _runEnd);
         _anim.SetBool("AnotherAction", _anotherAction);
+        if (_currentBaseState.fullPathHash != _deadState1 || _currentBaseState.fullPathHash != _deadState2)
+            IsLookPlayer();
         base.Update();
     }
 }

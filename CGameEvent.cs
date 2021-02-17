@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 namespace NEvent
 {
     [System.Serializable]
     public class MoveStart : UnityEvent<Vector3, Vector3> { }
+
     [System.Serializable]
     public class MoveStop : UnityEvent<Vector3> { }
+
     [System.Serializable]
     public class ActionStart : UnityEvent<int, Vector3, Vector3> { }
 }
@@ -62,7 +61,7 @@ public class CGameEvent : MonoBehaviour
             _inGameInterpreter.SendCharacterInfoRequest();
         }
         // 싱글 플레이 시에 일부 동작들은 서버에 거치지 않고 동작해야 함
-        else if(_playerCommand != null)
+        else if (_playerCommand != null)
         {
             Debug.Log("Network not Connected");
             //_playerCommand.SetMyCharacter(0);
@@ -70,7 +69,10 @@ public class CGameEvent : MonoBehaviour
     }
 
     public void PlayerMoveStart(Vector3 a, Vector3 b) => PlayerMoveStartEvent?.Invoke(a, b);
+
     public void PlayerMoveStop(Vector3 pos) => PlayerMoveStopEvent?.Invoke(pos);
+
     public void PlayerAttack(Vector3 pos) => PlayerAttackEvent?.Invoke(pos);
+
     public void PlayerAction(int actionNumber, Vector3 now, Vector3 dest) => PlayerActionEvent?.Invoke(actionNumber, now, dest);
 }

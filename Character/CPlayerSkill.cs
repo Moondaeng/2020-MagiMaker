@@ -49,10 +49,8 @@ public class CPlayerSkill : CCharacterSkill
     }
 
     // Start is called before the first frame update
-    protected override void Start()
+    protected void Start()
     {
-        base.Start();
-
         // 아래 항목은 전부 임시 코드(작동 테스트용) 
         // 콤보 스킬 포맷 등록
         for(int i = _skillList.Count; i < 42; i++)

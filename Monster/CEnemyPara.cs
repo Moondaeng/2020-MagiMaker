@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class CEnemyPara : CharacterPara
 {
@@ -40,7 +40,7 @@ public class CEnemyPara : CharacterPara
     public string _name;
     string _originTag = "Monster";
     [HideInInspector] public GameObject _myRespawn;
-
+    
     Vector3 _originPos;
 
     public override void InitPara()
@@ -50,7 +50,7 @@ public class CEnemyPara : CharacterPara
         _isDead = false;
         _curHp = _maxHp;
     }
-
+    
     public void SetRespawn(GameObject respawn, int spawnID, Vector3 originPos)
     {
         _myRespawn = respawn;

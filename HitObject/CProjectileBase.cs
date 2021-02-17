@@ -41,21 +41,44 @@ public class CProjectileBase : CHitObjectBase
     [Tooltip("충돌시 파괴 할 입자 시스템.")]
     public ParticleSystem[] ProjectileDestroyParticleSystemsOnCollision;
 
-    public Vector3 TargetPos;
-
     private IEnumerator SendCollisionAfterDelay()
     {
         yield return new WaitForSeconds(ProjectileColliderDelay);
-
         Vector3 dir = ProjectileDirection * ProjectileColliderSpeed;
         dir = ProjectileColliderObject.transform.rotation * dir;
         ProjectileColliderObject.GetComponent<Rigidbody>().velocity = dir;
     }
 
-    protected override void Start()
+    protected override void StartParticleSystems()
     {
-        base.Start();
+        foreach (ParticleSystem p in gameObject.GetComponentsInChildren<ParticleSystem>())
+        {
+            if (ManualParticleSystems == null || ManualParticleSystems.Length == 0 ||
+                System.Array.IndexOf(ManualParticleSystems, p) < 0)
+            {
+                if (p == ProjectileExplosionParticleSystem)
+                {
+                    continue;
+                }
 
+                if (p.main.startDelay.constant == 0.0f)
+                {
+                    // wait until next frame because the transform may change
+                    var m = p.main;
+                    var d = p.main.startDelay;
+                    d.constant = 0.01f;
+                    m.startDelay = d;
+                }
+                p.Clear();
+                p.Simulate(p.main.duration);
+                p.Play();
+            }
+        }
+    }
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
         StartCoroutine(SendCollisionAfterDelay());
     }
 
@@ -69,40 +92,37 @@ public class CProjectileBase : CHitObjectBase
     {
         base.OnTriggerEnter(other);
 
+        if (!IsInit)
+        {
+            return;
+        }
+
+        Debug.Log($"{other.gameObject.name}");
         // destroy particle systems after a slight delay
         if (ProjectileDestroyParticleSystemsOnCollision != null)
         {
-            foreach (ParticleSystem p in ProjectileDestroyParticleSystemsOnCollision)
-            {
-                GameObject.Destroy(p, 0.1f);
-            }
+            Invoke("DeactivateParticle", 0.1f);
         }
 
         //ProjectileExplosionParticleSystem.transform.position = c.contacts[0].point;
+        ProjectileCollisionSound.Play();
         ProjectileExplosionParticleSystem.Play();
-        CHitObjectBase.CreateExplosion(gameObject.transform.position, ProjectileExplosionRadius, ProjectileExplosionForce);
+        //CHitObjectBase.CreateExplosion(gameObject.transform.position, ProjectileExplosionRadius, ProjectileExplosionForce);
 
-        Destroy(gameObject, 0.5f);
+        //ProjectileCollisionSound.clip.length
+        Invoke("DeactivateObject", 1.0f);
     }
 
-    //protected override void OnCollisionEnter(Collision collision)
-    //{
-    //    base.OnCollisionEnter(collision);
-    //    Debug.Log($"Hit {collision.gameObject.name}");
+    private void DeactivateParticle()
+    {
+        foreach (ParticleSystem p in ProjectileDestroyParticleSystemsOnCollision)
+        {
+            p.Stop();
+        }
+    }
 
-    //    // destroy particle systems after a slight delay
-    //    if (ProjectileDestroyParticleSystemsOnCollision != null)
-    //    {
-    //        foreach (ParticleSystem p in ProjectileDestroyParticleSystemsOnCollision)
-    //        {
-    //            GameObject.Destroy(p, 0.1f);
-    //        }
-    //    }
-
-    //    //ProjectileExplosionParticleSystem.transform.position = c.contacts[0].point;
-    //    ProjectileExplosionParticleSystem.Play();
-    //    CHitObjectBase.CreateExplosion(gameObject.transform.position, ProjectileExplosionRadius, ProjectileExplosionForce);
-
-    //    Destroy(gameObject, 0.5f);
-    //}
+    private void DeactivateObject()
+    {
+        gameObject.SetActive(false);
+    }
 }
