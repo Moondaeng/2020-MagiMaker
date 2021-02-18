@@ -23,19 +23,4 @@ public class CEventBulletController : MonoBehaviour
         transform.rotation = Quaternion.Euler(new Vector3(UnityEngine.Random.Range(minRotationX, maxRotationX),
             UnityEngine.Random.Range(180-maxRotationY, 180+maxRotationY), transform.rotation.z));
     }
-
-    //private void OnTriggerEnter(Collider other)
-    //{
-    //    if (other.gameObject.tag == "WALL" || other.gameObject.tag == "TILE")
-    //    {
-    //        Destroy(gameObject);
-    //    }
-
-    //    if (other.tag == "Player")
-    //    {
-    //        CController.instance.player.GetComponent<CPlayerPara>().DamagedDisregardDefence(bulletDamage);
-    //        Debug.Log("Bullet");
-    //        Destroy(gameObject);
-    //    }
-    //}
 }

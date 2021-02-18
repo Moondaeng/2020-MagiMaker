@@ -92,18 +92,18 @@ public class CItemDropTable : MonoBehaviour
         return PopRandomItemByGrade(itemGrade, itemType);
     }
 
-    public GameObject DropConsumable()
-    {
-        List<GameObject> itemList = _consumableObjectList;
+    //public GameObject DropConsumable()
+    //{
+    //    List<GameObject> itemList = _consumableObjectLists;
 
-        if (itemList.Count == 0)
-        {
-            Debug.Log("Consumable Item List is empty");
-            return null;
-        }
+    //    if (itemList.Count == 0)
+    //    {
+    //        Debug.Log("Consumable Item List is empty");
+    //        return null;
+    //    }
 
-        return FindRandomItemInList(itemList);
-    }
+    //    return FindRandomItemInList(itemList);
+    //}
 
     /// <summary>
     /// ItemCompoenent를 가지고 있는 item 추가

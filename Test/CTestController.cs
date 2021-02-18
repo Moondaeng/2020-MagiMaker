@@ -19,17 +19,12 @@ public class CTestController : MonoBehaviour
         keyDictionary = new Dictionary<KeyCode, Action>
         {
             {KeyCode.KeypadPlus, () => {
-<<<<<<< HEAD:Test/CTestContorller.cs
                     var item = CItemDropTable.instance.PopRandomItemByGrade(CItemDropTable.ItemGrade.Normal, CConstants.EQUIP_ITEM_TYPE);
-=======
-                    var item = CItemDropTable.instance.PopRandomItemByGrade(CItemDropTable.ItemGrade.Normal);
-                    if(item == null) return;
->>>>>>> origin/ZeroFe:Test/CTestController.cs
                     item.SetActive(true);
                     item.transform.position = GetHitPoint();                    
                 } },
             {KeyCode.KeypadMinus, () => {
-                    var item = CItemDropTable.instance.DropConsumable();
+                    var item = CItemDropTable.instance.PopRandomItemByGrade(CItemDropTable.ItemGrade.Normal, CConstants.CONSUM_ITEM_TYPE);
                     item.SetActive(true);
                     item.transform.position = GetHitPoint();
                 }},

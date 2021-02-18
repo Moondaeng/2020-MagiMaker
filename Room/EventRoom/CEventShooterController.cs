@@ -13,6 +13,8 @@ public class CEventShooterController : MonoBehaviour
     [Tooltip("발사 주기")]
     public float firingCycle;
 
+    private List<GameObject> _bullets;
+
     private bool moveUp;
     // Start is called before the first frame update
     void Start()
@@ -27,6 +29,18 @@ public class CEventShooterController : MonoBehaviour
             firingCycle = 0.05f;
 
         moveUp = true;
+
+        _bullets = new List<GameObject>();
+
+        for (int i = 0; i < 5; i++)
+        {
+            GameObject bullet = Resources.Load("Object/EventBullet") as GameObject;
+            bullet = Object.Instantiate(bullet, transform.position, transform.rotation);
+            _bullets.Add(bullet);
+            bullet.transform.SetParent(transform.parent.Find("Bullet"));
+            bullet.SetActive(false);
+            Debug.Log(i + "'s bullet");
+        }
         StartCoroutine("spreadBullet", firingCycle);
     }
 
@@ -36,20 +50,33 @@ public class CEventShooterController : MonoBehaviour
         moveUpNDown();
     }
 
-    private void OnDestroy()
-    {
-        Debug.Log("Destroy Stone");
+    //private void OnDestroy()
+    //{
+    //    Debug.Log("Destroy Stone");
 
-        GameObject[] gameObjects = GameObject.FindGameObjectsWithTag("EventRoomStone");
+    //    GameObject[] gameObjects = GameObject.FindGameObjectsWithTag("EventRoomStone");
 
-        foreach (GameObject gameObject in gameObjects)
-            Object.Destroy(gameObject);
-    }
+    //    foreach (GameObject gameObject in gameObjects)
+    //        Object.Destroy(gameObject);
+    //}
 
     IEnumerator spreadBullet(float delayTime)
     {
-        GameObject bullet = Resources.Load("Object/EventBullet") as GameObject;
-        Object.Instantiate(bullet, transform.position, transform.rotation);
+        foreach(GameObject bullet in _bullets)
+        {
+            if(bullet == null)
+            {
+                Debug.Log("bullet is null");
+            }
+            else if(!bullet.activeSelf)
+            {
+                bullet.transform.position = transform.position;
+
+                bullet.SetActive(true);
+                bullet.transform.GetChild(0).GetComponent<ParticleSystem>().Play();
+                break;
+            }
+        }
         yield return new WaitForSeconds(delayTime);
         StartCoroutine("spreadBullet", firingCycle);
     }
