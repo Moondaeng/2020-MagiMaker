@@ -5,7 +5,6 @@ using UnityEngine;
 public class CRespawn : MonoBehaviour
 {
     #region Properties
-    List<GameObject> _monsters;
     [Tooltip("넣을 놈")]
     [SerializeField] GameObject[] _monPrefab;
     [Tooltip("리스폰인지 아닌지 체크")]
@@ -17,12 +16,14 @@ public class CRespawn : MonoBehaviour
     int _maxOfSpawnNumber;
     float _respawnDelay = 3f;
     int _deadMonsters = 0;
+    Coroutine Co;
     #endregion
 
     void Start()
     {
         SumSpawnNumber();
         ScaleMonsterTransform();
+        SpawnMonster();
     }
 
     #region 스폰하는 몬스터 세팅
@@ -52,7 +53,6 @@ public class CRespawn : MonoBehaviour
             }
             i++;
         }
-        _monsters = new List<GameObject>();
         for (int j = 0; j < _spawnNumber.Length; j++)
         {
             MakeMonsters(_monPrefab[j], j);
@@ -69,10 +69,9 @@ public class CRespawn : MonoBehaviour
         for (int i = 0; i < _spawnNumber[index]; i++)
         {
             GameObject mon = Instantiate(monster, _monsterPosition[index, i].position, Quaternion.identity) as GameObject;
-            mon.GetComponent<CEnemyPara>().SetRespawn(gameObject, _monsterIndex + i, _monsterPosition[index, i].position);
             mon.SetActive(false);
-            _monsters.Add(mon);
-            CManager.instance.AddNewMonsters(mon);
+            CMonsterManager.instance.AddMonsterInfo(mon);
+            mon.GetComponent<CEnemyPara>().SetRespawn(this.gameObject, CMonsterManager.instance.GetMonsterCount()-1,_monsterPosition[index, i].position);
         }
     }
 
@@ -87,50 +86,47 @@ public class CRespawn : MonoBehaviour
     }
     #endregion
 
-    public void RemoveMonster(int spawnID)
+    // CEnemyFSM에서 DeadEvent 발생 시 처리
+    // 리스폰 형식이면 몬스터 매니저에서 인포를 삭제하지 않음.
+    public void RemoveMonster(int monsterID)
     {
         _deadMonsters++;
-        //Debug.Log(_deadMonsters);
-        _monsters[spawnID].SetActive(false);
+        CMonsterManager.instance.GetMonsterInfo(monsterID).SetActive(false);
+        if (_isRespawn)
+        {
+            if (_deadMonsters == CMonsterManager.instance.GetMonsterCount())
+            {
+                SpawnMonster();
+            }
+        }
+        else
+        {
+            if (_deadMonsters == CMonsterManager.instance.GetMonsterCount())
+            {
+                Co = StartCoroutine(Stop());
+            }
+        }
         //print(spawnID + " monster was killed");
         // 리스폰 트리거
-        //if (_deadMonsters == _monsters.Count)
-        //{
-        //    StartCoroutine(InitMonsters());
-        //    _deadMonsters = 0;
-        //    if (!_isRespawn)
-        //    {
-        //        CManager.instance.DestroyAllMonsters();
-        //        Destroy(transform.gameObject);
-        //    }
-        //}
-
     }
 
-    #region 미사용
-    IEnumerator InitMonsters()
+    IEnumerator Stop()
     {
-        yield return new WaitForSeconds(_respawnDelay);
-        GetComponent<SphereCollider>().enabled = true;
+        Debug.Log("Cour");
+        yield return new WaitForSeconds(10f);
+        Debug.Log("outine");
+        Destroy(this.gameObject);
+        
     }
 
-
+    // 몬스터 스폰 함수
+    // SetRespawn에서 지정한 기본 정보를 토대로 소환.
     void SpawnMonster()
     {
-        for (int i = 0; i < _monsters.Count; i++)
+        for (int i = 0; i < CMonsterManager.instance.GetMonsterCount(); i++)
         {
-            _monsters[i].GetComponent<CEnemyPara>().respawnAgain();
-            _monsters[i].SetActive(true);
-        }
-    }
-    #endregion
-
-    private void OnTriggerEnter(Collider col)
-    {
-        if (col.gameObject.tag == "Player")
-        {
-            SpawnMonster();
-            GetComponent<SphereCollider>().enabled = false;
+            CMonsterManager.instance.GetMonsterInfo(i).GetComponent<CEnemyPara>().respawnAgain();
+            CMonsterManager.instance.GetMonsterInfo(i).SetActive(true);
         }
     }
 }

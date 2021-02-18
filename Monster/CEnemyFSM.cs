@@ -101,6 +101,7 @@ public class CEnemyFSM : MonoBehaviour
     protected EState _myOldState = EState.Idle;
     protected List<GameObject> _players = new List<GameObject>(); // 플레이어들의 GameObject를 담는 리스트
     protected List<float> _distances = new List<float>(); // 플레이어와의 거리 정보를 담는 리스트
+    
     #endregion
     
     void Start()
@@ -247,7 +248,10 @@ public class CEnemyFSM : MonoBehaviour
         {
             _myState = EState.Dead;
         }
-        _lookAtPlayer = false;
+        if (_lookAtPlayer)
+        {
+            _lookAtPlayer = false;
+        }
     }
     #endregion
 
@@ -340,14 +344,22 @@ public class CEnemyFSM : MonoBehaviour
 
     protected virtual void CallDeadEvent()
     {
+        if (_myPara != null)
+        {
+            Debug.Log(_myPara._name + " " + _myPara._spawnID + " is dead!");
+        }
+        else
+        {
+            Debug.Log(_myBossPara._name + " is dead!");
+        }
+
         _anim.SetBool("Dead", true);
         this.gameObject.tag = "Untagged";
         this.gameObject.layer = LayerMask.NameToLayer("DeadBody");
-        Invoke("RemoveMe", 3f);
+        Invoke("RemoveMe", .1f);
     }
     protected virtual void RemoveMe()
     {
-        _myRespawn.GetComponent<CRespawn>().RemoveMonster(_spawnID);
         _anim.SetBool("Dead", false);
     }
 
@@ -416,6 +428,16 @@ public class CEnemyFSM : MonoBehaviour
         _currentBaseState = _anim.GetCurrentAnimatorStateInfo(0);
         _distances = CalculateDistance(_players);
         _anim.SetInteger("PlayerCount", _players.Count);
+        
+        if (_myPara != null)
+        {
+            _anim.SetInteger("Hp", _myPara._curHp);
+        }
+        else
+        {
+            _anim.SetInteger("Hp", _myBossPara._curHp);
+        }
+
         if (_currentBaseState.fullPathHash != _deadState1)
         {
             IsLookPlayer();
