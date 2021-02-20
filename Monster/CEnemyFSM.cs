@@ -71,7 +71,7 @@ public class CEnemyFSM : MonoBehaviour
     public float _moveSpeed { get; set; } //초당 ~미터의 속도로 이동
     public float _attackDistance { get; set; } // 공격 거리 (적과의 거리)
     protected float _attackAngle { get; set; } // 공격 범위
-    
+
     #region 모션들
     protected static int _idleState { get; set; }
     protected static int _standState { get; set; }
@@ -84,7 +84,7 @@ public class CEnemyFSM : MonoBehaviour
     protected static int _skillWaitState1 { get; set; }
     protected static int _skillState2 { get; set; }
     protected static int _skillState3 { get; set; }
-    protected static int _gethitState { get; set; } 
+    protected static int _gethitState { get; set; }
     protected static int _deadState1 { get; set; }
     protected static int _deadState2 { get; set; }
     protected float _cooltime { get; set; }
@@ -96,13 +96,14 @@ public class CEnemyFSM : MonoBehaviour
     protected float _skillCooltime3 { get; set; }
     protected float _originSkillCooltime3 { get; set; }
     #endregion
-    
+
     protected EState _myState = EState.Idle;
     protected EState _myOldState = EState.Idle;
     protected List<GameObject> _players = new List<GameObject>(); // 플레이어들의 GameObject를 담는 리스트
     protected List<float> _distances = new List<float>(); // 플레이어와의 거리 정보를 담는 리스트
+
     #endregion
-    
+
     void Start()
     {
         InitStat();
@@ -112,7 +113,7 @@ public class CEnemyFSM : MonoBehaviour
     {
 
     }
-    
+
     #region State
     // 이동함수
     protected virtual void MoveState()
@@ -190,7 +191,7 @@ public class CEnemyFSM : MonoBehaviour
         {
             _myState = EState.Chase;
         }
-        
+
         if (!_actionStart)
         {
             _actionStart = true;
@@ -240,14 +241,17 @@ public class CEnemyFSM : MonoBehaviour
             _cooltime = _originCooltime;
         }
     }
-    
+
     protected virtual void DeadState1()
     {
         if (_myState != EState.Dead)
         {
             _myState = EState.Dead;
         }
-        _lookAtPlayer = false;
+        if (_lookAtPlayer)
+        {
+            _lookAtPlayer = false;
+        }
     }
     #endregion
 
@@ -340,15 +344,25 @@ public class CEnemyFSM : MonoBehaviour
 
     protected virtual void CallDeadEvent()
     {
+        if (_myPara != null)
+        {
+            Debug.Log(_myPara._name + " " + _myPara._spawnID + " is dead!");
+        }
+        else
+        {
+            Debug.Log(_myBossPara._name + " is dead!");
+        }
+
         _anim.SetBool("Dead", true);
         this.gameObject.tag = "Untagged";
         this.gameObject.layer = LayerMask.NameToLayer("DeadBody");
-        Invoke("RemoveMe", 3f);
+        Invoke("RemoveMe", .1f);
     }
     protected virtual void RemoveMe()
     {
-        //_myRespawn.GetComponent<CRespawn>().RemoveMonster(_spawnID);
         _anim.SetBool("Dead", false);
+        CMonsterManager.instance.RemoveMonster(_myPara._spawnID);
+        gameObject.SetActive(false);
     }
 
     protected virtual void CallHitEvent()
@@ -393,7 +407,7 @@ public class CEnemyFSM : MonoBehaviour
 
     }
 
-    
+
     protected virtual void DebugState()
     {
         if (_myOldState != _myState)
@@ -416,6 +430,16 @@ public class CEnemyFSM : MonoBehaviour
         _currentBaseState = _anim.GetCurrentAnimatorStateInfo(0);
         _distances = CalculateDistance(_players);
         _anim.SetInteger("PlayerCount", _players.Count);
+
+        if (_myPara != null)
+        {
+            _anim.SetInteger("Hp", _myPara.CurrentHp);
+        }
+        else
+        {
+            _anim.SetInteger("Hp", _myBossPara.CurrentHp);
+        }
+
         if (_currentBaseState.fullPathHash != _deadState1)
         {
             IsLookPlayer();

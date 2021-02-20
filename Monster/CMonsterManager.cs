@@ -53,6 +53,18 @@ public class CMonsterManager : MonoBehaviour
         return monsterNum;
     }
 
+    // 현재 존재하는 방안의 몬스터의 수를 알려줌
+    public int GetMonsterCount()
+    {
+        return _monsterCount;
+    }
+
+    public GameObject GetMonsterInfo(int monsterID)
+    {
+        Debug.Log(_monsterList.Find(monsterInfo => monsterInfo.id == monsterID).id);
+        return _monsterList.Find(monsterInfo => monsterInfo.id == monsterID).mObject;
+    }
+
     public void RemoveMonster(int monsterID)
     {
         _monsterList.Remove(_monsterList.Find(monsterInfo => monsterInfo.id == monsterID));

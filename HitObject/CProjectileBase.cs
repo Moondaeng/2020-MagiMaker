@@ -97,7 +97,7 @@ public class CProjectileBase : CHitObjectBase
             return;
         }
 
-        Debug.Log($"{other.gameObject.name}");
+        //Debug.Log($"{other.gameObject.name}");
         // destroy particle systems after a slight delay
         if (ProjectileDestroyParticleSystemsOnCollision != null)
         {

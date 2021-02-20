@@ -52,12 +52,11 @@ public class CGoblinFSM : CEnemyFSM
         }
         this.tag = "Untagged";
         this.gameObject.layer = LayerMask.NameToLayer("DeadBody");
-        Invoke("RemoveMe", 2f);
+        Invoke("RemoveMe", .1f);
     }
 
     protected override void RemoveMe()
     {
-        _myRespawn.GetComponent<CRespawn>().RemoveMonster(_spawnID);
         _anim.SetInteger("Dead", 0);
     }
 

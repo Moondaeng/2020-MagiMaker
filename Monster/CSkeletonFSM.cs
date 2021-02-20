@@ -13,9 +13,6 @@ public class CSkeletonFSM : CEnemyFSM
         _myPara = GetComponent<CEnemyPara>();
         _myPara.deadEvent.AddListener(CallDeadEvent);
 
-        _spawnID = _myPara.GetComponent<CEnemyPara>()._spawnID;
-        _myRespawn = _myPara.GetComponent<CEnemyPara>()._myRespawn;
-        
         // 몬스터 마다 다른 행동양식들
         _idleState = Animator.StringToHash("Base Layer.Idle");
         _walkState = Animator.StringToHash("Base Layer.Walk");
