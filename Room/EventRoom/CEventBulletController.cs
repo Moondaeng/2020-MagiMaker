@@ -4,38 +4,32 @@ using UnityEngine;
 
 public class CEventBulletController : MonoBehaviour
 {
+
     [Tooltip("y 로테이션 최대값 설정")]
-    public int maxRotationY;
+    public int middleRotationY;
     [Tooltip("x 로테이션 최대값 설정")]
     public int maxRotationX;
     [Tooltip("x 로테이션 최소값 설정")]
     public int minRotationX;
+    [Tooltip("총알 속도")]
+    public float speed;
+    [Tooltip("총알 데미지")]
+    public int bulletDamage;
     // Start is called before the first frame update
     void Start()
     {
-        if (maxRotationY == 0)
-            maxRotationY = 89;
+        if (middleRotationY == 0)
+            middleRotationY = 0;
         if (maxRotationX == 0)
-            maxRotationX = 60;
+            maxRotationX = 100;
         if (minRotationX == 0)
-            minRotationX = -30;
+            minRotationX = 70;
+        if (speed == 0)
+            speed = 6;
+        if (bulletDamage == 0)
+            bulletDamage = 100;
 
         transform.rotation = Quaternion.Euler(new Vector3(UnityEngine.Random.Range(minRotationX, maxRotationX),
-            UnityEngine.Random.Range(180-maxRotationY, 180+maxRotationY), transform.rotation.z));
+            UnityEngine.Random.Range(middleRotationY - 90, middleRotationY + 90), transform.rotation.z));
     }
-
-    //private void OnTriggerEnter(Collider other)
-    //{
-    //    if (other.gameObject.tag == "WALL" || other.gameObject.tag == "TILE")
-    //    {
-    //        Destroy(gameObject);
-    //    }
-
-    //    if (other.tag == "Player")
-    //    {
-    //        CController.instance.player.GetComponent<CPlayerPara>().DamagedDisregardDefence(bulletDamage);
-    //        Debug.Log("Bullet");
-    //        Destroy(gameObject);
-    //    }
-    //}
 }

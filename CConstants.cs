@@ -99,4 +99,7 @@
     #endregion Number of Slot
 
     public const int EVENT_ROLLING_STONE_DAMAGE = 100;
+
+    public static int EQUIP_ITEM_TYPE = 1;
+    public static int CONSUM_ITEM_TYPE = 0;
 }

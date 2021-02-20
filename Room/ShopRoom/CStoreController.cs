@@ -39,11 +39,19 @@ public class CStoreController : MonoBehaviour
         _slotRoot = transform.Find("SlotGroup");
         _slots = new List<CSlotController>();
 
-        for (int i = 0; i < _slotRoot.childCount; i++)
+        for (int i = 0; i < _slotRoot.childCount - 2; i++)
         {
             Debug.Log("get item");
             var slot = _slotRoot.GetChild(i).GetComponent<CSlotController>();
-            slot.SetItem(CItemDropTable.instance.DropRandomItem(CCreateMap.instance.GetStageNumber()));
+            slot.SetItem(CItemDropTable.instance.DropRandomItem(CCreateMap.instance.GetStageNumber(), CConstants.EQUIP_ITEM_TYPE));
+
+            _slots.Add(slot);
+        }
+
+        for (int i = _slotRoot.childCount - 2; i < _slotRoot.childCount; i++)
+        {
+            var slot = _slotRoot.GetChild(i).GetComponent<CSlotController>();
+            slot.SetItem(CItemDropTable.instance.DropRandomItem(CCreateMap.instance.GetStageNumber(), CConstants.CONSUM_ITEM_TYPE));
 
             _slots.Add(slot);
         }
@@ -82,7 +90,6 @@ public class CStoreController : MonoBehaviour
 
     private void ConfirmPurchaseIntention(GameObject slot)
     {
-        //esc 로 끌때 바깥거보다 먼저 안꺼지게 처리 필요함 플래그 이용
         //커서 옮기기도 처리 필요함
 
         //선택한 슬롯의 아이템 이미지와 가격 옮기기

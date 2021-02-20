@@ -421,7 +421,7 @@ public class CCreateMap : MonoBehaviour
         //debug용 보고싶은 맵 있으면 여기다 가져다 두면 됨.
         if (_roomCount == 1)
         {
-            CreateExplicitRoom("NormalRoom0_2");
+            CreateExplicitRoom("EventRoom0_4");
             return;
         }
 
