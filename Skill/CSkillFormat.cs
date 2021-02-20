@@ -33,8 +33,9 @@ public class CSkillFormat
         _timerRegisterNumber = -1;
         _actionNumber = 0;
     }
+    private int _animationNumber;
 
-    public CSkillFormat(int registerNumber, float cooldown, GameObject user)
+    public CSkillFormat(int registerNumber, float cooldown, GameObject user, int ani)
     {
         MaxStack = 1;
         _currentStack = 1;
@@ -43,6 +44,7 @@ public class CSkillFormat
         _timerRegisterNumber = registerNumber;
         _cooldown = cooldown;
         _actionNumber = 0;
+        _animationNumber = ani;
     }
 
     public CSkillFormat(int maxStack, int registerNumber, float cooldown, GameObject user)

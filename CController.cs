@@ -29,7 +29,7 @@ public class CController : MonoBehaviour
 
     public static CController instance;
 
-    public GameObject player;
+    [SerializeField] public GameObject player;
 
     private CCntl _playerControl;
 
@@ -42,6 +42,8 @@ public class CController : MonoBehaviour
     private float z;
 
     private GameObject _viewingObject;
+
+    public RaycastHit hit;
 
     private void Awake()
     {
@@ -63,7 +65,7 @@ public class CController : MonoBehaviour
             {KeyCode.E, UseConsumable },
             {KeyCode.F, GetItem },
             {KeyCode.Z, Roll },
-            {KeyCode.Mouse1, UseSkill },
+            {KeyCode.Mouse1, Skill },
         };
     }
 
@@ -271,6 +273,7 @@ public class CController : MonoBehaviour
         player.GetComponent<CCharacterSkill>().SkillSelect(index);
     }
 
+    // CCntl로 해당 내용 옮김
     // 스킬 사용
     private void UseSkill()
     {

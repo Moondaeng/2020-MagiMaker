@@ -273,7 +273,7 @@ public class CBoarFSM : CEnemyFSM
     protected override void Update()
     {
         DebugState();
-        _anim.SetInteger("Hp", _myPara.CurrentHp);
+        _anim.SetInteger("Hp", _myPara._curHp);
         _anim.SetBool("Hit", _getHit);
         _anim.SetBool("RandomWalk", _randomWalk);
         _anim.SetBool("Search", _search);

@@ -11,7 +11,7 @@ public class CRespawn : MonoBehaviour
     [SerializeField] bool _isRespawn;
     [Tooltip("몇 마리?")]
     [SerializeField] int[] _spawnNumber;
-    Transform[,] _monsterPosition;
+    Transform[, ] _monsterPosition;
     int _sumOfSpawnNumber;
     int _maxOfSpawnNumber;
     float _respawnDelay = 3f;
@@ -71,7 +71,7 @@ public class CRespawn : MonoBehaviour
             GameObject mon = Instantiate(monster, _monsterPosition[index, i].position, Quaternion.identity) as GameObject;
             mon.SetActive(false);
             CMonsterManager.instance.AddMonsterInfo(mon);
-            mon.GetComponent<CEnemyPara>().SetRespawn(this.gameObject, CMonsterManager.instance.GetMonsterCount() - 1, _monsterPosition[index, i].position);
+            mon.GetComponent<CEnemyPara>().SetRespawn(this.gameObject, CMonsterManager.instance.GetMonsterCount()-1,_monsterPosition[index, i].position);
         }
     }
 
@@ -116,7 +116,7 @@ public class CRespawn : MonoBehaviour
         yield return new WaitForSeconds(10f);
         Debug.Log("outine");
         Destroy(this.gameObject);
-
+        
     }
 
     // 몬스터 스폰 함수

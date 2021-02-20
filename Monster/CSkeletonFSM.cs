@@ -148,9 +148,4 @@ public class CSkeletonFSM : CEnemyFSM
             IsLookPlayer();
         base.Update();
     }
-
-    protected void Hit()
-    {
-
-    }
 }

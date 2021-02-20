@@ -12,17 +12,25 @@ public class CMonsterManager : MonoBehaviour
     {
         public int id;
         public GameObject mObject;
+        public Vector3 mPosition;
 
         public MonsterInfo(int id, GameObject monsterObject)
         {
             this.id = id;
             mObject = monsterObject;
         }
+
+        public MonsterInfo(int id, GameObject monsterObject, Vector3 monsterPosition)
+        {
+            this.id = id;
+            mObject = monsterObject;
+            mPosition = monsterPosition;
+        }
     }
 
     private int _monsterCount = 0;
     private List<MonsterInfo> _monsterList = new List<MonsterInfo>();
-    
+
     public static CMonsterManager instance;
 
     #region 초기화
@@ -39,8 +47,8 @@ public class CMonsterManager : MonoBehaviour
         SetMonsterStatusViewer();
     }
     #endregion
-
-    #region 몬스터 추가 / 제거
+    
+    #region 몬스터 추가 / 제거 / 현재 개체수 출력
     private int CreateMonsterID()
     {
         return _monsterCount++;
@@ -106,7 +114,7 @@ public class CMonsterManager : MonoBehaviour
     /// <param name="targetPlayerNumber">행동 대상</param>
     public void OrderAction(int monsterID, int actionNumber, int targetPlayerNumber)
     {
-        
+
     }
 
     /// <summary>
@@ -130,7 +138,7 @@ public class CMonsterManager : MonoBehaviour
 
     public void DestroyAllMonsters()
     {
-        
+
     }
     #endregion
 }

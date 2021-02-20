@@ -346,7 +346,7 @@ public class CDragonBossFSM : CEnemyFSM
     {
         DebugState();
         _anim.SetBool("CoolDown", _coolDown);
-        _anim.SetInteger("Hp", _myBossPara.CurrentHp);
+        _anim.SetInteger("Hp", _myBossPara._curHp);
         _anim.SetBool("Defend", _defend);
         _anim.SetBool("Hit", _getHit);
         if (_getHit) _getHit = false;

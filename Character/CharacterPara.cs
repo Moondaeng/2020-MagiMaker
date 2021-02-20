@@ -5,9 +5,19 @@ using UnityEngine.Events;
 using System;
 
 #region 캐릭터 이벤트
+[System.Serializable]
+public class DamageEvent : UnityEvent<int, int>
+{
+
+}
+
+public class HitEvent : UnityEvent<int>
+{
+
+}
+
 /// <summary>
 /// 체력이 바뀌는 모든 이벤트(데미지, 힐 등)
-/// string : 체력에 변화를 준 대상(태그)
 /// int : 체력 변화량
 /// </summary>
 public class HpChanageEvent : UnityEvent<int> { }
@@ -73,18 +83,17 @@ public class CharacterPara : MonoBehaviour
         }
     }
 
-    [SerializeField]
-    protected int _curHp;
-
-    public int _maxHp;
-    public int _attackMin { get; set; }
-    [SerializeField] public int _attackMax;
-    public int _defense { get; set; }
+    [Tooltip("최대 체력")] [SerializeField] public int _maxHp;
+    [HideInInspector] public int _curHp;
+    [Tooltip("최소 공격력")] [SerializeField] public int _attackMin;
+    [Tooltip("최대 공격력")] [SerializeField] public int _attackMax;
+    [Tooltip("방어력")] [SerializeField] public int _defense;
     public bool _isAnotherAction { get; set; }
     public bool _isStunned { get; set; }
     public bool _isDead { get; set; }
     public int _rewardMoney { get; set; }
     public int _spawnID { get; set; }
+    [Tooltip("히트 애니메이션 출력\n최대체력 비율")] public float _hitGauge;
     #endregion
 
     #region UseEffect 변수
@@ -137,6 +146,7 @@ public class CharacterPara : MonoBehaviour
     [System.NonSerialized]
     public HpChanageEvent healEvent = new HpChanageEvent();
 
+    public HitEvent hitGaugeEvent = new HitEvent();
     [System.NonSerialized]
     public HpDrawEvent hpDrawEvent = new HpDrawEvent();
     #endregion
@@ -169,6 +179,7 @@ public class CharacterPara : MonoBehaviour
 
     public virtual void InitPara()
     {
+        hitGaugeEvent.AddListener(HitGaugeCalculate);
     }
 
     // 평타 데미지 계산식
@@ -455,16 +466,10 @@ public class CharacterPara : MonoBehaviour
         DamagedDisregardDefence(damage);
     }
 
-    public void DamagedDisregardDefence(string damageGiverTag, int enemyAttack)
-    {
-        CurrentHp -= (int)enemyAttack;
-        damageEvent?.Invoke(CurrentHp);
-        UpdateAfterReceiveAttack();
-    }
-
     public void DamagedDisregardDefence(int enemyAttack)
     {
         CurrentHp -= (int)enemyAttack;
+        hitGaugeEvent?.Invoke(enemyAttack);
         UpdateAfterReceiveAttack();
     }
 
@@ -479,6 +484,16 @@ public class CharacterPara : MonoBehaviour
             CurrentHp = 0;
             _isDead = true;
             deadEvent.Invoke();
+        }
+    }
+
+    public virtual void HitGaugeCalculate(int attackDamage)
+    {
+        float result = (attackDamage * 100f) / _maxHp;
+        if (result > _hitGauge)
+        {
+            Debug.Log("Hit Event Before");
+            hitEvent.Invoke();
         }
     }
 

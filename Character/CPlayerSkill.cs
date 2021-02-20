@@ -51,13 +51,6 @@ public class CPlayerSkill : CCharacterSkill
     // Start is called before the first frame update
     protected void Start()
     {
-        // 아래 항목은 전부 임시 코드(작동 테스트용) 
-        // 콤보 스킬 포맷 등록
-        for(int i = _skillList.Count; i < 42; i++)
-        {
-            _skillList.Add(new CSkillFormat(i, 5f + 0.5f * i, gameObject));
-        }
-
         // 주원소, 부원소 배우기
         SetMainElement(0, SkillElement.Fire);
         SetMainElement(1, SkillElement.Water);

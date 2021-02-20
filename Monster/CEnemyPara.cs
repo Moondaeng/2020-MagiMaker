@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.UI;
 
 public class CEnemyPara : CharacterPara
 {
@@ -40,11 +39,11 @@ public class CEnemyPara : CharacterPara
     public string _name;
     string _originTag = "Monster";
     [HideInInspector] public GameObject _myRespawn;
-    
     Vector3 _originPos;
 
     public override void InitPara()
     {
+        deadEvent.AddListener(SetOffMonster);
         base.InitPara();
         _isStunned = false;
         _isDead = false;
@@ -54,9 +53,22 @@ public class CEnemyPara : CharacterPara
     public void SetRespawn(GameObject respawn, int spawnID, Vector3 originPos)
     {
         _myRespawn = respawn;
-        this._spawnID = spawnID;
-        this._originPos = originPos;
+        _spawnID = spawnID;
+        _originPos = originPos;
+        //Debug.Log("My Respawn is : " + _myRespawn + "  My SpawnID is : " + _spawnID
+        //    + "  My originPos is : " + _originPos);
     }
+
+    public void SetOffMonster()
+    {
+        Invoke("SetActiveFalse", 2f);
+    }
+
+    public void SetActiveFalse()
+    {
+        _myRespawn.GetComponent<CRespawn>().RemoveMonster(_spawnID);
+    }
+
 
     public void respawnAgain()
     {

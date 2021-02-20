@@ -60,7 +60,7 @@ public class CBossPara : CEnemyPara
         if (!_defendon && _curHp != 0)
         {
             Debug.Log("히트 이벤트 보내기 전");
-            //hitGaugeEvent?.Invoke(enemyAttack);
+            hitGaugeEvent?.Invoke(enemyAttack);
         }
         UpdateAfterReceiveAttack();
     }
