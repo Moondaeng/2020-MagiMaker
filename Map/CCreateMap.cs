@@ -70,6 +70,18 @@ public class CCreateMap : MonoBehaviour
         CreateStage();
     }
 
+    public void CreateRoom(CRoom[,] roomArr, int roomCount, int roadCount)
+    {
+        //debug용 보고싶은 맵 있으면 여기다 가져다 두면 됨.
+        if (_roomCount == 1)
+        {
+            CreateExplicitRoom("EventRoom0_3");
+            return;
+        }
+
+        InstantiateRoom(roomArr[roomCount, roadCount].RoomType);
+    }
+
     public void AddPortal()
     {
 
@@ -416,17 +428,7 @@ public class CCreateMap : MonoBehaviour
         }
     }
 
-    public void CreateRoom(CRoom[,] roomArr, int roomCount, int roadCount)
-    {
-        //debug용 보고싶은 맵 있으면 여기다 가져다 두면 됨.
-        if (_roomCount == 1)
-        {
-            CreateExplicitRoom("EventRoom0_4");
-            return;
-        }
-
-        InstantiateRoom(roomArr[roomCount, roadCount].RoomType);
-    }
+    
 
     private void InstantiateRoom(CGlobal.ERoomType roomType)
     {

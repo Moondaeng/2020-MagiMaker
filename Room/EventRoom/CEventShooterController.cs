@@ -39,11 +39,7 @@ public class CEventShooterController : MonoBehaviour
         for (int i = 0; i < 70; i++)
         {
             GameObject bullet = Resources.Load("Object/EventBullet") as GameObject;
-            bullet = Object.Instantiate(bullet, bullet.transform.position, bullet.transform.rotation);
-            _bullets.Add(bullet);
-            bullet.transform.SetParent(transform.parent.Find("Bullet"));
-            bullet.SetActive(false);
-            Debug.Log(i + "'s bullet");
+            CBulletQueue.instance.BulletEnqueue(bullet);
         }
         StartCoroutine("spreadBullet", firingCycle);
     }
@@ -54,34 +50,17 @@ public class CEventShooterController : MonoBehaviour
         moveUpNDown();
     }
 
-    //private void OnDestroy()
-    //{
-    //    Debug.Log("Destroy Stone");
-
-    //    GameObject[] gameObjects = GameObject.FindGameObjectsWithTag("EventRoomStone");
-
-    //    foreach (GameObject gameObject in gameObjects)
-    //        Object.Destroy(gameObject);
-    //}
-
     IEnumerator spreadBullet(float delayTime)
     {
-        foreach (GameObject bullet in _bullets)
+        GameObject bullet = CBulletQueue.instance.BulletDequeue();
+        if (bullet == null)
+            Debug.Log("bullet is null");
+        else
         {
-            if (bullet == null)
-            {
-                Debug.Log("bullet is null");
-            }
-            else if (!bullet.activeSelf)
-            {
-                bullet.transform.position = transform.position;
-
-                bullet.SetActive(true);
-                bullet.GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
-                bullet.GetComponent<Rigidbody>().AddRelativeForce(new Vector3(0, -launchVelocity, 0), ForceMode.VelocityChange);
-
-                break;
-            }
+            bullet.SetActive(true);
+            bullet.transform.position = transform.position;
+            bullet.GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
+            bullet.GetComponent<Rigidbody>().AddRelativeForce(new Vector3(0, -launchVelocity, 0), ForceMode.VelocityChange);
         }
         yield return new WaitForSeconds(delayTime);
         StartCoroutine("spreadBullet", delayTime);
