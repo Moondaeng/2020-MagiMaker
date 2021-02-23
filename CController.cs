@@ -65,7 +65,7 @@ public class CController : MonoBehaviour
             {KeyCode.E, UseConsumable },
             {KeyCode.F, GetItem },
             {KeyCode.Z, Roll },
-            {KeyCode.Mouse1, Skill },
+            {KeyCode.Mouse1, UseSkill },
         };
     }
 

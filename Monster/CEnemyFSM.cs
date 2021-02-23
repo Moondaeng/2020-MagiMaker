@@ -429,14 +429,14 @@ public class CEnemyFSM : MonoBehaviour
         _distances = CalculateDistance(_players);
         _anim.SetInteger("PlayerCount", _players.Count);
         
-        if (_myPara != null)
-        {
-            _anim.SetInteger("Hp", _myPara._curHp);
-        }
-        else
-        {
-            _anim.SetInteger("Hp", _myBossPara._curHp);
-        }
+        //if (_myPara != null)
+        //{
+        //    _anim.SetInteger("Hp", _myPara._curHp);
+        //}
+        //else
+        //{
+        //    _anim.SetInteger("Hp", _myBossPara._curHp);
+        //}
 
         if (_currentBaseState.fullPathHash != _deadState1)
         {

@@ -137,6 +137,13 @@ public class CSkeletonFSM : CEnemyFSM
 
     #endregion
 
+    #region Hit 애니메이션 Reciever 오류 피하기용
+    private void Hit()
+    {
+        
+    }
+    #endregion
+
     protected override void Update()
     {
         if (_currentBaseState.fullPathHash == _deadState1) return;

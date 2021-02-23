@@ -6,8 +6,8 @@ using UnityEngine.Events;
 public class CGolemFSM : CEnemyFSM
 {
     #region 골렘만 필요한 Properties
-    [SerializeField] readonly GameObject _hand;
-    [SerializeField] readonly GameObject _rock;
+    [SerializeField] GameObject _hand;
+    [SerializeField] GameObject _rock;
     GameObject Rock;
     ThrowObject RockScript;
     bool _holding;

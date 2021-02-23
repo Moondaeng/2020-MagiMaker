@@ -26,12 +26,12 @@ public class CEnemyPara : CharacterPara
     private void OnEnable()
     {
         _spawnID = CMonsterManager.instance.AddMonsterInfo(gameObject);
+        Debug.Log($"{_spawnID}");
         monsterHitEvent.AddListener(CMonsterManager.instance.MonsterHit);
     }
 
     private void OnDisable()
     {
-        CMonsterManager.instance.RemoveMonster(_spawnID);
         monsterHitEvent.RemoveAllListeners();
     }
     #endregion
@@ -66,7 +66,9 @@ public class CEnemyPara : CharacterPara
 
     public void SetActiveFalse()
     {
-        _myRespawn.GetComponent<CRespawn>().RemoveMonster(_spawnID);
+        // 코드 개선 필요 - 콜백을 통해 몬스터 매니저에게 호출하는 구조가 되어야 함
+        CMonsterManager.instance.RemoveMonster(_spawnID);
+        //_myRespawn.GetComponent<CRespawn>().RemoveMonster(_spawnID);
     }
 
 

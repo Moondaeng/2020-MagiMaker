@@ -8,6 +8,7 @@ using UnityEngine.Events;
  */
 public class CMonsterManager : MonoBehaviour
 {
+    [System.Serializable]
     private class MonsterInfo
     {
         public int id;
@@ -69,13 +70,20 @@ public class CMonsterManager : MonoBehaviour
 
     public GameObject GetMonsterInfo(int monsterID)
     {
-        Debug.Log(_monsterList.Find(monsterInfo => monsterInfo.id == monsterID).id);
+        //Debug.Log(_monsterList.Find(monsterInfo => monsterInfo.id == monsterID).id);
         return _monsterList.Find(monsterInfo => monsterInfo.id == monsterID).mObject;
     }
 
     public void RemoveMonster(int monsterID)
     {
-        _monsterList.Remove(_monsterList.Find(monsterInfo => monsterInfo.id == monsterID));
+        var removeMonsterInfo = _monsterList.Find(monsterInfo => monsterInfo.id == monsterID);
+        if (removeMonsterInfo == null)
+        {
+            Debug.Log("remove Monster is null");
+            return;
+        }
+        removeMonsterInfo.mObject.SetActive(false);
+        _monsterList.Remove(removeMonsterInfo);
     }
     #endregion
 
