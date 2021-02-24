@@ -9,7 +9,7 @@ public class CEventRoomNpcClick : MonoBehaviour
     public static CEventRoomNpcClick instance = null;
     public Stack<GameObject> _stackPopUp;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         if (instance == null)
             instance = this;

@@ -13,7 +13,6 @@ public class CEventRoomPopUpController : MonoBehaviour
     public virtual void Start()
     {
         _popUp = gameObject;
-        CEventRoomNpcClick.instance._stackPopUp.Push(_popUp);
 
         _childCount = _popUp.transform.childCount;
 

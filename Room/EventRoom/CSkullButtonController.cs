@@ -8,6 +8,7 @@ public class CSkullButtonController : CEventRoomPopUpController
     GameObject _skull;
     public override void Start()
     {
+        base.Start();
         _skull = GameObject.Find("Skull");
     }
 
