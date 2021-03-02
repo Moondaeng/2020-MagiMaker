@@ -35,9 +35,8 @@ public class CEnemyPara : CharacterPara
 
     public void SetActiveFalse()
     {
-        _myRespawn.GetComponent<CRespawn>().RemoveMonster(_spawnID);
+        CMonsterManager.instance.RemoveMonster(_spawnID);
     }
-
 
     public void respawnAgain()
     {

@@ -31,6 +31,7 @@ public class CDragonBossFSM : CEnemyFSM
     
     public sealed class DragonEState : EState
     {
+        public static readonly DragonEState Defend = new DragonEState("Defend");
         public static readonly DragonEState TakeOff = new DragonEState("TakeOff");
         public static readonly DragonEState FlyFloat = new DragonEState("FlyFloat");
         public static readonly DragonEState FlyForward = new DragonEState("FlyForward");
@@ -52,23 +53,12 @@ public class CDragonBossFSM : CEnemyFSM
         _attackAngle = 5f;
 
         _text = transform.GetChild(2).GetComponent<TextMeshPro>();
-        _anim = GetComponent<Animator>();
-        _myBossPara = GetComponent<CBossPara>();
         _myBossPara.deadEvent.AddListener(CallDeadEvent);
         _myBossPara.hitEvent.AddListener(CallHitEvent);
         _myBossPara.SkillUsingHPEvent.AddListener(SkillState3);
         _myBossPara.DefenceUsingEvent.AddListener(DefendState);
         
-        _idleState = Animator.StringToHash("Base Layer.Idle");
-        _runState = Animator.StringToHash("Base Layer.Run");
-        _attackState1 = Animator.StringToHash("Base Layer.Attack");
-        _waitState = Animator.StringToHash("Base Layer.AttackWait");
-        _skillState1 = Animator.StringToHash("Base Layer.Skill1");
-        _skillState2 = Animator.StringToHash("Base Layer.Skill2");
-        _skillState3 = Animator.StringToHash("Base Layer.Skill3");
-        _gethitState = Animator.StringToHash("Base Layer.GetHit");
         _defendState = Animator.StringToHash("Base Layer.Defend");
-        _deadState1 = Animator.StringToHash("Base Layer.Dead");
         _takeOff = Animator.StringToHash("Base Layer.TakeOff");
         _flyFloat = Animator.StringToHash("Base Layer.Skill3Detail.FlyFloat");
         _flyFloat1 = Animator.StringToHash("Base Layer.Skill3Detail.FlyFloat1");
@@ -78,35 +68,17 @@ public class CDragonBossFSM : CEnemyFSM
         _land = Animator.StringToHash("Base Layer.Land");
         
         _cooltime = 1f;
-        _skillCooltime1 = 5f;
-        _skillCooltime2 = 15f;
-        _originCooltime = _cooltime;
-        _originSkillCooltime1 = _skillCooltime1;
-        _originSkillCooltime2 = _skillCooltime2;
     }
     
-    protected override void CallDeadEvent()
-    {
-        Debug.Log("he is dead");
-        _anim.SetBool("Dead", true);
-        this.gameObject.tag = "Untagged";
-        this.gameObject.layer = LayerMask.NameToLayer("DeadBody");
-        Invoke("OffDead", 0.1f);
-    }
-
-    private void OffDead()
-    {
-        _anim.SetBool("Dead", false);
-    }
 
     #region State
     protected override void UpdateState()
     {
         if (_actionStart)
         {
-            _skillCooltime1 -= Time.deltaTime;
+            _skillCoolTime[0] -= Time.deltaTime;
             _skillCoolDown1 = true;
-            _skillCooltime2 -= Time.deltaTime;
+            _skillCoolTime[1] -= Time.deltaTime;
             _skillCoolDown2 = true;
         }
         if (_currentBaseState.fullPathHash == _idleState) IdleState();
@@ -117,7 +89,7 @@ public class CDragonBossFSM : CEnemyFSM
         else if (_currentBaseState.fullPathHash == _skillState3) SkillState3();
         else if (_currentBaseState.fullPathHash == _defendState) DefendState();
         else if (_currentBaseState.fullPathHash == _waitState) AttackWaitState();
-        else if (_currentBaseState.fullPathHash == _deadState1) DeadState1();
+        else if (_currentBaseState.fullPathHash == _deadState) DeadState();
         else if (_currentBaseState.fullPathHash == _takeOff) TakeOffState();
         else if (_currentBaseState.fullPathHash == _flyFloat) FlyFloatState();
         else if (_currentBaseState.fullPathHash == _flyFloat1) FlyFloatState();
@@ -126,19 +98,19 @@ public class CDragonBossFSM : CEnemyFSM
         else if (_currentBaseState.fullPathHash == _flyFireball) FlyFireballState();
         else if (_currentBaseState.fullPathHash == _land) LandState();
 
-        if (_skillCooltime1 < 0f && !_anotherAction)
+        if (_skillCoolTime[0] < 0f && !_anotherAction)
         {
             _anim.SetTrigger("Skill1");
             _skillCoolDown1 = false;
         }
-        if (_skillCooltime2 < 0f && !_anotherAction)
+        if (_skillCoolTime[1] < 0f && !_anotherAction)
         {
             _anim.SetTrigger("Skill2");
             _skillCoolDown2 = false;
         }
     }
     
-    private void IdleState()
+    private new void IdleState()
     {
         if (_anotherAction)
         {
@@ -149,7 +121,7 @@ public class CDragonBossFSM : CEnemyFSM
     protected override void ChaseState()
     {
         base.ChaseState();
-        if (_currentBaseState.fullPathHash != _deadState1) MoveState();
+        if (_currentBaseState.fullPathHash != _deadState) MoveState();
     }
 
     protected override void AttackState1()
@@ -164,7 +136,7 @@ public class CDragonBossFSM : CEnemyFSM
         if (_myState != EState.Skill1)
         {
             _myState = EState.Skill1;
-            _skillCooltime1 = _originSkillCooltime1;
+            _skillCoolTime[0] = _originSkillCoolTime[0];
         }
         _lookAtPlayer = false;
     }
@@ -175,7 +147,7 @@ public class CDragonBossFSM : CEnemyFSM
         if (_myState != EState.Skill2)
         {
             _myState = EState.Skill2;
-            _skillCooltime2 = _originSkillCooltime2;
+            _skillCoolTime[1] = _originSkillCoolTime[1];
         }
         if (!_lookAtPlayer)
         {
@@ -312,7 +284,7 @@ public class CDragonBossFSM : CEnemyFSM
     public void DefendState()
     {
         // 11-27 가드이벤트 처리 해야함
-        _myState = EState.Defend;
+        _myState = DragonEState.Defend;
         Debug.Log("가드 이벤트 보내기 후");
         _defend = true;
     }
@@ -346,7 +318,7 @@ public class CDragonBossFSM : CEnemyFSM
     {
         DebugState();
         _anim.SetBool("CoolDown", _coolDown);
-        _anim.SetInteger("Hp", _myBossPara._curHp);
+        _anim.SetInteger("Hp", _myBossPara.CurrentHp);
         _anim.SetBool("Defend", _defend);
         _anim.SetBool("Hit", _getHit);
         if (_getHit) _getHit = false;
