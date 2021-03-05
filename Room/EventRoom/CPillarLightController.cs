@@ -16,6 +16,8 @@ public class CPillarLightController : MonoBehaviour
         _pillarGroup = gameObject;
         r = new System.Random();
         _directionalLight = GameObject.Find("Directional Light");
+        CGlobal.isEvent = true;
+        CCreateMap.instance.NotifyPortal();
 
         StartCoroutine("PillarLightEvent");
     }
@@ -29,6 +31,9 @@ public class CPillarLightController : MonoBehaviour
             yield return StartCoroutine("ExtendSphereCollider");
         }
         //_directionalLight.SetActive(true);
+
+        CGlobal.isEvent = false;
+        CCreateMap.instance.NotifyPortal();
     }
 
     IEnumerator ExtendSphereCollider()

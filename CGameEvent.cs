@@ -16,6 +16,9 @@ namespace NEvent
 [DisallowMultipleComponent]
 public class CGameEvent : MonoBehaviour
 {
+    public class ChangingMoneyEvent : UnityEvent<int> { }
+
+
     public NEvent.MoveStart PlayerMoveStartEvent;
     public NEvent.MoveStop PlayerMoveStopEvent;
     public NEvent.ActionStart PlayerActionEvent;
@@ -24,6 +27,9 @@ public class CGameEvent : MonoBehaviour
 
     private Network.CTcpClient _tcpManager;
     private Network.CPacketInterpreter _inGameInterpreter;
+
+    public ChangingMoneyEvent EarnMoneyEvent = new ChangingMoneyEvent();
+    public ChangingMoneyEvent LoseMoneyEvent = new ChangingMoneyEvent();
 
     public static CGameEvent instance;
 
@@ -45,10 +51,10 @@ public class CGameEvent : MonoBehaviour
         _tcpManager = Network.CTcpClient.instance;
         _playerCommand = CPlayerCommand.instance;
 
-        // 연결되면 패킷 받을거 설정
         if (_tcpManager != null && _tcpManager.IsConnect == true)
         {
             Debug.Log("Network Connected");
+            // 연결되면 패킷 받을거 설정
             _inGameInterpreter = new Network.CPacketInterpreter(_tcpManager);
             _tcpManager.SetPacketInterpret(_inGameInterpreter.PacketInterpret);
             PlayerMoveStartEvent.AddListener(_inGameInterpreter.SendMoveStart);
@@ -65,6 +71,7 @@ public class CGameEvent : MonoBehaviour
         {
             Debug.Log("Network not Connected");
             //_playerCommand.SetMyCharacter(0);
+            EarnMoneyEvent.AddListener(_playerCommand.EarnMoneyAllCharacter);
         }
     }
 

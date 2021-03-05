@@ -74,6 +74,18 @@ public class CCreateMap : MonoBehaviour
         CreateStage();
     }
 
+    public void CreateRoom(CRoom[,] roomArr, int roomCount, int roadCount)
+    {
+        Debug.Log("Create Room");
+        //debug용 보고싶은 맵 있으면 여기다 가져다 두면 됨.
+        if (_roomCount < _explicitRoomList.Count && CreateExplicitRoomInList(_roomCount))
+        {
+            return;
+        }
+
+        InstantiateRoom(roomArr[roomCount, roadCount].RoomType);
+    }
+
     public void AddPortal()
     {
 
@@ -266,8 +278,15 @@ public class CCreateMap : MonoBehaviour
 
         if (_roomCount == 0)
         {
-            _roomArr[0, 0].RoomType = CGlobal.ERoomType._start;
-            InstantiateRoom(_roomArr[_roomCount, 0].RoomType); //시작방 생성
+            if (_explicitRoomList.Count != 0)
+            {
+                CreateExplicitRoomInList(0);
+            }
+            else
+            {
+                _roomArr[0, 0].RoomType = CGlobal.ERoomType._start;
+                InstantiateRoom(_roomArr[_roomCount, 0].RoomType); //시작방 생성
+            }
         }
 
         if (_roomCount == 1)
@@ -420,18 +439,6 @@ public class CCreateMap : MonoBehaviour
         }
     }
 
-    public void CreateRoom(CRoom[,] roomArr, int roomCount, int roadCount)
-    {
-        //debug용 보고싶은 맵 있으면 여기다 가져다 두면 됨.
-        if (_roomCount < _explicitRoomList.Count + 1)
-        {
-            CreateExplicitRoomInList(_roomCount);
-            return;
-        }
-
-        InstantiateRoom(roomArr[roomCount, roadCount].RoomType);
-    }
-
     private void InstantiateRoom(CGlobal.ERoomType roomType)
     {
         GameObject tempRoom;
@@ -537,14 +544,21 @@ public class CCreateMap : MonoBehaviour
     }
 
     #region Debug
-    private void CreateExplicitRoomInList(int elementNumber)
+    private bool CreateExplicitRoomInList(int elementNumber)
     {
-        var roomOrigin = _explicitRoomList[elementNumber-1];
+        if (_explicitRoomList[elementNumber] == null)
+        {
+            Debug.Log("can't create Explicit Room");
+            return false;
+        }
+
+        var roomOrigin = _explicitRoomList[elementNumber];
         var copy = Instantiate(roomOrigin, roomOrigin.transform.position, roomOrigin.transform.rotation);
         _rooms.AddLast(copy);
         _roomCount++;
         AddPortal();
         NotifyPortal();
+        return true;
     }
     #endregion
 }

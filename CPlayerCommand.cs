@@ -34,8 +34,8 @@ public class CPlayerCommand : MonoBehaviour
 
     private void Start()
     {
-        //SetActivePlayers(3);
-        //SetMyCharacter(0);
+        SetActivePlayers(1);
+        SetMyCharacter(0);
     }
 
     // 캐릭터 활성화
@@ -227,4 +227,31 @@ public class CPlayerCommand : MonoBehaviour
         var charStat = character.GetComponent<CharacterPara>();
         //charStat.buffParameter.Buff(CBuffList.AttackBuff, buffTime, buffScale);
     }
+
+    #region 골드 처리
+    public void EarnMoneyAllCharacter(int amount)
+    {
+        Debug.Log($"players earn {amount} gold");
+        foreach (var player in players)
+        {
+            if (player.activeSelf)
+            {
+                player.GetComponent<CPlayerPara>().Inventory.Gold += amount;
+            }
+        }
+    }
+
+    public void LoseMoneyAllCharacter(int amount)
+    {
+        Debug.Log($"players lose {amount} gold");
+        foreach (var player in players)
+        {
+            if (player.activeSelf)
+            {
+                player.GetComponent<CPlayerPara>().Inventory.Gold -= amount;
+            }
+        }
+    }
+    #endregion
+
 }

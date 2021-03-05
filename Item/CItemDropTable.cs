@@ -18,6 +18,7 @@ public class CItemDropTable : MonoBehaviour
         Normal, Special, Rare, Unique, Shop, Event
     }
 
+    private static readonly int dropForce = 300;
     public static CItemDropTable instance = null;
 
     [SerializeField]
@@ -51,6 +52,18 @@ public class CItemDropTable : MonoBehaviour
         {
             list.Clear();
         }
+    }
+
+    /// <summary>
+    /// dropPos 위치에 item이 드랍되도록 연출한다
+    /// </summary>
+    /// <param name="item"></param>
+    public static void SetItemToDropState(GameObject item, Vector3 dropPos)
+    {
+        item.SetActive(true);
+        item.transform.position = dropPos;
+        item.GetComponent<Rigidbody>().velocity = Vector3.zero;
+        item.GetComponent<Rigidbody>().AddForce(Vector3.up * dropForce);
     }
 
     public GameObject DropRandomItem(int stage, int itemType)
@@ -92,18 +105,18 @@ public class CItemDropTable : MonoBehaviour
         return PopRandomItemByGrade(itemGrade, itemType);
     }
 
-    //public GameObject DropConsumable()
-    //{
-    //    List<GameObject> itemList = _consumableObjectLists;
+    public GameObject DropConsumable()
+    {
+        List<GameObject> itemList = _consumableObjectLists[(int)ItemGrade.Normal];
 
-    //    if (itemList.Count == 0)
-    //    {
-    //        Debug.Log("Consumable Item List is empty");
-    //        return null;
-    //    }
+        if (itemList.Count == 0)
+        {
+            Debug.Log("Consumable Item List is empty");
+            return null;
+        }
 
-    //    return FindRandomItemInList(itemList);
-    //}
+        return FindRandomItemInList(itemList);
+    }
 
     /// <summary>
     /// ItemCompoenent를 가지고 있는 item 추가
@@ -189,13 +202,14 @@ public class CItemDropTable : MonoBehaviour
 
     private GameObject FindRandomItemInList(List<GameObject> list)
     {
-        int randInt = UnityEngine.Random.Range(1, list.Count) - 1;
+        int randInt = UnityEngine.Random.Range(0, list.Count);
+        Debug.Log($"find item{randInt}");
         return list[randInt];
     }
 
     private GameObject PopRandomItemInList(List<GameObject> list, int itemType)
     {
-        int randInt = UnityEngine.Random.Range(1, list.Count) - 1;
+        int randInt = UnityEngine.Random.Range(0, list.Count);
         var item = list[randInt];
 
         if (itemType == 1)

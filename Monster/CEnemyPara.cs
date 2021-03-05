@@ -28,11 +28,13 @@ public class CEnemyPara : CharacterPara
         _spawnID = CMonsterManager.instance.AddMonsterInfo(gameObject);
         Debug.Log($"{_spawnID}");
         monsterHitEvent.AddListener(CMonsterManager.instance.MonsterHit);
+        deadEvent.AddListener(SetOffMonster);
     }
 
     private void OnDisable()
     {
         monsterHitEvent.RemoveAllListeners();
+        deadEvent.RemoveAllListeners();
     }
     #endregion
 
@@ -43,7 +45,6 @@ public class CEnemyPara : CharacterPara
 
     public override void InitPara()
     {
-        deadEvent.AddListener(SetOffMonster);
         base.InitPara();
         _isStunned = false;
         _isDead = false;
@@ -59,6 +60,8 @@ public class CEnemyPara : CharacterPara
         //    + "  My originPos is : " + _originPos);
     }
 
+
+
     public void SetOffMonster()
     {
         Invoke("SetActiveFalse", 2f);
@@ -68,6 +71,7 @@ public class CEnemyPara : CharacterPara
     {
         // 코드 개선 필요 - 콜백을 통해 몬스터 매니저에게 호출하는 구조가 되어야 함
         CMonsterManager.instance.RemoveMonster(_spawnID);
+        CGameEvent.instance.EarnMoneyEvent?.Invoke(_rewardMoney);
         //_myRespawn.GetComponent<CRespawn>().RemoveMonster(_spawnID);
     }
 
@@ -84,5 +88,10 @@ public class CEnemyPara : CharacterPara
     protected override void UpdateAfterReceiveAttack()
     {
         base.UpdateAfterReceiveAttack();
+    }
+
+    protected virtual void DropItem()
+    {
+        //CItemDropTable.instance.DropRandomItem();
     }
 }

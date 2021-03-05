@@ -36,6 +36,7 @@ public class CEventRoomNpcClick : MonoBehaviour
 
     public void CanclePopUp()
     {
+        Debug.Log($"{instance._stackPopUp.Count}");
         if (instance._stackPopUp.Count != 0)
         {
             GameObject popUp = instance._stackPopUp.Pop();

@@ -273,11 +273,9 @@ public class CController : MonoBehaviour
         player.GetComponent<CCharacterSkill>().SkillSelect(index);
     }
 
-    // CCntl로 해당 내용 옮김
-    // 스킬 사용
     private void UseSkill()
     {
-        int layerMask = 1 << LayerMask.NameToLayer("Player");
+        int layerMask = (1 << LayerMask.NameToLayer("Player")) | (1 << LayerMask.NameToLayer("PlayerSkill"));
         layerMask = ~layerMask;
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);

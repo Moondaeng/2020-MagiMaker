@@ -4,8 +4,8 @@ using UnityEngine;
 
 public abstract class CPortal : MonoBehaviour
 {
-    GameObject PortalAcceptParent;
-    GameObject FadeController;
+    protected GameObject PortalAcceptParent;
+    protected GameObject FadeController;
 
     protected virtual void Start()
     {

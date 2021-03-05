@@ -11,7 +11,8 @@ public class CEventRoomMonsterCheck : MonoBehaviour
         foreach (GameObject monster in monsters)
             monster.SetActive(false);
 
-        CEventManager._instance._eventEvent.AddListener(CheckMonsterCount);
+        // 안 돌아가는 부분 제외
+        //CEventManager._instance._eventEvent.AddListener(CheckMonsterCount);
     }
 
     public void ForceDeadMonster()
@@ -28,16 +29,21 @@ public class CEventRoomMonsterCheck : MonoBehaviour
 
         for (int i = 0; i < _monsterGroup.transform.childCount; i++)
             _monsterGroup.transform.GetChild(i).gameObject.GetComponent<CharacterPara>().deadEvent.Invoke();
+
+        CGlobal.isEvent = false;
+        CCreateMap.instance.NotifyPortal();
     }
 
     public void CheckMonsterCount()
     {
+        Debug.Log("invoke");
         StartCoroutine("CheckMonsterCountCoru");
     }
 
     private void OnDestroy()
     {
-        CEventManager._instance._eventEvent.RemoveListener(CheckMonsterCount);
+        // 안 돌아가는 부분 제외
+        //CEventManager._instance._eventEvent.RemoveListener(CheckMonsterCount);
     }
 
     IEnumerator CheckMonsterCountCoru()

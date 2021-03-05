@@ -54,7 +54,7 @@ public class CSpawnStone : MonoBehaviour
         yield return new WaitForSeconds(sec);
         StartCoroutine(OnMagicCircle(pos));
         yield return new WaitForSeconds(1);
-        _stone = Resources.Load("Stone") as GameObject;
+        _stone = Resources.Load("Object/Stone") as GameObject;
         Transform stoneSpawnerChild = _stoneSpawner.transform.GetChild(pos);
         Instantiate(_stone, stoneSpawnerChild.position , Quaternion.identity);
     }

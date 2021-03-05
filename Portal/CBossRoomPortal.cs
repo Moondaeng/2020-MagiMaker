@@ -6,6 +6,7 @@ public class CBossRoomPortal : CPortal
 {
     private Vector3 _presentPosition;
     private Transform _portalMom;
+    [SerializeField] private GameObject _clearUi;
 
     public override void OpenNClosePortal()
     {
@@ -28,6 +29,15 @@ public class CBossRoomPortal : CPortal
             Debug.Log("return position");
             _portalMom.position = _presentPosition; //다시 가져오기
         }
+    }
 
+    private void OnTriggerEnter(Collider coll)
+    {
+        if (coll.tag == "Player")
+        {
+            Debug.Log("Game Clear");
+            _clearUi.SetActive(true);
+            CWindowFacade.instance.SetOtherWindowMode(true);
+        }
     }
 }

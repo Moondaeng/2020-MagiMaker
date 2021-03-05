@@ -84,6 +84,7 @@ public class CMonsterManager : MonoBehaviour
         }
         removeMonsterInfo.mObject.SetActive(false);
         _monsterList.Remove(removeMonsterInfo);
+
     }
     #endregion
 

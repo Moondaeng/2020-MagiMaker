@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class CEventBulletController : MonoBehaviour
 {
+    [HideInInspector]
+    public bool isFirst = true;
 
     [Tooltip("y 로테이션 최대값 설정")]
     public int middleRotationY;
@@ -16,7 +18,7 @@ public class CEventBulletController : MonoBehaviour
     [Tooltip("총알 데미지")]
     public int bulletDamage;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         if (middleRotationY == 0)
             middleRotationY = 0;

@@ -91,7 +91,7 @@ public class CharacterPara : MonoBehaviour
     public bool _isAnotherAction { get; set; }
     public bool _isStunned { get; set; }
     public bool _isDead { get; set; }
-    public int _rewardMoney { get; set; }
+    [SerializeField] public int _rewardMoney;
     public int _spawnID { get; set; }
     [Tooltip("히트 애니메이션 출력\n최대체력 비율")] public float _hitGauge;
     #endregion
@@ -101,7 +101,7 @@ public class CharacterPara : MonoBehaviour
 
     protected class DamageOfTime
     {
-        public static readonly float TimeBonus = -0.2f;
+        public static readonly float TimeBonus = 0.2f;
 
         public int id;
         public CUseEffect.HpChange Amount;
@@ -479,7 +479,7 @@ public class CharacterPara : MonoBehaviour
         print(name + "'s HP: " + CurrentHp);
         // 체력 관련 이벤트
 
-        if (CurrentHp <= 0)
+        if (CurrentHp <= 0 && !_isDead)
         {
             CurrentHp = 0;
             _isDead = true;

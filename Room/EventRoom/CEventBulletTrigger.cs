@@ -21,6 +21,8 @@ public class CEventBulletTrigger : CEventBulletController
 
     void hideObject()
     {
-        transform.parent.gameObject.SetActive(false);
+        GameObject bullet = transform.parent.gameObject;
+        CBulletQueue.instance.BulletEnqueue(bullet);
+        bullet.SetActive(false);
     }
 }

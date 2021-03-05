@@ -50,5 +50,6 @@ public class COldGravestoneButtonController : CEventRoomPopUpController
 
     public void ClickCancel()
     {
+        
     }
 }

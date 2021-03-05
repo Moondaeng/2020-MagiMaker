@@ -106,9 +106,10 @@ public class CStoreController : MonoBehaviour
         string itemPrice = slot.transform.Find("Price").GetComponent<TMPro.TextMeshProUGUI>().text;
         buyingSlot.transform.Find("Price").GetComponent<TMPro.TextMeshProUGUI>().text = itemPrice;
 
-        var itemComponent = slot.GetComponent<CSlotController>().item.GetComponent<CEquipComponent>();
-        var equip = itemComponent.Item as Item.CEquip;
-        guidanceMessage = "'" + equip.ItemName + "' 아이템을 구매하시겠습니까?";
+        var itemComponent = slot.GetComponent<CSlotController>().item.GetComponent<CItemComponent>();
+        var item = itemComponent.Item;
+        //var equip = itemComponent.Item as Item.CEquip;
+        guidanceMessage = "'" + item.ItemName + "' 아이템을 구매하시겠습니까?";
         _confirmPurchaseIntentionPopup.transform.GetChild(0).Find("GuidanceMessage").GetComponent<TMPro.TextMeshProUGUI>().text = guidanceMessage;
     }
 
