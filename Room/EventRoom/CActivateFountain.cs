@@ -5,8 +5,14 @@ using UnityEngine;
 public class CActivateFountain : MonoBehaviour
 {
     [Tooltip("뿌리는 아이템 개수")]
-    public int itemCount = 70;
+    public int itemCount = 300;
+    [Tooltip("뿌리는 주기")]
+    public float delayTime = 0.01f;
+    [Tooltip("뿌리는 힘")]
+    public int force = 1000;
+
     private Queue<int> _coinItemElement;
+    private bool useFlag = false;
     void ActivateFountain()
     {
         _coinItemElement = new Queue<int>();
@@ -14,14 +20,19 @@ public class CActivateFountain : MonoBehaviour
         {
             if (i == itemCount - 1) //원소 뿌리기       
                 _coinItemElement.Enqueue(2);
-            else if (i % (itemCount / 4) == 0) //아이템 뿌리기
+            else if (i % (itemCount / 2) == 0) //아이템 뿌리기
                 _coinItemElement.Enqueue(1);
             else
                 _coinItemElement.Enqueue(0);//코인 뿌리기
         }
 
         Debug.Log("Start Coroutine");
-        StartCoroutine("SpreadItem", 0.1);
+
+        if (!useFlag) //한번 사용시 더이상 사용불가
+        {
+            useFlag = true;
+            StartCoroutine("SpreadItem", delayTime);
+        }
     }
 
     IEnumerator SpreadItem(float delayTime)
@@ -37,9 +48,11 @@ public class CActivateFountain : MonoBehaviour
                     item = Resources.Load("Object/FountainItem") as GameObject;
                     break;
                 case 2:
-                    item = Resources.Load("Object/Test") as GameObject;
+                    item = Resources.Load("Object/FountainElement") as GameObject;
                     break;
             }
+        else
+            Destroy(gameObject);
 
         if (item == null)
         {
@@ -47,9 +60,9 @@ public class CActivateFountain : MonoBehaviour
         }
         else
         {
-            item = Object.Instantiate(item, transform.position, Quaternion.Euler(new Vector3(UnityEngine.Random.Range(-60, 0),
+            item = Instantiate(item, transform.position, Quaternion.Euler(new Vector3(UnityEngine.Random.Range(-60, 0),
                 UnityEngine.Random.Range(0, 360), 0)));
-            item.GetComponent<Rigidbody>().AddRelativeForce(Vector3.up * 750, ForceMode.Force);
+            item.GetComponent<Rigidbody>().AddRelativeForce(Vector3.up * force, ForceMode.Force);
 
             yield return new WaitForSeconds(delayTime);
             StartCoroutine("SpreadItem", delayTime);
