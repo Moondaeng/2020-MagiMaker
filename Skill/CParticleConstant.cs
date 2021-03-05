@@ -2,74 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LoopingAudioSource
-{
-    public AudioSource AudioSource { get; private set; }
-    public float TargetVolume { get; private set; }
-
-    private float startMultiplier;
-    private float stopMultiplier;
-    private float currentMultiplier;
-
-    public LoopingAudioSource(MonoBehaviour script, AudioSource audioSource, float startMultiplier, float stopMultiplier)
-    {
-        AudioSource = audioSource;
-        if (audioSource != null)
-        {
-            AudioSource.loop = true;
-            AudioSource.volume = 0.0f;
-            AudioSource.Stop();
-        }
-
-        TargetVolume = 1.0f;
-
-        this.startMultiplier = currentMultiplier = startMultiplier;
-        this.stopMultiplier = stopMultiplier;
-    }
-
-    public void Play()
-    {
-        Play(TargetVolume);
-    }
-
-    public void Play(float targetVolume)
-    {
-        if (AudioSource != null && !AudioSource.isPlaying)
-        {
-            AudioSource.volume = 0.0f;
-            AudioSource.Play();
-            currentMultiplier = startMultiplier;
-        }
-        TargetVolume = targetVolume;
-    }
-
-    public void Stop()
-    {
-        if (AudioSource != null && AudioSource.isPlaying)
-        {
-            TargetVolume = 0.0f;
-            currentMultiplier = stopMultiplier;
-        }
-    }
-
-    public void Update()
-    {
-        if (AudioSource != null && AudioSource.isPlaying &&
-            (AudioSource.volume = Mathf.Lerp(AudioSource.volume, TargetVolume, Time.deltaTime / currentMultiplier)) == 0.0f)
-        {
-            AudioSource.Stop();
-        }
-    }
-}
-
 public class CParticleConstant : CParitcleSkillBase
 {
-    [HideInInspector]
-    public LoopingAudioSource LoopingAudioSource;
-
-    [Tooltip("looping하는 오디오 소스")]
-    [SerializeField] protected AudioSource _audioSource;
-
     [Tooltip("시작 시간 애니메이션이랑 사운드에 사용")]
     [SerializeField] protected float _startTime = 1f;
 
@@ -119,6 +53,7 @@ public class CParticleConstant : CParitcleSkillBase
 
     private List<GameObject> InTriggerUnit;
     public ColliderSettings ColliderSet;
+    private CFlameThrowerGroupController _flameThrowerGroupController;
 
     Vector3 forward;
     Vector3 up;
@@ -136,24 +71,15 @@ public class CParticleConstant : CParitcleSkillBase
     private void Awake()
     {
         Starting = true;
-        LoopingAudioSource = new LoopingAudioSource(this, _audioSource, _startTime, _stopTime);
     }
     
     protected override void Start()
     {
-        //_myControl = _skillUsingUser.GetComponent<CCntl>();
-        //if (_myControl != null) _myControl.SkillExitEvent.AddListener(Stop);
-        //forward = _skillUsingUser.transform.forward;
-        //up = _skillUsingUser.transform.up;
-        if (_audioSource != null)
-        {
-            _audioSource.Play();
-        }
+        _flameThrowerGroupController = transform.parent.GetComponent<CFlameThrowerGroupController>();
         _stopTimeMultiplier = 1.0f / _stopTime;
         _startTimeMultiplier = 1.0f / _startTime;
         base.Start();
         StartCoroutine(TickDamage());
-        LoopingAudioSource.Play();
     }
 
     public override void CreateExplosion(Vector3 pos, float radius, float force)
@@ -202,10 +128,26 @@ public class CParticleConstant : CParitcleSkillBase
             {
                 objects = UnityEngine.Physics.OverlapCapsule(pos + Vector3.forward * ColliderSet.arg1,
                 pos - Vector3.forward * ColliderSet.arg2, radius, layermask);
+
+                if (gameObject.tag.Equals("FLAMETHROWER"))
+                {
+                    objects = UnityEngine.Physics.OverlapCapsule(pos + Vector3.forward * ColliderSet.arg1,
+                PointOnCircle(transform.position.x, transform.position.z, transform.eulerAngles), radius, layermask);
+                }
                 CollisionMessage(objects);
             }
 
         }
+    }
+
+    public Vector3 PointOnCircle(float x, float z, Vector3 angle)
+    {
+        float xPos = x + Mathf.Sin(angle.y * Mathf.PI / 180) * ColliderSet.arg2;
+        float zPos = z + Mathf.Cos(angle.y * Mathf.PI / 180) * ColliderSet.arg2;
+        Vector3 pos = new Vector3(xPos, 0, zPos);
+        Debug.Log(gameObject.name);
+
+        return pos;
     }
 
     public void CollisionMessage(Collider[] objects)
@@ -236,25 +178,12 @@ public class CParticleConstant : CParitcleSkillBase
                         SwitchInType(a, p);
                     }
                 }
-                else if (g.tag == "Monster")
-                {
-                    CEnemyPara e = g.GetComponent<CEnemyPara>();
-                    foreach (AttackArgumentsList a in AttackArguments)
-                    {
-                        SwitchInType(a, e);
-                    }
-                }
             }
         }
     }
 
     protected override void Update()
     {
-        //if (_staffAnchor)
-        //{
-        //    transform.rotation = _skillUsingUser.transform.rotation;
-        //    transform.position = _skillUsingUser.GetComponent<CCntl>().staff.transform.position;
-        //}
         if (Stopping)
         {
             // increase the stop time
@@ -279,7 +208,8 @@ public class CParticleConstant : CParitcleSkillBase
         }
         base.Update();
 
-        LoopingAudioSource.Update();
+        float speed = _flameThrowerGroupController.degreePerSecond * Time.deltaTime;
+        transform.Rotate(_flameThrowerGroupController._flamethrowerDir * speed);
     }
 
 
@@ -290,8 +220,6 @@ public class CParticleConstant : CParitcleSkillBase
             return;
         }
         Stopping = true;
-
-        LoopingAudioSource.Stop();
 
         base.Stop();
     }

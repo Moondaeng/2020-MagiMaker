@@ -97,7 +97,6 @@ public class CCreateMap : MonoBehaviour
 
     public void RemovePortal()
     {
-        //_portals.RemoveRange(0, _portals.Count);
         _portals.Clear();
     }
 
