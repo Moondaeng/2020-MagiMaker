@@ -8,6 +8,7 @@ public class CGoblinFSM : CEnemyFSM
     bool _runEnd;
     Vector3 _dest;
     float second = 1f;
+    CMonstermeleeChecker AttackTrail1, AttackTrail2;
     #endregion
 
     protected override void InitStat()
@@ -24,6 +25,8 @@ public class CGoblinFSM : CEnemyFSM
         _moveSpeed = 5f;
         _attackDistance = 5f;
         _attackAngle = 10f;
+        AttackTrail1 = transform.GetChild(3).GetComponent<CMonstermeleeChecker>();
+        AttackTrail2 = transform.GetChild(4).GetComponent<CMonstermeleeChecker>();
     }
     
 
@@ -97,6 +100,11 @@ public class CGoblinFSM : CEnemyFSM
             _skillCoolTime[0] = _originSkillCoolTime[0];
             second = 1f;
         }
+    }
+    protected override void AttackDisabledCollider()
+    {
+        AttackTrail1.DiscardList();
+        AttackTrail2.DiscardList();
     }
     #endregion
 

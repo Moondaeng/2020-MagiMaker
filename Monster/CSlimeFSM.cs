@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class CSlimeFSM : CEnemyFSM
 {
+    bool _exist;
+    List<string> _attackedPlayer = new List<string>();
     #region MonsterFSM에서 공유되는 것들
 
     protected override void InitStat()
@@ -64,5 +66,32 @@ public class CSlimeFSM : CEnemyFSM
         _anim.SetBool("CoolDown", _coolDown);
         _anim.SetBool("AnotherAction", _anotherAction);
         base.Update();
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        _exist = false;
+        if (other.tag == "Player")
+        {
+            for (int i = 0; i < _attackedPlayer.Count; i++)
+            {
+                //Debug.Log(_attackedPlayer[i]);
+                if (other.name == _attackedPlayer[i])
+                {
+                    _exist = true;
+                }
+            }
+            if (!_exist)
+            {
+                _attackedPlayer.Add(other.name);
+                var para = other.GetComponent<CPlayerPara>();
+                para.DamegedRegardDefence(_myPara.RandomAttackDamage());
+            }
+        }
+
+    }
+    public void DiscardList()
+    {
+        _attackedPlayer.Clear();
     }
 }

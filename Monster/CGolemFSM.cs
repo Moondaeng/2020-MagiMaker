@@ -10,10 +10,10 @@ public class CGolemFSM : CEnemyFSM
     [SerializeField] GameObject _rock;
     GameObject Rock;
     ThrowObject RockScript;
+    CMonstermeleeChecker AttackTrail;
     bool _holding;
     bool _shooting;
     #endregion
-    
     protected override void InitStat()
     {
         base.InitStat();
@@ -34,6 +34,8 @@ public class CGolemFSM : CEnemyFSM
         SetSkillCoolTimeList.Add(S2);
         SetCoolTime();
         _myPara.hitEvent.AddListener(CallHitEvent);
+        Debug.Log(transform.GetChild(2).name);
+        AttackTrail = transform.GetChild(2).GetComponent<CMonstermeleeChecker>();
     }
 
     #region State
@@ -114,10 +116,16 @@ public class CGolemFSM : CEnemyFSM
         _holding = false;
         _shooting = true;
     }
-    
+
+    protected override void AttackDisabledCollider()
+    {
+        AttackTrail.DiscardList();
+    }
+
     #endregion
     #endregion
-    
+
+
     protected override void Update()
     {
         _anim.SetBool("CoolDown", _coolDown);

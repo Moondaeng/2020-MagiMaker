@@ -466,6 +466,11 @@ public class CEnemyFSM : MonoBehaviour
             c.DamegedRegardDefence(_myBossPara.RandomAttackDamage());
         }
     }
+
+    protected virtual void AttackDisabledCollider()
+    {
+        SendMessage("DiscardList");
+    }
     #endregion
 
     // state의 업데이트는 하위 클래스인 몬스터들마다 세분화되어 관리되므로 Virtual로 남겨두었다.
