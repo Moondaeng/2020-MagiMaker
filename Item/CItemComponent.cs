@@ -20,7 +20,7 @@ namespace Item
             {
                 return "희귀";
             }
-            else if (gradeNumber == 2)
+            else if (gradeNumber == 3)
             {
                 return "진귀";
             }

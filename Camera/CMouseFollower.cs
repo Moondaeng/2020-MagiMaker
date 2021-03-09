@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
 
 public class CMouseFollower : MonoBehaviour
@@ -132,7 +130,6 @@ public class CMouseFollower : MonoBehaviour
         // Move the rig towards target position.
         transform.position = Vector3.Lerp(transform.position, m_Target.position, deltaTime * m_MoveSpeed);
     }
-
 
     private void HandleRotationMovement()
     {

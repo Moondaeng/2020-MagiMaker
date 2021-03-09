@@ -8,9 +8,9 @@ public class CBuffBase : CHitObjectBase
     [HideInInspector]
     public LoopingAudioSource LoopingAudioSource;
 
-    protected override void Awake()
+    protected override void OnEnable()
     {
-        base.Awake();
+        base.OnEnable();
 
         // constant effect, so set the duration really high and add an infinite looping sound
         LoopingAudioSource = new LoopingAudioSource(this, AudioSource, StartTime, StopTime);

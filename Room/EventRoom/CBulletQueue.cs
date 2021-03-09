@@ -16,6 +16,11 @@ public class CBulletQueue : MonoBehaviour
 
     public void BulletEnqueue(GameObject bullet)
     {
+        if (bullet == null)
+        {
+            Debug.Log("bullet is null");
+            return;
+        }
         bullet = Object.Instantiate(bullet, bullet.transform.position, bullet.transform.rotation);
         _bullets.Enqueue(bullet);
         bullet.transform.SetParent(transform.parent.Find("Bullet"));

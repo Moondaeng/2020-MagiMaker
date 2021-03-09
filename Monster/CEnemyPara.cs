@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.Events;
 
 public class CEnemyPara : CharacterPara
@@ -27,20 +26,21 @@ public class CEnemyPara : CharacterPara
     private void OnEnable()
     {
         _spawnID = CMonsterManager.instance.AddMonsterInfo(gameObject);
+        Debug.Log($"{_spawnID}");
         monsterHitEvent.AddListener(CMonsterManager.instance.MonsterHit);
+        deadEvent.AddListener(SetOffMonster);
     }
 
     private void OnDisable()
     {
-        CMonsterManager.instance.RemoveMonster(_spawnID);
         monsterHitEvent.RemoveAllListeners();
+        deadEvent.RemoveAllListeners();
     }
     #endregion
 
     public string _name;
     string _originTag = "Monster";
     [HideInInspector] public GameObject _myRespawn;
-
     Vector3 _originPos;
 
     public override void InitPara()
@@ -50,13 +50,31 @@ public class CEnemyPara : CharacterPara
         _isDead = false;
         _curHp = _maxHp;
     }
-
+    
     public void SetRespawn(GameObject respawn, int spawnID, Vector3 originPos)
     {
         _myRespawn = respawn;
-        this._spawnID = spawnID;
-        this._originPos = originPos;
+        _spawnID = spawnID;
+        _originPos = originPos;
+        //Debug.Log("My Respawn is : " + _myRespawn + "  My SpawnID is : " + _spawnID
+        //    + "  My originPos is : " + _originPos);
     }
+
+
+
+    public void SetOffMonster()
+    {
+        Invoke("SetActiveFalse", 2f);
+    }
+
+    public void SetActiveFalse()
+    {
+        // 코드 개선 필요 - 콜백을 통해 몬스터 매니저에게 호출하는 구조가 되어야 함
+        CMonsterManager.instance.RemoveMonster(_spawnID);
+        CGameEvent.instance.EarnMoneyEvent?.Invoke(_rewardMoney);
+        //_myRespawn.GetComponent<CRespawn>().RemoveMonster(_spawnID);
+    }
+
 
     public void respawnAgain()
     {
@@ -70,5 +88,10 @@ public class CEnemyPara : CharacterPara
     protected override void UpdateAfterReceiveAttack()
     {
         base.UpdateAfterReceiveAttack();
+    }
+
+    protected virtual void DropItem()
+    {
+        //CItemDropTable.instance.DropRandomItem();
     }
 }

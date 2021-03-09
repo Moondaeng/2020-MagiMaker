@@ -134,7 +134,6 @@ public class CParticleConstant : CParitcleSkillBase
                     objects = UnityEngine.Physics.OverlapCapsule(pos + Vector3.forward * ColliderSet.arg1,
                 PointOnCircle(transform.position.x, transform.position.z, transform.eulerAngles), radius, layermask);
                 }
-
                 CollisionMessage(objects);
             }
 

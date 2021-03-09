@@ -5,9 +5,19 @@ using UnityEngine.Events;
 using System;
 
 #region 캐릭터 이벤트
+[System.Serializable]
+public class DamageEvent : UnityEvent<int, int>
+{
+
+}
+
+public class HitEvent : UnityEvent<int>
+{
+
+}
+
 /// <summary>
 /// 체력이 바뀌는 모든 이벤트(데미지, 힐 등)
-/// string : 체력에 변화를 준 대상(태그)
 /// int : 체력 변화량
 /// </summary>
 public class HpChanageEvent : UnityEvent<int> { }
@@ -73,18 +83,17 @@ public class CharacterPara : MonoBehaviour
         }
     }
 
-    [SerializeField]
-    protected int _curHp;
-
-    public int _maxHp;
-    public int _attackMin { get; set; }
-    public int _attackMax { get; set; }
-    public int _defense { get; set; }
+    [Tooltip("최대 체력")] [SerializeField] public int _maxHp;
+    [HideInInspector] public int _curHp;
+    [Tooltip("최소 공격력")] [SerializeField] public int _attackMin;
+    [Tooltip("최대 공격력")] [SerializeField] public int _attackMax;
+    [Tooltip("방어력")] [SerializeField] public int _defense;
     public bool _isAnotherAction { get; set; }
     public bool _isStunned { get; set; }
     public bool _isDead { get; set; }
-    public int _rewardMoney { get; set; }
+    [SerializeField] public int _rewardMoney;
     public int _spawnID { get; set; }
+    [Tooltip("히트 애니메이션 출력\n최대체력 비율")] public float _hitGauge;
     #endregion
 
     #region UseEffect 변수
@@ -92,12 +101,14 @@ public class CharacterPara : MonoBehaviour
 
     protected class DamageOfTime
     {
+        public static readonly float TimeBonus = 0.2f;
+
         public int id;
-        public int Amount;
+        public CUseEffect.HpChange Amount;
         public float CurrentTime;
         public float Period;
 
-        public DamageOfTime(int id, int amount, float currentTime, float period)
+        public DamageOfTime(int id, CUseEffect.HpChange amount, float currentTime, float period)
         {
             this.id = id;
             Amount = amount;
@@ -135,12 +146,12 @@ public class CharacterPara : MonoBehaviour
     [System.NonSerialized]
     public HpChanageEvent healEvent = new HpChanageEvent();
 
+    public HitEvent hitGaugeEvent = new HitEvent();
     [System.NonSerialized]
     public HpDrawEvent hpDrawEvent = new HpDrawEvent();
     #endregion
 
     protected CBuffTimer _buffTimer;
-    public CBuffPara buffParameter;
 
     public int RandomAttackDamage()
     {
@@ -151,7 +162,11 @@ public class CharacterPara : MonoBehaviour
     protected virtual void Awake()
     {
         _buffTimer = gameObject.GetComponent<CBuffTimer>();
-        buffParameter = new CBuffPara(_buffTimer);
+        for (int i = 0; i < Enum.GetValues(typeof(EBuffAbility)).Length; i++)
+        {
+            _buffCoef[i] = 1.0f;
+            _debuffCoef[i] = 1.0f;
+        }
 
         // 파라미터가 다른 이벤트 처리
         InitPara();
@@ -164,7 +179,7 @@ public class CharacterPara : MonoBehaviour
 
     public virtual void InitPara()
     {
-
+        hitGaugeEvent.AddListener(HitGaugeCalculate);
     }
 
     // 평타 데미지 계산식
@@ -208,14 +223,14 @@ public class CharacterPara : MonoBehaviour
     protected void ApplyInstantEffect(CUseEffect.InstantEffect instantEffect)
     {
         // 데미지 효과 지정
-        hpChange(instantEffect.hpChangeAmount);
+        ApplyHpChange(instantEffect.hpChange);
             
         // 그 외 효과 지정
     }
 
     protected void ApplyConditionalEffect(CUseEffect.ConditionalEffect conditionalEffect)
     {
-        if(conditionalEffect.conditionEffectId == 0)
+        if(!conditionalEffect.IsValid())
         {
             return;
         }
@@ -224,7 +239,7 @@ public class CharacterPara : MonoBehaviour
         if (effectStack >= 1)
         {
             // 스택 관련 옵션 지정 - 클래스라 값이 누적되는지 확인 필요
-            if(conditionalEffect.isRelationStack)
+            if (conditionalEffect.isRelationStack)
             {
                 conditionalEffect.effect.instantEffect.MultiplyPersant(effectStack * conditionalEffect.stackBonusRate);
             }
@@ -239,14 +254,12 @@ public class CharacterPara : MonoBehaviour
     protected void ApplyPersistEffect(CUseEffect.PersistEffect persistEffect)
     {
         // 초기화 값이 들어가는거 방지용
-        if (persistEffect.id == 0)
+        if (persistEffect.IsValid())
         {
-            return;
+            _buffTimer.Register(persistEffect.id, persistEffect.time, persistEffect.maxStack, persistEffect.increaseStack,
+                (int buffStack) => StartPersistEffect(persistEffect, buffStack),
+                (int buffStack) => EndPersistEffect(persistEffect, buffStack));
         }
-
-        _buffTimer.Register(persistEffect.id, persistEffect.time, persistEffect.maxStack, persistEffect.increaseStack,
-            (int buffStack) => StartPersistEffect(persistEffect, buffStack),
-            (int buffStack) => EndPersistEffect(persistEffect, buffStack));
     }
 
     // 지속 효과 시작
@@ -255,9 +268,9 @@ public class CharacterPara : MonoBehaviour
         // 지속 데미지(힐) 관련은 CCharacterPara에서 Update or Coroutine으로 관리
         // Coroutine 사용 이유 : 체력 변화는 오직 CCharacterPara 안에서만 일어나는 일
         // 체력 변화 대상 관리 등 복잡한 연산은 Timer에서 수행
-        if(persistEffect.TickHpChangeAmount != 0 && persistEffect.TickPeriod != 0 && _DoTList.Find(x => x.id == persistEffect.id) == null)
+        if(persistEffect.TickHpChange.IsValid() && _DoTList.Find(x => x.id == persistEffect.id) == null)
         {
-            _DoTList.Add(new DamageOfTime(persistEffect.id, persistEffect.TickHpChangeAmount, 0, persistEffect.TickPeriod));
+            _DoTList.Add(new DamageOfTime(persistEffect.id, persistEffect.TickHpChange, DamageOfTime.TimeBonus, persistEffect.TickPeriod));
         }
 
         // CC 관련
@@ -296,15 +309,69 @@ public class CharacterPara : MonoBehaviour
     }
 
     // 체력 변화 처리함수
-    protected void hpChange(int hpChangeAmount)
+    protected void ApplyHpChange(CUseEffect.HpChange hpChange)
     {
-        if (hpChangeAmount > 0)
+        if (hpChange.isHeal)
         {
-            Heal(hpChangeAmount);
+            ApplyHeal(hpChange);
         }
         else
         {
-            DamegedRegardDefence(-hpChangeAmount);
+            ApplyDamage(hpChange);
+        }
+    }
+
+    protected void ApplyHeal(CUseEffect.HpChange hpChange)
+    {
+        int ratioToAmount;
+        switch (hpChange.ratioType)
+        {
+            case CUseEffect.HpChange.EHpRatioType.Current:
+                Debug.LogWarning("힐에 현재 체력 비례 적용 불가");
+                ratioToAmount = hpChange.RatioToAmount(CurrentHp);
+                break;
+            case CUseEffect.HpChange.EHpRatioType.Max:
+                ratioToAmount = hpChange.RatioToAmount(TotalMaxHp);
+                break;
+            case CUseEffect.HpChange.EHpRatioType.Lost:
+                ratioToAmount = hpChange.RatioToAmount(TotalMaxHp - CurrentHp);
+                break;
+            default:
+                Debug.LogWarning("Not Defined Ratio Type");
+                ratioToAmount = 0;
+                break;
+        }
+        Heal(hpChange.fixedAmount + hpChange.enhancePercentRate + ratioToAmount);
+    }
+
+    protected void ApplyDamage(CUseEffect.HpChange hpChange)
+    {
+        int ratioToAmount;
+        switch (hpChange.ratioType)
+        {
+            case CUseEffect.HpChange.EHpRatioType.Current:
+                ratioToAmount = hpChange.RatioToAmount(CurrentHp);
+                break;
+            case CUseEffect.HpChange.EHpRatioType.Max:
+                ratioToAmount = hpChange.RatioToAmount(TotalMaxHp);
+                break;
+            case CUseEffect.HpChange.EHpRatioType.Lost:
+                ratioToAmount = hpChange.RatioToAmount(TotalMaxHp - CurrentHp);
+                break;
+            default:
+                Debug.LogWarning("Not Defined Ratio Type");
+                ratioToAmount = 0;
+                break;
+        }
+
+        int totalDamage = hpChange.fixedAmount + hpChange.enhancePercentRate + ratioToAmount;
+        if (hpChange.isTrueDamage)
+        {
+            DamagedDisregardDefence(totalDamage);
+        }
+        else
+        {
+            DamegedRegardDefence(totalDamage);
         }
     }
 
@@ -318,7 +385,7 @@ public class CharacterPara : MonoBehaviour
                 // 부동 소수점 계산으로 틱 계산이 불안정 - 틱을 손해볼 수 있음. 개선 필요
                 if (DoT.CurrentTime >= DoT.Period)
                 {
-                    hpChange(DoT.Amount);
+                    ApplyHpChange(DoT.Amount);
                     DoT.CurrentTime -= DoT.Period;
                 }
 
@@ -392,24 +459,6 @@ public class CharacterPara : MonoBehaviour
     }
     #endregion
 
-    protected virtual bool CheckTag(string giverTag)
-    {
-        if(giverTag == gameObject.tag)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    public void DamegedRegardDefence(string damageGiverTag, int enemyAttack)
-    {
-        int damage = enemyAttack * 1000 / (950 + 10 * TotalDefenece);
-        DamagedDisregardDefence(damage);
-    }
-
     // 방어력 계산식: 1000 / (950 + 10*방어력)
     public void DamegedRegardDefence(int enemyAttack)
     {
@@ -417,16 +466,10 @@ public class CharacterPara : MonoBehaviour
         DamagedDisregardDefence(damage);
     }
 
-    public void DamagedDisregardDefence(string damageGiverTag, int enemyAttack)
-    {
-        CurrentHp -= (int)enemyAttack;
-        damageEvent?.Invoke(CurrentHp);
-        UpdateAfterReceiveAttack();
-    }
-
     public void DamagedDisregardDefence(int enemyAttack)
     {
         CurrentHp -= (int)enemyAttack;
+        hitGaugeEvent?.Invoke(enemyAttack);
         UpdateAfterReceiveAttack();
     }
 
@@ -436,11 +479,21 @@ public class CharacterPara : MonoBehaviour
         print(name + "'s HP: " + CurrentHp);
         // 체력 관련 이벤트
 
-        if (CurrentHp <= 0)
+        if (CurrentHp <= 0 && !_isDead)
         {
             CurrentHp = 0;
             _isDead = true;
             deadEvent.Invoke();
+        }
+    }
+
+    public virtual void HitGaugeCalculate(int attackDamage)
+    {
+        float result = (attackDamage * 100f) / _maxHp;
+        if (result > _hitGauge)
+        {
+            Debug.Log("Hit Event Before");
+            hitEvent.Invoke();
         }
     }
 

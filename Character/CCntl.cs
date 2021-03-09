@@ -18,7 +18,7 @@ public class CCntl : MonoBehaviour
     Animator _animator;
     AnimatorStateInfo _currentBaseState;
     CPlayerPara _myPara;
-    CStunExitCommand _myStun;
+    //CStunExitCommand _myStun;
     Rigidbody _rigidbody;
     CapsuleCollider _capsule;
     BoxCollider _attack;
@@ -65,7 +65,7 @@ public class CCntl : MonoBehaviour
         _animator = GetComponent<Animator>();
         _rigidbody = GetComponent<Rigidbody>();
         _myPara = GetComponent<CPlayerPara>();
-        _myStun = GetComponent<CStunExitCommand>();
+        //_myStun = GetComponent<CStunExitCommand>();
         _capsule = GetComponent<CapsuleCollider>();
         _attack = GetComponentInChildren<BoxCollider>();
         _animator.SetFloat("Jump", -4f);
@@ -86,7 +86,7 @@ public class CCntl : MonoBehaviour
     public IEnumerator COStun(float pauseTime)
     {
         _stun = true;
-        _myStun.Start((int)pauseTime * 3);
+        //_myStun.Start((int)pauseTime * 3);
         _animator.SetTrigger("StunTrigger");
         yield return new WaitForSeconds(pauseTime);
         SendMessage("EndTime");

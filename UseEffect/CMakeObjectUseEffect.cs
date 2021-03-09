@@ -10,4 +10,9 @@ public class CMakeObjectUseEffect : CUseEffectHandle
     {
         throw new System.NotImplementedException();
     }
+
+    public override void EnhanceEffectByStat(CharacterPara cPara)
+    {
+        Debug.Log("MakeObjectUseEffect's EnhanceEffectByStat isn't updated");
+    }
 }

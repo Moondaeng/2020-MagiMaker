@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -10,9 +11,11 @@ public class CWindowFacade : MonoBehaviour
 
     [SerializeField] private CInventoryWindow _inventoryWindow;
     [SerializeField] private CMenuWindow _menuWindow;
+    [SerializeField] private CHelpWindow _helpWindow;
+    [SerializeField] private CElementObtainViewer _ObtainingElementViewer;
 
     private bool _isOtherWindowMode = false;
-    private GameObject _activedWindow = null;
+    private Stack<GameObject> _activedWindowStack = new Stack<GameObject>();
 
     private GameObject _windowTarget = null;
 
@@ -35,7 +38,7 @@ public class CWindowFacade : MonoBehaviour
             CloseWindow();
         }
 
-        if (Input.GetKeyDown(KeyCode.Tab) && (_activedWindow == null))
+        if (Input.GetKeyDown(KeyCode.Tab) && _activedWindowStack.Count == 0)
         {
             OpenInventory(_windowTarget.GetComponent<CPlayerPara>().Inventory);
         }
@@ -54,36 +57,60 @@ public class CWindowFacade : MonoBehaviour
             return;
         }
 
-        if (_activedWindow == null)
+        if (_activedWindowStack.Count == 0)
         {
             OpenMenu();
         }
         else
         {
-            _activedWindow.SetActive(false);
-            _activedWindow = null;
-            SetControlLockCallback(false);
+            var deactivateWindow = _activedWindowStack.Pop();
+            deactivateWindow.SetActive(false);
+            if (_activedWindowStack.Count == 0)
+            {
+                SetControlLockCallback(false);
+            }
         }
     }
 
     private void OpenMenu()
     {
-        _activedWindow = _menuWindow.gameObject;
-        _activedWindow.SetActive(true);
-        SetControlLockCallback(true);
+        PushActiveWindow(_menuWindow.gameObject);
     }
 
     public void OpenInventory(CInventory inventory)
     {
-        _activedWindow = _inventoryWindow.gameObject;
-        _activedWindow.SetActive(true);
-        SetControlLockCallback(true);
+        PushActiveWindow(_inventoryWindow.gameObject);
         _inventoryWindow.OpenInventory(inventory);
+    }
+
+    public void OpenHelp()
+    {
+        PushActiveWindow(_helpWindow.gameObject);
+    }
+
+    public void OpenObtainingElement(CPlayerSkill playerSkill, bool isMainElement, CPlayerSkill.ESkillElement element)
+    {
+        PushActiveWindow(_ObtainingElementViewer.gameObject);
+        _ObtainingElementViewer.closeWindowCallback = CloseWindow;
+        _ObtainingElementViewer.DrawViewer(playerSkill, isMainElement, element);
     }
 
     public void SetOtherWindowMode(bool isOtherWindow)
     {
         _isOtherWindowMode = isOtherWindow;
         SetControlLockCallback(isOtherWindow);
+    }
+
+    private void PushActiveWindow(GameObject windowObject)
+    {
+        if (windowObject == null)
+        {
+            Debug.Log("can't push null window object");
+            return;
+        }
+
+        _activedWindowStack.Push(windowObject);
+        windowObject.SetActive(true);
+        SetControlLockCallback(true);
     }
 }

@@ -18,16 +18,14 @@ public class CTestController : MonoBehaviour
         // 조작 관리
         keyDictionary = new Dictionary<KeyCode, Action>
         {
-            {KeyCode.KeypadPlus, () => {
-                    var item = CItemDropTable.instance.PopRandomItemByGrade(CItemDropTable.ItemGrade.Normal, CConstants.EQUIP_ITEM_TYPE);
-                    item.SetActive(true);
-                    item.transform.position = GetHitPoint();                    
-                } },
-            {KeyCode.KeypadMinus, () => {
-                    var item = CItemDropTable.instance.PopRandomItemByGrade(CItemDropTable.ItemGrade.Normal, CConstants.CONSUM_ITEM_TYPE);
-                    item.SetActive(true);
-                    item.transform.position = GetHitPoint();
-                }},
+            {KeyCode.KeypadPlus, () => CItemDropTable.SetItemToDropState(
+                    CItemDropTable.instance.PopRandomItemByGrade(CItemDropTable.ItemGrade.Normal, CConstants.EQUIP_ITEM_TYPE),
+                    GetHitPoint())
+            },
+            {KeyCode.KeypadMinus, () => CItemDropTable.SetItemToDropState(
+                    CItemDropTable.instance.PopRandomItemByGrade(CItemDropTable.ItemGrade.Normal, CConstants.CONSUM_ITEM_TYPE),
+                    GetHitPoint())
+            },
             {KeyCode.U, () => commander.SetMyCharacter(0) },
             {KeyCode.I, () => commander.SetMyCharacter(1) },
             {KeyCode.O, () => commander.SetMyCharacter(2) },
@@ -78,11 +76,11 @@ public class CTestController : MonoBehaviour
 
     private Vector3 GetHitPoint()
     {
+        int layerMask = (1 << LayerMask.NameToLayer("Player")) | (1 << LayerMask.NameToLayer("PlayerSkill"));
+        layerMask = ~layerMask;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
         RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit))
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
         {
             return hit.point;
         }

@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
+﻿using UnityEngine;
 
 public class CFieldSkillBase : CHitObjectBase
 {
@@ -9,9 +6,8 @@ public class CFieldSkillBase : CHitObjectBase
     private static readonly int EXPECT_FRAMERATE = 60;
     private int operateStack = 0;
 
-    protected override void Awake()
+    protected void Awake()
     {
-        base.Awake();
         // 0으로 초기화되서 무한 호출되는 경우 방지
         if (_actionPeriod == 0)
         {

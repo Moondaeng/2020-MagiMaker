@@ -13,9 +13,10 @@ public class ElementSelectEvent : UnityEvent<int> { }
  */
 public class CPlayerSkill : CCharacterSkill
 {
-    public enum SkillElement
+    [System.Serializable]
+    public enum ESkillElement
     {
-        Fire, Water, Earth, Wind, Light, Dark
+        Fire, Water, Earth, Wind, Light, Dark, None = -1
     }
 
     private readonly int mainElementContainSize = 3;
@@ -49,24 +50,37 @@ public class CPlayerSkill : CCharacterSkill
     }
 
     // Start is called before the first frame update
-    protected override void Start()
+    protected void Start()
     {
-        base.Start();
+        // 주원소, 부원소 배우기
+        SetMainElement(0, ESkillElement.Fire);
+        SetMainElement(1, ESkillElement.Water);
+        SetSubElement(0, ESkillElement.Water);
+        SetSubElement(1, ESkillElement.Earth);
+        SetSubElement(2, ESkillElement.Wind);
+        SetSubElement(3, ESkillElement.Light);
+    }
 
-        // 아래 항목은 전부 임시 코드(작동 테스트용) 
-        // 콤보 스킬 포맷 등록
-        for(int i = _skillList.Count; i < 42; i++)
+    public int GetElementContainSize(bool isMainElement)
+    {
+        return isMainElement ? mainElementContainSize : subElementContainSize;
+    }
+
+    public int GetElementNumber(bool isMainElement, int slotNumber)
+    {
+        if (slotNumber < 0 || slotNumber > GetElementContainSize(isMainElement))
         {
-            _skillList.Add(new CSkillFormat(i, 5f + 0.5f * i, gameObject));
+            return (int)ESkillElement.None;
         }
 
-        // 주원소, 부원소 배우기
-        SetMainElement(0, SkillElement.Fire);
-        SetMainElement(1, SkillElement.Water);
-        SetSubElement(0, SkillElement.Water);
-        SetSubElement(1, SkillElement.Earth);
-        SetSubElement(2, SkillElement.Wind);
-        SetSubElement(3, SkillElement.Light);
+        if (isMainElement)
+        {
+            return mainElement[slotNumber];
+        }
+        else
+        {
+            return subElement[slotNumber];
+        }
     }
 
     public int GetRegisterNumber(int mainElementIndex, int subElementIndex)
@@ -88,7 +102,7 @@ public class CPlayerSkill : CCharacterSkill
     }
 
     // 주 원소 획득 / 교체
-    public void SetMainElement(int slot, SkillElement element)
+    public void SetMainElement(int slot, ESkillElement element)
     {
         if (slot < 0 || slot >= mainElementContainSize) return;
 
@@ -97,7 +111,7 @@ public class CPlayerSkill : CCharacterSkill
     }
 
     // 부 원소 획득 / 교체
-    public void SetSubElement(int slot, SkillElement element)
+    public void SetSubElement(int slot, ESkillElement element)
     {
         if (slot < 0 || slot >= subElementContainSize) return;
 
@@ -146,6 +160,8 @@ public class CPlayerSkill : CCharacterSkill
 
         _selectedSkillNum = GetRegisterNumber(_selectedElementNum, _selectedSkillNum);
 
+        // 스킬 모션 선택 가능하게 해당 클래스에서 지원 필요
+        GetComponent<CCntl>().Skill();
         base.UseSkillToPosition(targetPos);
         
         _selectedElementNum = -1;

@@ -5,7 +5,7 @@ using UnityEngine;
 public class CHitObjectBase : MonoBehaviour
 {
     [Tooltip("충돌 시 적용될 효과")]
-    public CUseEffect useEffect;
+    public List<CUseEffectHandle> useEffects;
 
     [Tooltip("시작 시, 한번 재생되는 오디오 소스")]
     public AudioSource AudioSource;
@@ -18,6 +18,7 @@ public class CHitObjectBase : MonoBehaviour
 
     [Tooltip("얼마나 오래 갈건가?")]
     public float Duration = 2.0f;
+    private float realDuration;
 
     [Tooltip("폭발중심 생성 힘량")]
     public float ForceAmount;
@@ -37,19 +38,20 @@ public class CHitObjectBase : MonoBehaviour
     private float stopTimeMultiplier;
     private float stopTimeIncrement;
 
-    private bool _isLayerSetting = false;
-
     private int _recentCollisionInstanceID = 0;
+
+    public bool IsInit { get; set; }
+    private bool bIsStartParticle = false;
 
     private IEnumerator CleanupEverythingCoRoutine()
     {
         // 2 extra seconds just to make sure animation and graphics have finished ending
         yield return new WaitForSeconds(StopTime + 2.0f);
 
-        GameObject.Destroy(gameObject);
+        gameObject.SetActive(false);
     }
 
-    private void StartParticleSystems()
+    protected virtual void StartParticleSystems()
     {
         foreach (ParticleSystem p in gameObject.GetComponentsInChildren<ParticleSystem>())
         {
@@ -64,38 +66,47 @@ public class CHitObjectBase : MonoBehaviour
                     d.constant = 0.01f;
                     m.startDelay = d;
                 }
+                p.Clear();
+                p.Simulate(p.main.duration);
                 p.Play();
             }
         }
     }
 
-    protected virtual void Awake()
+    protected virtual void OnEnable()
     {
         Starting = true;
+        IsInit = false;
+        realDuration = Duration;
     }
 
     protected virtual void Start()
     {
-        if (AudioSource != null)
-        {
-            AudioSource.Play();
-        }
-
         // precalculate so we can multiply instead of divide every frame
         stopTimeMultiplier = 1.0f / StopTime;
         startTimeMultiplier = 1.0f / StartTime;
 
         // if this effect has an explosion force, apply that now
         //CreateExplosion(gameObject.transform.position, ForceRadius, ForceAmount);
-
-        // start any particle system that is not in the list of manual start particle systems
-        StartParticleSystems();
     }
 
     protected virtual void Update()
     {
+        if (IsInit && !bIsStartParticle)
+        {
+            if (AudioSource != null)
+            {
+                AudioSource.Play();
+            }
+
+            // start any particle system that is not in the list of manual start particle systems
+            StartParticleSystems();
+
+            bIsStartParticle = true;
+        }
+
         // reduce the duration
-        Duration -= Time.deltaTime;
+        realDuration -= Time.deltaTime;
         if (Stopping)
         {
             // increase the stop time
@@ -118,11 +129,18 @@ public class CHitObjectBase : MonoBehaviour
                 Starting = false;
             }
         }
-        else if (Duration <= 0.0f)
+        else if (realDuration <= 0.0f)
         {
             // time to stop, no duration left
             Stop();
         }
+    }
+
+    private void OnDisable()
+    {
+        Stopping = false;
+        IsInit = false;
+        bIsStartParticle = false;
     }
 
     public static void CreateExplosion(Vector3 pos, float radius, float force)
@@ -152,6 +170,7 @@ public class CHitObjectBase : MonoBehaviour
         }
         Stopping = true;
 
+        Debug.Log("Stopping");
         // cleanup particle systems
         foreach (ParticleSystem p in gameObject.GetComponentsInChildren<ParticleSystem>())
         {
@@ -187,12 +206,11 @@ public class CHitObjectBase : MonoBehaviour
     public void SetObjectLayer(int layer)
     {
         gameObject.layer = layer;
-        //GetComponent<Collider>().isTrigger = true;
     }
 
     protected virtual void OnTriggerEnter(Collider other)
     {
-        if (!IsTriggeredRecently(other))
+        if (IsInit && !IsTriggeredRecently(other))
         {
             GetUseEffect(other);
         }
@@ -210,21 +228,13 @@ public class CHitObjectBase : MonoBehaviour
 
     protected void GetUseEffect(Collider other)
     {
-        Debug.Log($"Hit Collision - {_recentCollisionInstanceID}");
         var cPara = other.GetComponent<CharacterPara>();
         if (cPara != null)
         {
-            cPara.TakeUseEffect(useEffect);
+            foreach (var effect in useEffects)
+            {
+                effect.TakeUseEffect(cPara);
+            }
         }
     }
-
-    //protected virtual void OnCollisionEnter(Collision collision)
-    //{
-    //    Debug.Log("Hit Collision");
-    //    var cPara = collision.collider.GetComponent<CharacterPara>();
-    //    if (cPara != null)
-    //    {
-    //        cPara.TakeUseEffect(useEffect);
-    //    }
-    //}
 }

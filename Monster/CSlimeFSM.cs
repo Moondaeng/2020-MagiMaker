@@ -11,10 +11,6 @@ public class CSlimeFSM : CEnemyFSM
         _anim = GetComponent<Animator>();
         _myPara = GetComponent<CEnemyPara>();
         _myPara.deadEvent.AddListener(CallDeadEvent);
-
-        _spawnID = _myPara.GetComponent<CEnemyPara>()._spawnID;
-        _myRespawn = _myPara.GetComponent<CEnemyPara>()._myRespawn;
-        
         // 몬스터 마다 다른 행동양식들
         _idleState = Animator.StringToHash("Base Layer.Idle");
         _standState = Animator.StringToHash("Base Layer.Stand");
@@ -29,18 +25,6 @@ public class CSlimeFSM : CEnemyFSM
         _originCooltime = _cooltime;
         _originSkillCooltime1 = _skillCooltime1;
     }
-
-    protected void AttackCheck()
-    {
-        for (int i = 0; i < _players.Count; i++)
-        {
-            if (IsTargetInSight(10f, _players[i].transform) && IsInAttackDistance(3f, _players[i].transform))
-            {
-                _playerPara = _players[i].GetComponent<CPlayerPara>();
-                AttackCalculate();
-            }
-        }
-    }
     #endregion
 
     #region 통상적인 State 관련 함수들
@@ -52,10 +36,11 @@ public class CSlimeFSM : CEnemyFSM
             _skillCoolDown1 = true;
         }
 
-        if (_currentBaseState.fullPathHash == _runState)           ChaseState();
-        else if (_currentBaseState.fullPathHash == _attackState1)    AttackState();
-        else if (_currentBaseState.fullPathHash == _waitState)      AttackWaitState();
-        else if (_currentBaseState.fullPathHash == _skillState1)    SkillState1();
+        if (_currentBaseState.fullPathHash == _runState) ChaseState();
+        else if (_currentBaseState.fullPathHash == _attackState1) AttackState1();
+        else if (_currentBaseState.fullPathHash == _waitState) AttackWaitState();
+        else if (_currentBaseState.fullPathHash == _skillState1) SkillState1();
+        else if (_currentBaseState.fullPathHash == _deadState1) DeadState1();
 
         if (_skillCooltime1 < 0f)
         {
@@ -64,43 +49,12 @@ public class CSlimeFSM : CEnemyFSM
         }
     }
 
-    private void ChaseState()
+    protected override void ChaseState()
     {
-        if (!_actionStart) _actionStart = true;
+        base.ChaseState();
         if (_currentBaseState.fullPathHash != _deadState1) MoveState();
     }
-
-    protected override void MoveState()
-    {
-        _anotherAction = false;
-        base.MoveState();
-    }
     
-    private void AttackState()
-    {
-        if (!_lookAtPlayer)
-        {
-            _lookAtPlayer = false;
-            transform.LookAt(_player.transform.position);
-        }
-        _coolDown = true;
-    }
-
-    private void AttackWaitState()
-    {
-        _cooltime -= Time.deltaTime;
-        if (_cooltime < 0)
-        {
-            _coolDown = false;
-            _cooltime = _originCooltime;
-        }
-        else if (GetDistanceFromPlayer(_distances) > 3f)
-        {
-            _coolDown = false;
-            _anotherAction = true;
-            _cooltime = _originCooltime;
-        }
-    }
     #endregion
 
     #region Skill 관련 State들

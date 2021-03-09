@@ -39,6 +39,10 @@ public class CCreateMap : MonoBehaviour
     private int _portalMomCount; //포탈맘 사용할때 태그를 이용해서 오브젝트를 받아오는데, 이 때 사라져야할 전방 포탈들도 가져와서 전 방 포탈들을 따로 하드코딩으로 제외하기 위한 변수
     #endregion
 
+    #region Debug용 변수
+    [SerializeField] private List<GameObject> _explicitRoomList = new List<GameObject>();
+    #endregion
+
     private void Start()
     {
         startRoom = Resources.Load("Room/StartRoom0") as GameObject;
@@ -72,10 +76,10 @@ public class CCreateMap : MonoBehaviour
 
     public void CreateRoom(CRoom[,] roomArr, int roomCount, int roadCount)
     {
+        Debug.Log("Create Room");
         //debug용 보고싶은 맵 있으면 여기다 가져다 두면 됨.
-        if (_roomCount == 1)
+        if (_roomCount < _explicitRoomList.Count && CreateExplicitRoomInList(_roomCount))
         {
-            CreateExplicitRoom("EventRoom0_5");
             return;
         }
 
@@ -273,8 +277,15 @@ public class CCreateMap : MonoBehaviour
 
         if (_roomCount == 0)
         {
-            _roomArr[0, 0].RoomType = CGlobal.ERoomType._start;
-            InstantiateRoom(_roomArr[_roomCount, 0].RoomType); //시작방 생성
+            if (_explicitRoomList.Count != 0)
+            {
+                CreateExplicitRoomInList(0);
+            }
+            else
+            {
+                _roomArr[0, 0].RoomType = CGlobal.ERoomType._start;
+                InstantiateRoom(_roomArr[_roomCount, 0].RoomType); //시작방 생성
+            }
         }
 
         if (_roomCount == 1)
@@ -427,8 +438,6 @@ public class CCreateMap : MonoBehaviour
         }
     }
 
-    
-
     private void InstantiateRoom(CGlobal.ERoomType roomType)
     {
         GameObject tempRoom;
@@ -534,14 +543,21 @@ public class CCreateMap : MonoBehaviour
     }
 
     #region Debug
-    private void CreateExplicitRoom(string RoomName)
+    private bool CreateExplicitRoomInList(int elementNumber)
     {
-        GameObject temproom = Resources.Load("Room/" + RoomName) as GameObject;
-        var temp = Instantiate(temproom, temproom.transform.position, temproom.transform.rotation);
-        _rooms.AddLast(temp);
+        if (_explicitRoomList[elementNumber] == null)
+        {
+            Debug.Log("can't create Explicit Room");
+            return false;
+        }
+
+        var roomOrigin = _explicitRoomList[elementNumber];
+        var copy = Instantiate(roomOrigin, roomOrigin.transform.position, roomOrigin.transform.rotation);
+        _rooms.AddLast(copy);
         _roomCount++;
         AddPortal();
         NotifyPortal();
+        return true;
     }
     #endregion
 }

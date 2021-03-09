@@ -53,7 +53,12 @@ public class CRandomUseEffect : CUseEffectHandle
         cPara.TakeUseEffect(effects[selectEffect].effect);
     }
 
-    public int SelectRandomEffect()
+    public override void EnhanceEffectByStat(CharacterPara cPara)
+    {
+        Debug.Log("RandomUseEffect's EnhanceEffectByStat isn't updated");
+    }
+
+    private int SelectRandomEffect()
     {
         if (effects.Count == 0)
         {

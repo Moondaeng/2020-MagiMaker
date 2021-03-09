@@ -1,21 +1,22 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CControlRenderer : MonoBehaviour
 {
     public Renderer _rend;
+
     [SerializeField]
     public Material[] _materials;
-    CCntl _myStatus;
+
+    private CCntl _myStatus;
+
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         _rend = GetComponent<Renderer>();
         ChangeTest();
     }
-    
-    void ChangeTest()
+
+    private void ChangeTest()
     {
         _rend.sharedMaterial = _materials[0];
     }

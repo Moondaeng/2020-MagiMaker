@@ -9,6 +9,7 @@ public class CInventoryWindow : MonoBehaviour
     [SerializeField] Button TeamInventoryBtn;
     [SerializeField] CPlayerInventoryWindow playerInventoryWindow;
     [SerializeField] CTeamInventoryWindow teamInventoryWindow;
+    [SerializeField] TMPro.TMP_Text _goldText;
 
     private CInventory _inventory;
     private bool isOpenPlayerInventory = false;
@@ -55,7 +56,7 @@ public class CInventoryWindow : MonoBehaviour
         _inventory = inventory;
 
         UpdateInventoryWindow();
-
+        UpdateGoldInfo();
         OpenPlayerInventory();
     }
 
@@ -83,5 +84,10 @@ public class CInventoryWindow : MonoBehaviour
         playerInventoryWindow.gameObject.SetActive(false);
         teamInventoryWindow.gameObject.SetActive(true);
         isOpenPlayerInventory = false;
+    }
+
+    private void UpdateGoldInfo()
+    {
+        _goldText.text = _inventory.Gold.ToString();
     }
 }
