@@ -15,8 +15,6 @@ public class CEventShooterController : MonoBehaviour
     [Tooltip("발사 힘")]
     public float launchVelocity;
 
-    private List<GameObject> _bullets;
-
     private bool moveUp;
     // Start is called before the first frame update
     void Start()
@@ -33,8 +31,6 @@ public class CEventShooterController : MonoBehaviour
             launchVelocity = 5f;
 
         moveUp = true;
-
-        _bullets = new List<GameObject>();
 
         for (int i = 0; i < 70; i++)
         {

@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CEventRoomMonsterCheck : MonoBehaviour
+public class CMonsterCheck : MonoBehaviour
 {
+    public static CMonsterCheck instance = null;
 
     private void Start()
     {
@@ -11,8 +12,8 @@ public class CEventRoomMonsterCheck : MonoBehaviour
         foreach (GameObject monster in monsters)
             monster.SetActive(false);
 
-        // 안 돌아가는 부분 제외
-        //CEventManager._instance._eventEvent.AddListener(CheckMonsterCount);
+        if (instance == null)
+            instance = this;
     }
 
     public void ForceDeadMonster()
@@ -34,16 +35,10 @@ public class CEventRoomMonsterCheck : MonoBehaviour
         CCreateMap.instance.NotifyPortal();
     }
 
-    public void CheckMonsterCount()
+    public void CheckMonsterCountZero()
     {
         Debug.Log("invoke");
         StartCoroutine("CheckMonsterCountCoru");
-    }
-
-    private void OnDestroy()
-    {
-        // 안 돌아가는 부분 제외
-        //CEventManager._instance._eventEvent.RemoveListener(CheckMonsterCount);
     }
 
     IEnumerator CheckMonsterCountCoru()

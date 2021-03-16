@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CEventBulletController : MonoBehaviour
-{
-    [HideInInspector]
-    public bool isFirst = true;
-
-    [Tooltip("y 로테이션 최대값 설정")]
+{ 
+    [Tooltip("y 로테이션 중간값 설정")]
     public int middleRotationY;
     [Tooltip("x 로테이션 최대값 설정")]
     public int maxRotationX;

@@ -45,7 +45,7 @@ public class COldGravestoneButtonController : CEventRoomPopUpController
         Destroy(_oldGravestone);
 
         //debug
-        GameObject.Find("EventRoom0_0(Clone)").GetComponent<CEventRoomMonsterCheck>().SendMessage("ForceDeadMonster");
+        CMonsterCheck.instance.ForceDeadMonster();
     }
 
     public void ClickCancel()

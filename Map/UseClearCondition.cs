@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class UseClearCondition : MonoBehaviour
 {
-    public Vector3 position;
-
     private void OnTriggerEnter(Collider coll)
     {
         Debug.Log("Use ClearCondition");
