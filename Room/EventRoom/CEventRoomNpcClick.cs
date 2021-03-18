@@ -30,11 +30,11 @@ public class CEventRoomNpcClick : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
 #endif
         {
-            CanclePopUp();
+            CancelPopUp();
         }
     }
 
-    public void CanclePopUp()
+    public void CancelPopUp()
     {
         Debug.Log($"{instance._stackPopUp.Count}");
         if (instance._stackPopUp.Count != 0)

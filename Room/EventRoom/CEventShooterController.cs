@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CEventShooterController : MonoBehaviour
 {
-    [Tooltip("슈터가 움직이는 속도")]
+    [Tooltip("슈터 이동속도")]
     public int shooterSpeed;
     [Tooltip("슈터 최대 높이")]
     public int shooterMaxHeight;

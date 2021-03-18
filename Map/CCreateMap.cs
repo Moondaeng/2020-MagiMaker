@@ -31,7 +31,7 @@ public class CCreateMap : MonoBehaviour
     private int _eventCount;
     private int _shopCount;
     private bool _noRoomFlag;  //트루일 경우 방이 없음
-    private CGlobal.ERoomType _roomTypeFlag;
+    private CGlobal.ERoomType _userSelectRoom;
     private int _roomCount;
     private CRoom[,] _roomArr;
     private LinkedList<GameObject> _rooms;
@@ -59,7 +59,7 @@ public class CCreateMap : MonoBehaviour
         _eventCount = 0;
         _shopCount = 0;
         _noRoomFlag = true;
-        _roomTypeFlag = CGlobal.ERoomType._empty;
+        _userSelectRoom = CGlobal.ERoomType._empty;
         _roomCount = 0; //방의 개수가 12개가 넘어가면 멈춰줄 변수
         _portalMomCount = 0;
 
@@ -98,6 +98,11 @@ public class CCreateMap : MonoBehaviour
     public void RemovePortal()
     {
         _portals.Clear();
+    }
+
+    public CGlobal.ERoomType userSelectRoom()
+    {
+        return _userSelectRoom;
     }
 
     public void NotifyPortal()
@@ -355,13 +360,11 @@ public class CCreateMap : MonoBehaviour
             {
                 _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._shop;
                 _shopCount++;
-                RoomFlagCtrl(CGlobal.ERoomType._shop);
                 continue;
             }
             if (_noRoomFlag == true && j - randomRoad == 1) //조건들에 걸려 방이 아예 안나오는 경우 방지
             {
                 _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._normal;
-                RoomFlagCtrl(CGlobal.ERoomType._normal);
                 continue;
             }
 
@@ -372,7 +375,6 @@ public class CCreateMap : MonoBehaviour
             {
                 _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._skillElite;
                 _skillEliteCount++;
-                RoomFlagCtrl(CGlobal.ERoomType._skillElite);
                 continue;
             }
 
@@ -381,7 +383,6 @@ public class CCreateMap : MonoBehaviour
             {
                 _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._shop;
                 _shopCount++;
-                RoomFlagCtrl(CGlobal.ERoomType._shop);
                 continue;
             }
 
@@ -389,7 +390,6 @@ public class CCreateMap : MonoBehaviour
                 && selectRoomType < CConstants.SKILL_PROBABILITY + CConstants.SHOP__PROBABILITY + CConstants.NORMAL_PROBABILITY)//일반 방
             {
                 _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._normal;
-                RoomFlagCtrl(CGlobal.ERoomType._normal);
                 continue;
             }
 
@@ -399,7 +399,6 @@ public class CCreateMap : MonoBehaviour
             {
                 _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._event;
                 _eventCount++;
-                RoomFlagCtrl(CGlobal.ERoomType._event);
                 continue;
             }
 
@@ -407,7 +406,6 @@ public class CCreateMap : MonoBehaviour
                 && selectRoomType < CConstants.SKILL_PROBABILITY + CConstants.SHOP__PROBABILITY + CConstants.NORMAL_PROBABILITY + CConstants.EVENT_PROBABLILITY + CConstants.ITEM_PROBABILITY) //아이템 엘리트
             {
                 _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._itemElite;
-                RoomFlagCtrl(CGlobal.ERoomType._itemElite);
                 continue;
             }
         }
@@ -421,19 +419,19 @@ public class CCreateMap : MonoBehaviour
         switch (roomType)
         {
             case CGlobal.ERoomType._event:
-                _roomTypeFlag = CGlobal.ERoomType._event;
+                _userSelectRoom = CGlobal.ERoomType._event;
                 break;
             case CGlobal.ERoomType._itemElite:
-                _roomTypeFlag = CGlobal.ERoomType._itemElite;
+                _userSelectRoom = CGlobal.ERoomType._itemElite;
                 break;
             case CGlobal.ERoomType._normal:
-                _roomTypeFlag = CGlobal.ERoomType._normal;
+                _userSelectRoom = CGlobal.ERoomType._normal;
                 break;
             case CGlobal.ERoomType._shop:
-                _roomTypeFlag = CGlobal.ERoomType._shop;
+                _userSelectRoom = CGlobal.ERoomType._shop;
                 break;
             case CGlobal.ERoomType._skillElite:
-                _roomTypeFlag = CGlobal.ERoomType._skillElite;
+                _userSelectRoom = CGlobal.ERoomType._skillElite;
                 break;
         }
     }
