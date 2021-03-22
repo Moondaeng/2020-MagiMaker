@@ -10,6 +10,22 @@ public class CGlobal : MonoBehaviour
     public static int roomCount = 0;
     public static bool isEvent = false; //갑작스레 몬스터가 생겨서 포탈 이동이 제한된다거나 할 때의 플래그
 
+    public static int _idleState = Animator.StringToHash("Base Layer.Idle");
+    public static int _standState = Animator.StringToHash("Base Layer.MovingSub.Stand");
+    public static int _walkState = Animator.StringToHash("Base Layer.MovingSub.Walk");
+    public static int _runState = Animator.StringToHash("Base Layer.MovingSub.Run");
+    public static int _attackState1 = Animator.StringToHash("Base Layer.AttackSub.Attack1");
+    public static int _attackState2 = Animator.StringToHash("Base Layer.AttackSub.Attack2");
+    public static int _waitState = Animator.StringToHash("Base Layer.AttackSub.AttackWait");
+    public static int _skillState1 = Animator.StringToHash("Base Layer.AnySub.Skill1");
+    public static int _skillState2 = Animator.StringToHash("Base Layer.AnySub.Skill2");
+    public static int _skillState3 = Animator.StringToHash("Base Layer.AnySub.Skill3");
+    public static int _skillWaitState1 = Animator.StringToHash("Base Layer.AnySub.SkillWait1");
+    public static int _skillWaitState2 = Animator.StringToHash("Base Layer.AnySub.SkillWait2");
+    public static int _skillWaitState3 = Animator.StringToHash("Base Layer.AnySub.SkillWait3");
+    public static int _gethitState = Animator.StringToHash("Base Layer.AnySub.GetHit");
+    public static int _deadState = Animator.StringToHash("Base Layer.AnySub.Dead");
+
     public enum ERoomType
     {
         _start,
@@ -21,4 +37,5 @@ public class CGlobal : MonoBehaviour
         _boss,
         _empty
     }
+
 }
