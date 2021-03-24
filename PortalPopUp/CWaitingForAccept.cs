@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class CWaitingForAccept : MonoBehaviour
 {
     private const int MAX_PLAYER_COUNT = 4;
+    private int _playerCount;
 
     public enum EAccept
     {
@@ -14,7 +15,7 @@ public class CWaitingForAccept : MonoBehaviour
         _cancle
     }
     private int _acceptCount = 0;
-    private EAccept[] _playerAccepts = new EAccept[MAX_PLAYER_COUNT];
+    private EAccept[] _playerAccepts;
 
     public GameObject _portal;
     public GameObject _waitingForOtherPlayer;
@@ -30,7 +31,12 @@ public class CWaitingForAccept : MonoBehaviour
             instance = this;
         }
 
-        ResetPortalUseSelect();
+        _playerCount = CPlayerCommand.instance.activePlayersCount;
+        _playerAccepts = new EAccept[_playerCount];
+
+        Debug.Log("playerCount " + _playerCount);
+        SetPlayerSelect();
+        ResetPortalUseSelect();    
     }
 
     // Update is called once per frame
@@ -50,6 +56,14 @@ public class CWaitingForAccept : MonoBehaviour
         {
             SetPortalUseSelect(CPlayerCommand.instance.ControlCharacterId, EAccept._cancle);
         }
+    }
+
+    public void SetPlayerSelect() //현재 플레이어의 숫자에 따라 팝업의 체크표시 개수 변경
+    {
+        for (int i = _playerCount; _playerCount < MAX_PLAYER_COUNT; i++)
+        {
+            _waitingForOtherPlayer.transform.GetChild(i).gameObject.SetActive(false);
+        }      
     }
 
     public void SetActivePortalPopup(bool value)
@@ -124,25 +138,9 @@ public class CWaitingForAccept : MonoBehaviour
     private void ResetPortalUseSelect()
     {
         _acceptCount = 0;
-        for(int i = 0; i < MAX_PLAYER_COUNT; i++)
+        for(int i = 0; i < _playerCount; i++)
         {
             SetPortalUseSelect(i, EAccept._waiting);
         }
     }
-
-    //IEnumerator TestAccept()
-    //{
-    //    _player2Accept = EAccept._accept;
-    //    Image image = _waitingForOtherPlayer.transform.GetChild(1).GetComponent<Image>();
-    //    image.sprite = Resources.Load<Sprite>("T_12_ok_") as Sprite;
-
-    //    _player3Accept = EAccept._accept;
-    //    image = _waitingForOtherPlayer.transform.GetChild(2).GetComponent<Image>();
-    //    image.sprite = Resources.Load<Sprite>("T_12_ok_") as Sprite;
-
-    //    _player4Accept = EAccept._accept;
-    //    image = _waitingForOtherPlayer.transform.GetChild(3).GetComponent<Image>();
-    //    image.sprite = Resources.Load<Sprite>("T_12_ok_") as Sprite;
-    //    yield return null;
-    //}
 }
