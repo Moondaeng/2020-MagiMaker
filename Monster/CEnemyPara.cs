@@ -17,6 +17,7 @@ public class CEnemyPara : CharacterPara
         }
 
         monsterHitEvent.Invoke(this);
+        Debug.Log("hit monster");
 
         ApplyInstantEffect(effect.instantEffect);
         ApplyConditionalEffect(effect.conditionalEffect);
@@ -70,6 +71,7 @@ public class CEnemyPara : CharacterPara
     public void SetActiveFalse()
     {
         // 코드 개선 필요 - 콜백을 통해 몬스터 매니저에게 호출하는 구조가 되어야 함
+        Debug.Log("Dead");
         CMonsterManager.instance.RemoveMonster(_spawnID);
         CGameEvent.instance.EarnMoneyEvent?.Invoke(_rewardMoney);
         //_myRespawn.GetComponent<CRespawn>().RemoveMonster(_spawnID);

@@ -10,12 +10,6 @@ public class CProjectileSkill : MonoBehaviour
     public List<GameObject> _spellObject;
     private GameObject _prefabObject;
     private CParitcleSkillBase _prefabScript;
-    private static CLogComponent _log;
-
-    private void Awake()
-    {
-        _log = new CLogComponent(ELogType.Skill);
-    }
 
     // 스킬 포맷에 넣을 스킬
     public void Fireball(GameObject user, Vector3 targetPos)

@@ -14,12 +14,12 @@ public class CStartScene : MonoBehaviour
         RegisterFail = 113,
         LoginFail = 114,
     }
-    
-    private CLogComponent _logger;
+
     [SerializeField]
     private Network.CTcpClient _tcpManager;
 
     // Inspector에서 반드시 컴포넌트를 설정해줘야함
+    public Button tutorialBtn;
     public Button startBtn;
     public Button networkBtn;
     public Button exitBtn;
@@ -34,23 +34,25 @@ public class CStartScene : MonoBehaviour
     public GameObject loading;
     public Text errorHandlingDisplay;
 
+    [SerializeField] GameObject _debugPanel;
+    [SerializeField] Button _debugIpChangeButton;
+    [SerializeField] InputField _debugIpField;
+    [SerializeField] Button _debugPortChangeButton;
+    [SerializeField] InputField _debugPortField;
+
     public int timeout = 7;
-
-    // debug mode flag
-    public bool debug = false;
-
-    private void Awake()
-    {
-        _logger = new CLogComponent(ELogType.Network);
-    }
 
     private void Start()
     {
         _tcpManager = (Network.CTcpClient)FindObjectOfType(typeof(Network.CTcpClient));
 
+        if (tutorialBtn != null)
+        {
+            tutorialBtn.onClick.AddListener(StartTutorial);
+        }
         if (startBtn != null)
         {
-            startBtn.onClick.AddListener(StartGame);
+            startBtn.onClick.AddListener(StartSingleGame);
         }
         if (networkBtn != null)
         {
@@ -72,11 +74,29 @@ public class CStartScene : MonoBehaviour
         {
             CancelBtn.onClick.AddListener(CancelNetwork);
         }
+
+        if (!CClientInfo.IsDebugMode)
+        {
+            _debugPanel.SetActive(false);
+        }
+        else
+        {
+            DrawDebug();
+            _debugIpChangeButton.onClick.AddListener(ChangeIP);
+            _debugPortChangeButton.onClick.AddListener(ChangePort);
+        }
     }
 
-    private void StartGame()
+    private void StartTutorial()
     {
-        SceneManager.LoadScene("InGame");
+        CClientInfo.CreateRoom(0);
+        SceneManager.LoadScene("Tutorial");
+    }
+
+    private void StartSingleGame()
+    {
+        CClientInfo.CreateRoom(0);
+        SceneManager.LoadScene("Prototype");
     }
 
     private void ReadyToNetwork()
@@ -200,6 +220,36 @@ public class CStartScene : MonoBehaviour
     {
         errorHandlingDisplay.text = errorMsg;
     }
+
+    #region Debug
+    private void DrawDebug()
+    {
+        DrawIP();
+        DrawPort();
+    }
+
+    private void DrawIP()
+    {
+        _debugIpField.text = _tcpManager.ipString;
+    }
+
+    private void DrawPort()
+    {
+        _debugPortField.text = _tcpManager.port.ToString();
+    }
+
+    private void ChangeIP()
+    {
+        _tcpManager.ipString = _debugIpField.text;
+        Debug.Log($"Change IP to {_tcpManager.ipString}");
+    }
+
+    private void ChangePort()
+    {
+        _tcpManager.port = int.Parse(_debugPortField.text);
+        Debug.Log($"Change Port to {_tcpManager.port}");
+    }
+    #endregion
 
     // 에러 메세지 쓰기
     //private void ErrorHandling(string errorMsg)

@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class CMenuWindow : MonoBehaviour
 {
@@ -10,6 +8,7 @@ public class CMenuWindow : MonoBehaviour
 
     public Button QuitToLobbyBtn;
     public Button ReturnToGameBtn;
+    public Button HelpBtn;
 
     private void Awake()
     {
@@ -26,5 +25,9 @@ public class CMenuWindow : MonoBehaviour
     private void QuitToLobby()
     {
         Debug.Log("Quit to lobby");
+        // 싱글 게임이면 StartScene으로, 멀티 게임이면 Lobby로 나가져야 함
+        SceneManager.LoadScene("Start");
+        // 멀티 게임의 경우 서버 및 다른 플레이어에게 나갔음 알림을 보내야 함
+        // InvokeQuit();
     }
 }

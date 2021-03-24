@@ -6,6 +6,7 @@ public class CPlayerPara : CharacterPara
     public string _name;
     public bool _invincibility;
     public bool _invincibilityChecker;
+    public Animator _myAnimator;
     BoxCollider _col;
     [SerializeField] public Renderer _obj;
     Color _originColor;
@@ -47,6 +48,15 @@ public class CPlayerPara : CharacterPara
         get { return (int)(Inventory.HpRegenIncreaseSize); }
     }
 
+    public override int CurrentHp
+    {
+        protected set
+        {
+            base.CurrentHp = value;
+            _myAnimator.SetInteger("Hp", CurrentHp);
+        }
+    }
+
     protected override void Awake()
     {
         base.Awake();
@@ -66,8 +76,10 @@ public class CPlayerPara : CharacterPara
         _isDead = false;
         _invincibility = false;
         //_originColor = _obj.material.color;
+        _myAnimator = GetComponent<Animator>();
+        _myAnimator.SetInteger("Hp", _curHp);
     }
-    
+
     protected override void UpdateAfterReceiveAttack()
     {
         if (_invincibility) return;
@@ -81,19 +93,19 @@ public class CPlayerPara : CharacterPara
         }
     }
 
+    #region 무적판정
     public void OffInvincibility()
     {
         _invincibility = false;
         StopCoroutine(PowerOverwhelming());
         _obj.material.color = _originColor;
-        _col.enabled = true;
+        gameObject.layer = LayerMask.NameToLayer("DeadBody");
     }
 
     public void OnInvincibility()
     {
         if (_invincibilityChecker)
         {
-            _col.enabled = false;
             _invincibilityChecker = false;
             StartCoroutine(PowerOverwhelming());
         }
@@ -108,4 +120,6 @@ public class CPlayerPara : CharacterPara
             yield return null;
         }
     }
+
+    #endregion
 }

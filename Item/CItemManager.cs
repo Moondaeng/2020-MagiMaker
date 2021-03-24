@@ -21,7 +21,7 @@ public class CItemManager : MonoBehaviour
 
     void Start()
     {
-        DefinedUseEffectSetting();
+        //DefinedUseEffectSetting();
 
         // 아이템 프리팹 폴더에서 로드
         GameObject[] items = Resources.LoadAll<GameObject>("Item");
@@ -70,7 +70,7 @@ public class CItemManager : MonoBehaviour
         }
         if (effects != null && CheckUseEffectOmission(effects))
         {
-            Debug.LogError($"{item.name}'s UseEffect is omission");
+            Debug.LogWarning($"{item.name}'s UseEffect is omission");
         }
     }
 

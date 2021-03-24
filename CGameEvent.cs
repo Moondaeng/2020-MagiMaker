@@ -51,28 +51,26 @@ public class CGameEvent : MonoBehaviour
         _tcpManager = Network.CTcpClient.instance;
         _playerCommand = CPlayerCommand.instance;
 
-        if (_tcpManager != null && _tcpManager.IsConnect == true)
+        if (_tcpManager != null && _tcpManager.IsConnect == true && !CClientInfo.IsSinglePlay())
         {
-            Debug.Log("Network Connected");
+            Debug.Log("Multiplay Node");
             // 연결되면 패킷 받을거 설정
             _inGameInterpreter = new Network.CPacketInterpreter(_tcpManager);
-            _tcpManager.SetPacketInterpret(_inGameInterpreter.PacketInterpret);
-            PlayerMoveStartEvent.AddListener(_inGameInterpreter.SendMoveStart);
-            PlayerMoveStopEvent.AddListener(_inGameInterpreter.SendMoveStop);
-            PlayerActionEvent.AddListener(_inGameInterpreter.SendActionStart);
+            AddNetworkCode();
 
-            // 캐릭터 설정
-            Debug.Log($"Set Character : Send Message");
-            _playerCommand.SetActivePlayers(CClientInfo.PlayerCount);
-            _inGameInterpreter.SendCharacterInfoRequest();
+            InitMultiplay();
         }
         // 싱글 플레이 시에 일부 동작들은 서버에 거치지 않고 동작해야 함
         else if (_playerCommand != null)
         {
-            Debug.Log("Network not Connected");
-            //_playerCommand.SetMyCharacter(0);
             EarnMoneyEvent.AddListener(_playerCommand.EarnMoneyAllCharacter);
+            InitSinglePlay();
         }
+    }
+
+    public void QuitPlayer(int roomSlotNum)
+    {
+        
     }
 
     public void PlayerMoveStart(Vector3 a, Vector3 b) => PlayerMoveStartEvent?.Invoke(a, b);
@@ -82,4 +80,48 @@ public class CGameEvent : MonoBehaviour
     public void PlayerAttack(Vector3 pos) => PlayerAttackEvent?.Invoke(pos);
 
     public void PlayerAction(int actionNumber, Vector3 now, Vector3 dest) => PlayerActionEvent?.Invoke(actionNumber, now, dest);
+
+    private void InitMultiplay()
+    {
+        // 캐릭터 설정
+        Debug.Log($"Set Character : Send Message");
+        _playerCommand.SetActivePlayers(CClientInfo.PlayerCount);
+        _inGameInterpreter.SendCharacterInfoRequest();
+    }
+
+    private void InitSinglePlay()
+    {
+        Debug.Log("Singleplay Mode");
+        _playerCommand.SetActivePlayers(1);
+        _playerCommand.SetMyCharacter(0);
+    }
+
+    private void AddNetworkCode()
+    {
+        _tcpManager.SetPacketInterpret(_inGameInterpreter.PacketInterpret);
+        // 플레이어 움직임
+        PlayerMoveStartEvent.AddListener(_inGameInterpreter.SendMoveStart);
+        PlayerMoveStopEvent.AddListener(_inGameInterpreter.SendMoveStop);
+        PlayerActionEvent.AddListener(_inGameInterpreter.SendActionStart);
+    }
+
+    private void RemoveNetworkCode()
+    {
+        // 플레이어 움직임
+        PlayerMoveStartEvent.RemoveListener(_inGameInterpreter.SendMoveStart);
+        PlayerMoveStopEvent.RemoveListener(_inGameInterpreter.SendMoveStop);
+        PlayerActionEvent.RemoveListener(_inGameInterpreter.SendActionStart);
+    }
+
+    private void AddSingleplayCode()
+    {
+        // 몬스터 패턴 바로 적용하는 코드
+        // 돈 획득 바로하는 코드
+        // 방 생성 바로하는 코드
+    }
+
+    private void SucceedHost()
+    {
+
+    }
 }

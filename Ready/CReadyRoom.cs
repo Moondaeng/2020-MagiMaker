@@ -62,7 +62,7 @@ public class CReadyRoom : MonoBehaviour
                 _tcpManager.SetPacketInterpret(PacketInterpret);
         }
 
-        if (CClientInfo.ThisRoom.isHost)
+        if (CClientInfo.ThisRoom.IsHost)
         {
             Debug.Log("I'm Host");
             // 방 생성 시
@@ -78,7 +78,7 @@ public class CReadyRoom : MonoBehaviour
 
         if (startBtn != null)
         {
-            if (!CClientInfo.ThisRoom.isHost)
+            if (!CClientInfo.ThisRoom.IsHost)
                 startBtn.interactable = false;
             startBtn.onClick.AddListener(GameStartRequest);
         }
@@ -111,7 +111,7 @@ public class CReadyRoom : MonoBehaviour
             GameStart(1);
         }
 
-        var message = Network.CPacketFactory.CreateGameStartPacket(CClientInfo.ThisRoom.roomid);
+        var message = Network.CPacketFactory.CreateGameStartPacket(CClientInfo.ThisRoom.RoomID);
 
         _tcpManager.Send(message.data);
     }
@@ -125,13 +125,13 @@ public class CReadyRoom : MonoBehaviour
         }
 
         Network.CPacket message;
-        if (CClientInfo.ThisRoom.isHost)
+        if (CClientInfo.ThisRoom.IsHost)
         {
-            message = Network.CPacketFactory.CreateHostQuitPacket(CClientInfo.ThisRoom.roomid);
+            message = Network.CPacketFactory.CreateHostQuitPacket(CClientInfo.ThisRoom.RoomID);
         }
         else
         {
-            message = Network.CPacketFactory.CreateGuestQuitPacket(CClientInfo.ThisRoom.roomid, CClientInfo.ThisUser.Slot);
+            message = Network.CPacketFactory.CreateGuestQuitPacket(CClientInfo.ThisRoom.RoomID, CClientInfo.ThisUser.Slot);
         }
         _tcpManager.Send(message.data);
     }
@@ -195,7 +195,7 @@ public class CReadyRoom : MonoBehaviour
         // 새 UI 그리는 작업
         var thisUser = CClientInfo.ThisUser;
         AddPlayerToListView(thisUser.Slot, thisUser.id, thisUser.clear);
-        foreach (var user in CClientInfo.ThisRoom.others)
+        foreach (var user in CClientInfo.ThisRoom.Others)
         {
             AddPlayerToListView(user.Slot, user.id, user.clear);
         }
@@ -253,7 +253,7 @@ public class CReadyRoom : MonoBehaviour
     private void GameStart(int playerCount)
     {
         CClientInfo.PlayerCount = playerCount;
-        SceneManager.LoadScene("InGame");
+        SceneManager.LoadScene("Prototype");
     }
 
     private void QuitRoom()

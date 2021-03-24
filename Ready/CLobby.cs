@@ -24,12 +24,15 @@ public class CLobby : MonoBehaviour
     public int timeout = 10;
     public Text errorHandlingDisplay;
 
-    public Transform canvas;
+    public Transform RoomListTransform;
     public Button RefreshBtn;
     public Button CreateBtn;
     public Button QuitBtn;
 
     public int TotalRoomCount { get; private set; }
+
+    [SerializeField] GameObject _debugPanel;
+    [SerializeField] Button _debugAddRoomBtn;
 
     private int joinRoomNumber;
     private Network.CTcpClient _tcpManager;
@@ -75,6 +78,16 @@ public class CLobby : MonoBehaviour
         {
             QuitBtn.onClick.AddListener(QuitLobby);
         }
+
+        if (!CClientInfo.IsDebugMode)
+        {
+            _debugPanel.SetActive(false);
+        }
+        else
+        {
+            _debugAddRoomBtn.onClick.AddListener(AddFakeRoom);
+        }
+
 
         Debug.Log("UID : " + CClientInfo.ThisUser.uid);
     }
@@ -260,23 +273,42 @@ public class CLobby : MonoBehaviour
     }
 
     // 현재 오브젝트(룸 리스트) 위치에 새로운 룸 인스턴스를 추가한다
-    public void AddRoomToListView(int rid, string hostName, int rCnt, int roomNumber)
+    private void AddRoomToListView(int rid, string hostName, int rCnt, int roomNumber)
     {
-        // 방 추가
-        int roomSize = 10;
-        var instance = Instantiate(roomPrefeb);
-        instance.transform.SetParent(canvas, false);
-        var newPosition = roomCreatePos.position + Vector3.down * roomSize * roomNumber;
-        instance.transform.position = newPosition;
-        instance.name = "ReadyRoom" + roomNumber;
+        var roomInstance = AddRoomInstance();
 
         // 방 정보 기입
-        Text roomName = instance.transform.Find("Room Info Group/Room Name").GetComponent<Text>();
-        Text roomCnt = instance.transform.Find("Room Info Group/Room Count").GetComponent<Text>();
+        Text roomName = roomInstance.transform.Find("Room Info Group/Room Name").GetComponent<Text>();
+        Text roomCnt = roomInstance.transform.Find("Room Info Group/Room Count").GetComponent<Text>();
         roomName.text = hostName + "'s room";
         roomCnt.text = rCnt + "/4";
-        Button roomEnter = instance.transform.Find("Enter").GetComponent<Button>();
+        Button roomEnter = roomInstance.transform.Find("Enter").GetComponent<Button>();
         roomEnter.onClick.AddListener(() => JoinRoomRequest(rid));
+    }
+
+    private GameObject AddRoomInstance()
+    {
+        var roomInstance = Instantiate(roomPrefeb);
+        var roomTransform = roomInstance.GetComponent<RectTransform>();
+        var newPivot = new Vector2(0.5f, 1);
+        roomInstance.GetComponent<RectTransform>().pivot = newPivot;
+        var newLocalPosition = Vector3.down * roomTransform.rect.height * RoomListTransform.childCount;
+        roomInstance.transform.localPosition = newLocalPosition;
+        roomInstance.name = "ReadyRoom" + RoomListTransform.childCount;
+        roomInstance.transform.SetParent(RoomListTransform, false);
+        AutoRoomListViewer(roomTransform.rect.height);
+        return roomInstance;
+    }
+
+    private void AutoRoomListViewer(float roomInstanceHeight)
+    {
+        if (RoomListTransform.childCount >= 8)
+        {
+            var rectTransform = RoomListTransform.GetComponent<RectTransform>();
+            var newSize = rectTransform.sizeDelta;
+            newSize.y = RoomListTransform.childCount * roomInstanceHeight;
+            rectTransform.sizeDelta = newSize;
+        }
     }
 
     private void ErrorHandling(string errorMsg, string observer)
@@ -294,4 +326,11 @@ public class CLobby : MonoBehaviour
     {
         errorHandlingDisplay.text = errorMsg;
     }
+
+    #region Debug
+    private void AddFakeRoom()
+    {
+        AddRoomToListView(5, "Fake", 3, RoomListTransform.childCount);
+    }
+    #endregion
 }

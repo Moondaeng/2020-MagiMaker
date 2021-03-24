@@ -19,7 +19,6 @@ namespace Network
 
     public sealed class CTcpClient : MonoBehaviour
     {
-        private static CLogComponent _logger;
         private static CGameEvent _gameEvent;
 
         public const int Shutdown = 910;
@@ -59,11 +58,6 @@ namespace Network
             string[] args = Environment.GetCommandLineArgs();
             CClientInfo.ThisUser = new CClientInfo.User(0, args[1], 0);
 #endif
-        }
-
-        private void Start()
-        {
-            _logger = new CLogComponent(ELogType.Network);
         }
 
         private void Update()

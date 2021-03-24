@@ -139,14 +139,6 @@ public class CCharacterSkill : MonoBehaviour
             skillObj.transform.position = userPos + Vector3.up;
             skillObj.transform.rotation = lookRotation;
             hitObjectBase.SetObjectLayer(TranslateLayerCharacterToSkill(true));
-            // 유저 스탯에 비례해 스킬 발사
-            var userStat = GetComponent<CharacterPara>();
-            skillObj.GetComponent<CUseEffectHandle>().EnhanceEffectByStat(userStat);
-
-            // 공격력 등 필요한 정보 넣기
-
-            //projectileBase.userAttackPower = userStat._attackMax;
-            // 원소 관련 정보
         }
         else if (hitObjectBase is CBuffBase)
         {
@@ -158,6 +150,19 @@ public class CCharacterSkill : MonoBehaviour
             hitObjectBase.SetObjectLayer(TranslateLayerCharacterToSkill(true));
             skillObj.transform.position = targetPos;
         }
+        else if (hitObjectBase is CCornSkillBase)
+        {
+            var userPos = transform.position;
+            var objectivePos = targetPos - userPos;
+            Quaternion lookRotation = Quaternion.LookRotation(objectivePos);
+            skillObj.transform.position = userPos + Vector3.up;
+            skillObj.transform.rotation = lookRotation;
+            hitObjectBase.SetObjectLayer(TranslateLayerCharacterToSkill(true));
+            skillObj.transform.SetParent(transform);
+        }
+        // 유저 스탯에 비례해 스킬 발사
+        var userStat = GetComponent<CharacterPara>();
+        skillObj.GetComponent<CUseEffectHandle>().EnhanceEffectByStat(userStat);
         hitObjectBase.IsInit = true;
     }
 

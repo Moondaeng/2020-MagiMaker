@@ -34,8 +34,7 @@ public class CPlayerCommand : MonoBehaviour
 
     private void Start()
     {
-        SetActivePlayers(1);
-        SetMyCharacter(0);
+        
     }
 
     // 캐릭터 활성화

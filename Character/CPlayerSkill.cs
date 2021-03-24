@@ -83,6 +83,11 @@ public class CPlayerSkill : CCharacterSkill
         }
     }
 
+    public int GetElementNumber(bool isMainElement, int mainSlotNumber, int subSlotNumber)
+    {
+        return 0;
+    }
+
     public int GetRegisterNumber(int mainElementIndex, int subElementIndex)
     {
         if(subElementIndex == -1)
@@ -117,6 +122,11 @@ public class CPlayerSkill : CCharacterSkill
 
         subElement[slot] = (int)element;
         subElementLearnEvent.Invoke(slot, (int)element);
+    }
+
+    public void SetSubElement(int mainSlotNumber, int subSlotNumber, ESkillElement element)
+    {
+
     }
 
     public override void SkillSelect(int index)

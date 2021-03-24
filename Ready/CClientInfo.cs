@@ -48,17 +48,16 @@ public class CClientInfo : MonoBehaviour
     {
         // C# Auto 속성
         public int[] Slot { get; set; }
-
-        public readonly List<User> others;
-        public readonly bool isHost;
-        public readonly int roomid;
+        public bool IsHost { get; private set; }
+        public List<User> Others { get; private set; }
+        public int RoomID { get; private set; }
 
         public JoinRoom(int roomid, int[] slot, List<User> others, bool isHost)
         {
-            this.roomid = roomid;
+            RoomID = roomid;
             Slot = slot;
-            this.others = others;
-            this.isHost = isHost;
+            Others = others;
+            IsHost = isHost;
         }
 
         // 방 정보를 얻음
@@ -91,24 +90,45 @@ public class CClientInfo : MonoBehaviour
         public static void UpdateRoom(int slotNum, User newGuest)
         {
             newGuest.Slot = slotNum;
-            ThisRoom.others.Add(newGuest);
+            ThisRoom.Others.Add(newGuest);
         }
 
         public static void DeleteUser(int slotNum)
         {
-            foreach(var user in ThisRoom.others)
+            foreach(var user in ThisRoom.Others)
             {
                 Debug.Log($"CClientInfo - Delete User : id {user.id}, clear {user.clear}, slot {user.Slot}");
                 if(user.Slot == slotNum)
                 {
-                    ThisRoom.others.Remove(user);
+                    ThisRoom.Others.Remove(user);
                     return;
                 }
             }
         }
     }
 
+    public static void CreateRoom(int rid)
+    {
+        CClientInfo.ThisRoom = new CClientInfo.JoinRoom(rid, new int[4] { 0, -1, -1, -1 }, new List<CClientInfo.User>(), true);
+        CClientInfo.ThisUser.Slot = 0;
+    }
+
+    public static bool IsSinglePlay()
+    {
+        int playerCount = 0;
+        for (int i = 0; i < ThisRoom.Slot.Length; i++)
+        {
+            if (ThisRoom.Slot[i] != -1)
+            {
+                ++playerCount;
+            }
+        }
+        return playerCount == 1 ? true : false;
+    }
+
     public static User ThisUser { get; set; }
     public static JoinRoom ThisRoom { get; set; }
     public static int PlayerCount { get; set; }
+    public static readonly bool IsDebugMode = true;
+    public static readonly bool IsSingleDebugMode = true;
 }

@@ -23,7 +23,6 @@ namespace Network
         private const int _PortalTeleport = 613;
         private const int _UsePortalPopup = 614;
 
-        private static CLogComponent _logger = new CLogComponent(ELogType.Network);
         private Network.CTcpClient _tcpManager;
         private CPlayerCommand playerCommander;
 
@@ -38,7 +37,7 @@ namespace Network
             // 헤더 읽기
             CPacket packet = new CPacket(data);
             packet.ReadHeader(out byte payloadSize, out short messageType);
-            _logger.Log("Header : payloadSize = {0}, messageType = {1}", payloadSize, messageType);
+            Debug.Log($"Header : payloadSize = {payloadSize}, messageType = {messageType}");
 
             switch((int)messageType)
             {
@@ -103,7 +102,7 @@ namespace Network
         {
             Int32 MyId = packet.ReadInt32();
 
-            _logger.Log($"Set Character : my id - {MyId}");
+            Debug.Log($"Set Character : my id - {MyId}");
 
             //Commander
             playerCommander.SetMyCharacter((int)MyId);
@@ -122,7 +121,7 @@ namespace Network
             dest.y = packet.ReadSingle();
             dest.z = packet.ReadSingle();
 
-            _logger.Log("Move Start - id{0} move ({1},{2},{3}) to ({4},{5},{6})", 
+            Debug.LogFormat("Move Start - id{0} move ({1},{2},{3}) to ({4},{5},{6})", 
                 id, now.x, now.y, now.z, dest.x, dest.y, dest.z);
 
             //Commander
@@ -139,7 +138,7 @@ namespace Network
             now.y = packet.ReadSingle();
             now.z = packet.ReadSingle();
 
-            _logger.Log("Move Stop - id{0} ({1},{2})", id, now.x, now.y, now.z);
+            Debug.LogFormat("Move Stop - id{0} ({1},{2})", id, now.x, now.y, now.z);
         }
 
         private void InterpretMoveCorrection(CPacket packet)
@@ -155,7 +154,7 @@ namespace Network
             dest.y = packet.ReadSingle();
             dest.z = packet.ReadSingle();
 
-            _logger.Log("Move Correction - id{0} move ({1},{2},{3}) to ({4},{5},{6})",
+            Debug.LogFormat("Move Correction - id{0} move ({1},{2},{3}) to ({4},{5},{6})",
                 id, now.x, now.y, now.z, dest.x, dest.y, dest.z);
         }
 
@@ -177,7 +176,7 @@ namespace Network
             dest.y = packet.ReadSingle();
             dest.z = packet.ReadSingle();
 
-            _logger.Log("Action Start - id{0} actionNumber{1} move ({2},{3},{4}) to ({5},{6},{7})",
+            Debug.LogFormat("Action Start - id{0} actionNumber{1} move ({2},{3},{4}) to ({5},{6},{7})",
                 id, actionNumber, now.x, now.y, now.z, dest.x, dest.y, dest.z);
 
             playerCommander.UseSkill((int)id, (int)actionNumber, now, dest);
