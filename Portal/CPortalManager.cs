@@ -4,10 +4,9 @@ using UnityEngine;
 
 public class CPortalManager : MonoBehaviour
 {
-    public Vector3 position;
-    GameObject[] player;
-    GameObject PortalAcceptParent;
-    GameObject FadeController;
+    private GameObject[] player;
+    private GameObject PortalAcceptParent;
+    private GameObject FadeController;
 
     public static CPortalManager instance;
 
@@ -64,10 +63,13 @@ public class CPortalManager : MonoBehaviour
                 break;
         }
         CCreateMap.instance.CreateRoom(CCreateMap.instance.GetRooms(), CCreateMap.instance.getRoomCount(), whichPortalSelect); //유저가 플레이 할 방 생성
-        CCreateMap.instance.RoomFlagCtrl(CCreateMap.instance.GetRooms()[CCreateMap.instance.getRoomCount(), whichPortalSelect].RoomType); //유저가 선택한 방 타입이 다음 방에 중복으로 나올 확률 감소
-        CCreateMap.instance.CreateStage(); //현재 방 이후의 방들 맵으로 생성
-        CGlobal.roomCount++; //방 생성시 카운트 증가
-        CGlobal.isClear = false; //포탈을 사용해서 새로운 방으로 왔으므로 방은 클리어되지 않은 상태
-        CCreateMap.instance.NotifyPortal(); //플래그를 이용한 옵저버 패턴, 포탈 삭제하기
+        CCreateMap.instance.RoomFlagCtrl(CCreateMap.instance.GetRooms()[CCreateMap.instance.getRoomCount(), whichPortalSelect].RoomType); //유저가 선택한 방 타입 저장
+
+        if (CGlobal.isHost)
+        {
+            CCreateMap.instance.CreateStage(); //현재 방 이후의 방들 맵으로 생성
+            CCreateMap.instance.SendRoomArr(); //현재 방 이후의 방들 피어들에게 전송
+            CCreateMap.instance.MakePortalText(CCreateMap.instance._roomCount, CCreateMap.instance._roomArr); //포탈 따로 생성
+        }
     }
 }

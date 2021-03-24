@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CEventShooterController : MonoBehaviour
 {
-    [Tooltip("슈터가 움직이는 속도")]
+    [Tooltip("슈터 이동속도")]
     public int shooterSpeed;
     [Tooltip("슈터 최대 높이")]
     public int shooterMaxHeight;
@@ -14,8 +14,6 @@ public class CEventShooterController : MonoBehaviour
     public float firingCycle;
     [Tooltip("발사 힘")]
     public float launchVelocity;
-
-    private List<GameObject> _bullets;
 
     private bool moveUp;
     // Start is called before the first frame update
@@ -33,8 +31,6 @@ public class CEventShooterController : MonoBehaviour
             launchVelocity = 5f;
 
         moveUp = true;
-
-        _bullets = new List<GameObject>();
 
         for (int i = 0; i < 70; i++)
         {

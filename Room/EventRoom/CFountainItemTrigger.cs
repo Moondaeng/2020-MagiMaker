@@ -11,8 +11,6 @@ public class CFountainItemTrigger : MonoBehaviour
     }
     public void OnTriggerEnter(Collider other)
     {
-        
-
         if (other.tag == "Player")
             GetReward();
         else if (other.tag == "WALL" || other.tag == "TILE")

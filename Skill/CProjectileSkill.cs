@@ -37,7 +37,6 @@ public class CProjectileSkill : MonoBehaviour
         MakeProjectilePrototype(user, targetPos, _spellObject[4], true, false);
     }
 
-
     // 투사체 발사 스킬 원형
     private void MakeProjectilePrototype(GameObject user, Vector3 targetPos, 
         GameObject ProjectileModel, bool IsParticleSystem, bool IsChaseEnemy)

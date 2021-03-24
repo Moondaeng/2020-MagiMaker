@@ -10,6 +10,7 @@ public class CRoom
     }
 
     private CGlobal.ERoomType _roomType;
+
     public CGlobal.ERoomType RoomType
     {
         get { return _roomType; }

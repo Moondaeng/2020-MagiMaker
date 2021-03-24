@@ -19,7 +19,7 @@ public class CEventBulletTrigger : CEventBulletController
         }
     }
 
-    void hideObject()
+    private void hideObject()
     {
         GameObject bullet = transform.parent.gameObject;
         CBulletQueue.instance.BulletEnqueue(bullet);

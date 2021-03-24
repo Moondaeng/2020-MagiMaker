@@ -31,9 +31,9 @@ public class CCreateMap : MonoBehaviour
     private int _eventCount;
     private int _shopCount;
     private bool _noRoomFlag;  //트루일 경우 방이 없음
-    private CGlobal.ERoomType _roomTypeFlag;
-    private int _roomCount;
-    private CRoom[,] _roomArr;
+    private CGlobal.ERoomType _userSelectRoom;
+    public int _roomCount;
+    public CRoom[,] _roomArr;
     private LinkedList<GameObject> _rooms;
     private LinkedListNode<GameObject> _tempRoomNode;
     private int _portalMomCount; //포탈맘 사용할때 태그를 이용해서 오브젝트를 받아오는데, 이 때 사라져야할 전방 포탈들도 가져와서 전 방 포탈들을 따로 하드코딩으로 제외하기 위한 변수
@@ -59,7 +59,7 @@ public class CCreateMap : MonoBehaviour
         _eventCount = 0;
         _shopCount = 0;
         _noRoomFlag = true;
-        _roomTypeFlag = CGlobal.ERoomType._empty;
+        _userSelectRoom = CGlobal.ERoomType._empty;
         _roomCount = 0; //방의 개수가 12개가 넘어가면 멈춰줄 변수
         _portalMomCount = 0;
 
@@ -71,7 +71,24 @@ public class CCreateMap : MonoBehaviour
         _rooms = new LinkedList<GameObject>();
 
         RandomRoomEnqueue();
-        CreateStage();
+
+        if (CGlobal.isHost)
+        {
+            CreateStage();
+            SendRoomArr();
+            MakePortalText(_roomCount, _roomArr);
+        }
+    }
+
+    public void SendRoomArr()
+    {
+
+    }
+
+    public void ReceiveRoomArr(CRoom[,] roomArr)
+    {
+        _roomArr = roomArr;
+        MakePortalText(_roomCount, _roomArr);
     }
 
     public void CreateRoom(CRoom[,] roomArr, int roomCount, int roadCount)
@@ -98,6 +115,11 @@ public class CCreateMap : MonoBehaviour
     public void RemovePortal()
     {
         _portals.Clear();
+    }
+
+    public CGlobal.ERoomType userSelectRoom()
+    {
+        return _userSelectRoom;
     }
 
     public void NotifyPortal()
@@ -313,7 +335,7 @@ public class CCreateMap : MonoBehaviour
             _roomArr[6 - 1, 0].RoomType = CGlobal.ERoomType._boss; //보스방 따로 넣기
         }
 
-        MakePortalText(_roomCount);
+        MakePortalText(_roomCount, _roomArr);
     }
 
     public void CreateStage()
@@ -355,13 +377,11 @@ public class CCreateMap : MonoBehaviour
             {
                 _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._shop;
                 _shopCount++;
-                RoomFlagCtrl(CGlobal.ERoomType._shop);
                 continue;
             }
             if (_noRoomFlag == true && j - randomRoad == 1) //조건들에 걸려 방이 아예 안나오는 경우 방지
             {
                 _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._normal;
-                RoomFlagCtrl(CGlobal.ERoomType._normal);
                 continue;
             }
 
@@ -372,7 +392,6 @@ public class CCreateMap : MonoBehaviour
             {
                 _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._skillElite;
                 _skillEliteCount++;
-                RoomFlagCtrl(CGlobal.ERoomType._skillElite);
                 continue;
             }
 
@@ -381,7 +400,6 @@ public class CCreateMap : MonoBehaviour
             {
                 _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._shop;
                 _shopCount++;
-                RoomFlagCtrl(CGlobal.ERoomType._shop);
                 continue;
             }
 
@@ -389,7 +407,6 @@ public class CCreateMap : MonoBehaviour
                 && selectRoomType < CConstants.SKILL_PROBABILITY + CConstants.SHOP__PROBABILITY + CConstants.NORMAL_PROBABILITY)//일반 방
             {
                 _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._normal;
-                RoomFlagCtrl(CGlobal.ERoomType._normal);
                 continue;
             }
 
@@ -399,7 +416,6 @@ public class CCreateMap : MonoBehaviour
             {
                 _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._event;
                 _eventCount++;
-                RoomFlagCtrl(CGlobal.ERoomType._event);
                 continue;
             }
 
@@ -407,12 +423,9 @@ public class CCreateMap : MonoBehaviour
                 && selectRoomType < CConstants.SKILL_PROBABILITY + CConstants.SHOP__PROBABILITY + CConstants.NORMAL_PROBABILITY + CConstants.EVENT_PROBABLILITY + CConstants.ITEM_PROBABILITY) //아이템 엘리트
             {
                 _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._itemElite;
-                RoomFlagCtrl(CGlobal.ERoomType._itemElite);
                 continue;
             }
         }
-
-        MakePortalText(_roomCount);
     }
 
     public void RoomFlagCtrl(CGlobal.ERoomType roomType)
@@ -421,19 +434,19 @@ public class CCreateMap : MonoBehaviour
         switch (roomType)
         {
             case CGlobal.ERoomType._event:
-                _roomTypeFlag = CGlobal.ERoomType._event;
+                _userSelectRoom = CGlobal.ERoomType._event;
                 break;
             case CGlobal.ERoomType._itemElite:
-                _roomTypeFlag = CGlobal.ERoomType._itemElite;
+                _userSelectRoom = CGlobal.ERoomType._itemElite;
                 break;
             case CGlobal.ERoomType._normal:
-                _roomTypeFlag = CGlobal.ERoomType._normal;
+                _userSelectRoom = CGlobal.ERoomType._normal;
                 break;
             case CGlobal.ERoomType._shop:
-                _roomTypeFlag = CGlobal.ERoomType._shop;
+                _userSelectRoom = CGlobal.ERoomType._shop;
                 break;
             case CGlobal.ERoomType._skillElite:
-                _roomTypeFlag = CGlobal.ERoomType._skillElite;
+                _userSelectRoom = CGlobal.ERoomType._skillElite;
                 break;
         }
     }
@@ -505,7 +518,7 @@ public class CCreateMap : MonoBehaviour
         return;
     }
 
-    public void MakePortalText(int roomCount) //포탈 위에 다음 방이 어떤 방인지 알려주는 텍스트 생성, 빈 방인 경우 포탈 삭제
+    public void MakePortalText(int roomCount, CRoom[,] roomArr) //포탈 위에 다음 방이 어떤 방인지 알려주는 텍스트 생성, 빈 방인 경우 포탈 삭제
     {
         GameObject[] portalMom = GameObject.FindGameObjectsWithTag("PORTAL_MOM");
 
@@ -517,24 +530,25 @@ public class CCreateMap : MonoBehaviour
             switch (portal.tag)
             {
                 case "LEFT_PORTAL":
-                    text.GetComponent<TextMeshProUGUI>().text = _roomArr[roomCount, 0].RoomType.ToString().Substring(1);
-                    if (_roomArr[roomCount, 0].RoomType == CGlobal.ERoomType._empty)
+                    text.GetComponent<TextMeshProUGUI>().text = roomArr[roomCount, 0].RoomType.ToString().Substring(1);
+                    if (roomArr[roomCount, 0].RoomType == CGlobal.ERoomType._empty)
                         GameObject.Destroy(portalMom[i]);
                     break;
                 case "PORTAL":
-                    text.GetComponent<TextMeshProUGUI>().text = _roomArr[roomCount, 1].RoomType.ToString().Substring(1);
-                    if (_roomArr[roomCount, 1].RoomType == CGlobal.ERoomType._empty)
+                    text.GetComponent<TextMeshProUGUI>().text = roomArr[roomCount, 1].RoomType.ToString().Substring(1);
+                    if (roomArr[roomCount, 1].RoomType == CGlobal.ERoomType._empty)
                         GameObject.Destroy(portalMom[i]);
                     break;
                 case "RIGHT_PORTAL":
-                    text.GetComponent<TextMeshProUGUI>().text = _roomArr[roomCount, 2].RoomType.ToString().Substring(1);
-                    if (_roomArr[roomCount, 2].RoomType == CGlobal.ERoomType._empty)
+                    text.GetComponent<TextMeshProUGUI>().text = roomArr[roomCount, 2].RoomType.ToString().Substring(1);
+                    if (roomArr[roomCount, 2].RoomType == CGlobal.ERoomType._empty)
                         GameObject.Destroy(portalMom[i]);
                     break;
             }
         }
 
-        //_portalMomCount = portalMom.Length - _portalMomCount; // 이후에 find tag가 제거되야할 포탈들도 검색해버리는 문제 해결용
+        CGlobal.isClear = false; //포탈을 사용해서 새로운 방으로 왔으므로 방은 클리어되지 않은 상태
+        NotifyPortal(); //플래그를 이용한 옵저버 패턴, 포탈 삭제하기
     }
 
     public int getRoomCount()

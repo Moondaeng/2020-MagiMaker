@@ -30,11 +30,11 @@ public class CEventRoomNpcClick : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
 #endif
         {
-            CanclePopUp();
+            CancelPopUp();
         }
     }
 
-    public void CanclePopUp()
+    public void CancelPopUp()
     {
         Debug.Log($"{instance._stackPopUp.Count}");
         if (instance._stackPopUp.Count != 0)
@@ -45,7 +45,6 @@ public class CEventRoomNpcClick : MonoBehaviour
 
         if (instance._stackPopUp.Count == 0)
         {
-            CGlobal.useNPC = false;
             CWindowFacade.instance.SetOtherWindowMode(false);
         }
     }
@@ -54,7 +53,6 @@ public class CEventRoomNpcClick : MonoBehaviour
     {
         _popUp.SetActive(true);
         instance._stackPopUp.Push(_popUp);
-        CGlobal.useNPC = true;
         CWindowFacade.instance.SetOtherWindowMode(true);
     }
 }

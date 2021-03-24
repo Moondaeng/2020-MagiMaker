@@ -46,9 +46,9 @@ public class CEventRoomPopUpController : MonoBehaviour
           
             if (CGlobal.popUpCancel)
             {
-                CGlobal.useNPC = false; //팝업 꺼지므로 플레이어 이동 안막힘
+                //팝업 꺼지므로 플레이어 이동 안막힘
                 CGlobal.popUpCancel = false;
-                CEventRoomNpcClick.instance.CanclePopUp();
+                CEventRoomNpcClick.instance.CancelPopUp();
             }
         }
     }
