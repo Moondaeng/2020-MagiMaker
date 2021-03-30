@@ -3,16 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CEventRoomPopUpController : MonoBehaviour
+public class CNPCPopUpController : MonoBehaviour
 {
-    private GameObject _popUp;
+    protected GameObject _popUp;
     private int _childCount;
     private int _choose; //0이면 첫번째 선택 1이면 2번째 선택
+    protected GameObject _NPC;
 
     // Start is called before the first frame update
     public virtual void Start()
     {
         _popUp = gameObject;
+        _NPC = GameObject.FindGameObjectWithTag("NPC");
 
         _childCount = _popUp.transform.childCount;
 

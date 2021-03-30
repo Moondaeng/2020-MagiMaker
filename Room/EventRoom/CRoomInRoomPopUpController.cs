@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CRoomInRoomPopUpController : CEventRoomPopUpController
+public class CRoomInRoomPopUpController : CNPCPopUpController
 {
     private GameObject[] _players;
     private Vector3 skillElitePos = new Vector3(36, 1, 127);

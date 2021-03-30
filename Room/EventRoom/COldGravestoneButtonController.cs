@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class COldGravestoneButtonController : CEventRoomPopUpController
+public class COldGravestoneButtonController : CNPCPopUpController
 {
     private GameObject _oldGravestone;
     private GameObject _monsterGroup;

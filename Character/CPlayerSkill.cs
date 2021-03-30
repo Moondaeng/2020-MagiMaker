@@ -19,12 +19,12 @@ public class CPlayerSkill : CCharacterSkill
         Fire, Water, Earth, Wind, Light, Dark, None = -1
     }
 
-    private readonly int mainElementContainSize = 3;
-    private readonly int subElementContainSize = 4;
+    private static readonly int mainElementContainSize = 3;
+    private static readonly int subElementContainSize = 4;
     private const int elementTotalNumber = 6;
 
-    private int[] mainElement;
-    private int[] subElement;
+    private ESkillElement[] mainElement = new ESkillElement[mainElementContainSize];
+    private ESkillElement[,] subElement = new ESkillElement[mainElementContainSize, subElementContainSize];
 
     private int _selectedElementNum;
 
@@ -37,15 +37,13 @@ public class CPlayerSkill : CCharacterSkill
         base.Awake();
         _selectedElementNum = -1;
 
-        mainElement = new int[mainElementContainSize];
-        subElement = new int[subElementContainSize];
-        for (int slot = 0; slot < mainElement.Length; slot++)
+        for (int mainElementSlot = 0; mainElementSlot < mainElement.Length; mainElementSlot++)
         {
-            mainElement[slot] = -1;
-        }
-        for (int slot = 0; slot < subElement.Length; slot++)
-        {
-            subElement[slot] = -1;
+            mainElement[mainElementSlot] = ESkillElement.None;
+            for (int subElementSlot = 0; subElementSlot < subElementContainSize; subElementSlot++)
+            {
+                subElement[mainElementSlot, subElementSlot] = ESkillElement.None;
+            }
         }
     }
 
@@ -55,10 +53,9 @@ public class CPlayerSkill : CCharacterSkill
         // 주원소, 부원소 배우기
         SetMainElement(0, ESkillElement.Fire);
         SetMainElement(1, ESkillElement.Water);
-        SetSubElement(0, ESkillElement.Water);
-        SetSubElement(1, ESkillElement.Earth);
-        SetSubElement(2, ESkillElement.Wind);
-        SetSubElement(3, ESkillElement.Light);
+        SetSubElement(0, 0, ESkillElement.Water);
+        SetSubElement(0, 1, ESkillElement.Earth);
+        SetSubElement(0, 2, ESkillElement.Wind);
     }
 
     public int GetElementContainSize(bool isMainElement)
@@ -66,20 +63,21 @@ public class CPlayerSkill : CCharacterSkill
         return isMainElement ? mainElementContainSize : subElementContainSize;
     }
 
-    public int GetElementNumber(bool isMainElement, int slotNumber)
+    public int GetElementNumber(bool isMainElement, int mainSlot, int subSlot)
     {
-        if (slotNumber < 0 || slotNumber > GetElementContainSize(isMainElement))
+        if (mainSlot < 0 || mainSlot >= mainElementContainSize
+            || subSlot < 0 || subSlot >= subElementContainSize)
         {
             return (int)ESkillElement.None;
         }
 
         if (isMainElement)
         {
-            return mainElement[slotNumber];
+            return (int)mainElement[mainSlot];
         }
         else
         {
-            return subElement[slotNumber];
+            return (int)subElement[mainSlot, subSlot];
         }
     }
 
@@ -87,18 +85,18 @@ public class CPlayerSkill : CCharacterSkill
     {
         if(subElementIndex == -1)
         {
-            if (-1 == mainElement[mainElementIndex])
+            if (mainElement[mainElementIndex] == ESkillElement.None)
             {
                 return -1;
             }
-            return mainElement[mainElementIndex] * (elementTotalNumber + 1);
+            return (int)mainElement[mainElementIndex] * (elementTotalNumber + 1);
         }
 
-        if (-1 == mainElement[mainElementIndex] || -1 == subElement[subElementIndex])
+        if (mainElement[mainElementIndex] == ESkillElement.None || subElement[mainElementIndex, subElementIndex] == ESkillElement.None)
         {
             return -1;
         }
-        return mainElement[mainElementIndex] * (elementTotalNumber + 1) + subElement[subElementIndex];
+        return (int)mainElement[mainElementIndex] * (elementTotalNumber + 1) + (int)subElement[mainElementIndex, subElementIndex];
     }
 
     // 주 원소 획득 / 교체
@@ -106,17 +104,21 @@ public class CPlayerSkill : CCharacterSkill
     {
         if (slot < 0 || slot >= mainElementContainSize) return;
 
-        mainElement[slot] = (int)element;
+        mainElement[slot] = element;
         mainElementLearnEvent.Invoke(slot, (int)element);
     }
 
     // 부 원소 획득 / 교체
-    public void SetSubElement(int slot, ESkillElement element)
+    public void SetSubElement(int mainSlot, int subSlot, ESkillElement element)
     {
-        if (slot < 0 || slot >= subElementContainSize) return;
+        if (mainSlot < 0 || mainSlot >= mainElementContainSize
+            || subSlot < 0 || subSlot >= subElementContainSize)
+        {
+            return;
+        }
 
-        subElement[slot] = (int)element;
-        subElementLearnEvent.Invoke(slot, (int)element);
+        subElement[mainSlot, subSlot] = element;
+        subElementLearnEvent.Invoke(subSlot, (int)element);
     }
 
     public override void SkillSelect(int index)
@@ -135,7 +137,7 @@ public class CPlayerSkill : CCharacterSkill
                 return;
             }
             
-            if(-1 == (_selectedElementNum = mainElement[index]))
+            if ((_selectedElementNum = (int)mainElement[index]) == -1)
             {
                 Debug.Log("Element Select Error");
                 return;

@@ -60,7 +60,7 @@ public class CWaitingForAccept : MonoBehaviour
 
     public void SetPlayerSelect() //현재 플레이어의 숫자에 따라 팝업의 체크표시 개수 변경
     {
-        for (int i = _playerCount; _playerCount < MAX_PLAYER_COUNT; i++)
+        for (int i = _playerCount; i < MAX_PLAYER_COUNT; i++)
         {
             _waitingForOtherPlayer.transform.GetChild(i).gameObject.SetActive(false);
         }      

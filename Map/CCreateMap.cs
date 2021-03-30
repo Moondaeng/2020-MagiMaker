@@ -26,7 +26,7 @@ public class CCreateMap : MonoBehaviour
     #endregion
 
     #region memberVar
-    private int _stageNumber;
+    public int _stageNumber;
     private int _skillEliteCount;
     private int _eventCount;
     private int _shopCount;
@@ -312,7 +312,7 @@ public class CCreateMap : MonoBehaviour
 
         if (_roomCount == 1)
         {
-            _roomArr[1, 0].RoomType = CGlobal.ERoomType._normal; //일반방 넣기
+            _roomArr[1, 0].RoomType = CGlobal.ERoomType._itemElite; //일반방 넣기
         }
 
         if (_roomCount == 2)
@@ -322,7 +322,7 @@ public class CCreateMap : MonoBehaviour
 
         if (_roomCount == 3)
         {
-            _roomArr[3, 0].RoomType = CGlobal.ERoomType._itemElite; //아이템 엘리트방 넣기
+            _roomArr[3, 0].RoomType = CGlobal.ERoomType._normal; //아이템 엘리트방 넣기
         }
 
         if (_roomCount == 4)

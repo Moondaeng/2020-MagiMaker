@@ -8,10 +8,24 @@ public class CElementObtainViewer : MonoBehaviour
 
     private static readonly int MAX_CONTANING_ELEMENT = 4;
 
+    [System.Serializable]
+    class ElementInfo
+    {
+        public Transform mainElementPanel;
+        public Transform[] subElementPanels = new Transform[3];
+    }
+
+    [Serializable]
+    class ChangingElement
+    {
+        Image image;
+        CPlayerSkill.ESkillElement retaining;
+    }
+
     [SerializeField, EnumNamedArray(typeof(CPlayerSkill.ESkillElement))]
     private Sprite[] _elementImageArr = new Sprite[Enum.GetValues(typeof(CPlayerSkill.ESkillElement)).Length];
-    private Transform[] _elementPanel = new Transform[MAX_CONTANING_ELEMENT];
-    private TMPro.TMP_Text _changeElementText;
+    private ElementInfo[] _elementInfos = new ElementInfo[2];
+    private ChangingElement changingInfo;
 
     public Action closeWindowCallback;
 
@@ -22,36 +36,64 @@ public class CElementObtainViewer : MonoBehaviour
             instance = this;
         }
 
-        for (int i = 0; i < _elementPanel.Length; i++)
-        {
-            _elementPanel[i] = transform.Find($"Element{i + 1}");
+        Debug.Log(_elementInfos[0] + " ** elementalinfos");
+        Debug.Log(_elementInfos[1] + " ** elementalinfos");
+
+        // 주원소 개수만큼 패널 초기화
+        for (int i = 0; i < 2; i++)
+        {        
+            _elementInfos[i].mainElementPanel = transform.Find($"ElementPanel{i}/MainElementPanel");
+            for (int j = 0; j < 3; j++)
+            {
+                _elementInfos[i].mainElementPanel = transform.Find($"ElementPanel{i}/SubElementPanel{j}");
+            }
         }
-        _changeElementText = transform.Find("ChangeText").GetComponent<TMPro.TMP_Text>();
     }
 
-    public void DrawViewer(CPlayerSkill playerSkill, bool isMainElement, CPlayerSkill.ESkillElement element)
+    public void DrawPlayerElement(CPlayerSkill playerSkill)
     {
-        SetChangeElementText(isMainElement);
-
-        for (int i = 0; i < playerSkill.GetElementContainSize(isMainElement); i++)
+        for (int i = 0; i < 2; i++)
         {
-            SetElementImage(playerSkill.GetElementNumber(isMainElement, i), _elementPanel[i].Find("Image").GetComponent<Image>());
-            var button = _elementPanel[i].Find("ChangeButton").GetComponent<Button>();
-            button.interactable = true;
-            int slotNumber = i;
-            button.onClick.AddListener(() => ChangeElement(playerSkill, isMainElement, element, slotNumber));
+            SetElementImage(
+                playerSkill.GetElementNumber(true, i, 0),
+                _elementInfos[i].mainElementPanel.Find("Image").GetComponent<Image>()
+            );
+            for (int j = 0; j < 3; j++)
+            {
+                SetElementImage(
+                    playerSkill.GetElementNumber(false, i, j),
+                    _elementInfos[i].subElementPanels[j].Find("Image").GetComponent<Image>()
+                );
+            }
         }
-        for (int i = playerSkill.GetElementContainSize(isMainElement); i < MAX_CONTANING_ELEMENT; i++)
-        {
-            _elementPanel[i].Find("ChangeButton").GetComponent<Button>().interactable = false;
-        }
-
-
     }
 
-    private void SetChangeElementText(bool isMainElement)
+    public void SetChangingElementState(CPlayerSkill playerSkill, bool isMainElement, CPlayerSkill.ESkillElement element)
     {
-        _changeElementText.text = isMainElement ? "주원소" : "부원소";
+        for (int i = 0; i < 2; i++)
+        {
+            if (isMainElement)
+            {
+                _elementInfos[i].mainElementPanel.Find("Button").GetComponent<Button>().interactable = true;
+                var slotNumber = i;
+                ChangeElement(playerSkill, isMainElement, element, slotNumber, 0);
+                for (int j = 0; j < 3; j++)
+                {
+                    _elementInfos[i].subElementPanels[j].Find("Button").GetComponent<Button>().interactable = false;
+                }
+            }
+            else
+            {
+                _elementInfos[i].mainElementPanel.Find("Button").GetComponent<Button>().interactable = false;
+                for (int j = 0; j < 3; j++)
+                {
+                    _elementInfos[i].subElementPanels[j].Find("Button").GetComponent<Button>().interactable = true;
+                    var mainSlotNumber = i;
+                    var subSlotNumber = j;
+                    ChangeElement(playerSkill, isMainElement, element, mainSlotNumber, subSlotNumber);
+                }
+            }
+        }
     }
 
     private void SetElementImage(int element, Image image)
@@ -64,15 +106,15 @@ public class CElementObtainViewer : MonoBehaviour
         image.sprite = _elementImageArr[element];
     }
 
-    private void ChangeElement(CPlayerSkill playerSkill, bool isMainElement, CPlayerSkill.ESkillElement element, int slot)
+    private void ChangeElement(CPlayerSkill playerSkill, bool isMainElement, CPlayerSkill.ESkillElement element, int mainSlot, int subSlot)
     {
         if (isMainElement)
         {
-            playerSkill.SetMainElement(slot, element);
+            playerSkill.SetMainElement(mainSlot, element);
         }
         else
         {
-            playerSkill.SetSubElement(slot, element);
+            playerSkill.SetSubElement(mainSlot, subSlot, element);
         }
 
         closeWindowCallback?.Invoke();
