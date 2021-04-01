@@ -8,46 +8,45 @@ public class CElementObtainViewer : MonoBehaviour
 
     private static readonly int MAX_CONTANING_ELEMENT = 4;
 
-    [System.Serializable]
-    class ElementInfo
-    {
-        public Transform mainElementPanel;
-        public Transform[] subElementPanels = new Transform[3];
-    }
-
-    [Serializable]
-    class ChangingElement
-    {
-        Image image;
-        CPlayerSkill.ESkillElement retaining;
-    }
-
     [SerializeField, EnumNamedArray(typeof(CPlayerSkill.ESkillElement))]
     private Sprite[] _elementImageArr = new Sprite[Enum.GetValues(typeof(CPlayerSkill.ESkillElement)).Length];
-    private ElementInfo[] _elementInfos = new ElementInfo[2];
-    private ChangingElement changingInfo;
-
-    public Action closeWindowCallback;
+    private Transform[] mainElementPanels = new Transform[2];
+    private Transform[,] subElementPanels = new Transform[2,3];
+    
+    // 획득했음에도 사용하지 않으면 팝업 나오는 용
+    private CPlayerSkill.ESkillElement _currentObtainingElement;
 
     private void Awake()
     {
+        Debug.Log("awake");
+
         if (instance == null)
         {
             instance = this;
         }
 
-        Debug.Log(_elementInfos[0] + " ** elementalinfos");
-        Debug.Log(_elementInfos[1] + " ** elementalinfos");
-
         // 주원소 개수만큼 패널 초기화
         for (int i = 0; i < 2; i++)
-        {        
-            _elementInfos[i].mainElementPanel = transform.Find($"ElementPanel{i}/MainElementPanel");
+        {
+            Debug.Log($"ElementPanel{i}/MainElementPanel");
+            mainElementPanels[i] = transform.Find($"ElementPanel{i}").Find("MainElementPanel");
             for (int j = 0; j < 3; j++)
             {
-                _elementInfos[i].mainElementPanel = transform.Find($"ElementPanel{i}/SubElementPanel{j}");
+                subElementPanels[i,j] = transform.Find($"ElementPanel{i}").Find($"SubElementPanel{j}");
             }
         }
+
+        transform.Find("CancelButton").GetComponent<Button>().onClick.AddListener(CancelChangeElement);
+
+        Debug.Log("awake end");
+    }
+
+    public void OpenViewer(CPlayerSkill playerSkill, bool isMainElement, CPlayerSkill.ESkillElement element)
+    {
+        SetActiveViewer(true);
+        DrawPlayerElement(playerSkill);
+        DrawObtainedElement(isMainElement, element);
+        SetObtainChangeButton(playerSkill, isMainElement, element);
     }
 
     public void DrawPlayerElement(CPlayerSkill playerSkill)
@@ -56,44 +55,23 @@ public class CElementObtainViewer : MonoBehaviour
         {
             SetElementImage(
                 playerSkill.GetElementNumber(true, i, 0),
-                _elementInfos[i].mainElementPanel.Find("Image").GetComponent<Image>()
+                mainElementPanels[i].Find("ElementImage").GetComponent<Image>()
             );
             for (int j = 0; j < 3; j++)
             {
                 SetElementImage(
                     playerSkill.GetElementNumber(false, i, j),
-                    _elementInfos[i].subElementPanels[j].Find("Image").GetComponent<Image>()
+                    subElementPanels[i, j].Find("ElementImage").GetComponent<Image>()
                 );
             }
         }
     }
 
-    public void SetChangingElementState(CPlayerSkill playerSkill, bool isMainElement, CPlayerSkill.ESkillElement element)
+    private void DrawObtainedElement(bool isMainElement, CPlayerSkill.ESkillElement element)
     {
-        for (int i = 0; i < 2; i++)
-        {
-            if (isMainElement)
-            {
-                _elementInfos[i].mainElementPanel.Find("Button").GetComponent<Button>().interactable = true;
-                var slotNumber = i;
-                ChangeElement(playerSkill, isMainElement, element, slotNumber, 0);
-                for (int j = 0; j < 3; j++)
-                {
-                    _elementInfos[i].subElementPanels[j].Find("Button").GetComponent<Button>().interactable = false;
-                }
-            }
-            else
-            {
-                _elementInfos[i].mainElementPanel.Find("Button").GetComponent<Button>().interactable = false;
-                for (int j = 0; j < 3; j++)
-                {
-                    _elementInfos[i].subElementPanels[j].Find("Button").GetComponent<Button>().interactable = true;
-                    var mainSlotNumber = i;
-                    var subSlotNumber = j;
-                    ChangeElement(playerSkill, isMainElement, element, mainSlotNumber, subSlotNumber);
-                }
-            }
-        }
+        var panel = transform.Find("ObtainedElementPanel");
+        panel.Find("ElementImage").GetComponent<Image>().sprite = _elementImageArr[(int)element];
+        panel.Find("MainElementText").GetComponent<TMPro.TMP_Text>().text = isMainElement ? "주원소" : "부원소";
     }
 
     private void SetElementImage(int element, Image image)
@@ -106,8 +84,29 @@ public class CElementObtainViewer : MonoBehaviour
         image.sprite = _elementImageArr[element];
     }
 
+    private void SetObtainChangeButton(CPlayerSkill playerSkill, bool isMainElement, CPlayerSkill.ESkillElement element)
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            var mainElementButton = mainElementPanels[i].Find("ObtainChangeButton").GetComponent<Button>();
+            var mainSlotNumber = i;
+            mainElementButton.onClick.AddListener(() => ChangeElement(playerSkill, isMainElement, element, mainSlotNumber, 0));
+            mainElementButton.interactable = isMainElement ? true : false;
+            for (int j = 0; j < 3; j++)
+            {
+                var subElementButton = subElementPanels[i, j].Find("ObtainChangeButton").GetComponent<Button>();
+                var subSlotNumber = j;
+                subElementButton.onClick.AddListener(() => ChangeElement(playerSkill, isMainElement, element, mainSlotNumber, subSlotNumber));
+                subElementButton.interactable = !isMainElement ? true : false;
+            }
+        }
+    }
+
     private void ChangeElement(CPlayerSkill playerSkill, bool isMainElement, CPlayerSkill.ESkillElement element, int mainSlot, int subSlot)
     {
+        Debug.Log("ChangeElement function");
+
+
         if (isMainElement)
         {
             playerSkill.SetMainElement(mainSlot, element);
@@ -116,7 +115,17 @@ public class CElementObtainViewer : MonoBehaviour
         {
             playerSkill.SetSubElement(mainSlot, subSlot, element);
         }
+        SetActiveViewer(false);
+    }
 
-        closeWindowCallback?.Invoke();
+    private void CancelChangeElement()
+    {
+        SetActiveViewer(false);
+    }
+
+    private void SetActiveViewer(bool isOpen)
+    {
+        gameObject.SetActive(isOpen);
+        CController.instance.SetControlLock(isOpen);
     }
 }

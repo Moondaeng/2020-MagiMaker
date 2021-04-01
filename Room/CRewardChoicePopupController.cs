@@ -9,6 +9,7 @@ public class CRewardChoicePopupController : CNPCPopUpController
     private Dictionary<int, string> _itemGrade;
     private bool isUsed = false;
     CPlayerPara _playerPara;
+    private bool[] isBoss = new bool[2];
 
     // Start is called before the first frame update
     public override void Start()
@@ -16,9 +17,15 @@ public class CRewardChoicePopupController : CNPCPopUpController
         base.Start();
 
         if (CCreateMap.instance.userSelectRoom() == CGlobal.ERoomType._itemElite) //유저가 보스 엘리트 중 어떤 방에 들어온 것인지 확인.
+        {
             _userSelectRoom = 0;
+            isBoss[_userSelectRoom] = false;
+        }
         else if (CCreateMap.instance.userSelectRoom() == CGlobal.ERoomType._boss)
+        {
             _userSelectRoom = 1;
+            isBoss[_userSelectRoom] = true;
+        }
 
         _playerPara = CController.instance.player.GetComponent<CPlayerPara>(); //인벤토리를 위한 플레이어 파라 정의       
 
@@ -29,7 +36,7 @@ public class CRewardChoicePopupController : CNPCPopUpController
         MakeText();
     }
 
-    public void MakeText()
+    private void MakeText()
     {
         TMPro.TextMeshProUGUI goldText = _popUp.transform.GetChild(2).GetChild(0).GetComponent<TMPro.TextMeshProUGUI>(); //골드 보상 결정
         _gold = 300 + (100 * _userSelectRoom) + (CCreateMap.instance._stageNumber + 1) * UnityEngine.Random.Range(50, 100);
@@ -50,7 +57,7 @@ public class CRewardChoicePopupController : CNPCPopUpController
         switch (choose) //아이템 엘리트 기준으로 짜고 어떻게 변경할지 생각 ㄱ
         {
             case 0: //부원소 획득
-                Debug.Log("Element get");
+                GetElemental();
                 break;
             case 1: //무작위 아이템 획득
                 GetItem();
@@ -67,10 +74,16 @@ public class CRewardChoicePopupController : CNPCPopUpController
         CGlobal.popUpCancel = true;
     }
 
-    public void GetItem()
+    private void GetElemental()
+    {
+        CElementObtainViewer.instance.OpenViewer(CController.instance.player.GetComponent<CPlayerSkill>(), isBoss[_userSelectRoom], (CPlayerSkill.ESkillElement)
+            Random.Range(0, 5));
+    }
+
+    private void GetItem()
     {
         //확률 50 30 20
-        int random = UnityEngine.Random.Range(0, 100);
+        int random = Random.Range(0, 100);
 
         GameObject item;
         if (random < 50)

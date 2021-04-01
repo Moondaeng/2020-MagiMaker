@@ -30,11 +30,12 @@ public class CPlayerCommand : MonoBehaviour
         _controller = CController.instance;
         _othersUiList = GameObject.Find("UiScript").GetComponent<COtherPlayerUiManager>();
         _camera = GameObject.Find("FreeLookCameraRig").GetComponent<CMouseFollower>();
+
+        SetActivePlayers(1);
     }
 
     private void Start()
     {
-        SetActivePlayers(1);
         SetMyCharacter(0);
     }
 

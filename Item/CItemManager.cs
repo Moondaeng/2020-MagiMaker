@@ -39,7 +39,8 @@ public class CItemManager : MonoBehaviour
         // 아이템 드랍 테이블에 아이템 딕셔너리 내용물 넣기
         foreach (var item in _itemDict.Values)
         {
-            CItemDropTable.instance.AddItem(item);
+            int playerType = (item.GetComponent<CItemComponent>().Item.ItemCode / 10000);
+            CItemDropTable.instance.AddItem(item, playerType);
         }
     }
 

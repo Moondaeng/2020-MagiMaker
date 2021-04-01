@@ -149,7 +149,7 @@ public class CController : MonoBehaviour
         CWindowFacade.instance.SetTarget(controlCharacter);
     }
 
-    private void SetControlLock(bool isLock)
+    public void SetControlLock(bool isLock)
     {
         _camera.SetLockCursor(!isLock);
         _isControlMode = !isLock;

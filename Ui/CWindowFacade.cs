@@ -88,14 +88,6 @@ public class CWindowFacade : MonoBehaviour
         PushActiveWindow(_helpWindow.gameObject);
     }
 
-    public void OpenObtainingElement(CPlayerSkill playerSkill, bool isMainElement, CPlayerSkill.ESkillElement element)
-    {
-        PushActiveWindow(_ObtainingElementViewer.gameObject);
-        _ObtainingElementViewer.closeWindowCallback = CloseWindow;
-        _ObtainingElementViewer.DrawPlayerElement(playerSkill);
-        _ObtainingElementViewer.SetChangingElementState(playerSkill, isMainElement, element);
-    }
-
     public void SetOtherWindowMode(bool isOtherWindow)
     {
         _isOtherWindowMode = isOtherWindow;

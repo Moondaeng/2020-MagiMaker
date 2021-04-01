@@ -22,6 +22,7 @@ public class CObtainElementEffect : CUseEffectHandle
             return;
         }
 
-        CWindowFacade.instance.OpenObtainingElement(cPara.GetComponent<CPlayerSkill>(), isMainElement, elementType);
+        CElementObtainViewer.instance.gameObject.SetActive(true);
+        CElementObtainViewer.instance.OpenViewer(cPara.GetComponent<CPlayerSkill>(), isMainElement, elementType);
     }
 }
