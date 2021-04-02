@@ -19,18 +19,18 @@ public class CCreateMap : MonoBehaviour
     #endregion
 
     #region roomQueue
+    private Dictionary<CGlobal.ERoomType, Queue<GameObject>> _roomQueueDict = new Dictionary<CGlobal.ERoomType, Queue<GameObject>>();
+    private Queue<GameObject>[] _roomQueues = new Queue<GameObject>[3]; //0노말 1이벤트 2엘리트
     public Queue<GameObject> normalRoomQueue = new Queue<GameObject>();
     public Queue<GameObject> eventRoomQueue = new Queue<GameObject>();
-    public Queue<GameObject> skillEliteRoomQueue = new Queue<GameObject>();
-    public Queue<GameObject> itemEliteRoomQueue = new Queue<GameObject>();
+    public Queue<GameObject> eliteRoomQueue = new Queue<GameObject>();
     #endregion
 
     #region memberVar
     public int _stageNumber;
-    private int _skillEliteCount;
+    private int _eliteCount;
     private int _eventCount;
     private int _shopCount;
-    private bool _noRoomFlag;  //트루일 경우 방이 없음
     private CGlobal.ERoomType _userSelectRoom;
     public int _roomCount;
     public CRoom[,] _roomArr;
@@ -46,8 +46,8 @@ public class CCreateMap : MonoBehaviour
     private void Start()
     {
         startRoom = Resources.Load("Room/StartRoom0") as GameObject;
-        bossRoom = Resources.Load("Room/BossRoom0") as GameObject;
-        shopRoom = Resources.Load("Room/ShopRoom0") as GameObject;
+        bossRoom = Resources.Load("Room/BossRoom/BossRoom0") as GameObject;
+        shopRoom = Resources.Load("Room/ShopRoom/ShopRoom0") as GameObject;
 
         _portals = new List<CPortal>();
 
@@ -55,10 +55,9 @@ public class CCreateMap : MonoBehaviour
             instance = this;
 
         _stageNumber = 0;
-        _skillEliteCount = 0;
+        _eliteCount = 0;
         _eventCount = 0;
         _shopCount = 0;
-        _noRoomFlag = true;
         _userSelectRoom = CGlobal.ERoomType._empty;
         _roomCount = 0; //방의 개수가 12개가 넘어가면 멈춰줄 변수
         _portalMomCount = 0;
@@ -143,149 +142,28 @@ public class CCreateMap : MonoBehaviour
 
     public void RandomRoomEnqueue()  //스테이지의 종류에 따라 랜덤한 스테이지로 문자열을 만들어 반환함, random이 트루면 랜덤한 맵 리턴.
     {
-        //일반 방
-        string randomRoom = "Room/NormalRoom" + _stageNumber + "_";
-        int j, max = 0;
-        bool isSame;
+        string[] roomName = { "Room/NormalRoom", "Room/EventRoom", "Room/EliteRoom" };
+        _roomQueueDict.Add(CGlobal.ERoomType._normal, normalRoomQueue);
+        _roomQueueDict.Add(CGlobal.ERoomType._event, eventRoomQueue);
+        _roomQueueDict.Add(CGlobal.ERoomType._elite, eliteRoomQueue);
 
-        while (Resources.Load(randomRoom + max.ToString()) != null) //랜덤맵의 개수 확인
-            max++;
-        int[] check = new int[max];
-        for (int i = 0; i < max; i++) //중복없는 랜덤을 만들기 위해 중복확인용 배열 생성
-            check[i] = -1;
-
-        for (int i = 0; i < max; i++)
+        for (int i = 0; i < _roomQueueDict.Count; i++)
         {
-            while (true)
+            GameObject[] rooms = Resources.LoadAll<GameObject>(roomName[i]);
+            int count = 0;
+            int rand;
+
+            while (count < rooms.Length)
             {
-                isSame = false;
-                j = Random.Range(0, max);
-
-
-                for (int a = 0; a < max; a++)  //중복확인
+                rand = Random.Range(0, rooms.Length);
+                if (rooms[rand] != null)
                 {
-                    if (check[a] == j)
-                    {
-                        isSame = true;
-                        break;
-                    }
-                }
-
-                if (!isSame) //중복 없을 경우 루프문 탈출
-                {
-                    check[i] = j;
-                    normalRoomQueue.Enqueue(Resources.Load<GameObject>(randomRoom + j.ToString()));
-                    break;
+                    _roomQueueDict[(CGlobal.ERoomType)i + 1].Enqueue(rooms[rand]);
+                    rooms[rand] = null;
+                    count++;
                 }
             }
         }
-
-        //스킬엘리트 방
-        randomRoom = "Room/SkillEliteRoom" + _stageNumber + "_";
-        max = 0;
-
-        while (Resources.Load(randomRoom + max.ToString()) != null) //랜덤맵의 개수 확인
-            max++;
-
-        check = new int[max];
-        for (int i = 0; i < max; i++) //중복없는 랜덤을 만들기 위해 중복확인용 배열 생성
-            check[i] = -1;
-
-        for (int i = 0; i < max; i++)
-        {
-            while (true)
-            {
-                isSame = false;
-                j = Random.Range(0, max);
-
-                for (int a = 0; a < max; a++)  //중복확인
-                {
-                    if (check[a] == j)
-                    {
-                        isSame = true;
-                        break;
-                    }
-                }
-
-                if (!isSame) //중복 없을 경우 루프문 탈출
-                {
-                    check[i] = j;
-                    skillEliteRoomQueue.Enqueue(Resources.Load<GameObject>(randomRoom + j.ToString()));
-                    break;
-                }
-            }
-        }
-
-        //아이템엘리트 방
-        randomRoom = "Room/ItemEliteRoom" + _stageNumber + "_";
-        max = 0;
-
-        while (Resources.Load(randomRoom + max.ToString()) != null) //랜덤맵의 개수 확인
-            max++;
-        check = new int[max];
-        for (int i = 0; i < max; i++) //중복없는 랜덤을 만들기 위해 중복확인용 배열 생성
-            check[i] = -1;
-
-        for (int i = 0; i < max; i++)
-        {
-            while (true)
-            {
-                isSame = false;
-                j = Random.Range(0, max);
-
-                for (int a = 0; a < max; a++)  //중복확인
-                {
-                    if (check[a] == j)
-                    {
-                        isSame = true;
-                        break;
-                    }
-                }
-
-                if (!isSame) //중복 없을 경우 루프문 탈출
-                {
-                    check[i] = j;
-                    itemEliteRoomQueue.Enqueue(Resources.Load<GameObject>(randomRoom + j.ToString()));
-                    break;
-                }
-            }
-        }
-
-        //이벤트 방
-        randomRoom = "Room/EventRoom" + _stageNumber + "_";
-        max = 0;
-
-        while (Resources.Load(randomRoom + max.ToString()) != null) //랜덤맵의 개수 확인
-            max++;
-        check = new int[max];
-        for (int i = 0; i < max; i++) //중복없는 랜덤을 만들기 위해 중복확인용 배열 생성
-            check[i] = -1;
-
-        for (int i = 0; i < max; i++)
-        {
-            while (true)
-            {
-                isSame = false;
-                j = Random.Range(0, max);
-
-                for (int a = 0; a < max; a++)  //중복확인
-                {
-                    if (check[a] == j)
-                    {
-                        isSame = true;
-                        break;
-                    }
-                }
-
-                if (!isSame) //중복 없을 경우 루프문 탈출
-                {
-                    check[i] = j;
-                    eventRoomQueue.Enqueue(Resources.Load<GameObject>(randomRoom + j.ToString()));
-                    break;
-                }
-            }
-        }
-
     }
 
     public void CreateStageVerTuto()
@@ -312,7 +190,7 @@ public class CCreateMap : MonoBehaviour
 
         if (_roomCount == 1)
         {
-            _roomArr[1, 0].RoomType = CGlobal.ERoomType._itemElite; //일반방 넣기
+            _roomArr[1, 0].RoomType = CGlobal.ERoomType._elite; //일반방 넣기
         }
 
         if (_roomCount == 2)
@@ -367,7 +245,6 @@ public class CCreateMap : MonoBehaviour
 
 
         randomRoad = Random.Range(0, CConstants.MAX_ROAD - 1);
-        _noRoomFlag = true;
         roadCount = 0;
         selectRoomType = 123; //랜덤시드값
         for (int j = CConstants.MAX_ROAD; j > randomRoad; randomRoad++, roadCount++)
@@ -379,65 +256,48 @@ public class CCreateMap : MonoBehaviour
                 _shopCount++;
                 continue;
             }
-            if (_noRoomFlag == true && j - randomRoad == 1) //조건들에 걸려 방이 아예 안나오는 경우 방지
-            {
-                _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._normal;
-                continue;
-            }
 
             selectRoomType = ((selectRoomType * Random.Range(0, 100)) + Random.Range(0, 50)) % 100;
 
-            if (selectRoomType < CConstants.SKILL_PROBABILITY
-                && _skillEliteCount < 2 && _roomCount > (((CConstants.ROOM_PER_STAGE - 2) / 2) - 1))                                                                                                //스킬 엘리트
+            int probability = CConstants.ELITE_PROBABILITY;
+            if (selectRoomType < probability
+                && _eliteCount < 2 && _roomCount > (((CConstants.ROOM_PER_STAGE - 2) / 2) - 1)) //엘리트                                                                                    
             {
-                _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._skillElite;
-                _skillEliteCount++;
-                continue;
+                _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._elite;
+                _eliteCount++;
             }
 
-            if (selectRoomType >= CConstants.SKILL_PROBABILITY
-                && selectRoomType < CConstants.SKILL_PROBABILITY + CConstants.SHOP__PROBABILITY)             // 상점
-            {
-                _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._shop;
-                _shopCount++;
-                continue;
-            }
-
-            if (selectRoomType >= CConstants.SKILL_PROBABILITY + CConstants.SHOP__PROBABILITY
-                && selectRoomType < CConstants.SKILL_PROBABILITY + CConstants.SHOP__PROBABILITY + CConstants.NORMAL_PROBABILITY)//일반 방
-            {
-                _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._normal;
-                continue;
-            }
-
-            if (selectRoomType >= CConstants.SKILL_PROBABILITY + CConstants.SHOP__PROBABILITY + CConstants.NORMAL_PROBABILITY
-                && selectRoomType < CConstants.SKILL_PROBABILITY + CConstants.SHOP__PROBABILITY + CConstants.NORMAL_PROBABILITY + CConstants.EVENT_PROBABLILITY
-                && _eventCount < 15)                                                                                                    //이벤트
+            probability += CConstants.EVENT_PROBABLILITY; //이벤트 방
+            if (selectRoomType < probability && _eventCount < 15)                                                                                         
             {
                 _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._event;
                 _eventCount++;
-                continue;
             }
 
-            if (selectRoomType >= CConstants.SKILL_PROBABILITY + CConstants.SHOP__PROBABILITY + CConstants.NORMAL_PROBABILITY + CConstants.EVENT_PROBABLILITY
-                && selectRoomType < CConstants.SKILL_PROBABILITY + CConstants.SHOP__PROBABILITY + CConstants.NORMAL_PROBABILITY + CConstants.EVENT_PROBABLILITY + CConstants.ITEM_PROBABILITY) //아이템 엘리트
+            probability += CConstants.NORMAL_PROBABILITY;
+            if (selectRoomType < probability) //일반 방
             {
-                _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._itemElite;
-                continue;
+                _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._normal;
+            }
+
+            probability += CConstants.SHOP__PROBABILITY;
+            if (selectRoomType < probability) // 상점
+            {
+                _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._shop;
+                _shopCount++;
             }
         }
     }
 
     public void RoomFlagCtrl(CGlobal.ERoomType roomType)
     {
-        _noRoomFlag = false;
         switch (roomType)
         {
             case CGlobal.ERoomType._event:
                 _userSelectRoom = CGlobal.ERoomType._event;
                 break;
-            case CGlobal.ERoomType._itemElite:
-                _userSelectRoom = CGlobal.ERoomType._itemElite;
+            case CGlobal.ERoomType._elite:
+                _userSelectRoom = CGlobal.ERoomType._elite;
                 break;
             case CGlobal.ERoomType._normal:
                 _userSelectRoom = CGlobal.ERoomType._normal;
@@ -445,60 +305,46 @@ public class CCreateMap : MonoBehaviour
             case CGlobal.ERoomType._shop:
                 _userSelectRoom = CGlobal.ERoomType._shop;
                 break;
-            case CGlobal.ERoomType._skillElite:
-                _userSelectRoom = CGlobal.ERoomType._skillElite;
-                break;
         }
     }
 
     private void InstantiateRoom(CGlobal.ERoomType roomType)
     {
-        GameObject tempRoom;
+        GameObject tempRoom = null;
 
         switch (roomType)
         {
             case CGlobal.ERoomType._start:
-                tempRoom = Object.Instantiate(startRoom, startRoom.transform.position, startRoom.transform.rotation);
-                _rooms.AddLast(tempRoom);
+                tempRoom = startRoom;
                 break;
 
             case CGlobal.ERoomType._boss:
-                tempRoom = Object.Instantiate(bossRoom, bossRoom.transform.position, bossRoom.transform.rotation);
-                _rooms.AddLast(tempRoom);
+                tempRoom = bossRoom;
                 break;
 
             case CGlobal.ERoomType._event:
                 tempRoom = eventRoomQueue.Dequeue();
-                tempRoom = Object.Instantiate(tempRoom, tempRoom.transform.position, tempRoom.transform.rotation);
-                _rooms.AddLast(tempRoom);
                 break;
 
-            case CGlobal.ERoomType._itemElite:
-                tempRoom = itemEliteRoomQueue.Dequeue();
-                tempRoom = Object.Instantiate(tempRoom, tempRoom.transform.position, tempRoom.transform.rotation);
-                _rooms.AddLast(tempRoom);
+            case CGlobal.ERoomType._elite:
+                tempRoom = eliteRoomQueue.Dequeue();
                 break;
 
             case CGlobal.ERoomType._normal:
                 tempRoom = normalRoomQueue.Dequeue();
-                tempRoom = Object.Instantiate(tempRoom, tempRoom.transform.position, tempRoom.transform.rotation);
-                _rooms.AddLast(tempRoom);
                 break;
 
             case CGlobal.ERoomType._shop:
-                tempRoom = Object.Instantiate(shopRoom, shopRoom.transform.position, shopRoom.transform.rotation);
-                _rooms.AddLast(tempRoom);
+                tempRoom = shopRoom;
                 break;
 
-            case CGlobal.ERoomType._skillElite:
-                tempRoom = skillEliteRoomQueue.Dequeue();
-                tempRoom = Object.Instantiate(tempRoom, tempRoom.transform.position, tempRoom.transform.rotation);
-                _rooms.AddLast(tempRoom);
-                break;
             case CGlobal.ERoomType._empty:
                 Debug.Log("Can't create empty room error");
                 return;
         }
+
+        tempRoom = Object.Instantiate(tempRoom, tempRoom.transform.position, tempRoom.transform.rotation);
+        _rooms.AddLast(tempRoom);
 
         AddPortal();
         NotifyPortal();
@@ -522,7 +368,7 @@ public class CCreateMap : MonoBehaviour
     {
         GameObject[] portalMom = GameObject.FindGameObjectsWithTag("PORTAL_MOM");
 
-        for (int i = _portalMomCount; i < portalMom.Length; i++)         
+        for (int i = _portalMomCount; i < portalMom.Length; i++)
         {
             Transform portal = portalMom[i].transform.Find("Portal");
             Transform text = portalMom[i].transform.Find("PortalText").Find("Text");

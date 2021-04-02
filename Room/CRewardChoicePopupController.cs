@@ -16,7 +16,7 @@ public class CRewardChoicePopupController : CNPCPopUpController
     {
         base.Start();
 
-        if (CCreateMap.instance.userSelectRoom() == CGlobal.ERoomType._itemElite) //유저가 보스 엘리트 중 어떤 방에 들어온 것인지 확인.
+        if (CCreateMap.instance.userSelectRoom() == CGlobal.ERoomType._elite) //유저가 보스 엘리트 중 어떤 방에 들어온 것인지 확인.
         {
             _userSelectRoom = 0;
             isBoss[_userSelectRoom] = false;
