@@ -31,7 +31,7 @@ public class CWaitingForAccept : MonoBehaviour
             instance = this;
         }
 
-        _playerCount = CPlayerCommand.instance.activePlayersCount;
+        _playerCount = CPlayerCommand.instance.ActivatedPlayersCount;
         _playerAccepts = new EAccept[_playerCount];
 
         Debug.Log("playerCount " + _playerCount);
@@ -50,20 +50,20 @@ public class CWaitingForAccept : MonoBehaviour
         // 승낙, 거절 버튼
         if (Input.GetKeyDown(KeyCode.T))
         {
-            SetPortalUseSelect(CPlayerCommand.instance.ControlCharacterId, EAccept._accept);
+            SetPortalUseSelect(CPlayerCommand.instance.ControlCharacterID, EAccept._accept);
         }
         else if (Input.GetKeyDown(KeyCode.Y))
         {
-            SetPortalUseSelect(CPlayerCommand.instance.ControlCharacterId, EAccept._cancle);
+            SetPortalUseSelect(CPlayerCommand.instance.ControlCharacterID, EAccept._cancle);
         }
     }
 
     public void SetPlayerSelect() //현재 플레이어의 숫자에 따라 팝업의 체크표시 개수 변경
     {
-        for (int i = _playerCount; _playerCount < MAX_PLAYER_COUNT; i++)
+        for (int i = _playerCount; i < MAX_PLAYER_COUNT; i++)
         {
             _waitingForOtherPlayer.transform.GetChild(i).gameObject.SetActive(false);
-        }      
+        }
     }
 
     public void SetActivePortalPopup(bool value)
@@ -84,13 +84,9 @@ public class CWaitingForAccept : MonoBehaviour
         if(opinion == EAccept._accept)
         {
             _acceptCount++;
-            if(Network.CTcpClient.instance != null)
-            {
-                var packet = Network.CPacketFactory.CreatePortalVote(0);
-                Network.CTcpClient.instance.Send(packet.data);
-            }
             // 싱글 / 멀티 플레이용 확인
-            if (CPlayerCommand.instance.activePlayersCount <= _acceptCount)
+            CGameEvent.instance.PortalVoteEvent?.Invoke(0);
+            if (CPlayerCommand.instance.ActivatedPlayersCount <= _acceptCount)
             {
                 Debug.Log("Go Next Room");
                 CPortalManager portalManager = GameObject.Find("PortalManager").GetComponent<CPortalManager>();
@@ -103,12 +99,8 @@ public class CWaitingForAccept : MonoBehaviour
         else if(opinion == EAccept._cancle)
         {
             // 취소 처리하고 몇 초 있다가 복구
-            Invoke("CancelPortal", 3.0f);
-            if (Network.CTcpClient.instance != null)
-            {
-                var packet = Network.CPacketFactory.CreatePortalVote(1);
-                Network.CTcpClient.instance.Send(packet.data);
-            }
+            Invoke("CancelPortal", 3.0f); 
+            CGameEvent.instance.PortalVoteEvent?.Invoke(0);
         }
     }
 

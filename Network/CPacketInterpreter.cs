@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Network
 {
@@ -10,105 +11,114 @@ namespace Network
      * 네트워크에 연결된 경우 이벤트가 
      * 해석된 내용은 Commander로 실행시킨다
      */
-    public class CPacketInterpreter
+    public static class CPacketInterpreter
     {
-        private const int _setCharacterInfo = 410;
-        private const int _moveStart = 411;
-        private const int _moveStop = 412;
-        private const int _moveCorrection = 413;
-        private const int _actionCommand = 510;
-        private const int _GetItem = 610;
-        private const int _PortalAccept = 611;
-        private const int _UsePortal = 612;
-        private const int _PortalTeleport = 613;
-        private const int _UsePortalPopup = 614;
+        private delegate void PacketInterpretImpl(CPacket packet);
 
-        private Network.CTcpClient _tcpManager;
-        private CPlayerCommand playerCommander;
-
-        public CPacketInterpreter(Network.CTcpClient tcpManger)
+        private static Dictionary<int, PacketInterpretImpl> _packetInterpretDict = new Dictionary<int, PacketInterpretImpl>()
         {
-            _tcpManager = tcpManger;
-            playerCommander = CPlayerCommand.instance;
-        }
+            // 캐릭터 움직임 관련
+            [450] = InterpretSetCharacter,
+            [451] = InterpretMoveStart,
+            [452] = InterpretMoveStop,
+            [453] = InterpretActionCommand,
+            // 포탈, 맵
+            [651] = InterpretPortalAccept,
+            [652] = InterpretUsePortal,
+            [653] = InterpretCreateRooms,
+            // 시스템
+            [951] = InterpretQuitGame,
+            [952] = InterpretQuitGame,
+        };
 
-        public void PacketInterpret(byte[] data)
+        public static void PacketInterpret(byte[] data)
         {
             // 헤더 읽기
             CPacket packet = new CPacket(data);
             packet.ReadHeader(out byte payloadSize, out short messageType);
             Debug.Log($"Header : payloadSize = {payloadSize}, messageType = {messageType}");
 
-            switch((int)messageType)
+            if (_packetInterpretDict.TryGetValue((int)messageType, out var interpretFunc))
             {
-                case _setCharacterInfo:
-                    InterpretSetCharacter(packet);
-                    break;
-                case _moveStart:
-                    InterpretMoveStart(packet);
-                    break;
-                case _moveStop:
-                    InterpretMoveStop(packet);
-                    break;
-                case _moveCorrection:
-                    InterpretMoveCorrection(packet);
-                    break;
-                case _actionCommand:
-                    InterpretActionCommand(packet);
-                    break;
-                case _UsePortal:
-                    InterpretUsePortal(packet);
-                    break;
-                case _PortalAccept:
-                    InterpretPortalAccept(packet);
-                    break;
-                case _PortalTeleport:
-                    InterpretPortalTeleport(packet);
-                    break;
+                interpretFunc(packet);
+            }
+            else
+            {
+                Debug.Log($"Unknown Message Type : {messageType}");
             }
         }
 
         #region Send Message
-        public void SendCharacterInfoRequest()
+        public static void SendCharacterInfoRequest()
         {
             var message = CPacketFactory.CreateCharacterInfoPacket();
 
-            _tcpManager.Send(message.data);
+            CTcpClient.instance.Send(message.data);
         }
 
-        public void SendMoveStart(Vector3 now, Vector3 dest)
+        public static void SendMoveStart(Vector3 now, Vector3 dest)
         {
             var message = CPacketFactory.CreateMoveStartPacket(now, dest);
 
-            _tcpManager.Send(message.data);
+            CTcpClient.instance.Send(message.data);
         }
 
-        public void SendMoveStop(Vector3 now)
+        public static void SendMoveStop(Vector3 now)
         {
             var message = CPacketFactory.CreateMoveStopPacket(now);
 
-            _tcpManager.Send(message.data);
+            CTcpClient.instance.Send(message.data);
         }
-        public void SendActionStart(int actionNumber, Vector3 now, Vector3 dest)
+        public static void SendActionStart(int actionNumber, Vector3 now, Vector3 dest)
         {
             var message = CPacketFactory.CreateActionStartPacket(actionNumber, now, dest);
 
-            _tcpManager.Send(message.data);
+            CTcpClient.instance.Send(message.data);
+        }
+
+        public static void SendUsePortal()
+        {
+            var packet = CPacketFactory.CreatePortalPopup();
+
+            CTcpClient.instance.Send(packet.data);
+        }
+
+        public static void SendPortalVote(int accept)
+        {
+            var packet = CPacketFactory.CreatePortalVote(accept);
+
+            CTcpClient.instance.Send(packet.data);
+        }
+
+        public static void SendRoomsInfo(CRoom[,] roomArr)
+        {
+            var roomsIntArr = new int[CConstants.ROOM_PER_STAGE, CConstants.MAX_ROAD];
+
+            for (int i = 0; i < CConstants.ROOM_PER_STAGE; i++)
+            {
+                for (int j = 0; j < CConstants.MAX_ROAD; j++)
+                {
+                    roomsIntArr[i, j] = (int)roomArr[i, j].RoomType;
+                }
+            }
+
+            var message = CPacketFactory.CreateRoomsInfo(roomsIntArr);
+
+            CTcpClient.instance.Send(message.data);
         }
         #endregion
 
         #region Interpret Packet
-        private void InterpretSetCharacter(CPacket packet)
+        private static void InterpretSetCharacter(CPacket packet)
         {
             Int32 MyId = packet.ReadInt32();
 
             Debug.Log($"Set Character : my id - {MyId}");
 
-            //Commander
-            playerCommander.SetMyCharacter((int)MyId);
+            CPlayerCommand.instance.SetMyCharacter((int)MyId);
         }
 
-        private void InterpretMoveStart(CPacket packet)
+        private static void InterpretMoveStart(CPacket packet)
         {
             Int32 id;
             Vector3 now, dest;
@@ -124,11 +134,10 @@ namespace Network
             Debug.LogFormat("Move Start - id{0} move ({1},{2},{3}) to ({4},{5},{6})", 
                 id, now.x, now.y, now.z, dest.x, dest.y, dest.z);
 
-            //Commander
-            playerCommander.Move(id, dest);
+            CPlayerCommand.instance.Move(id, dest);
         }
 
-        private void InterpretMoveStop(CPacket packet)
+        private static void InterpretMoveStop(CPacket packet)
         {
             Int32 id;
             Vector3 now;
@@ -141,7 +150,7 @@ namespace Network
             Debug.LogFormat("Move Stop - id{0} ({1},{2})", id, now.x, now.y, now.z);
         }
 
-        private void InterpretMoveCorrection(CPacket packet)
+        private static void InterpretMoveCorrection(CPacket packet)
         {
             Int32 id;
             Vector3 now, dest;
@@ -158,8 +167,12 @@ namespace Network
                 id, now.x, now.y, now.z, dest.x, dest.y, dest.z);
         }
 
-        private void InterpretActionCommand(CPacket packet)
+        private static void InterpretActionCommand(CPacket packet)
         {
+            const int ATTACK = 0;
+            const int JUMP = 1;
+            const int ROLL = 2;
+            const int USE_SKILL = 3;
 
             Int32 id;
             Int32 actionNumber;
@@ -179,10 +192,26 @@ namespace Network
             Debug.LogFormat("Action Start - id{0} actionNumber{1} move ({2},{3},{4}) to ({5},{6},{7})",
                 id, actionNumber, now.x, now.y, now.z, dest.x, dest.y, dest.z);
 
-            playerCommander.UseSkill((int)id, (int)actionNumber, now, dest);
+            if (actionNumber == ATTACK)
+            {
+                CPlayerCommand.instance.Attack(id, now, dest);
+            }
+            else if (actionNumber == JUMP)
+            {
+                CPlayerCommand.instance.Jump(id, now, dest);
+            }
+            else if (actionNumber == ROLL)
+            {
+                CPlayerCommand.instance.Roll(id, now, dest);
+            }
+            else if (actionNumber >= USE_SKILL && actionNumber < USE_SKILL + 42)
+            {
+                Debug.Log($"player {id} use skill {actionNumber - USE_SKILL}");
+                CPlayerCommand.instance.UseSkill((int)id, (int)actionNumber - USE_SKILL, now, dest);
+            }
         }
 
-        private void InterpretGetItem(CPacket packet)
+        private static void InterpretGetItem(CPacket packet)
         {
             Int32 id;
 
@@ -195,7 +224,7 @@ namespace Network
             //playerCommander.UseSkill((int)id, (int)actionNumber, now, dest);
         }
 
-        private void InterpretUsePortal(CPacket packet)
+        private static void InterpretUsePortal(CPacket packet)
         {
             Int32 id;
 
@@ -207,7 +236,7 @@ namespace Network
             //playerCommander.UseSkill((int)id, (int)actionNumber, now, dest);
         }
 
-        private void InterpretPortalAccept(CPacket packet)
+        private static void InterpretPortalAccept(CPacket packet)
         {
             Int32 id;
             Int32 accept;
@@ -227,7 +256,7 @@ namespace Network
             }
         }
 
-        private void InterpretPortalTeleport(CPacket packet)
+        private static void InterpretPortalTeleport(CPacket packet)
         {
             Int32 id;
 
@@ -235,6 +264,31 @@ namespace Network
 
             id = packet.ReadInt32();
             
+        }
+
+        private static void InterpretCreateRooms(CPacket packet)
+        {
+            CRoom[,] rooms = new CRoom[CConstants.ROOM_PER_STAGE, CConstants.MAX_ROAD];
+            for (int i = 0; i < CConstants.ROOM_PER_STAGE; i++)
+            {
+                for (int j = 0; j < CConstants.MAX_ROAD; j++)
+                {
+                    rooms[i, j].RoomType = (CGlobal.ERoomType)packet.ReadInt32();
+                }
+            }
+
+            CCreateMap.instance.ReceiveRoomArr(rooms);
+        }
+
+        private static void InterpretReturnLobby(CPacket packet)
+        {
+            CTcpClient.instance.DeletePacketInterpret();
+            SceneManager.LoadScene("Lobby");
+        }
+
+        private static void InterpretQuitGame(CPacket packet)
+        {
+            CGameEvent.instance.QuitPlayer(packet.ReadInt32());
         }
         #endregion
     }

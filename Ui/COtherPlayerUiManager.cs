@@ -46,15 +46,35 @@ public class COtherPlayerUiManager : MonoBehaviour
 
     public void ActiveOtherPlayerUi(int playerCount)
     {
+        if (playerCount <= 0)
+        {
+            Debug.Log($"Error : player count is {playerCount}");
+            return;
+        }
+
         for (int i = 0; i < playerCount - 1; i++)
         {
             _otherPlayerUiArr[i].SetActive(true);
             SetUiTarget(CPlayerCommand.instance.players[i + 1], i);
         }
-        for (int i = playerCount-1; i < _otherPlayerUiArr.Count; i++)
+        for (int i = playerCount - 1; i < _otherPlayerUiArr.Count; i++)
         {
             _otherPlayerUiArr[i].SetActive(false);
         }
+    }
+
+    public void DeactivateOtherPlayerUI(int playerNumber)
+    {
+        int otherPlayerElemPos = -1;
+        for (int i = 0; i <= playerNumber; i++)
+        {
+            if (i == CPlayerCommand.instance.ControlCharacterID)
+            {
+                --otherPlayerElemPos;
+            }
+            ++otherPlayerElemPos;
+        }
+        _otherPlayerUiArr[otherPlayerElemPos].SetActive(false);
     }
 
     public void SetUiTarget(GameObject target, int uiNumber)

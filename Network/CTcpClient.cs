@@ -19,9 +19,7 @@ namespace Network
 
     public sealed class CTcpClient : MonoBehaviour
     {
-        private static CGameEvent _gameEvent;
-
-        public const int Shutdown = 910;
+        public const int Shutdown = 950;
 
         public delegate void PacketInterpret(byte[] buffer);
 

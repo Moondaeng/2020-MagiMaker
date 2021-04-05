@@ -72,17 +72,16 @@ public class CCreateMap : MonoBehaviour
 
         RandomRoomEnqueue();
 
-        if (CGlobal.isHost)
+        if (CClientInfo.JoinRoom.IsHost)
         {
             CreateStage();
             SendRoomArr();
-            MakePortalText(_roomCount, _roomArr);
         }
     }
 
     public void SendRoomArr()
     {
-
+        CGameEvent.instance.CreateRoom(_roomArr);
     }
 
     public void ReceiveRoomArr(CRoom[,] roomArr)

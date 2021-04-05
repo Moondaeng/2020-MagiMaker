@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.Events;
 
 namespace NEvent
@@ -17,6 +18,7 @@ namespace NEvent
 public class CGameEvent : MonoBehaviour
 {
     public class ChangingMoneyEvent : UnityEvent<int> { }
+    public class CreateRoomEvent : UnityEvent<CRoom[,]> { }
 
 
     public NEvent.MoveStart PlayerMoveStartEvent;
@@ -26,10 +28,14 @@ public class CGameEvent : MonoBehaviour
     public UnityEvent<Vector3> PlayerAttackEvent;
 
     private Network.CTcpClient _tcpManager;
-    private Network.CPacketInterpreter _inGameInterpreter;
 
     public ChangingMoneyEvent EarnMoneyEvent = new ChangingMoneyEvent();
     public ChangingMoneyEvent LoseMoneyEvent = new ChangingMoneyEvent();
+
+    public CreateRoomEvent HostRoomEvent = new CreateRoomEvent();
+
+    public Action UsePortalEvent;
+    public Action<int> PortalVoteEvent;
 
     public static CGameEvent instance;
 
@@ -51,29 +57,33 @@ public class CGameEvent : MonoBehaviour
         _tcpManager = Network.CTcpClient.instance;
         _playerCommand = CPlayerCommand.instance;
 
-        if (_tcpManager != null && _tcpManager.IsConnect == true && !CClientInfo.IsSinglePlay())
+        if (_tcpManager?.IsConnect == true && !CClientInfo.IsSinglePlay())
         {
-            Debug.Log("Multiplay Node");
-            // 연결되면 패킷 받을거 설정
-            _inGameInterpreter = new Network.CPacketInterpreter(_tcpManager);
-            AddNetworkCode();
+            _tcpManager.SetPacketInterpret(Network.CPacketInterpreter.PacketInterpret);
 
+            Debug.Log("Multiplay Mode");
             InitMultiplay();
+            AddNetworkCode();
         }
-        // 싱글 플레이 시에 일부 동작들은 서버에 거치지 않고 동작해야 함
-        else if (_playerCommand != null)
+        else
         {
             EarnMoneyEvent.AddListener(_playerCommand.EarnMoneyAllCharacter);
             InitSinglePlay();
+            AddSingleplayCode();
         }
     }
 
-    public void QuitPlayer(int roomSlotNum)
+    public void QuitPlayer(int playerNumber)
     {
+        CPlayerCommand.instance.DeactivatePlayer(playerNumber);
         
+        if (CPlayerCommand.instance.ActivatedPlayersCount == 1)
+        {
+            RemoveNetworkCode();
+        }
     }
 
-    public void PlayerMoveStart(Vector3 a, Vector3 b) => PlayerMoveStartEvent?.Invoke(a, b);
+    public void PlayerMoveStart(Vector3 now, Vector3 dest) => PlayerMoveStartEvent?.Invoke(now, dest);
 
     public void PlayerMoveStop(Vector3 pos) => PlayerMoveStopEvent?.Invoke(pos);
 
@@ -81,12 +91,14 @@ public class CGameEvent : MonoBehaviour
 
     public void PlayerAction(int actionNumber, Vector3 now, Vector3 dest) => PlayerActionEvent?.Invoke(actionNumber, now, dest);
 
+    public void CreateRoom(CRoom[,] rooms) => HostRoomEvent?.Invoke(rooms);
+
     private void InitMultiplay()
     {
         // 캐릭터 설정
         Debug.Log($"Set Character : Send Message");
         _playerCommand.SetActivePlayers(CClientInfo.PlayerCount);
-        _inGameInterpreter.SendCharacterInfoRequest();
+        Network.CPacketInterpreter.SendCharacterInfoRequest();
     }
 
     private void InitSinglePlay()
@@ -98,19 +110,39 @@ public class CGameEvent : MonoBehaviour
 
     private void AddNetworkCode()
     {
-        _tcpManager.SetPacketInterpret(_inGameInterpreter.PacketInterpret);
         // 플레이어 움직임
-        PlayerMoveStartEvent.AddListener(_inGameInterpreter.SendMoveStart);
-        PlayerMoveStopEvent.AddListener(_inGameInterpreter.SendMoveStop);
-        PlayerActionEvent.AddListener(_inGameInterpreter.SendActionStart);
+        PlayerMoveStartEvent.AddListener(Network.CPacketInterpreter.SendMoveStart);
+        PlayerMoveStopEvent.AddListener(Network.CPacketInterpreter.SendMoveStop);
+        PlayerActionEvent.AddListener(Network.CPacketInterpreter.SendActionStart);
+
+        // 포탈 관련
+        UsePortalEvent += Network.CPacketInterpreter.SendUsePortal;
+        PortalVoteEvent += Network.CPacketInterpreter.SendPortalVote;
+
+        if (CClientInfo.JoinRoom.IsHost)
+        {
+            AddNetworkHostCode();
+        }
     }
 
     private void RemoveNetworkCode()
     {
         // 플레이어 움직임
-        PlayerMoveStartEvent.RemoveListener(_inGameInterpreter.SendMoveStart);
-        PlayerMoveStopEvent.RemoveListener(_inGameInterpreter.SendMoveStop);
-        PlayerActionEvent.RemoveListener(_inGameInterpreter.SendActionStart);
+        PlayerMoveStartEvent.RemoveListener(Network.CPacketInterpreter.SendMoveStart);
+        PlayerMoveStopEvent.RemoveListener(Network.CPacketInterpreter.SendMoveStop);
+        PlayerActionEvent.RemoveListener(Network.CPacketInterpreter.SendActionStart);
+
+        // 포탈 관련
+        UsePortalEvent -= Network.CPacketInterpreter.SendUsePortal;
+        PortalVoteEvent -= Network.CPacketInterpreter.SendPortalVote;
+    }
+
+    private void AddNetworkHostCode()
+    {
+        // 몬스터 패턴 코드
+        // 돈 획득
+        // 방 생성
+        HostRoomEvent.AddListener(Network.CPacketInterpreter.SendRoomsInfo);
     }
 
     private void AddSingleplayCode()
@@ -118,6 +150,7 @@ public class CGameEvent : MonoBehaviour
         // 몬스터 패턴 바로 적용하는 코드
         // 돈 획득 바로하는 코드
         // 방 생성 바로하는 코드
+        HostRoomEvent.AddListener(CCreateMap.instance.ReceiveRoomArr);
     }
 
     private void SucceedHost()

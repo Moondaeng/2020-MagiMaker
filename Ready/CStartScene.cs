@@ -8,11 +8,11 @@ public class CStartScene : MonoBehaviour
 {
     enum MessageCode
     {
-        LoginSuccess = 110,
-        RegisterSuccess = 111,
-        LobbySuccess = 112,
-        RegisterFail = 113,
-        LoginFail = 114,
+        LoginSuccess = 150,
+        RegisterSuccess = 151,
+        LobbySuccess = 152,
+        RegisterFail = 153,
+        LoginFail = 154,
     }
 
     [SerializeField]
@@ -89,13 +89,13 @@ public class CStartScene : MonoBehaviour
 
     private void StartTutorial()
     {
-        CClientInfo.CreateRoom(0);
+        CClientInfo.JoinRoom.CreateRoom(0);
         SceneManager.LoadScene("Tutorial");
     }
 
     private void StartSingleGame()
     {
-        CClientInfo.CreateRoom(0);
+        CClientInfo.JoinRoom.CreateRoom(0);
         SceneManager.LoadScene("Prototype");
     }
 
