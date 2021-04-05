@@ -32,6 +32,8 @@ public class CMultiDoll : MonoBehaviour
         transform.position = Vector3.MoveTowards(transform.position,
                              targetPos, 1 * Time.deltaTime);
 
+        //(transform.position - targetPos).magnitude / 
+
         Move(0, 0);
         CancelInvoke("MoveExit");   // 중복 호출 시 걷다가 멈추는 현상 방지
         Invoke("MoveExit", 0.15f);

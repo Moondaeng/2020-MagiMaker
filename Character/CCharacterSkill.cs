@@ -14,11 +14,10 @@ public class SkillUseEvent : UnityEvent<int, Vector3> { }
 [RequireComponent(typeof(CSkillTimer))]
 public class CCharacterSkill : MonoBehaviour
 {
+    protected static readonly int NOT_SELECTED = -1;
+
     [SerializeField]
     protected List<CSkillFormat> _skillList;
-
-    protected CProjectileSkill _projectileSkill;
-    protected CBuffSkill _buffSkill;
 
     public int SelectedSkillNum
     {
@@ -70,24 +69,12 @@ public class CCharacterSkill : MonoBehaviour
 
     public virtual void UseSkillToPosition(Vector3 targetPos)
     {
-        if (_selectedSkillNum == -1)
-        {
-            Debug.Log("Skill Not Selected");
-            return;
-        }
-
-        if (_skillList[_selectedSkillNum].Use(targetPos))
-        {
-            // CCntl의 행동 코드
-            skillUseEvent?.Invoke(_selectedSkillNum, targetPos);
-            CreateSkillObject(_skillList[_selectedSkillNum].skillObject, targetPos);
-        }
-        SelectedSkillNum = 0;
+        UseSkillToPosition(SelectedSkillNum, targetPos);
     }
 
     public virtual void UseSkillToPosition(int skillNum, Vector3 targetPos)
     {
-        if (skillNum == -1)
+        if (skillNum == NOT_SELECTED)
         {
             Debug.Log("Skill Not Selected");
             return;

@@ -133,7 +133,7 @@ public class CController : MonoBehaviour
                 // 전송 - 이동 명령
                 //Debug.Log($"move character {previousPlayerPos.x}, {previousPlayerPos.y}, {previousPlayerPos.z}" +
                 //    $"to {player.transform.position.x}, {player.transform.position.y}, {player.transform.position.z}");
-                gameEvent.PlayerMoveStart(previousPlayerPos, player.transform.position);
+                //gameEvent.PlayerMoveStart(previousPlayerPos, player.transform.position);
             }
 
             // 과거 위치 갱신
@@ -147,9 +147,11 @@ public class CController : MonoBehaviour
         player = controlCharacter;
         _playerUi.SetUiTarget(controlCharacter);
         CWindowFacade.instance.SetTarget(controlCharacter);
+
+        AddActionListener();
     }
 
-    private void SetControlLock(bool isLock)
+    public void SetControlLock(bool isLock)
     {
         _camera.SetLockCursor(!isLock);
         _isControlMode = !isLock;
@@ -157,7 +159,15 @@ public class CController : MonoBehaviour
 
     private void Attack()
     {
-        _playerControl.Attack();
+        int layerMask = (1 << LayerMask.NameToLayer("Player")) | (1 << LayerMask.NameToLayer("PlayerSkill"));
+        layerMask = ~layerMask;
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
+        {
+            _playerControl.Attack();
+        }
+        gameEvent.PlayerAction(0, player.transform.position, hit.point);
     }
 
     private void Skill()
@@ -168,11 +178,13 @@ public class CController : MonoBehaviour
     private void Jump()
     {
         _playerControl.Jump();
+        gameEvent.PlayerAction(1, player.transform.position, player.transform.rotation.eulerAngles);
     }
 
     private void Roll()
     {
         _playerControl.Roll();
+        gameEvent.PlayerAction(2, player.transform.position, player.transform.rotation.eulerAngles);
     }
 
     private void ChangeConsumable()
@@ -283,5 +295,20 @@ public class CController : MonoBehaviour
         {
             player.GetComponent<CPlayerSkill>().UseSkillToPosition(hit.point);
         }
+    }
+
+    private void AddActionListener()
+    {
+        player.GetComponent<CCharacterSkill>().skillUseEvent.AddListener(SkillAction);
+    }
+
+    private void RemoveActionListener()
+    {
+        player.GetComponent<CCharacterSkill>().skillUseEvent.RemoveListener(SkillAction);
+    }
+
+    private void SkillAction(int actionNumber, Vector3 targetPos)
+    {
+        gameEvent.PlayerAction(3 + actionNumber, player.transform.position, targetPos);
     }
 }
