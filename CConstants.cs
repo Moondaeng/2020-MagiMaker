@@ -62,10 +62,9 @@
 
     #region Stage Probability
 
-    public const int NORMAL_PROBABILITY = 30;  //일반 방 출현 확률 30퍼
+    public const int NORMAL_PROBABILITY = 40;  //일반 방 출현 확률 30퍼
     public const int EVENT_PROBABLILITY = 30;  //이벤트 방
-    public const int SKILL_PROBABILITY = 15;   //스킬 엘리트
-    public const int ITEM_PROBABILITY = 15;    //아이템 엘리트
+    public const int ELITE_PROBABILITY = 20;   //엘리트
     public const int SHOP__PROBABILITY = 10;   //상점
 
     #endregion Stage Probability

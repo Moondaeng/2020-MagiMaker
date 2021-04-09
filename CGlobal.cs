@@ -13,8 +13,7 @@ public class CGlobal : MonoBehaviour
         _start,
         _normal,
         _event,
-        _skillElite,
-        _itemElite,
+        _elite,
         _shop,
         _boss,
         _empty

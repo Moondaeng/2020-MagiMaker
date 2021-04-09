@@ -161,7 +161,7 @@ public class CReadyRoom : MonoBehaviour
         }
         else
         {
-            message = Network.CPacketFactory.CreateGuestQuitPacket(CClientInfo.JoinRoom.RoomID, CClientInfo.ThisUser.Slot);
+            message = Network.CPacketFactory.CreateGuestQuitPacket(CClientInfo.JoinRoom.RoomID, CClientInfo.ThisUser.SlotNumber);
         }
         _tcpManager.Send(message.data);
     }
@@ -181,10 +181,10 @@ public class CReadyRoom : MonoBehaviour
 
         // 새 UI 그리는 작업
         var thisUser = CClientInfo.ThisUser;
-        AddPlayerToListView(thisUser.Slot, thisUser.id, thisUser.clear);
+        AddPlayerToListView(thisUser.SlotNumber, thisUser.id, thisUser.clear);
         foreach (var user in CClientInfo.JoinRoom.Others)
         {
-            AddPlayerToListView(user.Slot, user.id, user.clear);
+            AddPlayerToListView(user.SlotNumber, user.id, user.clear);
         }
     }
 

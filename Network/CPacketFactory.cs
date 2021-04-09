@@ -42,12 +42,13 @@ namespace Network
             MoveStop = 402,
             ActionStart = 403,
             ReturnLobby = 901,
+            FinishLoding = 902,
         }
 
         enum EDebug
         {
-            KickPlayer = 902,
             ChangePlayer = 1000,
+            KickPlayer = 1001,
         }
 
         #region Create Login Message
@@ -296,6 +297,8 @@ namespace Network
 
         public static CPacket CreateRoomsInfo(int[,] rooms)
         {
+            Debug.Log("Create Room Info Packet");
+            
             byte messageSize = 144;
 
             CPacket packet = new CPacket((int)messageSize);
@@ -320,6 +323,20 @@ namespace Network
 
             packet.WriteHeader(messageSize, (int)EInGame.ReturnLobby);
             packet.Write(isHost);
+
+            return packet;
+        }
+
+        public static CPacket CreateFinishLoading(bool isHost, int userCount)
+        {
+            byte gameUserCount = (byte)userCount;
+
+            byte messageSize = 4;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)EInGame.FinishLoding);
+            packet.Write(isHost).Write(gameUserCount);
 
             return packet;
         }

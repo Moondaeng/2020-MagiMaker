@@ -25,7 +25,7 @@ public class CController : MonoBehaviour
     [SerializeField] private GameObject MousePointer;
 
     private CUIManager _playerUi;
-    private CGameEvent gameEvent;
+    private Network.CNetworkEvent gameEvent;
 
     public static CController instance;
 
@@ -35,6 +35,7 @@ public class CController : MonoBehaviour
 
     // 이동 패킷 관련
     private const float moveTraceTime = 0.1f;
+    private bool _isMoveTracing = false;
 
     private Vector3 previousPlayerPos;
 
@@ -73,7 +74,7 @@ public class CController : MonoBehaviour
     {
         // Singleton 선언해놓은 클래스들 받는 변수
         _playerUi = CUIManager.instance;
-        gameEvent = CGameEvent.instance;
+        gameEvent = Network.CNetworkEvent.instance;
         _camera = CMouseFollower.instance;
 
         if (player != null)
@@ -133,7 +134,7 @@ public class CController : MonoBehaviour
                 // 전송 - 이동 명령
                 //Debug.Log($"move character {previousPlayerPos.x}, {previousPlayerPos.y}, {previousPlayerPos.z}" +
                 //    $"to {player.transform.position.x}, {player.transform.position.y}, {player.transform.position.z}");
-                //gameEvent.PlayerMoveStart(previousPlayerPos, player.transform.position);
+                gameEvent.PlayerMoveStart(previousPlayerPos, player.transform.position);
             }
 
             // 과거 위치 갱신

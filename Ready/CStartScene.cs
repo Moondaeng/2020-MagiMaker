@@ -165,6 +165,7 @@ public class CStartScene : MonoBehaviour
         switch ((int)messageType)
         {
             case (int)MessageCode.LoginSuccess:
+                ErrorHandling("로그인 성공!");
                 InterpretLoginSuccess(packet);
                 break;
             case (int)MessageCode.RegisterSuccess:
@@ -172,6 +173,7 @@ public class CStartScene : MonoBehaviour
                 ErrorHandling("회원가입 완료");
                 break;
             case (int)MessageCode.LobbySuccess:
+                ErrorHandling("로비로 넘어갑니다");
                 InterpretLobbySuccess(packet);
                 break;
             case (int)MessageCode.RegisterFail:

@@ -72,7 +72,7 @@ public class CEnemyPara : CharacterPara
     {
         // 코드 개선 필요 - 콜백을 통해 몬스터 매니저에게 호출하는 구조가 되어야 함
         CMonsterManager.instance.RemoveMonster(_spawnID);
-        CGameEvent.instance.EarnMoneyEvent?.Invoke(_rewardMoney);
+        Network.CNetworkEvent.instance.EarnMoneyEvent?.Invoke(_rewardMoney);
         //_myRespawn.GetComponent<CRespawn>().RemoveMonster(_spawnID);
     }
 

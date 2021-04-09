@@ -37,7 +37,7 @@ public class CTestController : MonoBehaviour
         keyDictionary = new Dictionary<KeyCode, Action>
         {
             // Character Add / Delete
-            //[KeyCode.Insert] = () => commander.SetActivePlayers(4),   // 무한루프 버그 때문에 봉인
+            [KeyCode.Insert] = () => commander.SetActivePlayers(4),
             [KeyCode.Delete] = () => KickPlayer(_selectedCharacterNumber),
             // Character Control
             [KeyCode.Alpha5]    = () => _selectedCharacterNumber = 0,
@@ -47,8 +47,8 @@ public class CTestController : MonoBehaviour
             [KeyCode.U]         = () => commander.SetMyCharacter(_selectedCharacterNumber),
             [KeyCode.O]         = () => commander.DamageToCharacter(_selectedCharacterNumber, 300),
             [KeyCode.J]         = () => commander.Follow(_selectedCharacterNumber),
-            [KeyCode.K]         = () => commander.Call(_selectedCharacterNumber),
-            [KeyCode.L]         = () => commander.SkillTo(_selectedCharacterNumber),
+            [KeyCode.K]         = () => commander.JumpTo(_selectedCharacterNumber),
+            [KeyCode.L]         = () => commander.RollTo(_selectedCharacterNumber),
             [KeyCode.M]         = () => CWaitingForAccept.instance.SetPortalUseSelect(_selectedCharacterNumber, CWaitingForAccept.EAccept._accept),
             [KeyCode.Comma]     = () => CWaitingForAccept.instance.SetPortalUseSelect(_selectedCharacterNumber, CWaitingForAccept.EAccept._cancle),
             // Item

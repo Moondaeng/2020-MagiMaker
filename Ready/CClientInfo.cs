@@ -11,14 +11,14 @@ public class CClientInfo : MonoBehaviour
         // id 최대 16자
         public readonly string id;
         public int clear;
-        public int Slot { get; set; }
+        public int SlotNumber;
 
         public User(string id, int clear, int slot)
         {
             this.uid = 0;
             this.id = id;
             this.clear = clear;
-            Slot = slot;
+            SlotNumber = slot;
         }
 
         public User(int uid, string id, int clear)
@@ -33,7 +33,7 @@ public class CClientInfo : MonoBehaviour
             this.uid = uid;
             this.id = id;
             this.clear = clear;
-            Slot = slot;
+            SlotNumber = slot;
         }
 
         public void UpdateUserStat(int clear)
@@ -78,12 +78,15 @@ public class CClientInfo : MonoBehaviour
         {
             ClearRoomData();
 
+            // 다른 사람 정보
+            Others.Clear();
+
+            // 내 정보 및 방 정보
             Slots[0] = ESlotState.User;
             IsHost = true;
-            Others.Clear();
             RoomID = rid;
 
-            ThisUser.Slot = 0;
+            ThisUser.SlotNumber = 0;
         }
 
         public static void JoinToRoom(int rid, Network.CPacket packet, int payloadSize)
@@ -94,6 +97,7 @@ public class CClientInfo : MonoBehaviour
 
             ClearRoomData();
 
+            // 다른 사람 정보
             int userCount = payloadSize / 24;
             for (int i = 0; i < userCount; i++)
             {
@@ -105,21 +109,23 @@ public class CClientInfo : MonoBehaviour
                 Debug.Log("CClientInfo - JoinRoom : A Slot is " + slot + " and id " + id);
             }
 
-            ThisUser.Slot = myslot;
+            // 내 정보 및 방 정보
+            ThisUser.SlotNumber = myslot;
             Slots[myslot] = ESlotState.User;
+            IsHost = false;
             RoomID = rid;
         }
 
         public static void AddUser(int slotNum, User newGuest)
         {
-            newGuest.Slot = slotNum;
+            newGuest.SlotNumber = slotNum;
             Others.Add(newGuest);
             Slots[slotNum] = ESlotState.User;
         }
 
         public static void DeleteUser(int slotNum)
         {
-            Others.RemoveAll(user => user.Slot == slotNum);
+            Others.RemoveAll(user => user.SlotNumber == slotNum);
             Debug.Log($"CClientInfo - Delete User {slotNum}");
             Slots[slotNum] = ESlotState.Open;
         }
@@ -140,7 +146,7 @@ public class CClientInfo : MonoBehaviour
         return playerCount == 1 ? true : false;
     }
 
-    public static User ThisUser { get; set; }
+    public static User ThisUser = new User(0, "SinglePlayer", 0);
     public static int PlayerCount { get; set; }
     public static readonly bool IsDebugMode = true;
     public static readonly bool IsSingleDebugMode = true;

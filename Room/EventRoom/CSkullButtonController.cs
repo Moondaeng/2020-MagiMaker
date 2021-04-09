@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CSkullButtonController : CEventRoomPopUpController
+public class CSkullButtonController : CNPCPopUpController
 {
     GameObject _skull;
     public override void Start()

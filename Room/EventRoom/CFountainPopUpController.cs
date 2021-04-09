@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CFountainPopUpController : CEventRoomPopUpController
+public class CFountainPopUpController : CNPCPopUpController
 {
     private GameObject _fountain;
     // Start is called before the first frame update

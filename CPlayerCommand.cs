@@ -123,7 +123,7 @@ public class CPlayerCommand : MonoBehaviour
         character = players[charId];
 
         var playerState = character.GetComponent<CMultiDoll>();
-        Debug.Log($"dummy {charId} go to {movePos.x}, {movePos.y}, {movePos.z}");
+        //Debug.Log($"dummy {charId} go to {movePos.x}, {movePos.y}, {movePos.z}");
         playerState.MoveTo(movePos);
     }
 
@@ -173,7 +173,7 @@ public class CPlayerCommand : MonoBehaviour
     }
 
     // 구르기 명령
-    public void Roll(int charId, Vector3 nowPos, Vector3 movePos)
+    public void Roll(int charId, Vector3 nowPos, Vector3 rollAngle)
     {
         if (charId == ControlCharacterID)
         {
@@ -186,9 +186,9 @@ public class CPlayerCommand : MonoBehaviour
         character = players[charId];
 
         Teleport(charId, nowPos);
-        character.transform.rotation = Quaternion.Euler(movePos);
+        //character.transform.rotation = Quaternion.Euler(movePos);
         var playerState = character.GetComponent<CMultiDoll>();
-        playerState.RollTo(Vector3.zero);
+        playerState.RollTo(rollAngle);
     }
 
     
@@ -220,11 +220,6 @@ public class CPlayerCommand : MonoBehaviour
             
         //}
     }
-
-    // For Test
-    public void Follow(int charId) => Move(charId, players[0].transform.position);
-    public void Call(int charId) => Teleport(charId, players[0].transform.position);
-    public void SkillTo(int charId) => UseSkill(charId, 0, players[charId].transform.position, players[0].transform.position);
     #endregion
 
     // 해당 캐릭터에게 데미지 주기
@@ -272,4 +267,11 @@ public class CPlayerCommand : MonoBehaviour
     }
     #endregion
 
+    #region Debug
+    public void Follow(int charId) => Move(charId, players[0].transform.position);
+    public void Call(int charId) => Teleport(charId, players[0].transform.position);
+    public void SkillTo(int charId) => UseSkill(charId, 0, players[charId].transform.position, players[0].transform.position);
+    public void JumpTo(int charId) => Jump(charId, players[charId].transform.position, players[0].transform.position);
+    public void RollTo(int charId) => Roll(charId, players[charId].transform.position, players[0].transform.rotation.eulerAngles);
+    #endregion
 }

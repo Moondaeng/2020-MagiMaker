@@ -21,7 +21,7 @@ public abstract class CPortal : MonoBehaviour
             PortalAcceptParent.transform.Find("WaitingForOtherPlayer").gameObject.SetActive(true);
             FadeController.transform.Find("FadeCanvas").gameObject.SetActive(false);
             CWaitingForAccept.instance._portal = gameObject;
-            CGameEvent.instance.UsePortalEvent?.Invoke();
+            Network.CNetworkEvent.instance.UsePortalEvent?.Invoke();
         }
     }
 

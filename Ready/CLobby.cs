@@ -187,7 +187,7 @@ public class CLobby : MonoBehaviour
         int rid = packet.ReadInt32();
 
         CClientInfo.JoinRoom.CreateRoom(rid);
-        CClientInfo.ThisUser.Slot = 0;
+        CClientInfo.ThisUser.SlotNumber = 0;
         
         _tcpManager.DeletePacketInterpret();
         SceneManager.LoadScene("Room");

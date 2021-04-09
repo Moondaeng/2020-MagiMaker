@@ -65,13 +65,6 @@ public class CPortalManager : MonoBehaviour
 
         ParentTransform.position = new Vector3(0, 1, 0);
 
-        if (CGlobal.isHost)
-        {
-            CCreateMap.instance.CreateStage(); //현재 방 이후의 방들 맵으로 생성
-            CCreateMap.instance.SendRoomArr(); //현재 방 이후의 방들 피어들에게 전송
-            
-            //CCreateMap.instance.MakePortalText(CCreateMap.instance._roomCount, CCreateMap.instance._roomArr); //포탈 따로 생성
-            // Recieve
-        }
+        CCreateMap.instance.CreateStage(); //현재 방 이후의 방들 맵으로 생성
     }
 }

@@ -27,8 +27,9 @@ namespace Network
             [652] = InterpretUsePortal,
             [653] = InterpretCreateRooms,
             // 시스템
-            [951] = InterpretQuitGame,
+            [951] = InterpretReturnLobby,
             [952] = InterpretQuitGame,
+            [953] = InterpretLoadingAllFinish,
         };
 
         public static void PacketInterpret(byte[] data)
@@ -131,8 +132,7 @@ namespace Network
             dest.y = packet.ReadSingle();
             dest.z = packet.ReadSingle();
 
-            Debug.LogFormat("Move Start - id{0} move ({1},{2},{3}) to ({4},{5},{6})", 
-                id, now.x, now.y, now.z, dest.x, dest.y, dest.z);
+            //Debug.LogFormat("Move Start - id{0} move ({1},{2},{3}) to ({4},{5},{6})", id, now.x, now.y, now.z, dest.x, dest.y, dest.z);
 
             CPlayerCommand.instance.Move(id, dest);
         }
@@ -241,7 +241,7 @@ namespace Network
             Int32 id;
             Int32 accept;
 
-            Debug.Log("Get Item");
+            Debug.Log("Portal Accept");
 
             id = packet.ReadInt32();
             accept = packet.ReadInt32();
@@ -268,13 +268,19 @@ namespace Network
 
         private static void InterpretCreateRooms(CPacket packet)
         {
-            CRoom[,] rooms = new CRoom[CConstants.ROOM_PER_STAGE, CConstants.MAX_ROAD];
+            Debug.Log("Receive Create Room Packets");
+
+            int[,] rooms = new int[CConstants.ROOM_PER_STAGE, CConstants.MAX_ROAD];
+
             for (int i = 0; i < CConstants.ROOM_PER_STAGE; i++)
             {
+                string roomData = $"rooms row {i} : ";
                 for (int j = 0; j < CConstants.MAX_ROAD; j++)
                 {
-                    rooms[i, j].RoomType = (CGlobal.ERoomType)packet.ReadInt32();
+                    rooms[i, j] = packet.ReadInt32();
+                    roomData += rooms[i, j];
                 }
+                Debug.Log(roomData);
             }
 
             CCreateMap.instance.ReceiveRoomArr(rooms);
@@ -288,7 +294,16 @@ namespace Network
 
         private static void InterpretQuitGame(CPacket packet)
         {
-            CGameEvent.instance.QuitPlayer(packet.ReadInt32());
+            CNetworkEvent.instance.QuitPlayer(packet.ReadInt32());
+        }
+
+        private static void InterpretLoadingAllFinish(CPacket packet)
+        {
+            Debug.Log("All player Loading finished");
+            if (CClientInfo.JoinRoom.IsHost)
+            {
+                CCreateMap.instance.CreateStage();
+            }
         }
         #endregion
     }

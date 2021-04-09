@@ -18,8 +18,6 @@ public class CElementObtainViewer : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log("awake");
-
         if (instance == null)
         {
             instance = this;
@@ -28,7 +26,6 @@ public class CElementObtainViewer : MonoBehaviour
         // 주원소 개수만큼 패널 초기화
         for (int i = 0; i < 2; i++)
         {
-            Debug.Log($"ElementPanel{i}/MainElementPanel");
             mainElementPanels[i] = transform.Find($"ElementPanel{i}").Find("MainElementPanel");
             for (int j = 0; j < 3; j++)
             {
@@ -37,8 +34,6 @@ public class CElementObtainViewer : MonoBehaviour
         }
 
         transform.Find("CancelButton").GetComponent<Button>().onClick.AddListener(CancelChangeElement);
-
-        Debug.Log("awake end");
     }
 
     public void OpenViewer(CPlayerSkill playerSkill, bool isMainElement, CPlayerSkill.ESkillElement element)
@@ -104,6 +99,8 @@ public class CElementObtainViewer : MonoBehaviour
 
     private void ChangeElement(CPlayerSkill playerSkill, bool isMainElement, CPlayerSkill.ESkillElement element, int mainSlot, int subSlot)
     {
+        Debug.Log("ChangeElement function");
+
         if (isMainElement)
         {
             playerSkill.SetMainElement(mainSlot, element);
