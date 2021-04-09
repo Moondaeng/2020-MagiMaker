@@ -19,11 +19,11 @@ public class CCreateMap : MonoBehaviour
     #endregion
 
     #region roomQueue
-    private Dictionary<CGlobal.ERoomType, Queue<GameObject>> _roomQueueDict = new Dictionary<CGlobal.ERoomType, Queue<GameObject>>();
-    private Queue<GameObject>[] _roomQueues = new Queue<GameObject>[3]; //0노말 1이벤트 2엘리트
+    private Dictionary<CGlobal.ERoomType, Queue<GameObject>> _roomQueueDict = new Dictionary<CGlobal.ERoomType, Queue<GameObject>>(); //0노말 1이벤트 2엘리트
     public Queue<GameObject> normalRoomQueue = new Queue<GameObject>();
     public Queue<GameObject> eventRoomQueue = new Queue<GameObject>();
     public Queue<GameObject> eliteRoomQueue = new Queue<GameObject>();
+    public int[,] randomRoomArray = new int[3, 10]; //패킷 보내기 위해 임의로 사이즈 고정, 노말방이든, 이벤트 방이든 같은 종류 개수 10개 넘어가면 수정필요
     #endregion
 
     #region memberVar
@@ -45,9 +45,9 @@ public class CCreateMap : MonoBehaviour
 
     private void Start()
     {
-        startRoom = Resources.Load("Room/StartRoom0") as GameObject;
-        bossRoom = Resources.Load("Room/BossRoom/BossRoom0") as GameObject;
-        shopRoom = Resources.Load("Room/ShopRoom/ShopRoom0") as GameObject;
+        startRoom = Resources.Load("Room/0/StartRoom0") as GameObject;
+        bossRoom = Resources.Load("Room/0/BossRoom0") as GameObject;
+        shopRoom = Resources.Load("Room/0/ShopRoom0") as GameObject;
 
         _portals = new List<CPortal>();
 
@@ -67,12 +67,19 @@ public class CCreateMap : MonoBehaviour
             for (int j = 0; j < CConstants.MAX_ROAD; j++)
                 _roomArr[i, j] = new CRoom();
 
-        _rooms = new LinkedList<GameObject>();
+        for(int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 10; j++)
+            {
+                randomRoomArray[i, j] = -1;
+            }
+        }
 
-        RandomRoomEnqueue();
+        _rooms = new LinkedList<GameObject>();
 
         if (CGlobal.isHost)
         {
+            RandomRoomEnqueue(_stageNumber);
             CreateStage();
             SendRoomArr();
             MakePortalText(_roomCount, _roomArr);
@@ -140,9 +147,9 @@ public class CCreateMap : MonoBehaviour
         return _roomArr;
     }
 
-    public void RandomRoomEnqueue()  //스테이지의 종류에 따라 랜덤한 스테이지로 문자열을 만들어 반환함, random이 트루면 랜덤한 맵 리턴.
+    public void RandomRoomEnqueue(int stageNumber)  //스테이지의 종류에 따라 랜덤한 스테이지로 문자열을 만들어 반환함, random이 트루면 랜덤한 맵 리턴.
     {
-        string[] roomName = { "Room/NormalRoom", "Room/EventRoom", "Room/EliteRoom" };
+        string[] roomName = { "Room/" + stageNumber + "/NormalRoom", "Room/" + stageNumber + "/EventRoom", "Room/" + stageNumber + "/EliteRoom" };
         _roomQueueDict.Add(CGlobal.ERoomType._normal, normalRoomQueue);
         _roomQueueDict.Add(CGlobal.ERoomType._event, eventRoomQueue);
         _roomQueueDict.Add(CGlobal.ERoomType._elite, eliteRoomQueue);
@@ -152,6 +159,7 @@ public class CCreateMap : MonoBehaviour
             GameObject[] rooms = Resources.LoadAll<GameObject>(roomName[i]);
             int count = 0;
             int rand;
+            int j = 0;
 
             while (count < rooms.Length)
             {
@@ -159,9 +167,29 @@ public class CCreateMap : MonoBehaviour
                 if (rooms[rand] != null)
                 {
                     _roomQueueDict[(CGlobal.ERoomType)i + 1].Enqueue(rooms[rand]);
+                    randomRoomArray[i, j++] = rand;
                     rooms[rand] = null;
                     count++;
                 }
+            }
+        }
+    }
+
+    public void NonHostRoomEnqueue(int[,] randomRoom ,int stageNumber)
+    {
+        string[] roomName = { "Room/" + stageNumber + "/NormalRoom/NormalRoom", "Room/" + stageNumber + "/EventRoom/EventRoom", "Room/" + stageNumber + "/EliteRoom/EliteRoom" };
+        _roomQueueDict.Add(CGlobal.ERoomType._normal, normalRoomQueue);
+        _roomQueueDict.Add(CGlobal.ERoomType._event, eventRoomQueue);
+        _roomQueueDict.Add(CGlobal.ERoomType._elite, eliteRoomQueue);
+
+        for (int i = 0; i < _roomQueueDict.Count; i++)
+        {
+            int j = 0;
+            while(randomRoom.GetLength(i) > j && randomRoom[i, j] != -1)
+            {
+                GameObject room = Resources.Load(roomName[i] + randomRoom[i,j].ToString()) as GameObject;
+                _roomQueueDict[(CGlobal.ERoomType)i + 1].Enqueue(room);
+                j++;
             }
         }
     }

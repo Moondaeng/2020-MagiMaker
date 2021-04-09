@@ -5,7 +5,7 @@ using UnityEngine;
 public class CEventRoomNpcClick : MonoBehaviour
 {
     private GameObject _eventRoom;
-    private GameObject _popUp;
+    public GameObject _popUp;
     public static CEventRoomNpcClick instance = null;
     public Stack<GameObject> _stackPopUp;
     // Start is called before the first frame update
@@ -17,7 +17,7 @@ public class CEventRoomNpcClick : MonoBehaviour
         instance._stackPopUp = new Stack<GameObject>();
 
         _eventRoom = gameObject.transform.parent.gameObject;
-        _popUp = _eventRoom.transform.Find("NPCPopUp").gameObject;
+        _popUp = GameObject.Find("NPCPopUp");
         _popUp.SetActive(false);
     }
 
