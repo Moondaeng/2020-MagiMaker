@@ -47,8 +47,8 @@ public class CTestController : MonoBehaviour
             [KeyCode.U]         = () => commander.SetMyCharacter(_selectedCharacterNumber),
             [KeyCode.O]         = () => commander.DamageToCharacter(_selectedCharacterNumber, 300),
             [KeyCode.J]         = () => commander.Follow(_selectedCharacterNumber),
-            [KeyCode.K]         = () => commander.JumpTo(_selectedCharacterNumber),
-            [KeyCode.L]         = () => commander.RollTo(_selectedCharacterNumber),
+            [KeyCode.K]         = () => commander.JumpMirror(_selectedCharacterNumber),
+            [KeyCode.L]         = () => commander.RollMirror(_selectedCharacterNumber),
             [KeyCode.M]         = () => CWaitingForAccept.instance.SetPortalUseSelect(_selectedCharacterNumber, CWaitingForAccept.EAccept._accept),
             [KeyCode.Comma]     = () => CWaitingForAccept.instance.SetPortalUseSelect(_selectedCharacterNumber, CWaitingForAccept.EAccept._cancle),
             // Item

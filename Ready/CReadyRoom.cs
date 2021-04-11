@@ -41,6 +41,9 @@ public class CReadyRoom : MonoBehaviour
     public Button startBtn;
     public Button leaveBtn;
 
+    public GameObject quitMessagePanel;
+    public Button quitMessageButton;
+
     #region Debug 관련 변수
     [SerializeField]
     private Transform _debugPanel;
@@ -148,12 +151,6 @@ public class CReadyRoom : MonoBehaviour
 
     public void QuitRoomRequest()
     {
-        if (nonNetwork)
-        {
-            QuitRoom();
-            return;
-        }
-
         Network.CPacket message;
         if (CClientInfo.JoinRoom.IsHost)
         {
@@ -202,7 +199,6 @@ public class CReadyRoom : MonoBehaviour
     }
     #endregion
 
-
     private void PacketInterpret(byte[] data)
     {
         // 헤더 읽기
@@ -219,7 +215,7 @@ public class CReadyRoom : MonoBehaviour
                 QuitRoom();
                 break;
             case (int)MessageCode.HostQuitRoom:
-                QuitRoom();
+                HostQuitRoom();
                 break;
             case (int)MessageCode.NoticeUserQuit:
                 DeleteQuitUser(packet);
@@ -241,18 +237,24 @@ public class CReadyRoom : MonoBehaviour
 
     private void QuitRoom()
     {
-        if(nonNetwork)
-        {
-            Application.Quit();
-            return;
-        }
+        ReturnLobbyRequest();
+        SceneManager.LoadScene("Lobby");
+    }
 
+    private void HostQuitRoom()
+    {
+        ReturnLobbyRequest();
+        quitMessagePanel.SetActive(true);
+        quitMessageButton.onClick.AddListener(() => SceneManager.LoadScene("Lobby"));
+    }
+
+    private void ReturnLobbyRequest()
+    {
         // 로비로 전환 요청
         var message = Network.CPacketFactory.CreateReturnLobbyPacket();
         _tcpManager.Send(message.data);
 
         _tcpManager.DeletePacketInterpret();
-        SceneManager.LoadScene("Lobby");
     }
 
     // 인원이 추가된 경우
@@ -297,7 +299,6 @@ public class CReadyRoom : MonoBehaviour
 
     private void UpdateDebugPlayerPanel(int slotNumber)
     {
-        Debug.Log($"update {slotNumber} panel");
         _debugPlayerPanels[slotNumber].stateText.text 
             = CClientInfo.JoinRoom.Slots[slotNumber] == CClientInfo.JoinRoom.ESlotState.Open ? "비어있음" : "존재";
         _debugPlayerPanels[slotNumber].addPlayerButton.interactable 

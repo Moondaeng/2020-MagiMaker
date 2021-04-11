@@ -168,7 +168,6 @@ public class CController : MonoBehaviour
         {
             _playerControl.Attack();
         }
-        gameEvent.PlayerAction(0, player.transform.position, hit.point);
     }
 
     private void Skill()
@@ -179,13 +178,11 @@ public class CController : MonoBehaviour
     private void Jump()
     {
         _playerControl.Jump();
-        gameEvent.PlayerAction(1, player.transform.position, player.transform.rotation.eulerAngles);
     }
 
     private void Roll()
     {
         _playerControl.Roll();
-        gameEvent.PlayerAction(2, player.transform.position, player.transform.rotation.eulerAngles);
     }
 
     private void ChangeConsumable()
@@ -300,12 +297,38 @@ public class CController : MonoBehaviour
 
     private void AddActionListener()
     {
+        player.GetComponent<CCntl>().AttackEvent.AddListener(AttackAction);
+        player.GetComponent<CCntl>().JumpEvent.AddListener(JumpAction);
+        player.GetComponent<CCntl>().JumpEndEvent.AddListener(JumpEndAction);
+        player.GetComponent<CCntl>().RollEvent.AddListener(RollAction);
         player.GetComponent<CCharacterSkill>().skillUseEvent.AddListener(SkillAction);
     }
 
     private void RemoveActionListener()
     {
         player.GetComponent<CCharacterSkill>().skillUseEvent.RemoveListener(SkillAction);
+    }
+
+    private void AttackAction()
+    {
+        gameEvent.PlayerAction(0, player.transform.position, player.transform.rotation.eulerAngles);
+    }
+
+    private void JumpAction()
+    {
+        Debug.Log("jump Start");
+        gameEvent.PlayerAction(1, player.transform.position, player.transform.rotation.eulerAngles);
+    }
+
+    private void JumpEndAction()
+    {
+        Debug.Log("jump End");
+        gameEvent.PlayerAction(1, player.transform.position, player.transform.rotation.eulerAngles);
+    }
+
+    private void RollAction()
+    {
+        gameEvent.PlayerAction(2, player.transform.position, player.transform.rotation.eulerAngles);
     }
 
     private void SkillAction(int actionNumber, Vector3 targetPos)

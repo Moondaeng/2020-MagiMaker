@@ -138,7 +138,7 @@ public class CPlayerCommand : MonoBehaviour
         character.transform.position = movePos;
     }
 
-    public void Attack(int charID, Vector3 nowPos, Vector3 targetPos)
+    public void Attack(int charID, Vector3 nowPos, Vector3 rotateAngle)
     {
         if (charID == ControlCharacterID)
         {
@@ -152,10 +152,10 @@ public class CPlayerCommand : MonoBehaviour
 
         Teleport(charID, nowPos);
         var playerState = character.GetComponent<CMultiDoll>();
-        playerState.Attack();
+        playerState.AttackTo(rotateAngle);
     }
 
-    public void Jump(int charID, Vector3 nowPos, Vector3 movePos)
+    public void Jump(int charID, Vector3 nowPos, Vector3 rotateAngle)
     {
         if (charID == ControlCharacterID)
         {
@@ -169,7 +169,7 @@ public class CPlayerCommand : MonoBehaviour
 
         Teleport(charID, nowPos);
         var playerState = character.GetComponent<CMultiDoll>();
-        playerState.Jump();
+        playerState.JumpTo(rotateAngle);
     }
 
     // 구르기 명령
@@ -186,12 +186,9 @@ public class CPlayerCommand : MonoBehaviour
         character = players[charId];
 
         Teleport(charId, nowPos);
-        //character.transform.rotation = Quaternion.Euler(movePos);
         var playerState = character.GetComponent<CMultiDoll>();
         playerState.RollTo(rollAngle);
     }
-
-    
 
     // 스킬 사용 명령
     public void UseSkill(int charId, int skillNumber, Vector3 nowPos, Vector3 targetPos)
@@ -267,11 +264,29 @@ public class CPlayerCommand : MonoBehaviour
     }
     #endregion
 
+    #region 내부 함수
+    private bool IsControlableCharacter(int charID)
+    {
+        if (charID == ControlCharacterID || IsInvalidCharacter(charID))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool IsInvalidCharacter(int charID)
+    {
+        return players?[charID] == null ? true : false;
+    }
+    #endregion
+
     #region Debug
     public void Follow(int charId) => Move(charId, players[0].transform.position);
     public void Call(int charId) => Teleport(charId, players[0].transform.position);
     public void SkillTo(int charId) => UseSkill(charId, 0, players[charId].transform.position, players[0].transform.position);
-    public void JumpTo(int charId) => Jump(charId, players[charId].transform.position, players[0].transform.position);
-    public void RollTo(int charId) => Roll(charId, players[charId].transform.position, players[0].transform.rotation.eulerAngles);
+    public void AttackMirror(int charId) => Jump(charId, players[charId].transform.position, players[0].transform.rotation.eulerAngles);
+    public void JumpMirror(int charId) => Jump(charId, players[charId].transform.position, players[0].transform.rotation.eulerAngles);
+    public void RollMirror(int charId) => Roll(charId, players[charId].transform.position, players[0].transform.rotation.eulerAngles);
     #endregion
 }

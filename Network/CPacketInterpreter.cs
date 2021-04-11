@@ -70,6 +70,7 @@ namespace Network
 
             CTcpClient.instance.Send(message.data);
         }
+
         public static void SendActionStart(int actionNumber, Vector3 now, Vector3 dest)
         {
             var message = CPacketFactory.CreateActionStartPacket(actionNumber, now, dest);
@@ -148,6 +149,8 @@ namespace Network
             now.z = packet.ReadSingle();
 
             Debug.LogFormat("Move Stop - id{0} ({1},{2})", id, now.x, now.y, now.z);
+
+            CPlayerCommand.instance.Teleport(id, now);
         }
 
         private static void InterpretMoveCorrection(CPacket packet)

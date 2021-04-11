@@ -124,12 +124,13 @@ public class CMultiDoll : MonoBehaviour
     public void RollTo(Vector3 rotateDirection)
     {
         transform.rotation = Quaternion.Euler(rotateDirection);
-        Roll();
+        Act(EAction.Roll, 0.6f);
     }
 
-    public void Attack()
+    public void AttackTo(Vector3 rotateDirection)
     {
-        Act(EAction.Attack1, 1.5f);
+        transform.rotation = Quaternion.Euler(rotateDirection);
+        Act(EAction.Attack1, 0.8f);
     }
     
     public void Skill()
@@ -137,16 +138,12 @@ public class CMultiDoll : MonoBehaviour
         Act(EAction.Skill1, 1.2f);
     }
 
-    public void Jump()
+    public void JumpTo(Vector3 rotateDirection)
     {
+        transform.rotation = Quaternion.Euler(rotateDirection);
         Act(EAction.Jump, 0.6f);
         _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, _jumpPower,
                 _rigidbody.velocity.z);
-    }
-
-    public void Roll()
-    {
-        Act(EAction.Roll, 0.6f);
     }
 
     public void Stun()
@@ -201,6 +198,11 @@ public class CMultiDoll : MonoBehaviour
     }
 
     void SetRightStartPoint()
+    {
+
+    }
+
+    void RollStart()
     {
 
     }

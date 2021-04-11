@@ -31,8 +31,16 @@ namespace Network
         public ConcurrentQueue<byte[]> tcpBuffer = new ConcurrentQueue<byte[]>();
         public bool IsConnect
         {
-            get { return _client.Connected; }
+            get 
+            {
+                if (_client == null)
+                {
+                    return false;
+                }
+                return _client.Connected; 
+            }
         }
+
 
         private static Socket _client;
         private PacketInterpret _interpretFunc = null;
@@ -48,8 +56,6 @@ namespace Network
                 Destroy(gameObject);
             }
             DontDestroyOnLoad(gameObject);
-
-            StartClient();
         }
 
         private void Update()
@@ -80,6 +86,7 @@ namespace Network
             // Connect to a remote device.  
             try
             {
+                //_client.set
                 IPAddress ipAddress = IPAddress.Parse(ipString);
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
 
