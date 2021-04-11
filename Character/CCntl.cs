@@ -44,6 +44,7 @@ public class CCntl : MonoBehaviour
 
     // 애니메이션 상태값
     private bool _isGrounded;
+    private bool _isJumping;
     private bool _jump;
     private bool _isAttackInputed;
     private bool _isJumpInputed;
@@ -76,6 +77,10 @@ public class CCntl : MonoBehaviour
     public SkillStartPoint _skillHand;
     [System.NonSerialized]
     public UnityEvent SkillExitEvent = new UnityEvent();
+    public UnityEvent AttackEvent = new UnityEvent();
+    public UnityEvent JumpEvent = new UnityEvent();
+    public UnityEvent JumpEndEvent = new UnityEvent();
+    public UnityEvent RollEvent = new UnityEvent();
     #endregion
 
     #region __start__
@@ -252,6 +257,7 @@ public class CCntl : MonoBehaviour
         {
             _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, _jumpPower,
                 _rigidbody.velocity.z);
+            JumpEvent?.Invoke();
             _isGrounded = false;
             _animator.applyRootMotion = false;
             _groundCheckDistance = 0.5f;
@@ -304,12 +310,18 @@ public class CCntl : MonoBehaviour
             Vector3.down, out hitInfo, _groundCheckDistance))
         {
             _groundNormal = hitInfo.normal;
+            if (_isJumping)
+            {
+                _isJumping = false;
+                JumpEndEvent?.Invoke();
+            }
             _isGrounded = true;
             _animator.applyRootMotion = true;
         }
         else
         {
             _isGrounded = false;
+            _isJumping = true;
             _groundNormal = hitInfo.normal;
             _animator.applyRootMotion = false;
         }
@@ -395,6 +407,16 @@ public class CCntl : MonoBehaviour
     {
         _skillHand.handPoint = false;
         _skillHand._skillStartPoint = _handCollider[1].gameObject.transform.position;
+    }
+
+    private void AttackStart()
+    {
+        AttackEvent?.Invoke();
+    }
+
+    private void RollStart()
+    {
+        RollEvent?.Invoke();
     }
 
     // 애니메이션이 스크립트의 효과를 받아서 움직이면 여기서 처리해줌.
