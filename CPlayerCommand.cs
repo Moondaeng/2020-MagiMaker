@@ -138,7 +138,7 @@ public class CPlayerCommand : MonoBehaviour
         character.transform.position = movePos;
     }
 
-    public void Attack(int charID, Vector3 nowPos, Vector3 rotateAngle)
+    public void Attack(int charID, Vector3 nowPos, float rotateAngle)
     {
         if (charID == ControlCharacterID)
         {
@@ -155,7 +155,7 @@ public class CPlayerCommand : MonoBehaviour
         playerState.AttackTo(rotateAngle);
     }
 
-    public void Jump(int charID, Vector3 nowPos, Vector3 rotateAngle)
+    public void Jump(int charID, Vector3 nowPos, float rotateAngle)
     {
         if (charID == ControlCharacterID)
         {
@@ -173,7 +173,7 @@ public class CPlayerCommand : MonoBehaviour
     }
 
     // 구르기 명령
-    public void Roll(int charId, Vector3 nowPos, Vector3 rollAngle)
+    public void Roll(int charId, Vector3 nowPos, float rollAngle)
     {
         if (charId == ControlCharacterID)
         {
@@ -285,8 +285,8 @@ public class CPlayerCommand : MonoBehaviour
     public void Follow(int charId) => Move(charId, players[0].transform.position);
     public void Call(int charId) => Teleport(charId, players[0].transform.position);
     public void SkillTo(int charId) => UseSkill(charId, 0, players[charId].transform.position, players[0].transform.position);
-    public void AttackMirror(int charId) => Jump(charId, players[charId].transform.position, players[0].transform.rotation.eulerAngles);
-    public void JumpMirror(int charId) => Jump(charId, players[charId].transform.position, players[0].transform.rotation.eulerAngles);
-    public void RollMirror(int charId) => Roll(charId, players[charId].transform.position, players[0].transform.rotation.eulerAngles);
+    public void AttackMirror(int charId) => Attack(charId, players[charId].transform.position, players[0].transform.rotation.eulerAngles.y);
+    public void JumpMirror(int charId) => Jump(charId, players[charId].transform.position, players[0].transform.rotation.eulerAngles.y);
+    public void RollMirror(int charId) => Roll(charId, players[charId].transform.position, players[0].transform.rotation.eulerAngles.y);
     #endregion
 }

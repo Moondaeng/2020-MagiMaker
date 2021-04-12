@@ -41,8 +41,18 @@ namespace Network
             MoveStart = 401,
             MoveStop = 402,
             ActionStart = 403,
+            JumpStart = 404,
+            AttackStart = 405,
+            RollStart = 406,
+
             ReturnLobby = 901,
             FinishLoding = 902,
+        }
+
+        enum EMapInfo
+        {
+            RoomTypeInfo = 603,
+            RoomNumberInfo = 604,
         }
 
         enum EDebug
@@ -222,6 +232,7 @@ namespace Network
         #endregion
 
         #region Create InGame Message
+        #region Character Movement
         public static CPacket CreateCharacterInfoPacket()
         {
             byte messageSize = 0;
@@ -269,6 +280,48 @@ namespace Network
             return packet;
         }
 
+        public static CPacket CreateJumpStartPacket(Vector3 now, float jumpRotate, bool isMoving)
+        {
+            byte messageSize = 20;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)EInGame.JumpStart);
+            packet.Write(now.x).Write(now.y).Write(now.z)
+                .Write(jumpRotate)
+                .Write(isMoving);
+
+            return packet;
+        }
+
+        public static CPacket CreateAttackStartPacket(Vector3 now, float attackRotate)
+        {
+            byte messageSize = 16;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)EInGame.AttackStart);
+            packet.Write(now.x).Write(now.y).Write(now.z)
+                .Write(attackRotate);
+
+            return packet;
+        }
+
+        public static CPacket CreateRollStartPacket(Vector3 now, float rollRotate)
+        {
+            byte messageSize = 16;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)EInGame.RollStart);
+            packet.Write(now.x).Write(now.y).Write(now.z)
+                .Write(rollRotate);
+
+            return packet;
+        }
+        #endregion
+
+        #region Map Info
         public static CPacket CreatePortalVote(int accept)
         {
             byte messageSize = 4;
@@ -285,7 +338,7 @@ namespace Network
         public static CPacket CreatePortalPopup()
         {
             byte messageSize = 0;
-            
+
             Debug.Log("Portal Popup");
 
             CPacket packet = new CPacket((int)messageSize);
@@ -295,15 +348,15 @@ namespace Network
             return packet;
         }
 
-        public static CPacket CreateRoomsInfo(int[,] rooms)
+        public static CPacket CreateRoomTypeInfo(int[,] rooms)
         {
             Debug.Log("Create Room Info Packet");
-            
+
             byte messageSize = 144;
 
             CPacket packet = new CPacket((int)messageSize);
 
-            packet.WriteHeader(messageSize, (int)603);
+            packet.WriteHeader(messageSize, (int)EMapInfo.RoomTypeInfo);
             for (int i = 0; i < CConstants.ROOM_PER_STAGE; i++)
             {
                 for (int j = 0; j < CConstants.MAX_ROAD; j++)
@@ -314,6 +367,28 @@ namespace Network
 
             return packet;
         }
+
+        public static CPacket CreateRoomNumberInfo(int[,] roomNumbers)
+        {
+            Debug.Log("Create Room Number Infomations Packet");
+
+            byte messageSize = 120;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)EMapInfo.RoomNumberInfo);
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 10; j++)
+                {
+                    packet.Write(roomNumbers[i, j]);
+                }
+            }
+
+            return packet;
+        }
+        #endregion
+
 
         public static CPacket CreateReturnLobby(bool isHost)
         {

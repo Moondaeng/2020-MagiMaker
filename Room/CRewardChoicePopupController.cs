@@ -9,7 +9,8 @@ public class CRewardChoicePopupController : CNPCPopUpController
     private Dictionary<int, string> _itemGrade;
     private bool isUsed = false;
     CPlayerPara _playerPara;
-    private bool[] isBoss = new bool[2];
+    private bool[] isBoss = { false, false };
+    private string[] _elementName = { "부원소", "부원소" };
 
     // Start is called before the first frame update
     public override void Start()
@@ -20,11 +21,13 @@ public class CRewardChoicePopupController : CNPCPopUpController
         {
             _userSelectRoom = 0;
             isBoss[_userSelectRoom] = false;
+            _elementName[_userSelectRoom] = "부원소";
         }
         else if (CCreateMap.instance.userSelectRoom() == CGlobal.ERoomType._boss)
         {
             _userSelectRoom = 1;
             isBoss[_userSelectRoom] = true;
+            _elementName[_userSelectRoom] = "주원소";
         }
 
         _playerPara = CController.instance.player.GetComponent<CPlayerPara>(); //인벤토리를 위한 플레이어 파라 정의       
@@ -44,6 +47,9 @@ public class CRewardChoicePopupController : CNPCPopUpController
 
         TMPro.TextMeshProUGUI itemText = _popUp.transform.GetChild(1).GetChild(0).GetComponent<TMPro.TextMeshProUGUI>(); //아이템 보상 텍스트
         itemText.text = itemText.text + " (" + _itemGrade[_userSelectRoom] + " ~ " + _itemGrade[_userSelectRoom + 2] + ")";
+
+        TMPro.TextMeshProUGUI elementText = _popUp.transform.GetChild(0).GetChild(0).GetComponent<TMPro.TextMeshProUGUI>(); //원소 보상 텍스트
+        elementText.text = "무작위 " + _elementName[_userSelectRoom] + " 획득";
     }
 
     public override void ChooseButton(int choose)

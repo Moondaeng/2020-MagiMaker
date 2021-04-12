@@ -121,15 +121,15 @@ public class CMultiDoll : MonoBehaviour
         _animator.SetInteger("Motion", (int)EAction.Idle);
     }
 
-    public void RollTo(Vector3 rotateDirection)
+    public void RollTo(float rotateDirection)
     {
-        transform.rotation = Quaternion.Euler(rotateDirection);
+        SetRotateByFloat(rotateDirection);
         Act(EAction.Roll, 0.6f);
     }
 
-    public void AttackTo(Vector3 rotateDirection)
+    public void AttackTo(float rotateDirection)
     {
-        transform.rotation = Quaternion.Euler(rotateDirection);
+        SetRotateByFloat(rotateDirection);
         Act(EAction.Attack1, 0.8f);
     }
     
@@ -138,9 +138,9 @@ public class CMultiDoll : MonoBehaviour
         Act(EAction.Skill1, 1.2f);
     }
 
-    public void JumpTo(Vector3 rotateDirection)
+    public void JumpTo(float rotateDirection)
     {
-        transform.rotation = Quaternion.Euler(rotateDirection);
+        SetRotateByFloat(rotateDirection);
         Act(EAction.Jump, 0.6f);
         _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, _jumpPower,
                 _rigidbody.velocity.z);
@@ -178,6 +178,16 @@ public class CMultiDoll : MonoBehaviour
         _animator.SetInteger("Motion", (int)EAction.Idle);
     }
 
+    private void SetRotateByFloat(float rotateDirection)
+    {
+        var rotateVector3 = transform.rotation.eulerAngles;
+        rotateVector3.y = rotateDirection;
+        transform.rotation = Quaternion.Euler(rotateVector3);
+    }
+
+    #region Animation Event
+
+    #endregion
     // 점프할 발 체크 추후에 여기에 사운드 추가
     // 애니메이션 placeholder에 들어가있는 함수
     void FootR()

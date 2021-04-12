@@ -11,12 +11,11 @@ namespace NEvent
     public class MoveStop : UnityEvent<Vector3> { }
 
     [System.Serializable]
-    public class ActionStart : UnityEvent<int, Vector3, Vector3> { }
+    public class UseSkill : UnityEvent<int, Vector3, Vector3> { }
 }
 
 namespace Network
 {
-
     [DisallowMultipleComponent]
     public class CNetworkEvent : MonoBehaviour
     {
@@ -24,11 +23,7 @@ namespace Network
 
         public NEvent.MoveStart PlayerMoveStartEvent = new NEvent.MoveStart();
         public NEvent.MoveStop PlayerMoveStopEvent = new NEvent.MoveStop();
-        public NEvent.ActionStart PlayerActionEvent;
-
-        public UnityEvent<Vector3> PlayerAttackEvent;
-
-        private Network.CTcpClient _tcpManager;
+        public NEvent.UseSkill PlayerActionEvent;
 
         public ChangingMoneyEvent EarnMoneyEvent = new ChangingMoneyEvent();
         public ChangingMoneyEvent LoseMoneyEvent = new ChangingMoneyEvent();
@@ -38,6 +33,7 @@ namespace Network
 
         public static CNetworkEvent instance;
 
+        private Network.CTcpClient _tcpManager;
         private CPlayerCommand _playerCommand;
 
         private void Awake()
@@ -83,8 +79,6 @@ namespace Network
 
         public void PlayerMoveStop(Vector3 pos) => PlayerMoveStopEvent?.Invoke(pos);
 
-        public void PlayerAttack(Vector3 pos) => PlayerAttackEvent?.Invoke(pos);
-
         public void PlayerAction(int actionNumber, Vector3 now, Vector3 dest) => PlayerActionEvent?.Invoke(actionNumber, now, dest);
 
         private void InitMultiplay()
@@ -93,7 +87,7 @@ namespace Network
             Debug.Log($"Set Character : Send Message");
             _playerCommand.SetActivePlayers(CClientInfo.PlayerCount);
             SendLodingFinish();
-            CPacketInterpreter.SendCharacterInfoRequest();
+            SendCharacterInfoRequest();
         }
 
         private void InitSinglePlay()
@@ -106,14 +100,19 @@ namespace Network
 
         private void AddNetworkCode()
         {
+            var controller = CController.instance;
             // 플레이어 움직임
-            PlayerMoveStartEvent.AddListener(Network.CPacketInterpreter.SendMoveStart);
-            PlayerMoveStopEvent.AddListener(Network.CPacketInterpreter.SendMoveStop);
-            PlayerActionEvent.AddListener(Network.CPacketInterpreter.SendActionStart);
+            PlayerMoveStartEvent.AddListener(SendMoveStart);
+            PlayerMoveStopEvent.AddListener(SendMoveStop);
+            PlayerActionEvent.AddListener(SendActionStart);
+            controller.PlayerPosCorrectionEvent.AddListener(SendMoveStop);
+            controller.PlayerJumpEvent.AddListener(SendJumpStart);
+            controller.PlayerAttackEvent.AddListener(SendAttackStart);
+            controller.PlayerRollEvent.AddListener(SendRollStart);
 
             // 포탈 관련
-            UsePortalEvent += Network.CPacketInterpreter.SendUsePortal;
-            PortalVoteEvent += Network.CPacketInterpreter.SendPortalVote;
+            UsePortalEvent += SendUsePortal;
+            PortalVoteEvent += SendPortalVote;
 
             if (CClientInfo.JoinRoom.IsHost)
             {
@@ -125,13 +124,13 @@ namespace Network
         private void RemoveNetworkCode()
         {
             // 플레이어 움직임
-            PlayerMoveStartEvent.RemoveListener(Network.CPacketInterpreter.SendMoveStart);
-            PlayerMoveStopEvent.RemoveListener(Network.CPacketInterpreter.SendMoveStop);
-            PlayerActionEvent.RemoveListener(Network.CPacketInterpreter.SendActionStart);
+            PlayerMoveStartEvent.RemoveListener(SendMoveStart);
+            PlayerMoveStopEvent.RemoveListener(SendMoveStop);
+            PlayerActionEvent.RemoveListener(SendActionStart);
 
             // 포탈 관련
-            UsePortalEvent -= Network.CPacketInterpreter.SendUsePortal;
-            PortalVoteEvent -= Network.CPacketInterpreter.SendPortalVote;
+            UsePortalEvent -= SendUsePortal;
+            PortalVoteEvent -= SendPortalVote;
         }
 
         private void AddNetworkHostCode()
@@ -139,7 +138,7 @@ namespace Network
             // 몬스터 패턴 코드
             // 돈 획득
             // 방 생성
-            CCreateMap.instance.CreateRooms.AddListener(CPacketInterpreter.SendRoomsInfo);
+            CCreateMap.instance.CreateRooms.AddListener(SendRoomsInfo);
         }
 
         private void AddSingleplayCode()
@@ -157,6 +156,87 @@ namespace Network
         }
 
         #region Packet Send
+
+        public static void SendCharacterInfoRequest()
+        {
+            var message = CPacketFactory.CreateCharacterInfoPacket();
+
+            CTcpClient.instance.Send(message.data);
+        }
+
+        public static void SendMoveStart(Vector3 now, Vector3 dest)
+        {
+            var message = CPacketFactory.CreateMoveStartPacket(now, dest);
+
+            CTcpClient.instance.Send(message.data);
+        }
+
+        public static void SendMoveStop(Vector3 now)
+        {
+            var message = CPacketFactory.CreateMoveStopPacket(now);
+
+            CTcpClient.instance.Send(message.data);
+        }
+
+        public static void SendActionStart(int actionNumber, Vector3 now, Vector3 dest)
+        {
+            var message = CPacketFactory.CreateActionStartPacket(actionNumber, now, dest);
+
+            CTcpClient.instance.Send(message.data);
+        }
+
+        private static void SendJumpStart(Vector3 currentPos, float rotate, bool isMoving)
+        {
+            Debug.Log("send jump");
+            var message = CPacketFactory.CreateJumpStartPacket(currentPos, rotate, isMoving);
+            CTcpClient.instance.Send(message.data);
+        }
+
+        private static void SendAttackStart(Vector3 currentPos, float rotate)
+        {
+            Debug.Log("send attack");
+            var message = CPacketFactory.CreateAttackStartPacket(currentPos, rotate);
+            CTcpClient.instance.Send(message.data);
+        }
+
+        private static void SendRollStart(Vector3 currentPos, float rotate)
+        {
+            Debug.Log("send roll");
+            var message = CPacketFactory.CreateRollStartPacket(currentPos, rotate);
+            CTcpClient.instance.Send(message.data);
+        }
+
+        public static void SendUsePortal()
+        {
+            var packet = CPacketFactory.CreatePortalPopup();
+
+            CTcpClient.instance.Send(packet.data);
+        }
+
+        public static void SendPortalVote(int accept)
+        {
+            var packet = CPacketFactory.CreatePortalVote(accept);
+
+            CTcpClient.instance.Send(packet.data);
+        }
+
+        public static void SendRoomsInfo(CRoom[,] roomArr)
+        {
+            var roomsIntArr = new int[CConstants.ROOM_PER_STAGE, CConstants.MAX_ROAD];
+
+            for (int i = 0; i < CConstants.ROOM_PER_STAGE; i++)
+            {
+                for (int j = 0; j < CConstants.MAX_ROAD; j++)
+                {
+                    roomsIntArr[i, j] = (int)roomArr[i, j].RoomType;
+                }
+            }
+
+            var message = CPacketFactory.CreateRoomTypeInfo(roomsIntArr);
+
+            CTcpClient.instance.Send(message.data);
+        }
+
         private void SendLodingFinish()
         {
             Debug.Log("Send Loading Finish Message");

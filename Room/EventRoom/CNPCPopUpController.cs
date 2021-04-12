@@ -15,6 +15,7 @@ public class CNPCPopUpController : MonoBehaviour
     {
         _popUp = gameObject;
         _NPC = GameObject.FindGameObjectWithTag("NPC");
+        Debug.Log("NpcPopUp Start");
 
         _childCount = _popUp.transform.childCount;
 
