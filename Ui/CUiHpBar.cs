@@ -8,39 +8,66 @@ using UnityEngine.UI;
  */
 public class CUiHpBar : MonoBehaviour
 {
-    public Image HpBarImage;
+    [SerializeField] private Image HpBarImage;
+    [SerializeField] private Image HpBarDamaged;
+
+    private CharacterPara drawTarget;
 
     private float _targetPercent;
     private float _animationPercent;
 
-    private const int ANIM_DRAW_FRAME_COUNT = 30;
+    [SerializeField] private int ANIM_DRAW_FRAME_COUNT = 30;
 
     public static readonly WaitForEndOfFrame WaitForEndOfFrame = new WaitForEndOfFrame();
     public static readonly WaitForFixedUpdate WaitForFixedUpdate = new WaitForFixedUpdate();
 
     void Start()
     {
-        HpBarImage = gameObject.GetComponent<Image>();
         _animationPercent = _targetPercent;
+    }
+
+    public void SetActive(bool isActive)
+    {
+        if (isActive == false)
+        {
+            StopAllCoroutines();
+        }
+        gameObject.SetActive(isActive);
+    }
+
+    public void Change(CharacterPara cPara)
+    {
+        if (drawTarget != null)
+        {
+            drawTarget.hpDrawEvent.RemoveListener(Draw);
+        }
+        drawTarget = cPara;
+        cPara.hpDrawEvent.AddListener(Draw);
+        _targetPercent = cPara.CurrentHp / cPara.TotalMaxHp;
+        _animationPercent = cPara.CurrentHp / cPara.TotalMaxHp;
     }
 
     public void Register(CharacterPara cPara)
     {
-        cPara.damageEvent.AddListener(Draw);
-        _targetPercent = cPara._curHp / cPara._maxHp;
-        _animationPercent = cPara._curHp / cPara._maxHp;
+        cPara.hpDrawEvent.AddListener(Draw);
+        _targetPercent = cPara.CurrentHp / cPara.TotalMaxHp;
+        _animationPercent = cPara.CurrentHp / cPara.TotalMaxHp;
     }
 
     public void Deregister(CharacterPara cPara)
     {
-        cPara.damageEvent.RemoveListener(Draw);
+        cPara.hpDrawEvent.RemoveListener(Draw);
     }
 
     public void Draw(int curHp, int maxHp)
     {
         _targetPercent = (float)curHp / (float)maxHp;
+        HpBarImage.fillAmount = _targetPercent;
         StopCoroutine("DrawHpAnimation");
-        StartCoroutine("DrawHpAnimation");
+        if (gameObject.activeSelf)
+        {
+            StartCoroutine("DrawHpAnimation");
+        }
     }
 
     private IEnumerator DrawHpAnimation()
@@ -49,10 +76,10 @@ public class CUiHpBar : MonoBehaviour
         for(int i = 0; i < ANIM_DRAW_FRAME_COUNT; i++)
         {
             _animationPercent += interpolatePercent;
-            HpBarImage.fillAmount = _animationPercent;
+            HpBarDamaged.fillAmount = _animationPercent;
             yield return WaitForFixedUpdate;
         }
         _animationPercent = _targetPercent;
-        HpBarImage.fillAmount = _animationPercent;
+        HpBarDamaged.fillAmount = _animationPercent;
     }
 }

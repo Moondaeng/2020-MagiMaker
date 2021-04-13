@@ -1,15 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System;
 
 public class CPlayerPara : CharacterPara
 {
     public string _name;
     public bool _invincibility;
     public bool _invincibilityChecker;
-    private Animator _myAnimator;
-    BoxCollider _col;
-    [SerializeField] public Renderer _obj;
+    public Animator _myAnimator;
+    public float _runAnimationMultiply = 1f;
+    public Renderer _obj;
     Color _originColor;
 
     [SerializeField]
@@ -20,16 +19,16 @@ public class CPlayerPara : CharacterPara
     {
         get
         {
-            return (int)(((_attackMin * Inventory.AtkIncreaseRate) + Inventory.EquipAtkIncreaseSize)
-              * buffParameter.AttackCoef * buffParameter.AttackDebuffCoef);
+            return (int)((_attackMin + Inventory.EquipAtkIncreaseSize)
+              * _buffCoef[(int)EBuffAbility.Attack] * _debuffCoef[(int)EBuffAbility.Attack]);
         }
     }
     public override int TotalAttackMax
     {
         get
         {
-            return (int)(((_attackMax * Inventory.AtkIncreaseRate) + Inventory.EquipAtkIncreaseSize)
-              * buffParameter.AttackCoef * buffParameter.AttackDebuffCoef);
+            return (int)((_attackMax + Inventory.EquipAtkIncreaseSize)
+              * _buffCoef[(int)EBuffAbility.Attack] * _debuffCoef[(int)EBuffAbility.Attack]);
         }
     }
     public override int TotalDefenece
@@ -37,10 +36,10 @@ public class CPlayerPara : CharacterPara
         get
         {
             return (int)(_defense + Inventory.DefIncreaseSize
-              * buffParameter.DefenceCoef * buffParameter.DefenceDebuffCoef);
+              * _buffCoef[(int)EBuffAbility.Defence] * _debuffCoef[(int)EBuffAbility.Defence]);
         }
     }
-    public int TotalMaxHp
+    public override int TotalMaxHp
     {
         get { return (int)(_maxHp + Inventory.MaxHpIncreaseSize); }
     }
@@ -49,38 +48,43 @@ public class CPlayerPara : CharacterPara
         get { return (int)(Inventory.HpRegenIncreaseSize); }
     }
 
+    public override int CurrentHp
+    {
+        protected set
+        {
+            base.CurrentHp = value;
+            _myAnimator.SetInteger("Hp", CurrentHp);
+        }
+    }
+
     protected override void Awake()
     {
         base.Awake();
-        Inventory = new CInventory();
+        Inventory = new CInventory(gameObject);
+        
     }
 
     public override void InitPara()
     {
-        _col = GetComponent<BoxCollider>();
         _maxHp = 1000;
         _curHp = _maxHp;
-        _attackMin = 5;
-        _attackMax = 8;
-        _defense = 3;
-        _eLevel = 0;
-        _eType = EElementType.none;
+        _attackMin = 50;
+        _attackMax = 80;
+        _defense = 30;
         _isAnotherAction = false;
         _isStunned = false;
         _isDead = false;
         _invincibility = false;
-        _hitGauge = 0;
-        _originColor = _obj.material.color;
+        //_originColor = _obj.material.color;
         _myAnimator = GetComponent<Animator>();
         _myAnimator.SetInteger("Hp", _curHp);
-        //CUIManager.instance.UpdatePlayerUI(this);
     }
-    
+
     protected override void UpdateAfterReceiveAttack()
     {
         if (_invincibility) return;
-        _myAnimator.SetInteger("Hp", _curHp);
         print(name + "'s HP: " + _curHp);
+
         if (_curHp <= 0)
         {
             _curHp = 0;
@@ -88,6 +92,7 @@ public class CPlayerPara : CharacterPara
             deadEvent.Invoke();
         }
     }
+
     #region 무적판정
     public void OffInvincibility()
     {
@@ -114,6 +119,13 @@ public class CPlayerPara : CharacterPara
             _obj.material.color = _originColor * flicker;
             yield return null;
         }
+    }
+
+    
+
+    private void Update()
+    {
+        _myAnimator.SetFloat("RunMulti", _runAnimationMultiply);
     }
 
     #endregion

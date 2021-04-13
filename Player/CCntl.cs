@@ -22,7 +22,6 @@ public class CCntl : MonoBehaviour
     private Animator _animator;
     private AnimatorStateInfo _currentBaseState;
     private CPlayerPara _myPara;
-    private CStunExitCommand _myStun;
     private Rigidbody _rigidbody;
     private CapsuleCollider _capsule;
     private BoxCollider _attack;
@@ -84,7 +83,6 @@ public class CCntl : MonoBehaviour
         _animator = GetComponent<Animator>();
         _rigidbody = GetComponent<Rigidbody>();
         _myPara = GetComponent<CPlayerPara>();
-        _myStun = GetComponent<CStunExitCommand>();
         _capsule = GetComponent<CapsuleCollider>();
         _attack = GetComponentInChildren<BoxCollider>();
         _mySkill = GetComponent<CPlayerSkill>();
@@ -109,28 +107,52 @@ public class CCntl : MonoBehaviour
     #endregion
 
     #region 코루틴 모음집
-    public IEnumerator COPause(float pauseTime)
+    IEnumerator COPause(float pauseTime)
     {
         yield return new WaitForSeconds(pauseTime);
     }
 
-    public IEnumerator COStun(float pauseTime)
+    IEnumerator COStun(float pauseTime)
     {
         _stun = true;
-        _myStun.Start((int)pauseTime * 3);
         _animator.SetTrigger("StunTrigger");
         yield return new WaitForSeconds(pauseTime);
-        SendMessage("EndTime");
         ExitStun();
     }
 
-    public IEnumerator COExitConcentration(float pauseTime)
+    IEnumerator COExitConcentration(float pauseTime)
     {
         _isConcentrated = true;
         yield return new WaitForSeconds(pauseTime);
         _isConcentrated = false;
     }
 
+    IEnumerator COPushingForSeconds(float level, Vector3 Direction)
+    {
+        int i = 1;
+        while (true)
+        {
+            yield return new WaitForSeconds(.02f);
+            _rigidbody.AddForce(Direction * 30.0f * level / i, ForceMode.VelocityChange);
+            if (i > 10) break;
+            i++;
+        }
+    }
+    IEnumerator COSlowForSeconds(float level)
+    {
+        int i = 0;
+        while (true)
+        {
+            yield return new WaitForSeconds(1f);
+            if (i < level) _myPara._runAnimationMultiply = .5f;
+            else
+            {
+                _myPara._runAnimationMultiply = 1f;
+                break;
+            }
+            i++;
+        }
+    }
     #endregion
 
     #region CController Use these function
@@ -421,12 +443,27 @@ public class CCntl : MonoBehaviour
             case "Gethit":
                 break;
             case "Stun":
-                CO = StartCoroutine(COStun(level * 2.5f));
+                StartCoroutine(COStun(level * 2.5f));
+                break;
+            case "Slow":
+                StartCoroutine(COSlowForSeconds(level));
                 break;
             case null:
                 break;
         }
+    }
 
+    public void CCController(string type, float level, Vector3 vec)
+    {
+        if (_myPara._invincibility) return;
+        switch (type)
+        {
+            case "Push":
+                StartCoroutine(COPushingForSeconds(level, vec));
+                break;
+            case null:
+                break;
+        }
     }
 
     // 무적 판정을 넣어줌.

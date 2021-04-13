@@ -1,88 +1,116 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 /*
  * 플레이어 오브젝트 조작 인터페이스 클래스
- * 
+ *
  */
+
+[DisallowMultipleComponent]
 public class CController : MonoBehaviour
 {
-    delegate void Action();
+    private delegate void Action();
 
+    #region 컨트롤러 모드 관리
+
+    private bool _isControlMode = true;
     private Dictionary<KeyCode, Action> keyDictionary;
-    private CSkillSelector _comboSelector;
-    public UnityEvent DefencePercentCalculating = new UnityEvent();
+    private CMouseFollower _camera;
 
-    //public CGameEvent gameEvent;
+    #endregion 컨트롤러 모드 관리
+
+    //private CConsumableItemViewer _consumableViewer;
+
+    [SerializeField] private GameObject MousePointer;
+
+    private CUIManager _playerUi;
+    private CGameEvent gameEvent;
+
+    public static CController instance;
 
     [SerializeField] public GameObject player;
 
     private CCntl _playerControl;
 
-    float x;
-    float z;
+    // 이동 패킷 관련
+    private const float moveTraceTime = 0.1f;
+
+    private Vector3 previousPlayerPos;
+
+    private float x;
+    private float z;
+
+    private GameObject _viewingObject;
 
     public RaycastHit hit;
 
     private void Awake()
     {
-        DontDestroyOnLoad(gameObject);
+        if (instance == null)
+        {
+            instance = this;
+        }
+
         // 조작 관리
         keyDictionary = new Dictionary<KeyCode, Action>
         {
             {KeyCode.Mouse0, Attack},
             {KeyCode.Space, Jump},
-            {KeyCode.Alpha1, () => SkillSelect(0) },
-            {KeyCode.Alpha2, () => SkillSelect(1) },
-            {KeyCode.Alpha3, () => SkillSelect(2) },
-            {KeyCode.Alpha4, () => SkillSelect(3) },
+            //{KeyCode.Alpha1, () => SkillSelect(0) },
+            //{KeyCode.Alpha2, () => SkillSelect(1) },
+            //{KeyCode.Alpha3, () => SkillSelect(2) },
+            //{KeyCode.Alpha4, () => SkillSelect(3) },
             {KeyCode.Q, ChangeConsumable },
             {KeyCode.E, UseConsumable },
-            {KeyCode.F, GetItem },
+            //{KeyCode.F, GetItem },
             {KeyCode.Z, Roll },
-            {KeyCode.Mouse1, Skill },
+            //{KeyCode.Mouse1, UseSkill },
         };
-
-        //gameEvent = GameObject.Find("GameEvent").GetComponent<CGameEvent>();
     }
 
-    void Start()
+    private void Start()
     {
-        // 콤보 스킬 세팅
-        _comboSelector = new CSkillSelector();
-
-        _comboSelector.SetMainElement(0, CSkillSelector.SkillElement.Fire);
-        _comboSelector.SetMainElement(1, CSkillSelector.SkillElement.Water);
-        _comboSelector.SetSubElement(0, CSkillSelector.SkillElement.Water);
-        _comboSelector.SetSubElement(1, CSkillSelector.SkillElement.Earth);
-        _comboSelector.SetSubElement(2, CSkillSelector.SkillElement.Wind);
-        _comboSelector.SetSubElement(3, CSkillSelector.SkillElement.Light);
+        // Singleton 선언해놓은 클래스들 받는 변수
+        _playerUi = CUIManager.instance;
+        gameEvent = CGameEvent.instance;
+        _camera = CMouseFollower.instance;
 
         if (player != null)
         {
             _playerControl = player.GetComponent<CCntl>();
+            SetControlCharacter(player);
+            previousPlayerPos = player.transform.position;
+            StartCoroutine("MoveTracer");
         }
+
+        // Callback 전달
+        CWindowFacade.instance.SetControlLockCallback = SetControlLock;
     }
 
-    // 임시 방안
-    public void DeselectEnemy()
+    private void Update()
     {
-        //player.GetComponent<CCntl>().CurrentEnemyDead();
-    }
+        //int layerMask = 1 << LayerMask.NameToLayer("Player");
+        //layerMask = ~layerMask;
+        //RaycastHit hit;
+        //Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        //if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
+        //{
+        //    MousePointer.transform.position = hit.point;
+        //}
 
-    void Update()
-    {
+        //ViewInteractionPopup();
+
         z = Input.GetAxisRaw("Horizontal");
         x = -(Input.GetAxisRaw("Vertical"));
-        if (player != null)
-        {
-            _playerControl = player.GetComponent<CCntl>();
-        }
-        _playerControl.Move(x, z);
 
-        if (Input.anyKeyDown)
+        // 모드에 따라 조작되는 키
+        if (_isControlMode)
+        {
+            _playerControl.Move(x, z);
+        }
+
+        if (Input.anyKeyDown && _isControlMode)
         {
             foreach (var dic in keyDictionary)
             {
@@ -94,6 +122,39 @@ public class CController : MonoBehaviour
         }
     }
 
+    private IEnumerator MoveTracer()
+    {
+        while (true)
+        {
+            // 비교
+            var differ = previousPlayerPos - player.transform.position;
+            if (differ.magnitude > 0.01f)
+            {
+                // 전송 - 이동 명령
+                //Debug.Log($"move character {previousPlayerPos.x}, {previousPlayerPos.y}, {previousPlayerPos.z}" +
+                //    $"to {player.transform.position.x}, {player.transform.position.y}, {player.transform.position.z}");
+                gameEvent.PlayerMoveStart(previousPlayerPos, player.transform.position);
+            }
+
+            // 과거 위치 갱신
+            previousPlayerPos = player.transform.position;
+            yield return new WaitForSeconds(moveTraceTime);
+        }
+    }
+
+    public void SetControlCharacter(GameObject controlCharacter)
+    {
+        player = controlCharacter;
+        _playerUi.SetUiTarget(controlCharacter);
+        CWindowFacade.instance.SetTarget(controlCharacter);
+    }
+
+    private void SetControlLock(bool isLock)
+    {
+        _camera.SetLockCursor(!isLock);
+        _isControlMode = !isLock;
+    }
+
     private void Attack()
     {
         _playerControl.Attack();
@@ -102,12 +163,6 @@ public class CController : MonoBehaviour
     private void Skill()
     {
         _playerControl.Skill();
-        GameObject Boss = GameObject.FindWithTag("Boss");
-        if (Boss != null)
-        {
-            Debug.Log("가드 이벤트 보내기 전");
-            DefencePercentCalculating.Invoke();
-        }
     }
 
     private void Jump()
@@ -137,62 +192,96 @@ public class CController : MonoBehaviour
             playerPara.Inventory.UseSelectedConsumable();
         }
     }
+    // 내가 안쓰는 것들
+    //private void ViewInteractionPopup()
+    //{
+    //    int layerMask = 1 << LayerMask.NameToLayer("Item");
+    //    RaycastHit hit;
+    //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+    //    if (Physics.Raycast(ray, out hit, 10, layerMask))
+    //    {
+    //        _viewingObject = hit.transform.gameObject;
 
-    private void GetItem()
-    {
-        print("Get Item");
-        int layerMask = 1 << LayerMask.NameToLayer("Item");
-        print(layerMask);
-        RaycastHit hit;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out hit, 10, layerMask))
-        {
-            print("I'm looking at " + hit.transform.name);
+    //        var playerPara = player.GetComponent<CPlayerPara>();
+    //        if (playerPara == null)
+    //        {
+    //            return;
+    //        }
 
-        }
+    //        var npc = _viewingObject.GetComponent<CEventRoomNpcClick>();
+    //        if (npc != null)
+    //        {
+    //            CInterationPopup.instance.gameObject.SetActive(true);
+    //        }
 
-        var playerPara = player.GetComponent<CPlayerPara>();
-        if (playerPara != null)
-        {
-            var item = hit.transform.gameObject.GetComponent<CEquipComponent>();
-            if(item != null)
-            {
-                bool tryAddEquip = playerPara.Inventory.AddEquip(item.equipStat);
-                if (tryAddEquip)
-                {
-                    hit.transform.gameObject.SetActive(false);
-                }
-            }
-            else
-            {
-                var consumable = hit.transform.gameObject.GetComponent<CConsumableComponent>();
-                bool tryAddConsumable = playerPara.Inventory.AddConsumableItem(consumable.ConsumableStat);
-                if (tryAddConsumable)
-                {
-                    hit.transform.gameObject.SetActive(false);
-                }
-            }
-        }
-    }
+    //        var itemComponent = _viewingObject.GetComponent<CItemComponent>();
+    //        if (itemComponent != null)
+    //        {
+    //            CDropItemInfoPopup.instance.gameObject.SetActive(true);
+    //            CDropItemInfoPopup.instance.DrawItemInfo(itemComponent.Item);
+    //        }
+    //    }
+    //    else
+    //    {
+    //        CDropItemInfoPopup.instance.gameObject.SetActive(false);
+    //        CInterationPopup.instance.gameObject.SetActive(false);
+    //    }
+    //}
 
-    private void SkillSelect(int index)
-    {
-        _comboSelector.Combo(index);
-        SendMessage("ComboIndexer", _comboSelector.EndComboIndex());
-    }
+    //private void GetItem()
+    //{
+    //    if (_viewingObject == null)
+    //    {
+    //        return;
+    //    }
 
-    // CCntl로 해당 내용 옮김
-    // 스킬 사용
-    private void UseSkill()
-    {
-        int comboSkillNum = _comboSelector.EndCombo();
-        if (comboSkillNum == -1) return;
-        bool? isSkillUse = player.GetComponent<CPlayerSkill>().UseSkillToPosition(comboSkillNum, hit.point);
-        //성공 시 플레이어 스킬 사용 이벤트 수행
-        if (isSkillUse == true)
-        {
-            //player.GetComponent<CCntl>().SkillAction(2, hit.point);
-            //gameEvent.PlayerAction(number, player.transform.position, hit.point);
-        }
-    }
+    //    var playerPara = player.GetComponent<CPlayerPara>();
+    //    if (playerPara == null)
+    //    {
+    //        return;
+    //    }
+
+    //    var npc = _viewingObject.GetComponent<CEventRoomNpcClick>();
+    //    if (npc != null)
+    //    {
+    //        CEventRoomNpcClick.instance.UseNPC();
+    //    }
+
+    //    var itemComponent = _viewingObject.GetComponent<CItemComponent>();
+    //    if (itemComponent != null)
+    //    {
+    //        bool canAddItem = false;
+    //        if (itemComponent.Item is Item.CEquip)
+    //        {
+    //            canAddItem = playerPara.Inventory.AddEquip(itemComponent.Item as Item.CEquip);
+    //        }
+    //        else if (itemComponent.Item is Item.CConsumable)
+    //        {
+    //            canAddItem = playerPara.Inventory.AddConsumableItem(itemComponent.Item as Item.CConsumable);
+    //        }
+
+    //        if (canAddItem)
+    //        {
+    //            itemComponent.gameObject.SetActive(false);
+    //            _viewingObject = null;
+    //        }
+    //    }
+    //}
+
+    //private void SkillSelect(int index)
+    //{
+    //    player.GetComponent<CCharacterSkill>().SkillSelect(index);
+    //}
+
+    //private void UseSkill()
+    //{
+    //    int layerMask = (1 << LayerMask.NameToLayer("Player")) | (1 << LayerMask.NameToLayer("PlayerSkill"));
+    //    layerMask = ~layerMask;
+    //    RaycastHit hit;
+    //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+    //    if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
+    //    {
+    //        player.GetComponent<CPlayerSkill>().UseSkillToPosition(hit.point);
+    //    }
+    //}
 }

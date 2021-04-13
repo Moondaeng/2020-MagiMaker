@@ -7,10 +7,7 @@ using UnityEngine.UI;
  * 스킬의 UI를 통합관리하는 클래스
  * 스킬이 UI 이름를 최대한 모르게 하고, UI를 같이 쓰는 일을 방지함
  * 스킬 타이머가 UI를 관리하는 일을 최소화함
-<<<<<<< HEAD
-=======
  * 
->>>>>>> 106e3c281a077f42e1e08ffc8215c72bfb9bddf3
  */ 
 public class CSkillUIManager : MonoBehaviour
 {
@@ -32,6 +29,9 @@ public class CSkillUIManager : MonoBehaviour
     
     private List<CSkillUi>[] _elementSkillLists = new List<CSkillUi>[3];
     private List<CSkillUi> _SelectElementList = new List<CSkillUi>();
+
+    private GameObject _uiTarget;
+
     private CSkillTimer _timer;
 
     // 갱신 시간 조절
@@ -59,7 +59,8 @@ public class CSkillUIManager : MonoBehaviour
             {
                 var skillUi = ElementUi.GetChild(j);
                 AddSkillUI(skillUi, _elementSkillLists[i]);
-                DeregisterSkillUi(i, j);
+                _elementSkillLists[i][j].preemptSkillNumber = -1;
+                skillUiObject.GetChild(i).GetChild(j).gameObject.SetActive(false);
             }
         }
 
@@ -85,46 +86,122 @@ public class CSkillUIManager : MonoBehaviour
             Draw();
         
     }
-    
-    public void RegisterTimer(GameObject timerOwner)
+
+    public void Register(GameObject uiTarget)
+    {
+        _uiTarget = uiTarget;
+        CCharacterSkill charSkill = uiTarget.GetComponent<CCharacterSkill>();
+        if(charSkill != null)
+        {
+            RegisterTimer(uiTarget);
+            charSkill.skillSelectEvent.AddListener(ShowSelectSkill);
+
+            if(charSkill is CPlayerSkill)
+            {
+                var playerSkill = charSkill as CPlayerSkill;
+                AdjustUiTarget();
+                playerSkill.mainElementLearnEvent.AddListener(ChangeMainElementUi);
+                playerSkill.subElementLearnEvent.AddListener(ChangeSubElementUi);
+                playerSkill.elementSelectEvent.AddListener(ShowSelectElement);
+            }
+        }
+    }
+
+    public void Deregister(GameObject uiTarget)
+    {
+        CCharacterSkill charSkill = uiTarget.GetComponent<CCharacterSkill>();
+        if (charSkill != null)
+        {
+            DeregisterTimer(uiTarget);
+            charSkill.skillSelectEvent.RemoveListener(ShowSelectSkill);
+
+            if (charSkill is CPlayerSkill)
+            {
+                var playerSkill = charSkill as CPlayerSkill;
+                playerSkill.mainElementLearnEvent.RemoveListener(ChangeMainElementUi);
+                playerSkill.subElementLearnEvent.RemoveListener(ChangeSubElementUi);
+                playerSkill.elementSelectEvent.RemoveListener(ShowSelectElement);
+            }
+        }
+    }
+
+    private void RegisterTimer(GameObject timerOwner)
     {
         _timer = timerOwner.GetComponent<CSkillTimer>();
         _timer.TimerStart += CooldownEnable;
         _timer.TimerEnd += CooldownDisable;
     }
 
-    public void DeregisterTimer(GameObject timerOwner)
+    private void DeregisterTimer(GameObject timerOwner)
     {
         _timer = timerOwner.GetComponent<CSkillTimer>();
         _timer.TimerStart -= CooldownEnable;
         _timer.TimerEnd -= CooldownDisable;
     }
-    
-    public void RegisterSkillUi(int elementUiNumber, int skillUiNumber, int skillNumber)
-    {
-        if (elementUiNumber < 0 || elementUiNumber >= 3) return;
-        if (skillUiNumber < 0 || skillUiNumber >= 5) return;
 
-        _elementSkillLists[elementUiNumber][skillUiNumber].preemptSkillNumber = skillNumber;
-        var skillUiObejct = skillUiObject.GetChild(elementUiNumber).GetChild(skillUiNumber).gameObject;
-        skillUiObejct.SetActive(true);
-        skillUiObejct.GetComponent<Image>().sprite = GetImageByRegisterNumber(skillNumber);
-    }
-    
-    public void DeregisterSkillUi(int elementUiNumber, int skillUiNumber)
+    private void AdjustUiTarget()
     {
-        if (elementUiNumber < 0 || elementUiNumber >= 3) return;
-        if (skillUiNumber < 0 || skillUiNumber >= 5) return;
-
-        _elementSkillLists[elementUiNumber][skillUiNumber].preemptSkillNumber = -1;
-        skillUiObject.GetChild(elementUiNumber).GetChild(skillUiNumber).gameObject.SetActive(false);
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 5; j++)
+            {
+                _elementSkillLists[i][j].preemptSkillNumber = _uiTarget.GetComponent<CPlayerSkill>().GetRegisterNumber(i, j-1);
+                if(_elementSkillLists[i][j].preemptSkillNumber == -1)
+                {
+                    skillUiObject.GetChild(i).GetChild(j).gameObject.SetActive(false);
+                }
+            }
+        }
     }
 
-    public void ShowSelectElement(int elementUiNumber)
+    private void ChangeMainElementUi(int mainElementIndex, int mainElementNumber)
     {
+        for(int i = 0; i < 5; i++)
+        {
+            int skillNumber = _uiTarget.GetComponent<CPlayerSkill>().GetRegisterNumber(mainElementIndex, i-1);
+            _elementSkillLists[mainElementIndex][i].preemptSkillNumber = skillNumber;
+
+            if (skillNumber != -1)
+            {
+                var skillUiObejct = skillUiObject.GetChild(mainElementIndex).GetChild(i).gameObject;
+                skillUiObejct.SetActive(true);
+                skillUiObejct.GetComponent<Image>().sprite = GetImageByRegisterNumber(skillNumber);
+            }
+        }
+    }
+
+    private void ChangeSubElementUi(int subElementIndex, int subElementNumber)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            int skillNumber = _uiTarget.GetComponent<CPlayerSkill>().GetRegisterNumber(i, subElementIndex);
+            _elementSkillLists[i][subElementIndex+1].preemptSkillNumber = skillNumber;
+
+            if (skillNumber != -1)
+            {
+                var skillUiObejct = skillUiObject.GetChild(i).GetChild(subElementIndex+1).gameObject;
+                skillUiObejct.SetActive(true);
+                skillUiObejct.GetComponent<Image>().sprite = GetImageByRegisterNumber(skillNumber);
+            }
+        }
+    }
+
+    // 주원소의 스킬들을 보여준다
+    // mainElementIndex가 -1일 경우 보여주지 않는다
+    private void ShowSelectElement(int mainElementIndex)
+    {
+        if(mainElementIndex == -1)
+        {
+            foreach (var skillUi in _SelectElementList)
+            {
+                skillUi.ui.SetActive(false);
+            }
+            return;
+        }
+
         for (int i = 0; i < 5; i++)
         {
-            _SelectElementList[i].preemptSkillNumber = _elementSkillLists[elementUiNumber][i].preemptSkillNumber;
+            _SelectElementList[i].preemptSkillNumber = _elementSkillLists[mainElementIndex][i].preemptSkillNumber;
             if (_SelectElementList[i].preemptSkillNumber != -1)
             {
                 crossHairObject.GetChild(i).gameObject.SetActive(true);
@@ -135,23 +212,11 @@ public class CSkillUIManager : MonoBehaviour
     }
 
     // 주원소의 elementSkillNumber에 해당하는 스킬만 밝게 보여준다
-    // 0일 경우 주원소 기본 스킬 / -1일 경우 보여주지 않는다
-    public void ShowSelectSkill(int elementSubSkillNumber)
+    private void ShowSelectSkill(int elementSubSkillNumber)
     {
-        if(elementSubSkillNumber == -1)
+        for (int i = 0; i < _SelectElementList.Count; i++)
         {
-            foreach(var skillUi in _SelectElementList)
-            {
-                skillUi.ui.SetActive(false);
-            }
-        }
-        else
-        {
-            for(int i = 0; i < _SelectElementList.Count; i++)
-            {
-                //SetImageAlpha(_SelectElementList[i].image, i == elementSubSkillNumber ? 1f : 0.3f);
-                _SelectElementList[i].drawer.SetAlpha(i == elementSubSkillNumber ? 1f : 0.3f);
-            }
+            _SelectElementList[i].drawer.SetAlpha(i == (elementSubSkillNumber+1) ? 1f : 0.3f);
         }
     }
 

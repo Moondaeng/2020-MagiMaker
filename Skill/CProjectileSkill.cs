@@ -72,9 +72,9 @@ public class CProjectileSkill : MonoBehaviour
                 if (_prefabScript._isProjectile)
                 {
                     rotation = user.transform.rotation;
-                    if (_prefabScript.IsStartingStaff)
+                    if (_prefabScript.IsStartingPoint)
                     {
-                        startPos = user.GetComponent<CCntl>().staff.transform.position;
+                        startPos = user.GetComponent<CCntl>()._skillHand._skillStartPoint;
                         _prefabObject.transform.position = startPos;
                     }
                     else
@@ -136,7 +136,7 @@ public class CProjectileSkill : MonoBehaviour
             projectile.tag = user.tag;
         }
         // 공격력 등 필요한 정보 넣기
-        _prefabScript._attackPower = user.GetComponent<CharacterPara>().GetRandomAttack();
+        _prefabScript._attackPower = (int) user.GetComponent<CharacterPara>().GetRandomAttack();
         _prefabScript._skillUsingUser = user;
         // 원소 관련 정보
     }

@@ -70,6 +70,14 @@ public class CPlayerManager : MonoBehaviour
     {
         return _playerList.Count;
     }
+
+    public void Print()
+    {
+        for (int i = 0; i < _playerList.Count; i++)
+        {
+            Debug.Log(_playerList[i].pObject);
+        }
+    }
     // Update is called once per frame
 
 

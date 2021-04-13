@@ -5,7 +5,18 @@ using UnityEngine.UI;
 
 public class CEnemyPara : CharacterPara
 {
-    public string _name;
+    [System.Serializable]
+    public class SkillType
+    {
+        [Tooltip("스킬 공격력 : 기본 공격력에서의 배수로 해둠")]
+        public int SkillPower;
+        [Tooltip("CC 종류 기본 값 None")]
+        public CrowdControl CCType;
+        public CrowdControlLevel CCLevel;
+    }
+
+    [Header ("Monster가 가지고 있는 스킬 속성 정의")]
+    public List<SkillType> _skillType = new List<SkillType>();
     string _originTag = "Monster";
     [HideInInspector] public GameObject _myRespawn;
     Vector3 _originPos;
