@@ -93,11 +93,11 @@ public class CRewardChoicePopupController : CNPCPopUpController
 
         GameObject item;
         if (random < 50)
-            item = CItemDropTable.instance.PopRandomItemByGrade((CItemDropTable.ItemGrade)_userSelectRoom, CConstants.EQUIP_ITEM_TYPE);
+            item = CItemManager.instance.PopRandomItemByGrade((CItemManager.EItemGrade)_userSelectRoom, CConstants.EQUIP_ITEM_TYPE);
         else if (random < 80)
-            item = CItemDropTable.instance.PopRandomItemByGrade((CItemDropTable.ItemGrade)_userSelectRoom + 1, CConstants.EQUIP_ITEM_TYPE);
+            item = CItemManager.instance.PopRandomItemByGrade((CItemManager.EItemGrade)_userSelectRoom + 1, CConstants.EQUIP_ITEM_TYPE);
         else
-            item = CItemDropTable.instance.PopRandomItemByGrade((CItemDropTable.ItemGrade)_userSelectRoom + 2, CConstants.EQUIP_ITEM_TYPE);
+            item = CItemManager.instance.PopRandomItemByGrade((CItemManager.EItemGrade)_userSelectRoom + 2, CConstants.EQUIP_ITEM_TYPE);
 
         MoveItemToInventory(item.GetComponent<CItemComponent>());
     }

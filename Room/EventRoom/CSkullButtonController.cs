@@ -32,7 +32,7 @@ public class CSkullButtonController : CNPCPopUpController
 
     public void ClickRandomItem()
     {
-        GameObject item = CItemDropTable.instance.DropRandomItem(CCreateMap.instance.GetStageNumber(), CConstants.EQUIP_ITEM_TYPE);
+        GameObject item = CItemManager.instance.DropRandomItem(CCreateMap.instance.GetStageNumber(), CConstants.EQUIP_ITEM_TYPE);
         item = Instantiate(item, _skull.transform.position, _skull.transform.rotation);
         item.SetActive(true);
 

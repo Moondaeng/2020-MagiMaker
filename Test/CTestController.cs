@@ -52,11 +52,11 @@ public class CTestController : MonoBehaviour
             [KeyCode.M]         = () => CWaitingForAccept.instance.SetPortalUseSelect(_selectedCharacterNumber, CWaitingForAccept.EAccept._accept),
             [KeyCode.Comma]     = () => CWaitingForAccept.instance.SetPortalUseSelect(_selectedCharacterNumber, CWaitingForAccept.EAccept._cancle),
             // Item
-            [KeyCode.KeypadPlus] = () => CItemDropTable.SetItemToDropState(
-                    CItemDropTable.instance.PopRandomItemByGrade(CItemDropTable.ItemGrade.Normal, CConstants.EQUIP_ITEM_TYPE),
+            [KeyCode.KeypadPlus] = () => CItemManager.SetItemToDropState(
+                    CItemManager.instance.PopRandomItemByGrade(CItemManager.EItemGrade.Normal, CConstants.EQUIP_ITEM_TYPE),
                     GetHitPoint()),
-            [KeyCode.KeypadMinus] = () => CItemDropTable.SetItemToDropState(
-                    CItemDropTable.instance.PopRandomItemByGrade(CItemDropTable.ItemGrade.Normal, CConstants.CONSUM_ITEM_TYPE),
+            [KeyCode.KeypadMinus] = () => CItemManager.SetItemToDropState(
+                    CItemManager.instance.PopRandomItemByGrade(CItemManager.EItemGrade.Normal, CConstants.CONSUM_ITEM_TYPE),
                     GetHitPoint()),
         };
     }

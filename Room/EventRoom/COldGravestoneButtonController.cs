@@ -32,7 +32,7 @@ public class COldGravestoneButtonController : CNPCPopUpController
 
     public void ClickRandomItem()
     {
-        GameObject item = CItemDropTable.instance.DropRandomItem(CCreateMap.instance.GetStageNumber(), CConstants.EQUIP_ITEM_TYPE);
+        GameObject item = CItemManager.instance.DropRandomItem(CCreateMap.instance.GetStageNumber(), CConstants.EQUIP_ITEM_TYPE);
         item = Instantiate(item, _oldGravestone.transform.position, _oldGravestone.transform.rotation);
         item.SetActive(true);
 

@@ -43,7 +43,7 @@ public class CStoreController : MonoBehaviour
         {
             Debug.Log("get item");
             var slot = _slotRoot.GetChild(i).GetComponent<CSlotController>();
-            slot.SetItem(CItemDropTable.instance.DropRandomItem(CCreateMap.instance.GetStageNumber(), CConstants.EQUIP_ITEM_TYPE));
+            slot.SetItem(CItemManager.instance.DropRandomItem(CCreateMap.instance.GetStageNumber(), CConstants.EQUIP_ITEM_TYPE));
 
             _slots.Add(slot);
         }
@@ -51,7 +51,7 @@ public class CStoreController : MonoBehaviour
         for (int i = _slotRoot.childCount - 2; i < _slotRoot.childCount; i++)
         {
             var slot = _slotRoot.GetChild(i).GetComponent<CSlotController>();
-            slot.SetItem(CItemDropTable.instance.DropRandomItem(CCreateMap.instance.GetStageNumber(), CConstants.CONSUM_ITEM_TYPE));
+            slot.SetItem(CItemManager.instance.DropRandomItem(CCreateMap.instance.GetStageNumber(), CConstants.CONSUM_ITEM_TYPE));
 
             _slots.Add(slot);
         }
