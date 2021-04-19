@@ -86,7 +86,7 @@ namespace Item
 
 public class CItemComponent : MonoBehaviour
 {
-    public Item.CItem Item { get; protected set; }
+     public Item.CItem Item { get; protected set; }
 
     protected void Start()
     {

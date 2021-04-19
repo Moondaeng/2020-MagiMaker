@@ -183,7 +183,7 @@ public class CItemDropTable : MonoBehaviour
         // 장비 아이템
         else if (itemType == 1)
         {
-            if (itemGrade < (int)ItemGrade.Rare)
+            if (itemGrade <= (int)ItemGrade.Rare)
                 _equipObjectLists[itemGrade].Add(item);
             else
             {

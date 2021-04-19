@@ -293,6 +293,7 @@ public class CCreateMap : MonoBehaviour
             {
                 _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._elite;
                 _eliteCount++;
+                continue;
             }
 
             probability += CConstants.EVENT_PROBABLILITY; //이벤트 방
@@ -300,12 +301,14 @@ public class CCreateMap : MonoBehaviour
             {
                 _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._event;
                 _eventCount++;
+                continue;
             }
 
             probability += CConstants.NORMAL_PROBABILITY;
             if (selectRoomType < probability) //일반 방
             {
                 _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._normal;
+                continue;
             }
 
             probability += CConstants.SHOP__PROBABILITY;
@@ -313,6 +316,7 @@ public class CCreateMap : MonoBehaviour
             {
                 _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._shop;
                 _shopCount++;
+                continue;
             }
         }
     }
@@ -406,17 +410,17 @@ public class CCreateMap : MonoBehaviour
                 case "LEFT_PORTAL":
                     text.GetComponent<TextMeshProUGUI>().text = roomArr[roomCount, 0].RoomType.ToString().Substring(1);
                     if (roomArr[roomCount, 0].RoomType == CGlobal.ERoomType._empty)
-                        GameObject.Destroy(portalMom[i]);
+                        portalMom[i].SetActive(false);
                     break;
                 case "PORTAL":
                     text.GetComponent<TextMeshProUGUI>().text = roomArr[roomCount, 1].RoomType.ToString().Substring(1);
                     if (roomArr[roomCount, 1].RoomType == CGlobal.ERoomType._empty)
-                        GameObject.Destroy(portalMom[i]);
+                        portalMom[i].SetActive(false);
                     break;
                 case "RIGHT_PORTAL":
                     text.GetComponent<TextMeshProUGUI>().text = roomArr[roomCount, 2].RoomType.ToString().Substring(1);
                     if (roomArr[roomCount, 2].RoomType == CGlobal.ERoomType._empty)
-                        GameObject.Destroy(portalMom[i]);
+                        portalMom[i].SetActive(false);
                     break;
             }
         }
