@@ -25,7 +25,7 @@ public class CItemManager : MonoBehaviour
     [Serializable]
     private class DropItemChanceInStage
     {
-        [Range(0, 100)]
+        [EnumNamedNestedArray(typeof(EItemGrade), 1)]
         public float[] chances = new float[DROPABLE_ITEM_GRADE + 1];
     }
 

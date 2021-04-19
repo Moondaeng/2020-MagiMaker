@@ -33,7 +33,7 @@ namespace Network
 
         public static CNetworkEvent instance;
 
-        private Network.CTcpClient _tcpManager;
+        private CTcpClient _tcpManager;
         private CPlayerCommand _playerCommand;
 
         private void Awake()
@@ -46,7 +46,7 @@ namespace Network
 
         private void Start()
         {
-            _tcpManager = Network.CTcpClient.instance;
+            _tcpManager = CTcpClient.instance;
             _playerCommand = CPlayerCommand.instance;
 
             //if (_tcpManager?.IsConnect == true && !CClientInfo.IsSinglePlay())
@@ -96,6 +96,7 @@ namespace Network
             _playerCommand.SetActivePlayers(1);
             _playerCommand.SetMyCharacter(0);
             CCreateMap.instance.CreateStage();
+            CWaitingLoadViewer.Instance.FinishLoading();
         }
 
         private void AddNetworkCode()
@@ -113,6 +114,7 @@ namespace Network
             // 포탈 관련
             UsePortalEvent += SendUsePortal;
             PortalVoteEvent += SendPortalVote;
+            CPortalManager.instance.EnterNextRoomEvent.AddListener(SendEnterNextRoom);
 
             if (CClientInfo.JoinRoom.IsHost)
             {
@@ -146,6 +148,8 @@ namespace Network
             // 몬스터 패턴 바로 적용하는 코드
             // 돈 획득 바로하는 코드
             //EarnMoneyEvent.AddListener(_playerCommand.EarnMoneyAllCharacter);
+            // 포탈 바로 이동하는 코드
+            CPortalManager.instance.EnterNextRoomEvent.AddListener(CPortalManager.instance.MoveToNextRoom);
             // 방 생성 바로하는 코드
             CCreateMap.instance.CreateRooms.AddListener(CCreateMap.instance.ReceiveRoomArr);
         }
@@ -206,6 +210,7 @@ namespace Network
             CTcpClient.instance.Send(message.data);
         }
 
+        #region Portal, MapInfo
         public static void SendUsePortal()
         {
             var packet = CPacketFactory.CreatePortalPopup();
@@ -220,7 +225,14 @@ namespace Network
             CTcpClient.instance.Send(packet.data);
         }
 
-        public static void SendRoomsInfo(CRoom[,] roomArr)
+        public static void SendEnterNextRoom()
+        {
+            var packet = CPacketFactory.CreateEnterNextRoom();
+
+            CTcpClient.instance.Send(packet.data);
+        }
+
+        public static void SendRoomsInfo(CCreateMap.ERoomType[,] roomArr)
         {
             var roomsIntArr = new int[CConstants.ROOM_PER_STAGE, CConstants.MAX_ROAD];
 
@@ -228,7 +240,7 @@ namespace Network
             {
                 for (int j = 0; j < CConstants.MAX_ROAD; j++)
                 {
-                    roomsIntArr[i, j] = (int)roomArr[i, j].RoomType;
+                    roomsIntArr[i, j] = (int)roomArr[i, j];
                 }
             }
 
@@ -236,6 +248,7 @@ namespace Network
 
             CTcpClient.instance.Send(message.data);
         }
+        #endregion
 
         private void SendLodingFinish()
         {

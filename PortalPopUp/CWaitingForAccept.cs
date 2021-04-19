@@ -23,7 +23,7 @@ public class CWaitingForAccept : MonoBehaviour
     public GameObject PortalAccept;
     public static CWaitingForAccept instance;
 
-    private bool isVoteEnable = true;
+    public bool isVoteEnable = true;
 
     // Start is called before the first frame update
     void Start()
@@ -50,12 +50,12 @@ public class CWaitingForAccept : MonoBehaviour
         }
 
         // 승낙, 거절 버튼
-        if (isVoteEnable && Input.GetKeyDown(KeyCode.T))
+        if (Input.GetKeyDown(KeyCode.T))
         {
-            CPortalManager.instance.MoveToNextRoom();
-            //SetPortalUseSelect(CPlayerCommand.instance.ControlCharacterID, EAccept._accept);
+            //CPortalManager.instance.MoveToNextRoom();
+            SetPortalUseSelect(CPlayerCommand.instance.ControlCharacterID, EAccept._accept);
         }
-        else if (isVoteEnable && Input.GetKeyDown(KeyCode.Y))
+        else if (Input.GetKeyDown(KeyCode.Y))
         {
             SetPortalUseSelect(CPlayerCommand.instance.ControlCharacterID, EAccept._cancle);
         }
@@ -77,10 +77,10 @@ public class CWaitingForAccept : MonoBehaviour
 
     public void SetPortalUseSelect(int playerNumber, EAccept opinion)
     {
-        if (opinion != EAccept._waiting && _playerAccepts[playerNumber] != EAccept._waiting)
-        {
-            return;
-        }
+        //if (opinion != EAccept._waiting && _playerAccepts[playerNumber] != EAccept._waiting)
+        //{
+        //    return;
+        //}
         _playerAccepts[playerNumber] = opinion;
         LoadImage(playerNumber, opinion);
 
@@ -88,27 +88,29 @@ public class CWaitingForAccept : MonoBehaviour
         {
             _acceptCount++;
             // 싱글 / 멀티 플레이용 확인
-            Network.CNetworkEvent.instance.PortalVoteEvent?.Invoke(0);
-            if (CPlayerCommand.instance.ActivatedPlayersCount <= _acceptCount)
+            //Network.CNetworkEvent.instance.PortalVoteEvent?.Invoke(0);
+            //if (CPlayerCommand.instance.ActivatedPlayersCount <= _acceptCount)
+            if (CClientInfo.JoinRoom.IsHost)
             {
                 Debug.Log("Go Next Room");
                 CPortalManager portalManager = GameObject.Find("PortalManager").GetComponent<CPortalManager>();
                 SetActivePortalPopup(false);
-                portalManager.MoveToNextRoom();
+                CPortalManager.instance.EnterNextRoom();
+                //portalManager.MoveToNextRoom();
 
                 CPlayerCommand.instance.Teleport(0, new Vector3(0, 1, 0));
                 CPlayerCommand.instance.Teleport(1, new Vector3(0, 1, 4));
                 CPlayerCommand.instance.Teleport(2, new Vector3(4, 1, 0));
                 CPlayerCommand.instance.Teleport(3, new Vector3(4, 1, 4));
 
-                ResetPortalUseSelect();
+                //ResetPortalUseSelect();
             }
         }
         else if(opinion == EAccept._cancle)
         {
             // 취소 처리하고 몇 초 있다가 복구
             Invoke("CancelPortal", 3.0f); 
-            Network.CNetworkEvent.instance.PortalVoteEvent?.Invoke(0);
+            //Network.CNetworkEvent.instance.PortalVoteEvent?.Invoke(0);
         }
     }
 

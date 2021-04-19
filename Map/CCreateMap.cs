@@ -10,72 +10,73 @@ public class CCreateMap : MonoBehaviour
 {
     static public CCreateMap instance = null;
 
-    #region room&portal
-    private GameObject startRoom;
-    private GameObject bossRoom;
-    private GameObject shopRoom;
+    public enum ERoomType
+    {
+        _start,
+        _normal,
+        _event,
+        _elite,
+        _shop,
+        _boss,
+        _empty
+    }
 
-    private List<CPortal> _portals;
+    #region room&portal
+    protected GameObject startRoom;
+    protected GameObject bossRoom;
+    protected GameObject shopRoom;
+
+    protected List<CPortal> _portals = new List<CPortal>();
     #endregion
 
     #region roomQueue
-    private Dictionary<CGlobal.ERoomType, Queue<GameObject>> _roomQueueDict = new Dictionary<CGlobal.ERoomType, Queue<GameObject>>(); //0노말 1이벤트 2엘리트
     public Queue<GameObject> normalRoomQueue = new Queue<GameObject>();
     public Queue<GameObject> eventRoomQueue = new Queue<GameObject>();
     public Queue<GameObject> eliteRoomQueue = new Queue<GameObject>();
+    //0노말 1이벤트 2엘리트
+    protected Dictionary<ERoomType, Queue<GameObject>> _roomQueueDict = new Dictionary<ERoomType, Queue<GameObject>>();
+    
+    
     public int[,] randomRoomArray = new int[3, 10]; //패킷 보내기 위해 임의로 사이즈 고정, 노말방이든, 이벤트 방이든 같은 종류 개수 10개 넘어가면 수정필요
     #endregion
 
     #region memberVar
-    public int _stageNumber;
-    private int _eliteCount;
-    private int _eventCount;
-    private int _shopCount;
-    private CGlobal.ERoomType _userSelectRoom;
-    public int _roomCount;
-    public CRoom[,] _roomArr;
-    private LinkedList<GameObject> _rooms;
-    private LinkedListNode<GameObject> _tempRoomNode;
-    private int _portalMomCount; //포탈맘 사용할때 태그를 이용해서 오브젝트를 받아오는데, 이 때 사라져야할 전방 포탈들도 가져와서 전 방 포탈들을 따로 하드코딩으로 제외하기 위한 변수
+    public int _stageNumber = 0;
+    protected int _eliteCount = 0;
+    protected int _eventCount = 0;
+    protected int _shopCount = 0;
+    protected ERoomType _userSelectRoom = ERoomType._empty;
+    public int _roomCount = 0;
+    public ERoomType[,] _roomArr = new ERoomType[CConstants.ROOM_PER_STAGE, CConstants.MAX_ROAD];
+    protected LinkedList<GameObject> _rooms = new LinkedList<GameObject>();
+    protected LinkedListNode<GameObject> _tempRoomNode;
+    protected int _portalMomCount = 0; //포탈맘 사용할때 태그를 이용해서 오브젝트를 받아오는데, 이 때 사라져야할 전방 포탈들도 가져와서 전 방 포탈들을 따로 하드코딩으로 제외하기 위한 변수
     #endregion
 
     #region Debug용 변수
-    [SerializeField] private List<GameObject> _explicitRoomList = new List<GameObject>();
+    [SerializeField] protected List<GameObject> _explicitRoomList = new List<GameObject>();
     #endregion
 
     #region 스테이지 이벤트
-    public class CreateRoomEvent : UnityEngine.Events.UnityEvent<CRoom[,]> { }
+    public class CreateRoomEvent : UnityEngine.Events.UnityEvent<ERoomType[,]> { }
     public CreateRoomEvent CreateRooms = new CreateRoomEvent();
     #endregion
 
-    private void Awake()
+    #region Init Function
+    protected void Awake()
     {
         if (instance == null)
             instance = this;
-    }
 
-    private void Start()
-    {
-        startRoom = Resources.Load("Room/0/StartRoom0") as GameObject;
-        bossRoom = Resources.Load("Room/0/BossRoom0") as GameObject;
-        shopRoom = Resources.Load("Room/0/ShopRoom0") as GameObject;
-
-        _portals = new List<CPortal>();
-
-        _stageNumber = 0;
-        _eliteCount = 0;
-        _eventCount = 0;
-        _shopCount = 0;
-        _userSelectRoom = CGlobal.ERoomType._empty;
-        _roomCount = 0; //방의 개수가 12개가 넘어가면 멈춰줄 변수
-        _portalMomCount = 0;
-
-        _roomArr = new CRoom[CConstants.ROOM_PER_STAGE, CConstants.MAX_ROAD];
         for (int i = 0; i < CConstants.ROOM_PER_STAGE; i++)
+        {
             for (int j = 0; j < CConstants.MAX_ROAD; j++)
-                _roomArr[i, j] = new CRoom();
+            {
+                _roomArr[i, j] = ERoomType._empty;
+            }
+        }
 
-        for(int i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++)
         {
             for (int j = 0; j < 10; j++)
             {
@@ -83,42 +84,53 @@ public class CCreateMap : MonoBehaviour
             }
         }
 
-        _rooms = new LinkedList<GameObject>();
-
+        _roomQueueDict.Add(ERoomType._normal, normalRoomQueue);
+        _roomQueueDict.Add(ERoomType._event, eventRoomQueue);
+        _roomQueueDict.Add(ERoomType._elite, eliteRoomQueue);
         if (CClientInfo.JoinRoom.IsHost)
         {
             RandomRoomEnqueue(_stageNumber);
         }
-        Debug.Log("Create Start Room");
 
-        // CreateStartRoom
+        LoadSpecialRoom();
+    }
+
+    protected void Start()
+    {
+        Debug.Log("Create Start Room");
         if (_roomCount == 0)
         {
-            _roomArr[0, 0].RoomType = CGlobal.ERoomType._start;
-            InstantiateRoom(_roomArr[_roomCount, 0].RoomType); //시작방 생성
-            //MakePortalText(_roomCount, _roomArr);
+            _roomArr[0, 0] = ERoomType._start;
+            InstantiateRoom(_roomArr[_roomCount, 0]); //시작방 생성
         }
     }
+
+    protected virtual void LoadSpecialRoom()
+    {
+        startRoom = Resources.Load("Room/0/StartRoom0") as GameObject;
+        bossRoom = Resources.Load("Room/0/BossRoom0") as GameObject;
+        shopRoom = Resources.Load("Room/0/ShopRoom0") as GameObject;
+    }
+    #endregion
 
     public void SendRoomArr()
     {
         // debug code
-        //for (int i = 0; i < CConstants.ROOM_PER_STAGE; i++)
-        //{
-        //    string roomData = $"rooms row {i} : ";
-        //    for (int j = 0; j < CConstants.MAX_ROAD; j++)
-        //    {
-        //        roomData += (int)_roomArr[i, j].RoomType;
-        //    }
-        //    Debug.Log(roomData);
-        //}
+        for (int i = 0; i < CConstants.ROOM_PER_STAGE; i++)
+        {
+            string roomData = $"Send rooms row {i} : ";
+            for (int j = 0; j < CConstants.MAX_ROAD; j++)
+            {
+                roomData += (int)_roomArr[i, j];
+            }
+            Debug.Log(roomData);
+        }
 
         CreateRooms?.Invoke(_roomArr);
     }
 
-    public void ReceiveRoomArr(CRoom[,] roomArr)
+    public void ReceiveRoomArr(ERoomType[,] roomArr)
     {
-        Debug.Log("Receive Room Arr");
         _roomArr = roomArr;
         MakePortalText(_roomCount, _roomArr);
     }
@@ -128,15 +140,18 @@ public class CCreateMap : MonoBehaviour
         Debug.Log("Receive Room Arr");
         for (int i = 0; i < CConstants.ROOM_PER_STAGE; i++)
         {
+            string roomData = $"receive rooms row {i} : ";
             for (int j = 0; j < CConstants.MAX_ROAD; j++)
             {
-                _roomArr[i, j].RoomType = (CGlobal.ERoomType)intRoomArr[i, j];
+                _roomArr[i, j] = (ERoomType)intRoomArr[i, j];
+                roomData += _roomArr[i, j] + " ";
             }
+            Debug.Log(roomData);
         }
         MakePortalText(_roomCount, _roomArr);
     }
 
-    public void CreateRoom(CRoom[,] roomArr, int roomCount, int roadCount)
+    public void CreateRoom(ERoomType[,] roomArr, int roomCount, int roadCount)
     {
         Debug.Log("Create Room");
         //debug용 보고싶은 맵 있으면 여기다 가져다 두면 됨.
@@ -145,7 +160,7 @@ public class CCreateMap : MonoBehaviour
             return;
         }
 
-        InstantiateRoom(roomArr[roomCount, roadCount].RoomType);
+        InstantiateRoom(roomArr[roomCount, roadCount]);
     }
 
     public void AddPortal()
@@ -162,7 +177,7 @@ public class CCreateMap : MonoBehaviour
         _portals.Clear();
     }
 
-    public CGlobal.ERoomType userSelectRoom()
+    public ERoomType userSelectRoom()
     {
         return _userSelectRoom;
     }
@@ -181,7 +196,7 @@ public class CCreateMap : MonoBehaviour
         return _stageNumber;
     }
 
-    public CRoom[,] GetRooms()
+    public ERoomType[,] GetRooms()
     {
         return _roomArr;
     }
@@ -191,17 +206,10 @@ public class CCreateMap : MonoBehaviour
         Debug.Log("Random Room Enqueue");
 
         string[] roomName = { "Room/" + stageNumber + "/NormalRoom", "Room/" + stageNumber + "/EventRoom", "Room/" + stageNumber + "/EliteRoom" };
-        _roomQueueDict.Add(CGlobal.ERoomType._normal, normalRoomQueue);
-        _roomQueueDict.Add(CGlobal.ERoomType._event, eventRoomQueue);
-        _roomQueueDict.Add(CGlobal.ERoomType._elite, eliteRoomQueue);
 
         for (int i = 0; i < _roomQueueDict.Count; i++)
         {
             GameObject[] rooms = Resources.LoadAll<GameObject>(roomName[i]);
-            foreach (var room in rooms)
-            {
-                Debug.Log(room.name);
-            }
             int count = 0;
             int rand;
             int j = 0;
@@ -211,7 +219,7 @@ public class CCreateMap : MonoBehaviour
                 rand = Random.Range(0, rooms.Length);
                 if (rooms[rand] != null)
                 {
-                    _roomQueueDict[(CGlobal.ERoomType)i + 1].Enqueue(rooms[rand]);
+                    _roomQueueDict[(ERoomType)i + 1].Enqueue(rooms[rand]);
                     randomRoomArray[i, j++] = rand;
                     rooms[rand] = null;
                     count++;
@@ -223,85 +231,32 @@ public class CCreateMap : MonoBehaviour
     public void NonHostRoomEnqueue(int[,] randomRoom ,int stageNumber)
     {
         string[] roomName = { "Room/" + stageNumber + "/NormalRoom/NormalRoom", "Room/" + stageNumber + "/EventRoom/EventRoom", "Room/" + stageNumber + "/EliteRoom/EliteRoom" };
-        _roomQueueDict.Add(CGlobal.ERoomType._normal, normalRoomQueue);
-        _roomQueueDict.Add(CGlobal.ERoomType._event, eventRoomQueue);
-        _roomQueueDict.Add(CGlobal.ERoomType._elite, eliteRoomQueue);
+        Debug.Log("non host Room Enqueue");
 
         for (int i = 0; i < _roomQueueDict.Count; i++)
         {
+            string randomRoomStr = $"roomQueue{i} ";
             int j = 0;
-            while(randomRoom.GetLength(i) > j && randomRoom[i, j] != -1)
+            while(randomRoom.GetLength(1) > j && randomRoom[i, j] != -1)
             {
+                randomRoomStr += randomRoom[i, j];
                 GameObject room = Resources.Load(roomName[i] + randomRoom[i,j].ToString()) as GameObject;
-                _roomQueueDict[(CGlobal.ERoomType)i + 1].Enqueue(room);
+                if (room == null)
+                {
+                    Debug.Log($"room {roomName[i] + randomRoom[i, j].ToString()} is null");
+                }
+                _roomQueueDict[(ERoomType)i + 1].Enqueue(room);
                 j++;
             }
+            Debug.Log(randomRoomStr);
         }
     }
 
-    public void CreateStageVerTuto()
-    {
-        int randomRoad; //랜덤한 갈림길 개수
-        int selectRoomType; //랜덤으로 방 종류 뽑기
-        int roadCount;  //갈림길 숫자
-
-        if (_roomCount > 5) //방 전부 생성됬을경우 대기
-            return;
-
-        if (_roomCount == 0)
-        {
-            if (_explicitRoomList.Count != 0)
-            {
-                CreateExplicitRoomInList(0);
-            }
-            else
-            {
-                _roomArr[0, 0].RoomType = CGlobal.ERoomType._start;
-                InstantiateRoom(_roomArr[_roomCount, 0].RoomType); //시작방 생성
-            }
-        }
-
-        if (_roomCount == 1)
-        {
-            _roomArr[1, 0].RoomType = CGlobal.ERoomType._elite; //일반방 넣기
-        }
-
-        if (_roomCount == 2)
-        {
-            _roomArr[2, 0].RoomType = CGlobal.ERoomType._event; //이벤트방 넣기
-        }
-
-        if (_roomCount == 3)
-        {
-            _roomArr[3, 0].RoomType = CGlobal.ERoomType._normal; //아이템 엘리트방 넣기
-        }
-
-        if (_roomCount == 4)
-        {
-            _roomArr[4, 0].RoomType = CGlobal.ERoomType._shop; //상점방 넣기
-        }
-
-        if (_roomCount == 6 - 1)
-        {
-            _roomArr[6 - 1, 0].RoomType = CGlobal.ERoomType._boss; //보스방 따로 넣기
-        }
-
-        MakePortalText(_roomCount, _roomArr);
-        SendRoomArr();
-    }
-
-    public void CreateStage()
+    public virtual void CreateStage()
     {
         if (!CClientInfo.JoinRoom.IsHost)
         {
-            return;
-        }
-
-        Debug.Log("Host Create Stage");
-
-        if (CGlobal.isTutorial)  //튜토리얼만 임의로 생성
-        {
-            CreateStageVerTuto();
+            Debug.Log("Guest can't create room type info");
             return;
         }
 
@@ -314,11 +269,9 @@ public class CCreateMap : MonoBehaviour
 
         if (_roomCount == CConstants.ROOM_PER_STAGE - 1)
         {
-            _roomArr[CConstants.ROOM_PER_STAGE - 1, 0].RoomType = CGlobal.ERoomType._boss; //보스방 따로 넣기
+            _roomArr[CConstants.ROOM_PER_STAGE - 1, 0] = ERoomType._boss; //보스방 따로 넣기
             return;
         }
-
-        Debug.Log("return?");
 
         randomRoad = Random.Range(0, CConstants.MAX_ROAD - 1);
         roadCount = 0;
@@ -328,7 +281,7 @@ public class CCreateMap : MonoBehaviour
             //최소 조건
             if (_shopCount < CConstants.MIN_SHOP_PER_STAGE && _roomCount == 10 && roadCount == 0) //상점이 한번도 안나왔고 마지막 방일 때 첫번째 갈림길에는 무조건 상점방
             {
-                _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._shop;
+                _roomArr[_roomCount, roadCount] = ERoomType._shop;
                 _shopCount++;
                 continue;
             }
@@ -339,89 +292,93 @@ public class CCreateMap : MonoBehaviour
             if (selectRoomType < probability
                 && _eliteCount < 2 && _roomCount > (((CConstants.ROOM_PER_STAGE - 2) / 2) - 1)) //엘리트                                                                                    
             {
-                _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._elite;
+                _roomArr[_roomCount, roadCount] = ERoomType._elite;
                 _eliteCount++;
+                continue;
             }
 
             probability += CConstants.EVENT_PROBABLILITY; //이벤트 방
             if (selectRoomType < probability && _eventCount < 15)                                                                                         
             {
-                _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._event;
+                _roomArr[_roomCount, roadCount] = ERoomType._event;
                 _eventCount++;
+                continue;
             }
 
             probability += CConstants.NORMAL_PROBABILITY;
             if (selectRoomType < probability) //일반 방
             {
-                _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._normal;
+                _roomArr[_roomCount, roadCount] = ERoomType._normal;
+                continue;
             }
 
             probability += CConstants.SHOP__PROBABILITY;
             if (selectRoomType < probability) // 상점
             {
-                _roomArr[_roomCount, roadCount].RoomType = CGlobal.ERoomType._shop;
+                _roomArr[_roomCount, roadCount] = ERoomType._shop;
                 _shopCount++;
+                continue;
             }
         }
 
         SendRoomArr();
     }
 
-    public void RoomFlagCtrl(CGlobal.ERoomType roomType)
+    public void RoomFlagCtrl(ERoomType roomType)
     {
         switch (roomType)
         {
-            case CGlobal.ERoomType._event:
-                _userSelectRoom = CGlobal.ERoomType._event;
+            case ERoomType._event:
+                _userSelectRoom = ERoomType._event;
                 break;
-            case CGlobal.ERoomType._elite:
-                _userSelectRoom = CGlobal.ERoomType._elite;
+            case ERoomType._elite:
+                _userSelectRoom = ERoomType._elite;
                 break;
-            case CGlobal.ERoomType._normal:
-                _userSelectRoom = CGlobal.ERoomType._normal;
+            case ERoomType._normal:
+                _userSelectRoom = ERoomType._normal;
                 break;
-            case CGlobal.ERoomType._shop:
-                _userSelectRoom = CGlobal.ERoomType._shop;
+            case ERoomType._shop:
+                _userSelectRoom = ERoomType._shop;
                 break;
         }
     }
 
-    private void InstantiateRoom(CGlobal.ERoomType roomType)
+    protected void InstantiateRoom(ERoomType roomType)
     {
         GameObject tempRoom = null;
 
         switch (roomType)
         {
-            case CGlobal.ERoomType._start:
+            case ERoomType._start:
                 Debug.Log("start room");
                 tempRoom = startRoom;
                 break;
 
-            case CGlobal.ERoomType._boss:
+            case ERoomType._boss:
                 Debug.Log("boss room");
                 tempRoom = bossRoom;
                 break;
 
-            case CGlobal.ERoomType._event:
+            case ERoomType._event:
                 Debug.Log("event room");
                 tempRoom = eventRoomQueue.Dequeue();
                 break;
 
-            case CGlobal.ERoomType._elite:
+            case ERoomType._elite:
                 Debug.Log("elite room");
                 tempRoom = eliteRoomQueue.Dequeue();
                 break;
 
-            case CGlobal.ERoomType._normal:
+            case ERoomType._normal:
                 Debug.Log("normal room");
                 tempRoom = normalRoomQueue.Dequeue();
                 break;
 
-            case CGlobal.ERoomType._shop:
+            case ERoomType._shop:
                 tempRoom = shopRoom;
                 break;
 
-            case CGlobal.ERoomType._empty:
+            case ERoomType._empty:
                 Debug.Log("Can't create empty room error");
                 return;
         }
@@ -447,7 +404,7 @@ public class CCreateMap : MonoBehaviour
         return;
     }
 
-    public void MakePortalText(int roomCount, CRoom[,] roomArr) //포탈 위에 다음 방이 어떤 방인지 알려주는 텍스트 생성, 빈 방인 경우 포탈 삭제
+    public void MakePortalText(int roomCount, ERoomType[,] roomArr) //포탈 위에 다음 방이 어떤 방인지 알려주는 텍스트 생성, 빈 방인 경우 포탈 삭제
     {
         GameObject[] portalMom = GameObject.FindGameObjectsWithTag("PORTAL_MOM");
 
@@ -459,18 +416,18 @@ public class CCreateMap : MonoBehaviour
             switch (portal.tag)
             {
                 case "LEFT_PORTAL":
-                    text.GetComponent<TextMeshProUGUI>().text = roomArr[roomCount, 0].RoomType.ToString().Substring(1);
-                    if (roomArr[roomCount, 0].RoomType == CGlobal.ERoomType._empty)
+                    text.GetComponent<TextMeshProUGUI>().text = roomArr[roomCount, 0].ToString().Substring(1);
+                    if (roomArr[roomCount, 0] == ERoomType._empty)
                         portalMom[i].SetActive(false);
                     break;
                 case "PORTAL":
-                    text.GetComponent<TextMeshProUGUI>().text = roomArr[roomCount, 1].RoomType.ToString().Substring(1);
-                    if (roomArr[roomCount, 1].RoomType == CGlobal.ERoomType._empty)
+                    text.GetComponent<TextMeshProUGUI>().text = roomArr[roomCount, 1].ToString().Substring(1);
+                    if (roomArr[roomCount, 1] == ERoomType._empty)
                         portalMom[i].SetActive(false);
                     break;
                 case "RIGHT_PORTAL":
-                    text.GetComponent<TextMeshProUGUI>().text = roomArr[roomCount, 2].RoomType.ToString().Substring(1);
-                    if (roomArr[roomCount, 2].RoomType == CGlobal.ERoomType._empty)
+                    text.GetComponent<TextMeshProUGUI>().text = roomArr[roomCount, 2].ToString().Substring(1);
+                    if (roomArr[roomCount, 2] == ERoomType._empty)
                         portalMom[i].SetActive(false);
                     break;
             }
@@ -486,7 +443,7 @@ public class CCreateMap : MonoBehaviour
     }
 
     #region Debug
-    private bool CreateExplicitRoomInList(int elementNumber)
+    protected bool CreateExplicitRoomInList(int elementNumber)
     {
         if (_explicitRoomList[elementNumber] == null)
         {

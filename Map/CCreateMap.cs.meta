@@ -20,7 +20,7 @@ MonoImporter:
       type: 3}
   - portal: {fileID: 6625529865772309902, guid: 849374f10a3df6b48b518daf545d8e6b,
       type: 3}
-  executionOrder: 0
+  executionOrder: 100
   icon: {instanceID: 0}
   userData: 
   assetBundleName: 

@@ -215,7 +215,7 @@ public class CReadyRoom : MonoBehaviour
                 QuitRoom();
                 break;
             case (int)MessageCode.HostQuitRoom:
-                HostQuitRoom();
+                QuitRoom();
                 break;
             case (int)MessageCode.NoticeUserQuit:
                 DeleteQuitUser(packet);

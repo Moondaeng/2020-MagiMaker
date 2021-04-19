@@ -26,6 +26,8 @@ public class CLobby : MonoBehaviour
     public Transform RoomListTransform;
     public Button RefreshBtn;
     public Button CreateBtn;
+
+    public Button quitMessageButton;
     public Button QuitBtn;
 
     public int TotalRoomCount { get; private set; }
@@ -265,6 +267,7 @@ public class CLobby : MonoBehaviour
         roomCnt.text = rCnt + "/4";
         Button roomEnter = roomInstance.transform.Find("Enter").GetComponent<Button>();
         roomEnter.onClick.AddListener(() => JoinRoomRequest(rid));
+        roomEnter.onClick.AddListener(() => DisableButton(roomNumber));
     }
 
     private GameObject AddRoomInstance()
@@ -289,6 +292,11 @@ public class CLobby : MonoBehaviour
         roomInstance.transform.SetParent(RoomListTransform, false);
         AutoRoomListViewer(roomTransform.rect.height);
         return roomInstance;
+    }
+
+    private void DisableButton(int roomNumber)
+    {
+        RoomListTransform.Find($"ReadyRoom" + roomNumber).gameObject.SetActive(false);
     }
 
     private void AutoRoomListViewer(float roomInstanceHeight)

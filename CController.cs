@@ -79,7 +79,7 @@ public class CController : MonoBehaviour
         keyDictionary = new Dictionary<KeyCode, Action>
         {
             {KeyCode.Mouse0, Attack},
-            {KeyCode.Space, Jump},
+            //{KeyCode.Space, Jump},    // 임시로 점프 막음
             {KeyCode.Alpha1, () => SkillSelect(0) },
             {KeyCode.Alpha2, () => SkillSelect(1) },
             {KeyCode.Alpha3, () => SkillSelect(2) },
@@ -307,7 +307,9 @@ public class CController : MonoBehaviour
 
     private void UseSkill()
     {
-        int layerMask = (1 << LayerMask.NameToLayer("Player")) | (1 << LayerMask.NameToLayer("PlayerSkill"));
+        int layerMask = (1 << LayerMask.NameToLayer("Player"))
+            | (1 << LayerMask.NameToLayer("PlayerSkill"))
+            | (1 << LayerMask.NameToLayer("DeadBody"));
         layerMask = ~layerMask;
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -397,7 +399,7 @@ public class CController : MonoBehaviour
 
     private void SkillAction(int actionNumber, Vector3 targetPos)
     {
-        gameEvent.PlayerAction(3 + actionNumber, player.transform.position, targetPos);
+        gameEvent.PlayerAction(actionNumber, player.transform.position, targetPos);
     }
     #endregion
 }

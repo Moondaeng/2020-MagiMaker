@@ -91,15 +91,17 @@ public class CClientInfo : MonoBehaviour
 
         public static void JoinToRoom(int rid, Network.CPacket packet, int payloadSize)
         {
+            Debug.Log($"payloadSize = {payloadSize}");
+
             int myslot = packet.ReadInt32();
             int ucnt = packet.ReadInt32();
-            Debug.LogFormat("ucnt : ", ucnt);
+            Debug.Log($"ucnt : {ucnt}");
 
             ClearRoomData();
 
             // 다른 사람 정보
             int userCount = payloadSize / 24;
-            for (int i = 0; i < userCount; i++)
+            for (int i = 0; i < ucnt; i++)
             {
                 string id = packet.ReadString(16);
                 var slot = packet.ReadInt32();

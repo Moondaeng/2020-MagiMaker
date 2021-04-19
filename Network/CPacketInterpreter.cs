@@ -30,6 +30,7 @@ namespace Network
             [652] = InterpretUsePortal,
             [653] = InterpretRoomTypeInfos,
             [654] = InterpretRoomNumberInfos,
+            [655] = InterpretEnterNextRoom,
             // 시스템
             [951] = InterpretReturnLobby,
             [952] = InterpretQuitGame,
@@ -212,6 +213,13 @@ namespace Network
             }
         }
 
+        private static void InterpretEnterNextRoom(CPacket packet)
+        {
+            Debug.Log("Enter Next Room");
+
+            CPortalManager.instance.MoveToNextRoom();
+        }
+
         private static void InterpretRoomTypeInfos(CPacket packet)
         {
             Debug.Log("Receive Room Type Infomation Packets");
@@ -220,7 +228,7 @@ namespace Network
 
             for (int i = 0; i < CConstants.ROOM_PER_STAGE; i++)
             {
-                string roomData = $"rooms row {i} : ";
+                string roomData = $"rooms type row {i} : ";
                 for (int j = 0; j < CConstants.MAX_ROAD; j++)
                 {
                     rooms[i, j] = packet.ReadInt32();
@@ -234,13 +242,13 @@ namespace Network
 
         private static void InterpretRoomNumberInfos(CPacket packet)
         {
-            Debug.Log("Receive Room Type Infomation Packets");
+            Debug.Log("Receive Room Number Infomation Packets");
 
             int[,] rooms = new int[3, 10];
 
             for (int i = 0; i < 3; i++)
             {
-                string roomData = $"rooms row {i} : ";
+                string roomData = $"rooms number row {i} : ";
                 for (int j = 0; j < 10; j++)
                 {
                     rooms[i, j] = packet.ReadInt32();
@@ -249,7 +257,7 @@ namespace Network
                 Debug.Log(roomData);
             }
 
-            // 수정 필요
+            // Stage Number 추가 필요
             CCreateMap.instance.NonHostRoomEnqueue(rooms, 0);
         }
         #endregion
@@ -270,6 +278,7 @@ namespace Network
         private static void InterpretLoadingAllFinish(CPacket packet)
         {
             Debug.Log("All player Loading finished");
+            CWaitingLoadViewer.Instance.FinishLoading();
             if (CClientInfo.JoinRoom.IsHost)
             {
                 CCreateMap.instance.CreateStage();

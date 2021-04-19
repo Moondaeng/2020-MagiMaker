@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class CPortalManager : MonoBehaviour
 {
@@ -9,6 +10,8 @@ public class CPortalManager : MonoBehaviour
     private GameObject FadeController;
 
     public static CPortalManager instance;
+
+    public UnityEvent EnterNextRoomEvent = new UnityEvent();
 
     private void Start()
     {
@@ -22,6 +25,11 @@ public class CPortalManager : MonoBehaviour
         FadeController = GameObject.Find("FadeController");
         PortalAcceptParent.transform.Find("PortalAccept").gameObject.SetActive(false);
         PortalAcceptParent.transform.Find("WaitingForOtherPlayer").gameObject.SetActive(false);
+    }
+
+    public void EnterNextRoom()
+    {
+        EnterNextRoomEvent?.Invoke();
     }
 
     public void MoveToNextRoom()
@@ -55,7 +63,7 @@ public class CPortalManager : MonoBehaviour
                 break;
         }
         CCreateMap.instance.CreateRoom(CCreateMap.instance.GetRooms(), CCreateMap.instance.getRoomCount(), whichPortalSelect); //유저가 플레이 할 방 생성
-        CCreateMap.instance.RoomFlagCtrl(CCreateMap.instance.GetRooms()[CCreateMap.instance.getRoomCount(), whichPortalSelect].RoomType); //유저가 선택한 방 타입 저장
+        CCreateMap.instance.RoomFlagCtrl(CCreateMap.instance.GetRooms()[CCreateMap.instance.getRoomCount(), whichPortalSelect]); //유저가 선택한 방 타입 저장
 
         Transform ParentTransform = player[0].transform; //최상위 오브젝트 찾기 -> 캐릭터 옮기기
         CPlayerCommand.instance.Teleport(0, new Vector3(0, 1, 0));
@@ -64,6 +72,8 @@ public class CPortalManager : MonoBehaviour
         CPlayerCommand.instance.Teleport(3, new Vector3(4, 1, 4));
 
         ParentTransform.position = new Vector3(0, 1, 0);
+
+        CWaitingForAccept.instance.isVoteEnable = true;
 
         CCreateMap.instance.CreateStage(); //현재 방 이후의 방들 맵으로 생성
     }

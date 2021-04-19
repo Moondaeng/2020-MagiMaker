@@ -54,12 +54,12 @@ public class CMonsterCheck : MonoBehaviour
         {
             switch (CCreateMap.instance.userSelectRoom())
             {
-                case CGlobal.ERoomType._event:
+                case CCreateMap.ERoomType._event:
                     CGlobal.isEvent = false;
                     CCreateMap.instance.NotifyPortal();
                     break;
 
-                case CGlobal.ERoomType._boss:
+                case CCreateMap.ERoomType._boss:
                     break;
             }        
         }
