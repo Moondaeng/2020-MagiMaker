@@ -1,4 +1,4 @@
-﻿﻿using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Threading;
@@ -56,7 +56,7 @@ public class CSpawnStone : MonoBehaviour
         yield return new WaitForSeconds(1);
         _stone = Resources.Load("Object/Stone") as GameObject;
         Transform stoneSpawnerChild = _stoneSpawner.transform.GetChild(pos);
-        Instantiate(_stone, stoneSpawnerChild.position , Quaternion.identity);
+        Instantiate(_stone, stoneSpawnerChild.position, Quaternion.identity);
     }
 
     IEnumerator OnMagicCircle(int pos)  //돌이 생성되기 1초전 마법진 빛나줌.

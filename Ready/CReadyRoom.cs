@@ -139,7 +139,7 @@ public class CReadyRoom : MonoBehaviour
 
     public void GameStartRequest()
     {
-        if(nonNetwork)
+        if (nonNetwork)
         {
             GameStart(1);
         }
@@ -284,7 +284,7 @@ public class CReadyRoom : MonoBehaviour
         CClientInfo.JoinRoom.DeleteUser(slotNum);
 
         Debug.Log($"Delete User {slotNum}");
-        
+
         UpdateRoomListView();
         UpdateDebugPlayerPanel(slotNum);
     }
@@ -299,9 +299,9 @@ public class CReadyRoom : MonoBehaviour
 
     private void UpdateDebugPlayerPanel(int slotNumber)
     {
-        _debugPlayerPanels[slotNumber].stateText.text 
+        _debugPlayerPanels[slotNumber].stateText.text
             = CClientInfo.JoinRoom.Slots[slotNumber] == CClientInfo.JoinRoom.ESlotState.Open ? "비어있음" : "존재";
-        _debugPlayerPanels[slotNumber].addPlayerButton.interactable 
+        _debugPlayerPanels[slotNumber].addPlayerButton.interactable
             = CClientInfo.JoinRoom.Slots[slotNumber] == CClientInfo.JoinRoom.ESlotState.Open ? true : false;
         _debugPlayerPanels[slotNumber].banPlayerButton.interactable
             = CClientInfo.JoinRoom.Slots[slotNumber] == CClientInfo.JoinRoom.ESlotState.Open ? false : true;

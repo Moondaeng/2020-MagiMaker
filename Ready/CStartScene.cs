@@ -128,7 +128,7 @@ public class CStartScene : MonoBehaviour
         string id = LoginID.text;
         string pw = LoginPW.text;
 
-        if(id.Length == 0 || pw.Length == 0)
+        if (id.Length == 0 || pw.Length == 0)
         {
             ErrorHandling("아이디와 비밀번호를 입력해주세요!");
             return;
@@ -208,7 +208,7 @@ public class CStartScene : MonoBehaviour
         CClientInfo.ThisUser = new CClientInfo.User(uid, id, clear);
 
         var message = Network.CPacketFactory.CreateLobbyRequest();
-        
+
         _tcpManager.Send(message.data);
     }
 

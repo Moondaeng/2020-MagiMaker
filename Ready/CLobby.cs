@@ -60,7 +60,7 @@ public class CLobby : MonoBehaviour
 
     void Start()
     {
-        if(debug)
+        if (debug)
         {
             CClientInfo.ThisUser = new CClientInfo.User(1, "test", 5);
         }
@@ -98,7 +98,7 @@ public class CLobby : MonoBehaviour
     // 리프레시 버튼을 눌렀을 때 방 리스트를 갱신
     public void RefreshRoom()
     {
-        if(debug)
+        if (debug)
         {
             DeleteAllRoomToListView();
 
@@ -115,7 +115,7 @@ public class CLobby : MonoBehaviour
     // 방 생성
     public void CreateRoomHandler()
     {
-        if(debug)
+        if (debug)
         {
             rooms.Add(new Room(-1, 1, "test"));
             Debug.LogFormat("Create Room : {0}", rooms.Count);
@@ -125,7 +125,7 @@ public class CLobby : MonoBehaviour
             return;
         }
 
-        var message =  Network.CPacketFactory.CreateRoomCreateRequest(CClientInfo.ThisUser.id);
+        var message = Network.CPacketFactory.CreateRoomCreateRequest(CClientInfo.ThisUser.id);
 
         _tcpManager.Send(message.data);
     }
@@ -190,7 +190,7 @@ public class CLobby : MonoBehaviour
 
         CClientInfo.JoinRoom.CreateRoom(rid);
         CClientInfo.ThisUser.SlotNumber = 0;
-        
+
         _tcpManager.DeletePacketInterpret();
         SceneManager.LoadScene("Room");
     }
@@ -208,7 +208,7 @@ public class CLobby : MonoBehaviour
         {
             Debug.Log("Room Renew Error!");
         }
-        
+
         Debug.LogFormat("Room Count : {0}", roomCount);
 
         for (int i = 0; i < roomCount; i++)
@@ -281,7 +281,7 @@ public class CLobby : MonoBehaviour
                 return notUsedRoomInstance;
             }
         }
-        
+
         var roomInstance = Instantiate(roomPrefeb);
         var roomTransform = roomInstance.GetComponent<RectTransform>();
         var newPivot = new Vector2(0.5f, 1);

@@ -9,9 +9,4 @@ public class CRewardChoiceEventRoom0_5 : CRewardChoicePopupController
     {
         base.Start();
     }
-
-    public void OnEnable()
-    {
-        base.Start();
-    }
 }

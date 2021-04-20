@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -59,7 +59,7 @@ public class CItemManager : MonoBehaviour
 
         // 아이템 프리팹 폴더에서 로드
         GameObject[] items = Resources.LoadAll<GameObject>("Item");
-        foreach(var item in items)
+        foreach (var item in items)
         {
             var itemClone = Instantiate(item);
             itemClone.transform.SetParent(gameObject.transform);
@@ -205,7 +205,7 @@ public class CItemManager : MonoBehaviour
         // 장비 아이템
         else if (itemType == 1)
         {
-            if (itemGrade < (int)EItemGrade.Rare)
+            if (itemGrade <= (int)EItemGrade.Rare)
                 _equipObjectLists[itemGrade].Add(item);
             else
             {
@@ -287,20 +287,20 @@ public class CItemManager : MonoBehaviour
 
     private bool CheckUseEffectOmission(List<CUseEffectHandle> effects)
     {
-        for(int i = 0; i < effects.Count; i++)
+        for (int i = 0; i < effects.Count; i++)
         {
-            if(effects[i] == null)
+            if (effects[i] == null)
             {
                 return true;
             }
         }
         return false;
     }
-    
+
     public GameObject GetItemObject(int itemCode)
     {
         bool isFind = _itemDict.TryGetValue(itemCode, out var item);
-        if(isFind)
+        if (isFind)
         {
             return item;
         }

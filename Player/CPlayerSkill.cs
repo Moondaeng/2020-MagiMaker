@@ -116,7 +116,7 @@ public class CPlayerSkill : CCharacterSkill
                 Debug.Log("Element index valid Error");
                 return;
             }
-            
+
             if ((_selectedElement = mainElement[index]) == ESkillElement.None)
             {
                 Debug.Log("Element Select Error");
@@ -145,7 +145,7 @@ public class CPlayerSkill : CCharacterSkill
         // 스킬 모션 선택 가능하게 해당 클래스에서 지원 필요
         GetComponent<CCntl>().Skill();
         base.UseSkillToPosition(targetPos);
-        
+
         _selectedElement = ESkillElement.None;
         elementSelectEvent.Invoke((int)_selectedElement);
     }

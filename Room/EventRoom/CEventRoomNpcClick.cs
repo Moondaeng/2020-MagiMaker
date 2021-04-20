@@ -34,6 +34,12 @@ public class CEventRoomNpcClick : MonoBehaviour
         }
     }
 
+    public void ChangePopUp(GameObject popUp)
+    {
+        instance._popUp = popUp;
+        instance._popUp.SetActive(false);
+    }
+
     public void CancelPopUp()
     {
         Debug.Log($"{instance._stackPopUp.Count}");

@@ -13,7 +13,7 @@ public class CRespawn : MonoBehaviour
     [SerializeField] int[] _spawnNumber;
     Transform[, ] _monsterPosition;
     int _sumOfSpawnNumber;
-    int _maxOfSpawnNumber;
+    int _maxOfSpawnNumber = 0;
     float _respawnDelay = 3f;
     int _deadMonsters = 0;
     Coroutine Co;
@@ -29,7 +29,6 @@ public class CRespawn : MonoBehaviour
     #region 스폰하는 몬스터 세팅
     void SumSpawnNumber()
     {
-        _maxOfSpawnNumber = 0;
         for (int i = 0; i < _spawnNumber.Length; i++)
         {
             _sumOfSpawnNumber += _spawnNumber[i];
@@ -92,16 +91,17 @@ public class CRespawn : MonoBehaviour
     {
         _deadMonsters++;
         CMonsterManager.instance.GetMonsterInfo(monsterID).SetActive(false);
+        Debug.Log("Max Spawn Number : " + _maxOfSpawnNumber + "Dead Monsters : " + _deadMonsters);
         if (_isRespawn)
         {
-            if (_deadMonsters == CMonsterManager.instance.GetMonsterCount())
+            if (_deadMonsters == _sumOfSpawnNumber)
             {
                 SpawnMonster();
             }
         }
         else
         {
-            if (_deadMonsters == CMonsterManager.instance.GetMonsterCount())
+            if (_deadMonsters == _sumOfSpawnNumber)
             {
                 Co = StartCoroutine(Stop());
             }
@@ -113,10 +113,10 @@ public class CRespawn : MonoBehaviour
     IEnumerator Stop()
     {
         Debug.Log("Cour");
-        yield return new WaitForSeconds(10f);
+        yield return new WaitForSeconds(20f);
         Debug.Log("outine");
+        //this.gameObject.SetActive(false);
         Destroy(this.gameObject);
-        
     }
 
     // 몬스터 스폰 함수

@@ -35,8 +35,8 @@ public class CCreateMap : MonoBehaviour
     public Queue<GameObject> eliteRoomQueue = new Queue<GameObject>();
     //0노말 1이벤트 2엘리트
     protected Dictionary<ERoomType, Queue<GameObject>> _roomQueueDict = new Dictionary<ERoomType, Queue<GameObject>>();
-    
-    
+
+
     public int[,] randomRoomArray = new int[3, 10]; //패킷 보내기 위해 임의로 사이즈 고정, 노말방이든, 이벤트 방이든 같은 종류 개수 10개 넘어가면 수정필요
     #endregion
 
@@ -228,7 +228,7 @@ public class CCreateMap : MonoBehaviour
         }
     }
 
-    public void NonHostRoomEnqueue(int[,] randomRoom ,int stageNumber)
+    public void NonHostRoomEnqueue(int[,] randomRoom, int stageNumber)
     {
         string[] roomName = { "Room/" + stageNumber + "/NormalRoom/NormalRoom", "Room/" + stageNumber + "/EventRoom/EventRoom", "Room/" + stageNumber + "/EliteRoom/EliteRoom" };
         Debug.Log("non host Room Enqueue");
@@ -237,10 +237,10 @@ public class CCreateMap : MonoBehaviour
         {
             string randomRoomStr = $"roomQueue{i} ";
             int j = 0;
-            while(randomRoom.GetLength(1) > j && randomRoom[i, j] != -1)
+            while (randomRoom.GetLength(1) > j && randomRoom[i, j] != -1)
             {
                 randomRoomStr += randomRoom[i, j];
-                GameObject room = Resources.Load(roomName[i] + randomRoom[i,j].ToString()) as GameObject;
+                GameObject room = Resources.Load(roomName[i] + randomRoom[i, j].ToString()) as GameObject;
                 if (room == null)
                 {
                     Debug.Log($"room {roomName[i] + randomRoom[i, j].ToString()} is null");
@@ -298,7 +298,7 @@ public class CCreateMap : MonoBehaviour
             }
 
             probability += CConstants.EVENT_PROBABLILITY; //이벤트 방
-            if (selectRoomType < probability && _eventCount < 15)                                                                                         
+            if (selectRoomType < probability && _eventCount < 15)
             {
                 _roomArr[_roomCount, roadCount] = ERoomType._event;
                 _eventCount++;

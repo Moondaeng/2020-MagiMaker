@@ -83,6 +83,7 @@ public class CharacterPara : MonoBehaviour
         }
     }
 
+    [Header("Status")]
     [Tooltip("최대 체력")] [SerializeField] public int _maxHp;
     [HideInInspector] public int _curHp;
     [Tooltip("최소 공격력")] [SerializeField] public int _attackMin;
@@ -460,7 +461,7 @@ public class CharacterPara : MonoBehaviour
     #endregion
 
     // 방어력 계산식: 1000 / (950 + 10*방어력)
-    public void DamegedRegardDefence(int enemyAttack)
+    public virtual void DamegedRegardDefence(int enemyAttack)
     {
         int damage = enemyAttack * 1000 / (950 + 10 * TotalDefenece);
         DamagedDisregardDefence(damage);

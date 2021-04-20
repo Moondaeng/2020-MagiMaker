@@ -31,13 +31,13 @@ namespace Network
         public ConcurrentQueue<byte[]> tcpBuffer = new ConcurrentQueue<byte[]>();
         public bool IsConnect
         {
-            get 
+            get
             {
                 if (_client == null)
                 {
                     return false;
                 }
-                return _client.Connected; 
+                return _client.Connected;
             }
         }
 

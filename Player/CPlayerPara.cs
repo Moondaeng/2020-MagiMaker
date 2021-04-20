@@ -7,8 +7,8 @@ public class CPlayerPara : CharacterPara
     public bool _invincibility;
     public bool _invincibilityChecker;
     public Animator _myAnimator;
-    BoxCollider _col;
-    [SerializeField] public Renderer _obj;
+    public float _runAnimationMultiply = 1f;
+    public Renderer _obj;
     Color _originColor;
 
     [SerializeField]
@@ -61,11 +61,11 @@ public class CPlayerPara : CharacterPara
     {
         base.Awake();
         Inventory = new CInventory(gameObject);
+        
     }
 
     public override void InitPara()
     {
-        _col = GetComponent<BoxCollider>();
         _maxHp = 1000;
         _curHp = _maxHp;
         _attackMin = 50;
@@ -78,6 +78,13 @@ public class CPlayerPara : CharacterPara
         //_originColor = _obj.material.color;
         _myAnimator = GetComponent<Animator>();
         _myAnimator.SetInteger("Hp", _curHp);
+    }
+
+    public override void DamegedRegardDefence(int enemyAttack)
+    {
+        int damage = enemyAttack * 1000 / (950 + 10 * TotalDefenece);
+        float damageF = damage * ((100 + Inventory.ReducedDmgReceived) / 100);
+        DamagedDisregardDefence((int)damageF);
     }
 
     protected override void UpdateAfterReceiveAttack()
@@ -119,6 +126,13 @@ public class CPlayerPara : CharacterPara
             _obj.material.color = _originColor * flicker;
             yield return null;
         }
+    }
+
+    
+
+    private void Update()
+    {
+        _myAnimator.SetFloat("RunMulti", _runAnimationMultiply);
     }
 
     #endregion

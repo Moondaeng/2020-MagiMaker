@@ -9,6 +9,8 @@ public class ChangeConsumableEvent : UnityEvent<Sprite, string, int> { }
 [System.Serializable]
 public class CInventory
 {
+    public UnityEvent addItemEvent = new UnityEvent();
+
     [System.Serializable]
     public class ConsumableWithStack
     {
@@ -57,6 +59,21 @@ public class CInventory
         get
         {
             return _equipAbilityIncreaseSizeArr[(int)Item.EEquipAbility.Attack];
+        }
+    }
+    public int AtkPercentIncreaseSize
+    {
+        get
+        {
+            return _equipAbilityIncreaseSizeArr[(int)Item.EEquipAbility.AttackPercent];
+        }
+    }
+
+    public float ReducedDmgReceived
+    {
+        get
+        {
+            return (float)(_equipAbilityIncreaseSizeArr[(int)Item.EEquipAbility.DamageReduceRate]) / 100;
         }
     }
     public int DefIncreaseSize
@@ -146,6 +163,10 @@ public class CInventory
 
         _equipItems.Add(newEquip);
         AddEquipAbility(newEquip);
+
+        addItemEvent.Invoke();
+        Debug.Log("Success add equip");
+        Debug.Log(_inventoryUser.GetComponent<CPlayerPara>().TotalAttackMin);
 
         return true;
     }

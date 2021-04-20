@@ -39,7 +39,7 @@ public class CSkullButtonController : CNPCPopUpController
         Debug.Log("Lose Max HP");
         Destroy(_skull);
     }
-    
+
     public void ClickRandomMinorElement()
     {
         Debug.Log("Get Element!");

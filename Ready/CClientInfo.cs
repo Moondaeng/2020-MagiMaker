@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CClientInfo : MonoBehaviour
@@ -54,7 +54,7 @@ public class CClientInfo : MonoBehaviour
         }
 
         // C# Auto 속성
-        public static ESlotState[] Slots 
+        public static ESlotState[] Slots
         {
             get { return _slots; }
         }

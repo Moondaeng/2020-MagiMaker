@@ -38,7 +38,7 @@ public class CWaitingForAccept : MonoBehaviour
 
         Debug.Log("playerCount " + _playerCount);
         SetPlayerSelect();
-        ResetPortalUseSelect();    
+        ResetPortalUseSelect();
     }
 
     // Update is called once per frame
@@ -84,7 +84,7 @@ public class CWaitingForAccept : MonoBehaviour
         _playerAccepts[playerNumber] = opinion;
         LoadImage(playerNumber, opinion);
 
-        if(opinion == EAccept._accept)
+        if (opinion == EAccept._accept)
         {
             _acceptCount++;
             // 싱글 / 멀티 플레이용 확인
@@ -106,10 +106,10 @@ public class CWaitingForAccept : MonoBehaviour
                 //ResetPortalUseSelect();
             }
         }
-        else if(opinion == EAccept._cancle)
+        else if (opinion == EAccept._cancle)
         {
             // 취소 처리하고 몇 초 있다가 복구
-            Invoke("CancelPortal", 3.0f); 
+            Invoke("CancelPortal", 3.0f);
             //Network.CNetworkEvent.instance.PortalVoteEvent?.Invoke(0);
         }
     }
@@ -145,7 +145,7 @@ public class CWaitingForAccept : MonoBehaviour
     private void ResetPortalUseSelect()
     {
         _acceptCount = 0;
-        for(int i = 0; i < _playerCount; i++)
+        for (int i = 0; i < _playerCount; i++)
         {
             SetPortalUseSelect(i, EAccept._waiting);
         }

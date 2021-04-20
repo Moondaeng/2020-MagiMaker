@@ -1,51 +1,30 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class CEnemyPara : CharacterPara
 {
-    #region 몬스터 피격 처리
-    public class MonsterHitEvent : UnityEvent<CEnemyPara> { }
-    [System.NonSerialized] public MonsterHitEvent monsterHitEvent = new MonsterHitEvent();
-
-    public override void TakeUseEffect(CUseEffect effect)
+    [System.Serializable]
+    public class SkillType
     {
-        if (effect == null)
-        {
-            return;
-        }
-
-        monsterHitEvent.Invoke(this);
-        Debug.Log("hit monster");
-
-        ApplyInstantEffect(effect.instantEffect);
-        ApplyConditionalEffect(effect.conditionalEffect);
-        ApplyPersistEffect(effect.persistEffect);
+        [Tooltip("스킬 공격력 : 기본 공격력에서의 배수로 해둠")]
+        public int SkillPower;
+        [Tooltip("CC 종류 기본 값 None")]
+        public CrowdControl CCType;
+        public CrowdControlLevel CCLevel;
     }
 
-    private void OnEnable()
-    {
-        _spawnID = CMonsterManager.instance.AddMonsterInfo(gameObject);
-        Debug.Log($"{_spawnID}");
-        monsterHitEvent.AddListener(CMonsterManager.instance.MonsterHit);
-        deadEvent.AddListener(SetOffMonster);
-    }
-
-    private void OnDisable()
-    {
-        monsterHitEvent.RemoveAllListeners();
-        deadEvent.RemoveAllListeners();
-    }
-    #endregion
-
-    public string _name;
+    [Header ("Monster가 가지고 있는 스킬 속성 정의")]
+    public List<SkillType> _skillType = new List<SkillType>();
     string _originTag = "Monster";
     [HideInInspector] public GameObject _myRespawn;
     Vector3 _originPos;
+    public string _name;
 
     public override void InitPara()
     {
+        deadEvent.AddListener(SetOffMonster);
         base.InitPara();
         _isStunned = false;
         _isDead = false;
@@ -61,8 +40,6 @@ public class CEnemyPara : CharacterPara
         //    + "  My originPos is : " + _originPos);
     }
 
-
-
     public void SetOffMonster()
     {
         Invoke("SetActiveFalse", 2f);
@@ -70,12 +47,8 @@ public class CEnemyPara : CharacterPara
 
     public void SetActiveFalse()
     {
-        // 코드 개선 필요 - 콜백을 통해 몬스터 매니저에게 호출하는 구조가 되어야 함
         CMonsterManager.instance.RemoveMonster(_spawnID);
-        Network.CNetworkEvent.instance.EarnMoneyEvent?.Invoke(_rewardMoney);
-        //_myRespawn.GetComponent<CRespawn>().RemoveMonster(_spawnID);
     }
-
 
     public void respawnAgain()
     {
@@ -89,10 +62,5 @@ public class CEnemyPara : CharacterPara
     protected override void UpdateAfterReceiveAttack()
     {
         base.UpdateAfterReceiveAttack();
-    }
-
-    protected virtual void DropItem()
-    {
-        //CItemDropTable.instance.DropRandomItem();
     }
 }

@@ -29,8 +29,16 @@ public class CEventRoom0_5Portal : MonoBehaviour
             CRoomInRoomPopUpController.instance.SetText();
             Destroy(_npc);
             Destroy(_npcPopUp);
-            GameObject.Find("EventRoom0_5Reward").transform.GetChild(1).gameObject.SetActive(true);
-            GameObject.Find("EventRoom0_5Reward").transform.GetChild(0).gameObject.SetActive(true);
+
+            StartCoroutine(RewardSetActiveTrue());
         }
+    }
+
+    IEnumerator RewardSetActiveTrue()
+    {
+        yield return new WaitForSeconds(1.0f);
+
+        GameObject.Find("EventRoom0_5Reward").transform.GetChild(1).gameObject.SetActive(true);
+        GameObject.Find("EventRoom0_5Reward").transform.GetChild(0).gameObject.SetActive(true);
     }
 }

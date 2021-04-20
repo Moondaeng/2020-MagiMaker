@@ -23,7 +23,7 @@ public class CParitcleSkillBase : MonoBehaviour
     [HideInInspector] public GameObject _skillUsingUser;
 
     [Tooltip("Staff에서 발사됨")]
-    [SerializeField] public bool IsStartingStaff;
+    public bool IsStartingPoint;
     public enum AttackType
     {
         damage, stun, KnockBack, Slow, Burn, Curse, Blind,
