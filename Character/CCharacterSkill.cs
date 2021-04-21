@@ -16,8 +16,53 @@ public class CCharacterSkill : MonoBehaviour
 {
     protected static readonly int NOT_SELECTED = -1;
 
+    [System.Serializable]
+    protected class SkillFormat
+    {
+        [Tooltip("스킬 사용 시 나가는 오브젝트")]
+        public GameObject skillObject;
+        [Tooltip("스킬 쿨다운")]
+        public float cooldown;
+        [Tooltip("스킬 사용 시 취할 모션 번호")]
+        public int actionNumber;
+        [Tooltip("비축 가능한 스택")]
+        public int maxStack;
+        [Tooltip("스킬 썸네일")]
+        public Sprite thumbnail;
+
+        private int currentStack;
+
+        public SkillFormat()
+        {
+            maxStack = 1;
+            currentStack = 1;
+        }
+
+        public bool Use(Vector3 targetPos)
+        {
+            if (0 >= currentStack)
+            {
+                return false;
+            }
+            else
+            {
+                currentStack--;
+                return true;
+            }
+        }
+
+        public void EndCooldown(int notUsed)
+        {
+            currentStack++;
+            if (currentStack > maxStack)
+            {
+                currentStack = maxStack;
+            }
+        }
+    }
+
     [SerializeField]
-    protected List<CSkillFormat> _skillList;
+    protected List<SkillFormat> _skillList = new List<SkillFormat>();
 
     public int SelectedSkillNum
     {
@@ -29,27 +74,13 @@ public class CCharacterSkill : MonoBehaviour
         }
     }
 
-    protected int _selectedSkillNum;
+    protected int _selectedSkillNum = 0;
 
     public SkillSelectEvent skillSelectEvent = new SkillSelectEvent();
     public SkillUseEvent skillUseEvent = new SkillUseEvent();
 
     protected virtual void Awake()
     {
-        _selectedSkillNum = 0;
-
-        if (_skillList != null)
-        {
-            for (int i = 0; i < _skillList.Count; i++)
-            {
-                _skillList[i].InitRegisteredNumber(i);
-                _skillList[i].InitSkillUser(gameObject);
-            }
-        }
-        else
-        {
-            _skillList = new List<CSkillFormat>();
-        }
     }
 
     /// <summary>
@@ -82,11 +113,17 @@ public class CCharacterSkill : MonoBehaviour
 
         if (_skillList[skillNum].Use(targetPos))
         {
+            GetComponent<CSkillTimer>().Register(skillNum, _skillList[skillNum].cooldown, _skillList[skillNum].EndCooldown);
             // CCntl의 행동 코드
             skillUseEvent?.Invoke(skillNum, targetPos);
             CreateSkillObject(_skillList[skillNum].skillObject, targetPos);
         }
         SelectedSkillNum = 0;
+    }
+
+    public Sprite GetSkillThumbnail(int skillNumber)
+    {
+        return _skillList[skillNumber].thumbnail;
     }
 
     // 스킬 오브젝트 생성

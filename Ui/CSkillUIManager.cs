@@ -11,12 +11,12 @@ using UnityEngine.UI;
  */ 
 public class CSkillUIManager : MonoBehaviour
 {
-    public enum EUIName
+    public enum EUiName
     {
         Base, Combo1, Combo2, Combo3, Combo4
     }
 
-    class CSkillUi
+    class CSkillUI
     {
         public GameObject ui;
         public Image image;
@@ -27,8 +27,8 @@ public class CSkillUIManager : MonoBehaviour
     public Transform skillUiObject;
     public Transform crossHairObject;
     
-    private List<CSkillUi>[] _elementSkillLists = new List<CSkillUi>[3];
-    private List<CSkillUi> _SelectElementList = new List<CSkillUi>();
+    private List<CSkillUI>[] _elementSkillLists = new List<CSkillUI>[3];
+    private List<CSkillUI> _SelectElementList = new List<CSkillUI>();
 
     private GameObject _uiTarget;
 
@@ -53,7 +53,7 @@ public class CSkillUIManager : MonoBehaviour
         Transform ElementUi;
         for (int i = 0; i < 3; i++)
         {
-            _elementSkillLists[i] = new List<CSkillUi>();
+            _elementSkillLists[i] = new List<CSkillUI>();
             ElementUi = skillUiObject.GetChild(i);
             for (int j = 0; j < 5; j++)
             {
@@ -165,7 +165,7 @@ public class CSkillUIManager : MonoBehaviour
             {
                 var skillUiObejct = skillUiObject.GetChild(mainElementIndex).GetChild(i).gameObject;
                 skillUiObejct.SetActive(true);
-                skillUiObejct.GetComponent<Image>().sprite = GetImageByRegisterNumber(skillNumber);
+                skillUiObejct.GetComponent<Image>().sprite = GetCharacterSkillThumbnail(skillNumber);
             }
         }
     }
@@ -181,7 +181,7 @@ public class CSkillUIManager : MonoBehaviour
             {
                 var skillUiObejct = skillUiObject.GetChild(i).GetChild(subElementIndex+1).gameObject;
                 skillUiObejct.SetActive(true);
-                skillUiObejct.GetComponent<Image>().sprite = GetImageByRegisterNumber(skillNumber);
+                skillUiObejct.GetComponent<Image>().sprite = GetCharacterSkillThumbnail(skillNumber);
             }
         }
     }
@@ -206,7 +206,7 @@ public class CSkillUIManager : MonoBehaviour
             {
                 crossHairObject.GetChild(i).gameObject.SetActive(true);
                 crossHairObject.GetChild(i).gameObject.GetComponent<Image>().sprite 
-                    = GetImageByRegisterNumber(_SelectElementList[i].preemptSkillNumber);
+                    = GetCharacterSkillThumbnail(_SelectElementList[i].preemptSkillNumber);
             }
         }
     }
@@ -264,21 +264,15 @@ public class CSkillUIManager : MonoBehaviour
         }
     }
 
-    private Sprite GetImageByRegisterNumber(int registeredNumber)
+    private Sprite GetCharacterSkillThumbnail(int registeredNumber)
     {
-        if (!CSkillList.SkillList.TryGetValue(registeredNumber, out string spritePath))
-        {
-            return Resources.Load<Sprite>("Clean Vector Icons/T_0_empty_");
-        }
-        else
-        {
-            return Resources.Load<Sprite>(spritePath);
-        }
+        return _uiTarget.GetComponent<CCharacterSkill>().GetSkillThumbnail(registeredNumber) 
+            ?? Resources.Load<Sprite>("Clean Vector Icons/T_0_empty_");
     }
 
-    private void AddSkillUI(Transform skillUi, List<CSkillUi> list)
+    private void AddSkillUI(Transform skillUi, List<CSkillUI> list)
     {
-        var settingSkillUi = new CSkillUi()
+        var settingSkillUi = new CSkillUI()
         {
             ui = skillUi.gameObject,
             image = skillUi.GetComponent<Image>(),
@@ -288,7 +282,7 @@ public class CSkillUIManager : MonoBehaviour
         list.Add(settingSkillUi);
     }
 
-    private CSkillUi FindPreemptNumber(int registeredNumber)
+    private CSkillUI FindPreemptNumber(int registeredNumber)
     {
         foreach (var skillUiList in _elementSkillLists)
         {

@@ -21,7 +21,7 @@ public class CPlayerSkill : CCharacterSkill
 
     private static readonly int mainElementContainSize = 3;
     private static readonly int subElementContainSize = 4;
-    private static readonly int ELEMENT_lENGTH = System.Enum.GetValues(typeof(ESkillElement)).Length;
+    private static readonly int ELEMENT_LENGTH = System.Enum.GetValues(typeof(ESkillElement)).Length;
 
     private ESkillElement[] mainElement = new ESkillElement[mainElementContainSize];
     private ESkillElement[,] subElement = new ESkillElement[mainElementContainSize, subElementContainSize];
@@ -90,7 +90,7 @@ public class CPlayerSkill : CCharacterSkill
 
         if (subElementIndex == NOT_SELECTED)
         {
-            return (int)mainElement[mainElementIndex] * ELEMENT_lENGTH;
+            return (int)mainElement[mainElementIndex] * ELEMENT_LENGTH;
         }
 
         if (subElement[mainElementIndex, subElementIndex] == ESkillElement.None)
@@ -98,7 +98,7 @@ public class CPlayerSkill : CCharacterSkill
             return NOT_SELECTED;
         }
 
-        return (int)mainElement[mainElementIndex] * ELEMENT_lENGTH + (int)subElement[mainElementIndex, subElementIndex] + 1;
+        return (int)mainElement[mainElementIndex] * ELEMENT_LENGTH + (int)subElement[mainElementIndex, subElementIndex] + 1;
     }
 
     public override void SkillSelect(int index)
