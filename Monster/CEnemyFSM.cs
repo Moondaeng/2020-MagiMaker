@@ -1,77 +1,100 @@
-﻿using System.Collections;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static CGlobal;
 
 public delegate void DebugingDelegate();
 
-// 상태들을 클래스화 함. TypeSafe Enum Pattern
-public class EState
-{
-    public static readonly EState Idle = new EState("Idle");
-    public static readonly EState Chase = new EState("Chase");
-    public static readonly EState Move = new EState("Move");
-    public static readonly EState Attack = new EState("Attack");
-    public static readonly EState AttackWait = new EState("AttackWait");
-    public static readonly EState Skill1 = new EState("Skill1");
-    public static readonly EState Skill2 = new EState("Skill2");
-    public static readonly EState Skill3 = new EState("Skill3");
-    public static readonly EState Dead = new EState("Dead");
-    public static readonly EState Defend = new EState("Defend");
-
-    public override string ToString()
-    {
-        return Value;
-    }
-
-    protected EState(string value)
-    {
-        this.Value = value;
-    }
-
-    public string Value { get; private set; }
-}
-
-public class DebugingMyState
-{
-    private EState _stateName;
-
-    public DebugingMyState(EState name)
-    {
-        this._stateName = name;
-    }
-
-    public void DisplayToConsole()
-    {
-        Debug.Log(this._stateName);
-    }
-}
-
 public class CEnemyFSM : MonoBehaviour
 {
-    #region Properties
-    protected Animator _anim;                          // 몬스터가 가지고있는 애니메이터
-    protected AnimatorStateInfo _currentBaseState;     // 기본 레이어에 사용되는 애니메이터의 현재 상테에 대한 참조
-    protected GameObject _player;
-    protected CEnemyPara _myPara;
-    protected CBossPara _myBossPara;
-    protected CPlayerPara _playerPara;
-    [HideInInspector] public GameObject _myRespawn;
+    // 상태들을 클래스화 함. TypeSafe Enum Pattern
+    public class EState
+    {
+        public static readonly EState Idle = new EState("Idle");
+        public static readonly EState Chase = new EState("Chase");
+        public static readonly EState Move = new EState("Move");
+        public static readonly EState Attack = new EState("Attack");
+        public static readonly EState AttackWait = new EState("AttackWait");
+        public static readonly EState Skill1 = new EState("Skill1");
+        public static readonly EState SkillWait1 = new EState("SkillWait1");
+        public static readonly EState Skill2 = new EState("Skill2");
+        public static readonly EState SkillWait2 = new EState("SkillWait2");
+        public static readonly EState Skill3 = new EState("Skill3");
+        public static readonly EState SkillWait3 = new EState("SkillWait3");
+        public static readonly EState Dead = new EState("Dead");
 
+        public override string ToString()
+        {
+            return Value;
+        }
+
+        protected EState(string value)
+        {
+            this.Value = value;
+        }
+
+        public string Value { get; private set; }
+    }
+
+    public class DebugingMyState
+    {
+        private EState _stateName;
+
+        public DebugingMyState(EState name)
+        {
+            this._stateName = name;
+        }
+
+        public void DisplayToConsole()
+        {
+            Debug.Log(this._stateName);
+        }
+    }
+    public enum StateType
+    {
+        idle, stand, walk, run, attackState1, attackState2, wait
+        , skill1, skillWait1, skill2, skillWait2, skillState3, skillWait3
+        , gethit, dead1, dead2
+    }
+    [SerializeField]
+    public struct StateInfo
+    {
+        public StateType type;
+    }
+    #region Properties
+    protected Animator _anim;                           // 몬스터가 가지고있는 애니메이터
+    protected AnimatorStateInfo _currentBaseState;      // 기본 레이어에 사용되는 애니메이터의 현재 상테에 대한 참조
+    protected GameObject _player;                       // 가장 가까운 플레이어의 정보를 저장
+    protected CPlayerPara _playerPara;                  // 가장 가가움 플레이어의 Para
+    protected CEnemyPara _myPara;                       // 보스 몬스터를 제외한 Para
+    protected CBossPara _myBossPara;                    // 보스 몬스터 전용 Para
     protected bool _lookAtPlayer; // 어떤 행동시에, 플레이어를 바라보게 하는 TurnToDestination을 OFF하게 하려는 목적을 가진 bool
     protected bool _coolDown;     // 평타 쿨타임 판단
     protected bool _skill1, _skill2, _skill3; // 스킬 행동의 중간단계의 동작을 관리하기 위한 bool
-    protected bool _skillCoolDown1, _skillCoolDown2, _skillCoolDown3; // 스킬 쿨타임 판단
+
+    protected bool _skillCoolDown1; // 스킬 쿨타임 판단
+    protected bool _skillCoolDown2; // 스킬 쿨타임 판단
+    protected bool _skillCoolDown3; // 스킬 쿨타임 판단
+
+    [SerializeField]
+    public struct SetSkillCoolTime
+    {
+        [Tooltip("Skill 쿨타임 최소")] public float skillCoolDownUp; // 스킬 쿨타임 판단
+        [Tooltip("Skill 쿨타임 최대")] public float skillCoolDownDown; // 스킬 쿨타임 판단
+    }
+
+    [Tooltip("몬스터 기본 공격 간격")]
+    [SerializeField] protected static float _cooltime;
+    protected float _originCooltime;
+
     protected bool _anotherAction; // 공격 사용 후, 플레이어의 거리가 멀어지면 chase 아니면, 그대로 공격하게 하는걸 판단
     protected bool _actionStart; // 플레이어와 조우 전에, 스킬의 쿨타임이 미리 도는 것을 방지하려는 것
     protected bool _getHit;      // 히트 애니메이션 관련 bool
-
-    public int _spawnID { get; set; } // CRespawn에서 판별한 SpawnID 폐기예정
     protected float _rotAnglePerSecond = 360f; //1초에 플레이어의 방향을 360도 회전
     public float _moveSpeed { get; set; } //초당 ~미터의 속도로 이동
     public float _attackDistance { get; set; } // 공격 거리 (적과의 거리)
     protected float _attackAngle { get; set; } // 공격 범위
-    
+
     #region 모션들
     protected static int _idleState { get; set; }
     protected static int _standState { get; set; }
@@ -83,37 +106,74 @@ public class CEnemyFSM : MonoBehaviour
     protected static int _skillState1 { get; set; }
     protected static int _skillWaitState1 { get; set; }
     protected static int _skillState2 { get; set; }
+    protected static int _skillWaitState2 { get; set; }
     protected static int _skillState3 { get; set; }
-    protected static int _gethitState { get; set; } 
-    protected static int _deadState1 { get; set; }
-    protected static int _deadState2 { get; set; }
-    protected float _cooltime { get; set; }
-    protected float _originCooltime { get; set; }
-    protected float _skillCooltime1 { get; set; }
-    protected float _originSkillCooltime1 { get; set; }
-    protected float _skillCooltime2 { get; set; }
-    protected float _originSkillCooltime2 { get; set; }
-    protected float _skillCooltime3 { get; set; }
-    protected float _originSkillCooltime3 { get; set; }
+    protected static int _skillWaitState3 { get; set; }
+    protected static int _gethitState { get; set; }
+    protected static int _deadState { get; set; }
+
     #endregion
-    
-    protected EState _myState = EState.Idle;
-    protected EState _myOldState = EState.Idle;
+
+    protected EState _myState, _myOldState = EState.Idle;
     protected List<GameObject> _players = new List<GameObject>(); // 플레이어들의 GameObject를 담는 리스트
     protected List<float> _distances = new List<float>(); // 플레이어와의 거리 정보를 담는 리스트
-    
+    [Tooltip("스킬 개수 및 스킬 쿨타임 설정")]
+    [SerializeField] protected List<SetSkillCoolTime> SetSkillCoolTimeList = new List<SetSkillCoolTime>();
+    [HideInInspector] protected List<float> _skillCoolTime = new List<float>();
+    [HideInInspector] protected List<float> _originSkillCoolTime = new List<float>();
+
     #endregion
-    
-    void Start()
+
+    protected virtual void Start()
     {
         InitStat();
     }
 
     protected virtual void InitStat()
     {
+        if (gameObject.tag == "Boss")
+        {
+            _myBossPara = GetComponent<CBossPara>();
+        }
+        else
+        {
+            _myPara = GetComponent<CEnemyPara>();
+        }
+
+        _anim = GetComponent<Animator>();
+        _myPara.deadEvent.AddListener(CallDeadEvent);
+        _idleState = Animator.StringToHash("Base Layer.Idle");
+        _standState = Animator.StringToHash("Base Layer.MovingSub.Stand");
+        _walkState = Animator.StringToHash("Base Layer.MovingSub.Walk");
+        _runState = Animator.StringToHash("Base Layer.MovingSub.Run");
+        _attackState1 = Animator.StringToHash("Base Layer.AttackSub.Attack1");
+        _waitState = Animator.StringToHash("Base Layer.AttackSub.AttackWait");
+        _attackState2 = Animator.StringToHash("Base Layer.AttackSub.Attack2");
+        _skillState1 = Animator.StringToHash("Base Layer.AnySub.Skill1");
+        _skillState2 = Animator.StringToHash("Base Layer.AnySub.Skill2");
+        _skillState2 = Animator.StringToHash("Base Layer.AnySub.Skill3");
+        _skillWaitState1 = Animator.StringToHash("Base Layer.AnySub.SkillWait1");
+        _skillWaitState1 = Animator.StringToHash("Base Layer.AnySub.SkillWait2");
+        _skillWaitState1 = Animator.StringToHash("Base Layer.AnySub.SkillWait3");
+        _gethitState = Animator.StringToHash("Base Layer.AnySub.GetHit");
+        _deadState = Animator.StringToHash("Base Layer.AnySub.Dead");
 
     }
-    
+
+    // 몬스터 기본 공격, 스킬 쿨타임을 인스펙터 상에서 조절 가능하게 함.
+    // 랜덤하게 조절
+    protected void SetCoolTime()
+    {
+        _originCooltime = _cooltime != 0f ? _cooltime : .5f;
+
+        for (int i = 0; i < SetSkillCoolTimeList.Count; i++)
+        {
+            _originSkillCoolTime.Add(UnityEngine.Random.Range(SetSkillCoolTimeList[i].skillCoolDownDown,
+                SetSkillCoolTimeList[i].skillCoolDownUp));
+            _skillCoolTime.Add(_originSkillCoolTime[i]);
+        }
+    }
+
     #region State
     // 이동함수
     protected virtual void MoveState()
@@ -126,7 +186,6 @@ public class CEnemyFSM : MonoBehaviour
         {
             _lookAtPlayer = true;
         }
-        _myState = EState.Move;
         MoveToDestination(transform.position - new Vector3(0f, transform.position.y, 0f), _player.transform.position);
     }
 
@@ -191,7 +250,7 @@ public class CEnemyFSM : MonoBehaviour
         {
             _myState = EState.Chase;
         }
-        
+
         if (!_actionStart)
         {
             _actionStart = true;
@@ -200,6 +259,11 @@ public class CEnemyFSM : MonoBehaviour
         if (!_lookAtPlayer)
         {
             _lookAtPlayer = true;
+        }
+
+        if (_currentBaseState.fullPathHash != _deadState)
+        {
+            MoveState();
         }
     }
 
@@ -227,7 +291,10 @@ public class CEnemyFSM : MonoBehaviour
             _myState = EState.AttackWait;
         }
         _cooltime -= Time.deltaTime;
-        _lookAtPlayer = true;
+        if (!_lookAtPlayer)
+        {
+            _lookAtPlayer = true;
+        }
         if (_cooltime < 0)
         {
             _coolDown = false;
@@ -241,8 +308,8 @@ public class CEnemyFSM : MonoBehaviour
             _cooltime = _originCooltime;
         }
     }
-    
-    protected virtual void DeadState1()
+
+    protected virtual void DeadState()
     {
         if (_myState != EState.Dead)
         {
@@ -342,7 +409,7 @@ public class CEnemyFSM : MonoBehaviour
 
     #region 이벤트
 
-    protected virtual void CallDeadEvent()
+    protected void CallDeadEvent()
     {
         if (_myPara != null)
         {
@@ -353,13 +420,15 @@ public class CEnemyFSM : MonoBehaviour
             Debug.Log(_myBossPara._name + " is dead!");
         }
 
+        Debug.Log("SetBool true");
         _anim.SetBool("Dead", true);
-        this.gameObject.tag = "Untagged";
-        this.gameObject.layer = LayerMask.NameToLayer("DeadBody");
-        Invoke("RemoveMe", .1f);
+        gameObject.tag = "Untagged";
+        gameObject.layer = LayerMask.NameToLayer("DeadBody");
+        Invoke("RemoveMe", .5f);
     }
     protected virtual void RemoveMe()
     {
+        Debug.Log("SetBool false");
         _anim.SetBool("Dead", false);
     }
 
@@ -397,6 +466,11 @@ public class CEnemyFSM : MonoBehaviour
             c.DamegedRegardDefence(_myBossPara.RandomAttackDamage());
         }
     }
+
+    protected virtual void AttackDisabledCollider()
+    {
+        SendMessage("DiscardList");
+    }
     #endregion
 
     // state의 업데이트는 하위 클래스인 몬스터들마다 세분화되어 관리되므로 Virtual로 남겨두었다.
@@ -405,7 +479,7 @@ public class CEnemyFSM : MonoBehaviour
 
     }
 
-    
+
     protected virtual void DebugState()
     {
         if (_myOldState != _myState)
@@ -428,17 +502,13 @@ public class CEnemyFSM : MonoBehaviour
         _currentBaseState = _anim.GetCurrentAnimatorStateInfo(0);
         _distances = CalculateDistance(_players);
         _anim.SetInteger("PlayerCount", _players.Count);
-        
-        //if (_myPara != null)
-        //{
-        //    _anim.SetInteger("Hp", _myPara._curHp);
-        //}
-        //else
-        //{
-        //    _anim.SetInteger("Hp", _myBossPara._curHp);
-        //}
 
-        if (_currentBaseState.fullPathHash != _deadState1)
+        if (_myPara != null)
+        {
+            _anim.SetInteger("Hp", _myPara.CurrentHp);
+        }
+
+        if (_currentBaseState.fullPathHash != _deadState)
         {
             IsLookPlayer();
         }

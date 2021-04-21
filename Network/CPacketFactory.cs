@@ -30,6 +30,7 @@ namespace Network
             GuestQuitRequest = 302,
             HostQuitRequest = 303,
             LobbyReturnRequest = 304,
+            // debug
             BanRequest = 305,
             AddGuestRequest = 306
         }
@@ -39,7 +40,26 @@ namespace Network
             CharacterInfoRequest = 400,
             MoveStart = 401,
             MoveStop = 402,
-            ActionStart = 500
+            ActionStart = 403,
+            JumpStart = 404,
+            AttackStart = 405,
+            RollStart = 406,
+
+            ReturnLobby = 901,
+            FinishLoding = 902,
+        }
+
+        enum EMapInfo
+        {
+            EnterNextRoom = 605,
+            RoomTypeInfo = 603,
+            RoomNumberInfo = 604,
+        }
+
+        enum EDebug
+        {
+            ChangePlayer = 1000,
+            KickPlayer = 1001,
         }
 
         #region Create Login Message
@@ -199,19 +219,21 @@ namespace Network
         }
 
         // debug
-        public static CPacket CreateAddGuestRequest()
+        public static CPacket CreateAddGuestRequest(int slotNum)
         {
-            byte messageSize = 0;
+            byte messageSize = 4;
 
             CPacket packet = new CPacket((int)messageSize);
 
             packet.WriteHeader(messageSize, (int)EReadyRoom.AddGuestRequest);
+            packet.Write(slotNum);
 
             return packet;
         }
         #endregion
 
         #region Create InGame Message
+        #region Character Movement
         public static CPacket CreateCharacterInfoPacket()
         {
             byte messageSize = 0;
@@ -259,6 +281,48 @@ namespace Network
             return packet;
         }
 
+        public static CPacket CreateJumpStartPacket(Vector3 now, float jumpRotate, bool isMoving)
+        {
+            byte messageSize = 20;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)EInGame.JumpStart);
+            packet.Write(now.x).Write(now.y).Write(now.z)
+                .Write(jumpRotate)
+                .Write(isMoving);
+
+            return packet;
+        }
+
+        public static CPacket CreateAttackStartPacket(Vector3 now, float attackRotate)
+        {
+            byte messageSize = 16;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)EInGame.AttackStart);
+            packet.Write(now.x).Write(now.y).Write(now.z)
+                .Write(attackRotate);
+
+            return packet;
+        }
+
+        public static CPacket CreateRollStartPacket(Vector3 now, float rollRotate)
+        {
+            byte messageSize = 16;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)EInGame.RollStart);
+            packet.Write(now.x).Write(now.y).Write(now.z)
+                .Write(rollRotate);
+
+            return packet;
+        }
+        #endregion
+
+        #region Map Info
         public static CPacket CreatePortalVote(int accept)
         {
             byte messageSize = 4;
@@ -275,7 +339,7 @@ namespace Network
         public static CPacket CreatePortalPopup()
         {
             byte messageSize = 0;
-            
+
             Debug.Log("Portal Popup");
 
             CPacket packet = new CPacket((int)messageSize);
@@ -285,16 +349,85 @@ namespace Network
             return packet;
         }
 
-        public static CPacket CreatePortalTeleport()
+        public static CPacket CreateEnterNextRoom()
         {
             byte messageSize = 0;
 
             CPacket packet = new CPacket((int)messageSize);
 
-            packet.WriteHeader(messageSize, (int)603);
+            packet.WriteHeader(messageSize, (int)EMapInfo.EnterNextRoom);
 
             return packet;
         }
+
+        public static CPacket CreateRoomTypeInfo(int[,] rooms)
+        {
+            Debug.Log("Create Room Info Packet");
+
+            byte messageSize = 144;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)EMapInfo.RoomTypeInfo);
+            for (int i = 0; i < CConstants.ROOM_PER_STAGE; i++)
+            {
+                for (int j = 0; j < CConstants.MAX_ROAD; j++)
+                {
+                    packet.Write(rooms[i, j]);
+                }
+            }
+
+            return packet;
+        }
+
+        public static CPacket CreateRoomNumberInfo(int[,] roomNumbers)
+        {
+            Debug.Log("Create Room Number Infomations Packet");
+
+            byte messageSize = 120;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)EMapInfo.RoomNumberInfo);
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 10; j++)
+                {
+                    packet.Write(roomNumbers[i, j]);
+                }
+            }
+
+            return packet;
+        }
+        #endregion
+
+
+        public static CPacket CreateReturnLobby(bool isHost)
+        {
+            byte messageSize = 4;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)EInGame.ReturnLobby);
+            packet.Write(isHost);
+
+            return packet;
+        }
+
+        public static CPacket CreateFinishLoading(bool isHost, int userCount)
+        {
+            byte gameUserCount = (byte)userCount;
+
+            byte messageSize = 4;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)EInGame.FinishLoding);
+            packet.Write(isHost).Write(gameUserCount);
+
+            return packet;
+        }
+
         #endregion
 
         public static CPacket CreateShutdownPacket()
@@ -307,5 +440,31 @@ namespace Network
 
             return packet;
         }
+
+        #region debug
+        public static CPacket CreateChangePlayer(int playerNumber)
+        {
+            byte messageSize = 4;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)EDebug.ChangePlayer);
+            packet.Write(playerNumber);
+
+            return packet;
+        }
+
+        public static CPacket CreateKickPlayer(int playerNumber)
+        {
+            byte messageSize = 4;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)EDebug.KickPlayer);
+            packet.Write(playerNumber);
+
+            return packet;
+        }
+        #endregion
     }
 }

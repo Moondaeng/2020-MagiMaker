@@ -6,18 +6,18 @@ public class COldGravestoneButtonController : CNPCPopUpController
 {
     private GameObject _oldGravestone;
     private GameObject _monsterGroup;
-    
+
     private Color _color;
     public override void Start()
     {
         base.Start();
-        _oldGravestone = GameObject.Find("OldGravestone");     
+        _oldGravestone = GameObject.Find("OldGravestone");
         _monsterGroup = GameObject.Find("MonsterGroup");
     }
 
     public override void ChooseButton(int choose)
     {
-        switch(choose)
+        switch (choose)
         {
             case 0:
                 ClickRandomItem();
@@ -32,7 +32,7 @@ public class COldGravestoneButtonController : CNPCPopUpController
 
     public void ClickRandomItem()
     {
-        GameObject item = CItemDropTable.instance.DropRandomItem(CCreateMap.instance.GetStageNumber(), CConstants.EQUIP_ITEM_TYPE);
+        GameObject item = CItemManager.instance.DropRandomItem(CCreateMap.instance.GetStageNumber(), CConstants.EQUIP_ITEM_TYPE);
         item = Instantiate(item, _oldGravestone.transform.position, _oldGravestone.transform.rotation);
         item.SetActive(true);
 
@@ -50,6 +50,6 @@ public class COldGravestoneButtonController : CNPCPopUpController
 
     public void ClickCancel()
     {
-        
+
     }
 }

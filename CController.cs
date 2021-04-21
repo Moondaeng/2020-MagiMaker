@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 /*
  * 플레이어 오브젝트 조작 인터페이스 클래스
@@ -11,6 +12,27 @@ using UnityEngine;
 public class CController : MonoBehaviour
 {
     private delegate void Action();
+
+    // 카메라 보정용 : x = 0, z = 0에 해당하는 1,1 위치는 쓰지 않음
+    // 기본적으로 pivot Y : 180, player rotation = camera rotation + pivot
+    // WASD에 따라 적용치 : W = 180, A = 90, S = 0(360), D = 270
+    // WD = 225, WA = 135, AS = 45, SD = 315
+    private static readonly float[,] rotateCorrectionArr = {
+        { 135f, 180f, 225f },
+        { 90f, -1f, 270f },
+        { 45f, 0f, 315f },
+    };
+
+    #region 컨트롤 대상 이벤트
+    public class CorrectionEvent : UnityEvent<Vector3> { }
+    public class CharacterJumpEvent : UnityEvent<Vector3, float, bool> { }
+    public class CharacterActionEvent : UnityEvent<Vector3, float> { }
+
+    public CorrectionEvent PlayerPosCorrectionEvent = new CorrectionEvent();
+    public CharacterJumpEvent PlayerJumpEvent = new CharacterJumpEvent();
+    public CharacterActionEvent PlayerAttackEvent = new CharacterActionEvent();
+    public CharacterActionEvent PlayerRollEvent = new CharacterActionEvent();
+    #endregion
 
     #region 컨트롤러 모드 관리
 
@@ -25,7 +47,7 @@ public class CController : MonoBehaviour
     [SerializeField] private GameObject MousePointer;
 
     private CUIManager _playerUi;
-    private CGameEvent gameEvent;
+    private Network.CNetworkEvent gameEvent;
 
     public static CController instance;
 
@@ -35,6 +57,7 @@ public class CController : MonoBehaviour
 
     // 이동 패킷 관련
     private const float moveTraceTime = 0.1f;
+    private bool _isMoveTracing = false;
 
     private Vector3 previousPlayerPos;
 
@@ -56,7 +79,7 @@ public class CController : MonoBehaviour
         keyDictionary = new Dictionary<KeyCode, Action>
         {
             {KeyCode.Mouse0, Attack},
-            {KeyCode.Space, Jump},
+            //{KeyCode.Space, Jump},    // 임시로 점프 막음
             {KeyCode.Alpha1, () => SkillSelect(0) },
             {KeyCode.Alpha2, () => SkillSelect(1) },
             {KeyCode.Alpha3, () => SkillSelect(2) },
@@ -73,7 +96,7 @@ public class CController : MonoBehaviour
     {
         // Singleton 선언해놓은 클래스들 받는 변수
         _playerUi = CUIManager.instance;
-        gameEvent = CGameEvent.instance;
+        gameEvent = Network.CNetworkEvent.instance;
         _camera = CMouseFollower.instance;
 
         if (player != null)
@@ -147,6 +170,8 @@ public class CController : MonoBehaviour
         player = controlCharacter;
         _playerUi.SetUiTarget(controlCharacter);
         CWindowFacade.instance.SetTarget(controlCharacter);
+
+        AddActionListener();
     }
 
     public void SetControlLock(bool isLock)
@@ -157,7 +182,14 @@ public class CController : MonoBehaviour
 
     private void Attack()
     {
-        _playerControl.Attack();
+        int layerMask = (1 << LayerMask.NameToLayer("Player")) | (1 << LayerMask.NameToLayer("PlayerSkill"));
+        layerMask = ~layerMask;
+        RaycastHit hit;
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
+        {
+            _playerControl.Attack();
+        }
     }
 
     private void Skill()
@@ -275,7 +307,9 @@ public class CController : MonoBehaviour
 
     private void UseSkill()
     {
-        int layerMask = (1 << LayerMask.NameToLayer("Player")) | (1 << LayerMask.NameToLayer("PlayerSkill"));
+        int layerMask = (1 << LayerMask.NameToLayer("Player"))
+            | (1 << LayerMask.NameToLayer("PlayerSkill"))
+            | (1 << LayerMask.NameToLayer("DeadBody"));
         layerMask = ~layerMask;
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -284,4 +318,88 @@ public class CController : MonoBehaviour
             player.GetComponent<CPlayerSkill>().UseSkillToPosition(hit.point);
         }
     }
+
+    #region 이벤트 처리
+    private void AddActionListener()
+    {
+        player.GetComponent<CCntl>().AttackEvent.AddListener(AttackAction);
+        player.GetComponent<CCntl>().JumpEvent.AddListener(JumpAction);
+        player.GetComponent<CCntl>().JumpEndEvent.AddListener(JumpEndAction);
+        player.GetComponent<CCntl>().RollEvent.AddListener(RollAction);
+        player.GetComponent<CCharacterSkill>().skillUseEvent.AddListener(SkillAction);
+    }
+
+    // 캐릭터 변경이 있을 때 사용할 예정 
+    private void RemoveActionListener()
+    {
+        player.GetComponent<CCharacterSkill>().skillUseEvent.RemoveListener(SkillAction);
+    }
+
+    private void AttackAction()
+    {
+        float rotateY = _camera.transform.rotation.eulerAngles.y + 180f;
+        if (rotateY > 360f)
+        {
+            rotateY -= 360f;
+        }
+        PlayerAttackEvent?.Invoke(player.transform.position, rotateY);
+    }
+
+    private void JumpAction()
+    {
+        // 입력에 따른 보정
+        float rotateY;
+        bool isMoving;
+
+        if (x == 0 && z == 0)
+        {
+            rotateY = player.transform.rotation.eulerAngles.y;
+            isMoving = false;
+        }
+        else
+        {
+            rotateY = _camera.transform.rotation.eulerAngles.y + rotateCorrectionArr[(int)x + 1, (int)z + 1];
+            if (rotateY > 360)
+            {
+                rotateY -= 360f;
+            }
+            isMoving = true;
+        }
+        
+        PlayerJumpEvent?.Invoke(player.transform.position, rotateY, isMoving);
+    }
+
+    private void JumpEndAction()
+    {
+        PlayerPosCorrectionEvent?.Invoke(player.transform.position);
+    }
+
+    private void RollAction()
+    {
+        // 입력에 따른 보정
+        float rotateY;
+
+        if (x == 0 && z == 0)
+        {
+            rotateY = player.transform.rotation.eulerAngles.y;
+        }
+        else
+        {
+            rotateY = _camera.transform.rotation.eulerAngles.y + rotateCorrectionArr[(int)x + 1, (int)z + 1];
+            if (rotateY > 360)
+            {
+                rotateY -= 360f;
+            }
+        }
+
+        Debug.Log($"rotate : {rotateY}");
+
+        PlayerRollEvent?.Invoke(player.transform.position, rotateY);
+    }
+
+    private void SkillAction(int actionNumber, Vector3 targetPos)
+    {
+        gameEvent.PlayerAction(actionNumber, player.transform.position, targetPos);
+    }
+    #endregion
 }

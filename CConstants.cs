@@ -1,5 +1,7 @@
 ﻿public static class CConstants
 {
+    public static readonly int MAX_STAGE_IN_GAME = 3;
+
     #region MAX Room
 
     public const int MAX_ELITE = MAX_ROOM_PER_ROAD / 2;                         // 엘리트 최대 개수

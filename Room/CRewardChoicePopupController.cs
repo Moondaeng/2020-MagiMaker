@@ -17,13 +17,13 @@ public class CRewardChoicePopupController : CNPCPopUpController
     {
         base.Start();
 
-        if (CCreateMap.instance.userSelectRoom() == CGlobal.ERoomType._elite) //유저가 보스 엘리트 중 어떤 방에 들어온 것인지 확인.
+        if (CCreateMap.instance.userSelectRoom() == CCreateMap.ERoomType._elite) //유저가 보스 엘리트 중 어떤 방에 들어온 것인지 확인.
         {
             _userSelectRoom = 0;
             isBoss[_userSelectRoom] = false;
             _elementName[_userSelectRoom] = "부원소";
         }
-        else if (CCreateMap.instance.userSelectRoom() == CGlobal.ERoomType._boss)
+        else if (CCreateMap.instance.userSelectRoom() == CCreateMap.ERoomType._boss)
         {
             _userSelectRoom = 1;
             isBoss[_userSelectRoom] = true;
@@ -93,11 +93,11 @@ public class CRewardChoicePopupController : CNPCPopUpController
 
         GameObject item;
         if (random < 50)
-            item = CItemDropTable.instance.PopRandomItemByGrade((CItemDropTable.ItemGrade)_userSelectRoom, CConstants.EQUIP_ITEM_TYPE);
+            item = CItemManager.instance.PopRandomItemByGrade((CItemManager.EItemGrade)_userSelectRoom, CConstants.EQUIP_ITEM_TYPE);
         else if (random < 80)
-            item = CItemDropTable.instance.PopRandomItemByGrade((CItemDropTable.ItemGrade)_userSelectRoom + 1, CConstants.EQUIP_ITEM_TYPE);
+            item = CItemManager.instance.PopRandomItemByGrade((CItemManager.EItemGrade)_userSelectRoom + 1, CConstants.EQUIP_ITEM_TYPE);
         else
-            item = CItemDropTable.instance.PopRandomItemByGrade((CItemDropTable.ItemGrade)_userSelectRoom + 2, CConstants.EQUIP_ITEM_TYPE);
+            item = CItemManager.instance.PopRandomItemByGrade((CItemManager.EItemGrade)_userSelectRoom + 2, CConstants.EQUIP_ITEM_TYPE);
 
         MoveItemToInventory(item.GetComponent<CItemComponent>());
     }

@@ -32,60 +32,46 @@ public class CBoarFSM : CEnemyFSM
 
     protected override void InitStat()
     {
+        base.InitStat();
+
+        var S1 = new SetSkillCoolTime
+        {
+            skillCoolDownDown = 6f,
+            skillCoolDownUp = 8f
+        };
+        var S2 = new SetSkillCoolTime
+        {
+            skillCoolDownDown = 6f,
+            skillCoolDownUp = 8f
+        };
+        SetSkillCoolTimeList.Add(S1);
+        SetSkillCoolTimeList.Add(S2);
+        SetCoolTime();
+
         _moveSpeed = 5f;
         _attackDistance = 6f;
         _attackAngle = 5f;
         _hornAttackDistance = 2f;
         _hornAttackAngle = 180f;
         
-        _anim = GetComponent<Animator>();
-        _myPara = GetComponent<CEnemyPara>();
-        _myPara.deadEvent.AddListener(CallDeadEvent);
         _myPara.hitEvent.AddListener(CallHitEvent);
         
-        _idleState = Animator.StringToHash("Base Layer.Idle");
-        _runState = Animator.StringToHash("Base Layer.Run");
-        _searchingState = Animator.StringToHash("Base Layer.Searching");
-        _walkState = Animator.StringToHash("Base Layer.Walk");
-        _attackState1 = Animator.StringToHash("Base Layer.Attack");
-        _waitState = Animator.StringToHash("Base Layer.AttackWait");
-        _skillState1 = Animator.StringToHash("Base Layer.Scream");
-        _skillState2 = Animator.StringToHash("Base Layer.HornAttack");
-        _gethitState = Animator.StringToHash("Base Layer.GetHit");
-        _deadState1 = Animator.StringToHash("Base Layer.Dead");
-        _toOriginPositionState = Animator.StringToHash("Base Layer. ToOriginPosition");
+        _searchingState = Animator.StringToHash("Base Layer.MovingSub.Searching");
+        _skillState2 = Animator.StringToHash("Base Layer.AttackSub.HornAttack");
+        _deadState = Animator.StringToHash("Base Layer.AnySub.Dead");
+        _toOriginPositionState = Animator.StringToHash("Base Layer.AnySub.ToOriginPosition");
 
-        _cooltime = 1f;
-        _skillCooltime1 = 20f;
-        _originCooltime = _cooltime;
-        _originSkillCooltime1 = _skillCooltime1;
-        _skillCooltime2 = 8f;
-        _originSkillCooltime2 = _skillCooltime2;
         _originVector = transform.position;
     }
     
-    protected override void CallDeadEvent()
-    {
-        Debug.Log("he is dead");
-        _anim.SetBool("Dead", true);
-        this.gameObject.tag = "Untagged";
-        this.gameObject.layer = LayerMask.NameToLayer("DeadBody");
-        Invoke("OffDead", 0.1f);
-    }
-
-    private void OffDead()
-    {
-        _anim.SetBool("Dead", false);
-    }
-
     #region State
     protected override void UpdateState()
     {
         _originTimer -= Time.deltaTime;
         if (_actionStart)
         {
-            _skillCooltime1 -= Time.deltaTime;
-            _skillCooltime2 -= Time.deltaTime;
+            _skillCoolTime[0] -= Time.deltaTime;
+            _skillCoolTime[1] -= Time.deltaTime;
         }
         
         if (_anim.GetFloat("DistanceFromPlayer") > 15f)
@@ -106,14 +92,14 @@ public class CBoarFSM : CEnemyFSM
         else if (_currentBaseState.fullPathHash == _skillState1) SkillState1();
         else if (_currentBaseState.fullPathHash == _skillState2) SkillState2();
         else if (_currentBaseState.fullPathHash == _waitState) AttackWaitState();
-        else if (_currentBaseState.fullPathHash == _deadState1) DeadState1();
+        else if (_currentBaseState.fullPathHash == _deadState) DeadState();
         else if (_currentBaseState.fullPathHash == _toOriginPositionState) WalkOriginPosition();
 
-        if (_skillCooltime1 < 0f && !_anotherAction)
+        if (_skillCoolTime[0] < 0f && !_anotherAction)
         {
             _anim.SetTrigger("Skill1");
         }
-        if (_skillCooltime2 < 0f)
+        if (_skillCoolTime[1] < 0f)
         {
             //Debug.Log("Skill2 Cooltime finished!");
             _hornAttackCheck = true;
@@ -128,7 +114,7 @@ public class CBoarFSM : CEnemyFSM
         }
     }
     
-    private void IdleState()
+    private new void IdleState()
     {
         if (_anotherAction)
         {
@@ -172,7 +158,7 @@ public class CBoarFSM : CEnemyFSM
     protected override void ChaseState()
     {
         base.ChaseState();
-        if (_currentBaseState.fullPathHash != _deadState1) MoveState();
+        if (_currentBaseState.fullPathHash != _deadState) MoveState();
     }
 
     protected override void AttackState1()
@@ -187,7 +173,7 @@ public class CBoarFSM : CEnemyFSM
         if (_myState != EState.Skill1)
         {
             _myState = EState.Skill1;
-            _skillCooltime1 = _originSkillCooltime1;
+            _skillCoolTime[0] = _originSkillCoolTime[0];
         }
         if (_lookAtPlayer)
         {
@@ -228,7 +214,7 @@ public class CBoarFSM : CEnemyFSM
         if (_myState != EState.Skill2)
         {
             _myState = EState.Skill2;
-            _skillCooltime2 = _originSkillCooltime2;
+            _skillCoolTime[1] = _originSkillCoolTime[0];
             _hornAttackCheck = false;
         }
         if (_lookAtPlayer)
@@ -273,7 +259,7 @@ public class CBoarFSM : CEnemyFSM
     protected override void Update()
     {
         DebugState();
-        _anim.SetInteger("Hp", _myPara._curHp);
+        _anim.SetInteger("Hp", _myPara.CurrentHp);
         _anim.SetBool("Hit", _getHit);
         _anim.SetBool("RandomWalk", _randomWalk);
         _anim.SetBool("Search", _search);

@@ -7,7 +7,7 @@ public class CFlameThrowerGroupController : MonoBehaviour
     [Tooltip("불 회전하는 속도")]
     public float degreePerSecond;
     [HideInInspector]
-    public Vector3 _flamethrowerDir; 
+    public Vector3 _flamethrowerDir;
 
     private void Start()
     {

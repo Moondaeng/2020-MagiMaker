@@ -6,14 +6,17 @@ public class CMonsterCheck : MonoBehaviour
 {
     public static CMonsterCheck instance = null;
 
+    private void Awake()
+    {
+        if (instance == null)
+            instance = this;
+    }
+
     private void Start()
     {
         GameObject[] monsters = GameObject.FindGameObjectsWithTag("Monster");
         foreach (GameObject monster in monsters)
             monster.SetActive(false);
-
-        if (instance == null)
-            instance = this;
     }
 
     public void ForceDeadMonster()
@@ -51,12 +54,12 @@ public class CMonsterCheck : MonoBehaviour
         {
             switch (CCreateMap.instance.userSelectRoom())
             {
-                case CGlobal.ERoomType._event:
+                case CCreateMap.ERoomType._event:
                     CGlobal.isEvent = false;
                     CCreateMap.instance.NotifyPortal();
                     break;
 
-                case CGlobal.ERoomType._boss:
+                case CCreateMap.ERoomType._boss:
                     break;
             }        
         }

@@ -8,18 +8,18 @@ public class CStartScene : MonoBehaviour
 {
     enum MessageCode
     {
-        LoginSuccess = 110,
-        RegisterSuccess = 111,
-        LobbySuccess = 112,
-        RegisterFail = 113,
-        LoginFail = 114,
+        LoginSuccess = 150,
+        RegisterSuccess = 151,
+        LobbySuccess = 152,
+        RegisterFail = 153,
+        LoginFail = 154,
     }
-    
-    private CLogComponent _logger;
+
     [SerializeField]
     private Network.CTcpClient _tcpManager;
 
     // Inspector에서 반드시 컴포넌트를 설정해줘야함
+    public Button tutorialBtn;
     public Button startBtn;
     public Button networkBtn;
     public Button exitBtn;
@@ -34,23 +34,25 @@ public class CStartScene : MonoBehaviour
     public GameObject loading;
     public Text errorHandlingDisplay;
 
+    [SerializeField] GameObject _debugPanel;
+    [SerializeField] Button _debugIpChangeButton;
+    [SerializeField] InputField _debugIpField;
+    [SerializeField] Button _debugPortChangeButton;
+    [SerializeField] InputField _debugPortField;
+
     public int timeout = 7;
-
-    // debug mode flag
-    public bool debug = false;
-
-    private void Awake()
-    {
-        _logger = new CLogComponent(ELogType.Network);
-    }
 
     private void Start()
     {
         _tcpManager = (Network.CTcpClient)FindObjectOfType(typeof(Network.CTcpClient));
 
+        if (tutorialBtn != null)
+        {
+            tutorialBtn.onClick.AddListener(StartTutorial);
+        }
         if (startBtn != null)
         {
-            startBtn.onClick.AddListener(StartGame);
+            startBtn.onClick.AddListener(StartSingleGame);
         }
         if (networkBtn != null)
         {
@@ -72,11 +74,29 @@ public class CStartScene : MonoBehaviour
         {
             CancelBtn.onClick.AddListener(CancelNetwork);
         }
+
+        if (!CClientInfo.IsDebugMode)
+        {
+            _debugPanel.SetActive(false);
+        }
+        else
+        {
+            DrawDebug();
+            _debugIpChangeButton.onClick.AddListener(ChangeIP);
+            _debugPortChangeButton.onClick.AddListener(ChangePort);
+        }
     }
 
-    private void StartGame()
+    private void StartTutorial()
     {
-        SceneManager.LoadScene("InGame");
+        CClientInfo.JoinRoom.CreateRoom(0);
+        SceneManager.LoadScene("Tutorial");
+    }
+
+    private void StartSingleGame()
+    {
+        CClientInfo.JoinRoom.CreateRoom(0);
+        SceneManager.LoadScene("Prototype");
     }
 
     private void ReadyToNetwork()
@@ -108,7 +128,7 @@ public class CStartScene : MonoBehaviour
         string id = LoginID.text;
         string pw = LoginPW.text;
 
-        if(id.Length == 0 || pw.Length == 0)
+        if (id.Length == 0 || pw.Length == 0)
         {
             ErrorHandling("아이디와 비밀번호를 입력해주세요!");
             return;
@@ -145,6 +165,7 @@ public class CStartScene : MonoBehaviour
         switch ((int)messageType)
         {
             case (int)MessageCode.LoginSuccess:
+                ErrorHandling("로그인 성공!");
                 InterpretLoginSuccess(packet);
                 break;
             case (int)MessageCode.RegisterSuccess:
@@ -152,6 +173,7 @@ public class CStartScene : MonoBehaviour
                 ErrorHandling("회원가입 완료");
                 break;
             case (int)MessageCode.LobbySuccess:
+                ErrorHandling("로비로 넘어갑니다");
                 InterpretLobbySuccess(packet);
                 break;
             case (int)MessageCode.RegisterFail:
@@ -186,7 +208,7 @@ public class CStartScene : MonoBehaviour
         CClientInfo.ThisUser = new CClientInfo.User(uid, id, clear);
 
         var message = Network.CPacketFactory.CreateLobbyRequest();
-        
+
         _tcpManager.Send(message.data);
     }
 
@@ -200,6 +222,36 @@ public class CStartScene : MonoBehaviour
     {
         errorHandlingDisplay.text = errorMsg;
     }
+
+    #region Debug
+    private void DrawDebug()
+    {
+        DrawIP();
+        DrawPort();
+    }
+
+    private void DrawIP()
+    {
+        _debugIpField.text = _tcpManager.ipString;
+    }
+
+    private void DrawPort()
+    {
+        _debugPortField.text = _tcpManager.port.ToString();
+    }
+
+    private void ChangeIP()
+    {
+        _tcpManager.ipString = _debugIpField.text;
+        Debug.Log($"Change IP to {_tcpManager.ipString}");
+    }
+
+    private void ChangePort()
+    {
+        _tcpManager.port = int.Parse(_debugPortField.text);
+        Debug.Log($"Change Port to {_tcpManager.port}");
+    }
+    #endregion
 
     // 에러 메세지 쓰기
     //private void ErrorHandling(string errorMsg)

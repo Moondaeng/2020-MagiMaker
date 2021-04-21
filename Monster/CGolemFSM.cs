@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -10,37 +10,32 @@ public class CGolemFSM : CEnemyFSM
     [SerializeField] GameObject _rock;
     GameObject Rock;
     ThrowObject RockScript;
+    CMonstermeleeChecker AttackTrail;
     bool _holding;
     bool _shooting;
     #endregion
-    
-
     protected override void InitStat()
     {
+        base.InitStat();
         _moveSpeed = 4f;
         _attackDistance = 7f;
         _attackAngle = 20f;
-
-        _anim = GetComponent<Animator>();
-        _myPara = GetComponent<CEnemyPara>();
-        _myPara.deadEvent.AddListener(CallDeadEvent);
+        var S1 = new SetSkillCoolTime
+        {
+            skillCoolDownDown = 6f,
+            skillCoolDownUp = 8f
+        };
+        var S2 = new SetSkillCoolTime
+        {
+            skillCoolDownDown = 6f,
+            skillCoolDownUp = 8f
+        };
+        SetSkillCoolTimeList.Add(S1);
+        SetSkillCoolTimeList.Add(S2);
+        SetCoolTime();
         _myPara.hitEvent.AddListener(CallHitEvent);
-
-        _idleState = Animator.StringToHash("Base Layer.Idle");
-        _walkState = Animator.StringToHash("Base Layer.Walk");
-        _attackState1 = Animator.StringToHash("Base Layer.Attack");
-        _waitState = Animator.StringToHash("Base Layer.AttackWait");
-        _skillState1 = Animator.StringToHash("Base Layer.Skill1");
-        _skillState2 = Animator.StringToHash("Base Layer.Skill2");
-        _gethitState = Animator.StringToHash("Base Layer.GetHit");
-        _deadState1 = Animator.StringToHash("Base Layer.Dead");
-
-        _cooltime = 1f;
-        _skillCooltime1 = 10f;
-        _skillCooltime2 = 15f;
-        _originCooltime = _cooltime;
-        _originSkillCooltime1 = _skillCooltime1;
-        _originSkillCooltime2 = _skillCooltime2;
+        Debug.Log(transform.GetChild(2).name);
+        AttackTrail = transform.GetChild(2).GetComponent<CMonstermeleeChecker>();
     }
 
     #region State
@@ -48,7 +43,7 @@ public class CGolemFSM : CEnemyFSM
     {
         if (_actionStart)
         {
-            _skillCooltime1 -= Time.deltaTime;
+            _skillCoolTime[0] -= Time.deltaTime;
             _skillCoolDown1 = true;
             //_skillCooltime2 -= Time.deltaTime;
             //_skillCoolDown2 = true;
@@ -58,14 +53,14 @@ public class CGolemFSM : CEnemyFSM
         else if (_currentBaseState.fullPathHash == _skillState1) SkillState1();
         else if (_currentBaseState.fullPathHash == _skillState2) SkillState2();
         else if (_currentBaseState.fullPathHash == _waitState) AttackWaitState();
-        else if (_currentBaseState.fullPathHash == _deadState1) DeadState1();
+        else if (_currentBaseState.fullPathHash == _deadState) DeadState();
 
-        if (_skillCooltime1 < 0f)
+        if (_skillCoolTime[0] < 0f)
         {
             _anim.SetTrigger("Skill1");
             _skillCoolDown1 = false;
         }
-        if (_skillCooltime2 < 0f)
+        if (_skillCoolTime[1] < 0f)
         {
             _anim.SetTrigger("Skill2");
             _skillCoolDown2 = false;
@@ -80,7 +75,6 @@ public class CGolemFSM : CEnemyFSM
     protected override void ChaseState()
     {
         base.ChaseState();
-        if (_currentBaseState.fullPathHash != _deadState1) MoveState();
     }
     #region Skill
     private void SkillState1()
@@ -94,7 +88,7 @@ public class CGolemFSM : CEnemyFSM
             {
                 Rock.SendMessage("StartShot");
                 _shooting = false;
-                _skillCooltime1 = _originSkillCooltime1;
+                _skillCoolTime[0] = _originSkillCoolTime[0];
                 _skillCoolDown1 = false;
             }
         }
@@ -111,7 +105,7 @@ public class CGolemFSM : CEnemyFSM
         RockScript.Projectile = Rock.transform;
         RockScript._myTransform = _hand.transform;
     }
-    
+
     private void OnHold()
     {
         _holding = true;
@@ -122,10 +116,16 @@ public class CGolemFSM : CEnemyFSM
         _holding = false;
         _shooting = true;
     }
-    
+
+    protected override void AttackDisabledCollider()
+    {
+        AttackTrail.DiscardList();
+    }
+
     #endregion
     #endregion
-    
+
+
     protected override void Update()
     {
         _anim.SetBool("CoolDown", _coolDown);
@@ -133,8 +133,8 @@ public class CGolemFSM : CEnemyFSM
         _anim.SetBool("CoolDown2", _skillCoolDown2);
         _anim.SetBool("AnotherAction", _anotherAction);
         _anim.SetBool("Hit", _getHit);
-        if (_getHit)  _getHit = false;
-        if (_currentBaseState.fullPathHash != _deadState1)
+        if (_getHit) _getHit = false;
+        if (_currentBaseState.fullPathHash != _deadState)
             IsLookPlayer();
         base.Update();
     }

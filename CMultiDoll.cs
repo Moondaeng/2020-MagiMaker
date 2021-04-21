@@ -7,18 +7,91 @@ using UnityEngine.Events;
 [RequireComponent(typeof(Animator))]
 public class CMultiDoll : MonoBehaviour
 {
+    public enum EAction
+    {
+        Idle,
+        Run,
+        Jump,
+        Roll,
+        Attack1,
+        Skill1,
+        Stun,
+        Knockback,
+        Dead = 10,
+    }
+
+    #region Properties
+    private Rigidbody _rigidbody;
     [SerializeField] public float _jumpPower = 12f;
     [Range(1f, 4f)] [SerializeField] float _gravityMultiplier = 3.5f;
     [SerializeField] float _groundCheckDistance = 0.5f;
+    private AnimatorStateInfo _currentBaseState;
+
+    // 법선 벡터 (
+    private Vector3 _groundNormal;
+
+    // 애니메이션 상태값
+    private bool _isGrounded;
+    private bool _jump;
+
+    // Run 보간용
+    [SerializeField] float moveSpeed = 5.5f;
+
+    private bool _isActing = false;
     private CEventTester _test;
     private Animator _animator;
-    
+    #endregion
+
     private void Start()
     {
         _animator = GetComponent<Animator>();
-        _test = GetComponent<CEventTester>();
-        _test.Attack.AddListener(Attack);
-        _test.Jump.AddListener(Jump);
+        _rigidbody = GetComponent<Rigidbody>();
+        _animator.SetFloat("Jump", -4f);
+
+        //_test = GetComponent<CEventTester>();
+        //_test.Attack.AddListener(Attack);
+        //_test.Jump.AddListener(Jump);
+    }
+
+    private void Update()
+    {
+        _animator.SetBool("OnGround", _isGrounded);
+
+        CheckGroundStatus();
+        if (_isGrounded) HandleGroundedMovement();
+        if (!_isGrounded) _animator.SetFloat("Jump", _rigidbody.velocity.y);
+    }
+
+    // RaycastHit을 이용한 땅에 붙어있는지 체크
+    void CheckGroundStatus()
+    {
+        RaycastHit hitInfo;
+        if (Physics.Raycast(transform.position + (Vector3.up * 0.1f),
+            Vector3.down, out hitInfo, _groundCheckDistance))
+        {
+            _groundNormal = hitInfo.normal;
+            _isGrounded = true;
+            _animator.applyRootMotion = true;
+        }
+        else
+        {
+            _isGrounded = false;
+            _groundNormal = hitInfo.normal;
+            _animator.applyRootMotion = false;
+        }
+    }
+
+    void HandleGroundedMovement()
+    {
+        // 점프 조건 1. 앉아 있지 않기 2. Idle 상태 3. 뛰는 상태
+        if (_jump && (_currentBaseState.IsName("Idle") || _currentBaseState.IsName("Run")))
+        {
+            _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, _jumpPower,
+                _rigidbody.velocity.z);
+            _isGrounded = false;
+            _animator.applyRootMotion = false;
+            _groundCheckDistance = 0.5f;
+        }
     }
 
     // 초안 
@@ -28,53 +101,49 @@ public class CMultiDoll : MonoBehaviour
 
     public void MoveTo(Vector3 targetPos)
     {
+        if (_isActing)
+        {
+            return;
+        }
+
+        targetPos.y = transform.position.y;
         transform.rotation = Quaternion.LookRotation(targetPos - transform.position);
         transform.position = Vector3.MoveTowards(transform.position,
                              targetPos, 1 * Time.deltaTime);
 
-        Move(0, 0);
-        CancelInvoke("MoveExit");   // 중복 호출 시 걷다가 멈추는 현상 방지
-        Invoke("MoveExit", 0.15f);
+        _animator.SetInteger("Motion", (int)EAction.Run);
+        CancelInvoke("RunEnd"); // 이전 달리기 명령 취소
+        Invoke("RunEnd", Vector3.Distance(transform.position, targetPos) / moveSpeed);    // 거리와 move speed를 보고 끄기
     }
 
-    public void RollTo(Vector3 targetPos)
+    private void RunEnd()
     {
-        transform.rotation = Quaternion.LookRotation(targetPos - transform.position);
-        Roll();
+        _animator.SetInteger("Motion", (int)EAction.Idle);
     }
 
-    public void Move(float x, float z)
+    public void RollTo(float rotateDirection)
     {
-        // x, z 값을 받아와서 lerp 하기
-
-        _animator.SetBool("Moving", true);
+        SetRotateByFloat(rotateDirection);
+        Act(EAction.Roll, 0.6f);
     }
 
-    public void MoveExit()
+    public void AttackTo(float rotateDirection)
     {
-        // lerp 끝날 시 호출
-
-        _animator.SetBool("Moving", false);
-    }
-
-    public void Attack()
-    {
-        _animator.SetTrigger("Attack");
+        SetRotateByFloat(rotateDirection);
+        Act(EAction.Attack1, 0.8f);
     }
     
     public void Skill()
     {
-        _animator.SetTrigger("Skill1");
+        Act(EAction.Skill1, 1.2f);
     }
 
-    public void Jump()
+    public void JumpTo(float rotateDirection)
     {
-        _animator.SetTrigger("Jump");
-    }
-
-    public void Roll()
-    {
-        _animator.SetTrigger("Roll");
+        SetRotateByFloat(rotateDirection);
+        Act(EAction.Jump, 0.6f);
+        _rigidbody.velocity = new Vector3(_rigidbody.velocity.x, _jumpPower,
+                _rigidbody.velocity.z);
     }
 
     public void Stun()
@@ -93,7 +162,32 @@ public class CMultiDoll : MonoBehaviour
         _animator.SetTrigger("DeadTrigger");
     }
 
+    private void Act(EAction action, float endTime)
+    {
+        // 행동 중 이동에 따른 행동 씹힘 방지
+        _isActing = true;
+        CancelInvoke("RunEnd");
 
+        _animator.SetInteger("Motion", (int)action);
+        Invoke("ActEnd", endTime);
+    }
+
+    private void ActEnd()
+    {
+        _isActing = false;
+        _animator.SetInteger("Motion", (int)EAction.Idle);
+    }
+
+    private void SetRotateByFloat(float rotateDirection)
+    {
+        var rotateVector3 = transform.rotation.eulerAngles;
+        rotateVector3.y = rotateDirection;
+        transform.rotation = Quaternion.Euler(rotateVector3);
+    }
+
+    #region Animation Event
+
+    #endregion
     // 점프할 발 체크 추후에 여기에 사운드 추가
     // 애니메이션 placeholder에 들어가있는 함수
     void FootR()
@@ -106,5 +200,20 @@ public class CMultiDoll : MonoBehaviour
 
     void Hit()
     {
+    }
+
+    void AttackDisabledRightCollider()
+    {
+
+    }
+
+    void SetRightStartPoint()
+    {
+
+    }
+
+    void RollStart()
+    {
+
     }
 }

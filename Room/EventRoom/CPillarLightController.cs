@@ -50,9 +50,9 @@ public class CPillarLightController : MonoBehaviour
             sphereCollider.radius += 0.1f;
             yield return new WaitForSeconds(0.1f);
         }
-        
+
         yield return new WaitForSeconds(3f);
-       
+
 
         light.intensity = 0;
         sphereCollider.radius = 0.1f;

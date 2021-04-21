@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class CMenuWindow : MonoBehaviour
 {
@@ -10,6 +8,7 @@ public class CMenuWindow : MonoBehaviour
 
     public Button QuitToLobbyBtn;
     public Button ReturnToGameBtn;
+    public Button HelpBtn;
 
     private void Awake()
     {
@@ -26,5 +25,22 @@ public class CMenuWindow : MonoBehaviour
     private void QuitToLobby()
     {
         Debug.Log("Quit to lobby");
+        if (Network.CTcpClient.instance.IsConnect)
+        {
+            if (CClientInfo.IsSinglePlay())
+            {
+                SceneManager.LoadScene("Lobby");
+            }
+            else
+            {
+                var message = Network.CPacketFactory.CreateReturnLobby(CClientInfo.JoinRoom.IsHost);
+
+                Network.CTcpClient.instance.Send(message.data);
+            }
+        }
+        else
+        {
+            SceneManager.LoadScene("Start");
+        }
     }
 }

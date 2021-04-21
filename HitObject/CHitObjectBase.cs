@@ -231,10 +231,7 @@ public class CHitObjectBase : MonoBehaviour
         var cPara = other.GetComponent<CharacterPara>();
         if (cPara != null)
         {
-            foreach (var effect in useEffects)
-            {
-                effect.TakeUseEffect(cPara);
-            }
+            cPara.TakeUseEffectHandleList(useEffects);
         }
     }
 }

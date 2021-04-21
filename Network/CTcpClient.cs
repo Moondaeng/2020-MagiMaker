@@ -19,23 +19,30 @@ namespace Network
 
     public sealed class CTcpClient : MonoBehaviour
     {
-        private static CLogComponent _logger;
-        private static CGameEvent _gameEvent;
-
-        public const int Shutdown = 910;
+        public const int Shutdown = 950;
 
         public delegate void PacketInterpret(byte[] buffer);
 
         public static CTcpClient instance;
 
         // The port number for the remote device.  
-        public Int32 port = 9000;
+        public Int32 port = 95200;
         public string ipString = "127.0.0.1";
         public ConcurrentQueue<byte[]> tcpBuffer = new ConcurrentQueue<byte[]>();
-        public bool IsConnect { get; private set; } = false;
-        public int RoomID = -1;
+        public bool IsConnect
+        {
+            get
+            {
+                if (_client == null)
+                {
+                    return false;
+                }
+                return _client.Connected;
+            }
+        }
 
-        private Socket _client;
+
+        private static Socket _client;
         private PacketInterpret _interpretFunc = null;
 
         private void Awake()
@@ -49,21 +56,6 @@ namespace Network
                 Destroy(gameObject);
             }
             DontDestroyOnLoad(gameObject);
-
-            StartClient();
-
-#if UNITY_EDITOR
-            string[] args = Environment.GetCommandLineArgs();
-            CClientInfo.ThisUser = new CClientInfo.User(0, "a4", 0);
-#else
-            string[] args = Environment.GetCommandLineArgs();
-            CClientInfo.ThisUser = new CClientInfo.User(0, args[1], 0);
-#endif
-        }
-
-        private void Start()
-        {
-            _logger = new CLogComponent(ELogType.Network);
         }
 
         private void Update()
@@ -94,6 +86,7 @@ namespace Network
             // Connect to a remote device.  
             try
             {
+                //_client.set
                 IPAddress ipAddress = IPAddress.Parse(ipString);
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
 
@@ -119,7 +112,6 @@ namespace Network
         {
             Debug.Log("Shutdown");
             // Release the socket
-            IsConnect = false;
             DeletePacketInterpret();
             while (tcpBuffer.TryDequeue(out byte[] data)) ;
             Debug.Log("Clean");
@@ -129,13 +121,12 @@ namespace Network
             _client = null;
         }
 
-        public void Send(Socket client, byte[] data)
+        public void Send(byte[] data)
         {
             // Begin sending the data to the remote device.  
             try
             {
-                //client.BeginSend(data, 0, data.Length, 0, null, client);
-                client.BeginSend(data, 0, data.Length, 0, new AsyncCallback(SendCallback), client);
+                _client.BeginSend(data, 0, data.Length, 0, new AsyncCallback(SendCallback), _client);
             }
             catch (Exception e)
             {
@@ -165,7 +156,6 @@ namespace Network
                 client.EndConnect(ar);
 
                 Debug.LogFormat("Socket connected to {0}", client.RemoteEndPoint.ToString());
-                IsConnect = true;
 
                 Receive(client);
             }
@@ -249,19 +239,14 @@ namespace Network
             return false;
         }
 
-        public void Send(byte[] data)
-        {
-            Send(_client, data);
-        }
-
         // 서버에 종료 요청
         public void SendShutdown()
         {
             if (!IsConnect) return;
 
             Debug.Log("Send Shutdown Message");
-            var packet = Network.CPacketFactory.CreateShutdownPacket();
-            Send(_client, packet.data);
+            var packet = CPacketFactory.CreateShutdownPacket();
+            Send(packet.data);
         }
     }
 }

@@ -80,6 +80,15 @@ public class CMouseFollower : MonoBehaviour
         //}
     }
 
+    private void OnApplicationFocus(bool focus)
+    {
+        if (focus)
+        {
+            Debug.Log("Focus On");
+            SetLockCursor(m_LockCursor);
+        }
+    }
+
     private void FixedUpdate()
     {
         // we update from here if updatetype is set to Fixed, or in auto mode,

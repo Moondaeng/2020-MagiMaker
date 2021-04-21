@@ -62,7 +62,7 @@ public class CharacterPara : MonoBehaviour
     #endregion
 
     #region 캐릭터 기본 능력치
-    public int CurrentHp
+    public virtual int CurrentHp
     {
         get { return _curHp; }
         protected set 
@@ -83,6 +83,7 @@ public class CharacterPara : MonoBehaviour
         }
     }
 
+    [Header("Status")]
     [Tooltip("최대 체력")] [SerializeField] public int _maxHp;
     [HideInInspector] public int _curHp;
     [Tooltip("최소 공격력")] [SerializeField] public int _attackMin;
@@ -481,8 +482,10 @@ public class CharacterPara : MonoBehaviour
 
         if (CurrentHp <= 0 && !_isDead)
         {
+            Debug.Log("Dead?");
             CurrentHp = 0;
             _isDead = true;
+
             deadEvent.Invoke();
         }
     }

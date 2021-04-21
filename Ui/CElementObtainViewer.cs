@@ -11,15 +11,13 @@ public class CElementObtainViewer : MonoBehaviour
     [SerializeField, EnumNamedArray(typeof(CPlayerSkill.ESkillElement))]
     private Sprite[] _elementImageArr = new Sprite[Enum.GetValues(typeof(CPlayerSkill.ESkillElement)).Length];
     private Transform[] mainElementPanels = new Transform[2];
-    private Transform[,] subElementPanels = new Transform[2,3];
-    
+    private Transform[,] subElementPanels = new Transform[2, 3];
+
     // 획득했음에도 사용하지 않으면 팝업 나오는 용
     private CPlayerSkill.ESkillElement _currentObtainingElement;
 
     private void Awake()
     {
-        Debug.Log("awake");
-
         if (instance == null)
         {
             instance = this;
@@ -28,17 +26,14 @@ public class CElementObtainViewer : MonoBehaviour
         // 주원소 개수만큼 패널 초기화
         for (int i = 0; i < 2; i++)
         {
-            Debug.Log($"ElementPanel{i}/MainElementPanel");
             mainElementPanels[i] = transform.Find($"ElementPanel{i}").Find("MainElementPanel");
             for (int j = 0; j < 3; j++)
             {
-                subElementPanels[i,j] = transform.Find($"ElementPanel{i}").Find($"SubElementPanel{j}");
+                subElementPanels[i, j] = transform.Find($"ElementPanel{i}").Find($"SubElementPanel{j}");
             }
         }
 
         transform.Find("CancelButton").GetComponent<Button>().onClick.AddListener(CancelChangeElement);
-
-        Debug.Log("awake end");
     }
 
     public void OpenViewer(CPlayerSkill playerSkill, bool isMainElement, CPlayerSkill.ESkillElement element)
@@ -49,7 +44,7 @@ public class CElementObtainViewer : MonoBehaviour
         SetObtainChangeButton(playerSkill, isMainElement, element);
     }
 
-    public void DrawPlayerElement(CPlayerSkill playerSkill)
+    private void DrawPlayerElement(CPlayerSkill playerSkill)
     {
         for (int i = 0; i < 2; i++)
         {
@@ -105,7 +100,6 @@ public class CElementObtainViewer : MonoBehaviour
     private void ChangeElement(CPlayerSkill playerSkill, bool isMainElement, CPlayerSkill.ESkillElement element, int mainSlot, int subSlot)
     {
         Debug.Log("ChangeElement function");
-
 
         if (isMainElement)
         {

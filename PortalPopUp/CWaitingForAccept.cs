@@ -23,6 +23,8 @@ public class CWaitingForAccept : MonoBehaviour
     public GameObject PortalAccept;
     public static CWaitingForAccept instance;
 
+    public bool isVoteEnable = true;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -31,12 +33,12 @@ public class CWaitingForAccept : MonoBehaviour
             instance = this;
         }
 
-        _playerCount = CPlayerCommand.instance.activePlayersCount;
+        _playerCount = CPlayerCommand.instance.ActivatedPlayersCount;
         _playerAccepts = new EAccept[_playerCount];
 
         Debug.Log("playerCount " + _playerCount);
         SetPlayerSelect();
-        ResetPortalUseSelect();    
+        ResetPortalUseSelect();
     }
 
     // Update is called once per frame
@@ -50,11 +52,12 @@ public class CWaitingForAccept : MonoBehaviour
         // 승낙, 거절 버튼
         if (Input.GetKeyDown(KeyCode.T))
         {
-            SetPortalUseSelect(CPlayerCommand.instance.ControlCharacterId, EAccept._accept);
+            //CPortalManager.instance.MoveToNextRoom();
+            SetPortalUseSelect(CPlayerCommand.instance.ControlCharacterID, EAccept._accept);
         }
         else if (Input.GetKeyDown(KeyCode.Y))
         {
-            SetPortalUseSelect(CPlayerCommand.instance.ControlCharacterId, EAccept._cancle);
+            SetPortalUseSelect(CPlayerCommand.instance.ControlCharacterID, EAccept._cancle);
         }
     }
 
@@ -63,7 +66,7 @@ public class CWaitingForAccept : MonoBehaviour
         for (int i = _playerCount; i < MAX_PLAYER_COUNT; i++)
         {
             _waitingForOtherPlayer.transform.GetChild(i).gameObject.SetActive(false);
-        }      
+        }
     }
 
     public void SetActivePortalPopup(bool value)
@@ -74,42 +77,46 @@ public class CWaitingForAccept : MonoBehaviour
 
     public void SetPortalUseSelect(int playerNumber, EAccept opinion)
     {
-        if (opinion != EAccept._waiting && _playerAccepts[playerNumber] != EAccept._waiting)
-        {
-            return;
-        }
+        //if (opinion != EAccept._waiting && _playerAccepts[playerNumber] != EAccept._waiting)
+        //{
+        //    return;
+        //}
         _playerAccepts[playerNumber] = opinion;
         LoadImage(playerNumber, opinion);
 
-        if(opinion == EAccept._accept)
+        if (opinion == EAccept._accept)
         {
             _acceptCount++;
-            if(Network.CTcpClient.instance != null)
-            {
-                var packet = Network.CPacketFactory.CreatePortalVote(0);
-                Network.CTcpClient.instance.Send(packet.data);
-            }
             // 싱글 / 멀티 플레이용 확인
-            if (CPlayerCommand.instance.activePlayersCount <= _acceptCount)
+            //Network.CNetworkEvent.instance.PortalVoteEvent?.Invoke(0);
+            //if (CPlayerCommand.instance.ActivatedPlayersCount <= _acceptCount)
+            if (CClientInfo.JoinRoom.IsHost)
             {
                 Debug.Log("Go Next Room");
                 CPortalManager portalManager = GameObject.Find("PortalManager").GetComponent<CPortalManager>();
                 SetActivePortalPopup(false);
-                portalManager.MoveToNextRoom();
+                CPortalManager.instance.EnterNextRoom();
+                //portalManager.MoveToNextRoom();
 
-                ResetPortalUseSelect();
+                CPlayerCommand.instance.Teleport(0, new Vector3(0, 1, 0));
+                CPlayerCommand.instance.Teleport(1, new Vector3(0, 1, 4));
+                CPlayerCommand.instance.Teleport(2, new Vector3(4, 1, 0));
+                CPlayerCommand.instance.Teleport(3, new Vector3(4, 1, 4));
+
+                //ResetPortalUseSelect();
             }
         }
-        else if(opinion == EAccept._cancle)
+        else if (opinion == EAccept._cancle)
         {
             // 취소 처리하고 몇 초 있다가 복구
             Invoke("CancelPortal", 3.0f);
-            if (Network.CTcpClient.instance != null)
-            {
-                var packet = Network.CPacketFactory.CreatePortalVote(1);
-                Network.CTcpClient.instance.Send(packet.data);
-            }
+            //Network.CNetworkEvent.instance.PortalVoteEvent?.Invoke(0);
         }
+    }
+
+    private void DisableVote()
+    {
+
     }
 
     private void LoadImage(int childNumber, EAccept opinion)
@@ -138,7 +145,7 @@ public class CWaitingForAccept : MonoBehaviour
     private void ResetPortalUseSelect()
     {
         _acceptCount = 0;
-        for(int i = 0; i < _playerCount; i++)
+        for (int i = 0; i < _playerCount; i++)
         {
             SetPortalUseSelect(i, EAccept._waiting);
         }

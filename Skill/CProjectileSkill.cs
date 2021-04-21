@@ -10,12 +10,6 @@ public class CProjectileSkill : MonoBehaviour
     public List<GameObject> _spellObject;
     private GameObject _prefabObject;
     private CParitcleSkillBase _prefabScript;
-    private static CLogComponent _log;
-
-    private void Awake()
-    {
-        _log = new CLogComponent(ELogType.Skill);
-    }
 
     // 스킬 포맷에 넣을 스킬
     public void Fireball(GameObject user, Vector3 targetPos)
@@ -42,7 +36,6 @@ public class CProjectileSkill : MonoBehaviour
     {
         MakeProjectilePrototype(user, targetPos, _spellObject[4], true, false);
     }
-
 
     // 투사체 발사 스킬 원형
     private void MakeProjectilePrototype(GameObject user, Vector3 targetPos, 
@@ -72,10 +65,10 @@ public class CProjectileSkill : MonoBehaviour
                 if (_prefabScript._isProjectile)
                 {
                     rotation = user.transform.rotation;
-                    if (_prefabScript.IsStartingStaff)
+                    if (_prefabScript.IsStartingPoint)
                     {
-                        //startPos = user.GetComponent<CCntl>().staff.transform.position;
-                        //_prefabObject.transform.position = startPos;
+                        startPos = user.GetComponent<CCntl>()._skillHand._skillStartPoint;
+                        _prefabObject.transform.position = startPos;
                     }
                     else
                     {
@@ -136,7 +129,7 @@ public class CProjectileSkill : MonoBehaviour
             projectile.tag = user.tag;
         }
         // 공격력 등 필요한 정보 넣기
-        //_prefabScript._attackPower = user.GetComponent<CharacterPara>().GetRandomAttack();
+        _prefabScript._attackPower = (int) user.GetComponent<CharacterPara>().GetRandomAttack();
         _prefabScript._skillUsingUser = user;
         // 원소 관련 정보
     }

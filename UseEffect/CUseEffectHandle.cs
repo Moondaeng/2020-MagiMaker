@@ -46,5 +46,13 @@ public static class CUseEffectHandleExplain
 public abstract class CUseEffectHandle : MonoBehaviour
 {
     public abstract void TakeUseEffect(CharacterPara cPara);
-    public abstract void EnhanceEffectByStat(CharacterPara userStatus);
+
+    /// <summary>
+    /// 효과를 사용자 능력치에 따라 강화시킴
+    /// </summary>
+    /// <param name="userStatus"></param>
+    public virtual void EnhanceEffectByStat(CharacterPara userStatus)
+    {
+
+    }
 }
