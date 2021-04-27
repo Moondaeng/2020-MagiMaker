@@ -132,11 +132,12 @@ public class CCntl : MonoBehaviour
         int i = 1;
         while (true)
         {
-            yield return new WaitForSeconds(.02f);
-            _rigidbody.AddForce(Direction * 30.0f * level / i, ForceMode.VelocityChange);
-            if (i > 10) break;
+            yield return new WaitForSeconds(Time.deltaTime);
+            _rigidbody.AddForce(Direction * 600.0f * level / i, ForceMode.Impulse);
+            if (i > 10 * level) break;
             i++;
         }
+        yield return null;
     }
     IEnumerator COSlowForSeconds(float level)
     {
@@ -443,7 +444,7 @@ public class CCntl : MonoBehaviour
             case "Gethit":
                 break;
             case "Stun":
-                StartCoroutine(COStun(level * 2.5f));
+                StartCoroutine(COStun(level * 2f));
                 break;
             case "Slow":
                 StartCoroutine(COSlowForSeconds(level));
@@ -477,7 +478,6 @@ public class CCntl : MonoBehaviour
     public void ExitStun()
     {
         _stun = false;
-        StopCoroutine(CO);
     }
 
     #endregion
