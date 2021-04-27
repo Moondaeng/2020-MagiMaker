@@ -13,12 +13,10 @@ public class CUIManager : MonoBehaviour
     // 플레이어 UI - 플레이어를 추적해서 그림
     public GameObject UiTargetObject;
     public CUiHpBar hpBarObject;
-    // Scene Canvas 설정 - Ui가 제대로 추가될 수 있도록 설정
-    public Transform UiCanvasTransform;
 
     [SerializeField] private CSkillUIManager _skillUIManager;
     [SerializeField] private CBuffTimerListUI _buffTimerUiList;
-    private CConsumableItemViewer _consumableViewer;
+    [SerializeField] private CConsumableItemViewer _consumableViewer;
     private COtherPlayerUiManager _otherPlayerUi;
 
     // 언제 어디서나 쉽게 접금할수 있도록 하기위해 만든 정적변수
@@ -36,9 +34,7 @@ public class CUIManager : MonoBehaviour
     {
         // 하위 UI 관리
         _skillUIManager = gameObject.GetComponent<CSkillUIManager>();
-        _consumableViewer = CConsumableItemViewer.instance;
         _otherPlayerUi = gameObject.GetComponent<COtherPlayerUiManager>();
-        SetSceneCanvas();
     }
 
     // 지정 캐릭터에 대한 UI를 그림
@@ -66,12 +62,6 @@ public class CUIManager : MonoBehaviour
         _buffTimerUiList.RegisterTimer(UiTargetObject);
         hpBarObject.Register(UiTargetObject.GetComponent<CharacterPara>());
         _consumableViewer.Register(UiTargetObject.GetComponent<CPlayerPara>().Inventory);
-    }
-
-    // 기본 Canvas 설정(초기화용)
-    private void SetSceneCanvas()
-    {
-        _otherPlayerUi.SetCanvas(UiCanvasTransform);
     }
 }
 

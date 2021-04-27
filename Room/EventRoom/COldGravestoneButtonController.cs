@@ -2,36 +2,54 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class COldGravestoneButtonController : MonoBehaviour
+public class COldGravestoneButtonController : CNPCPopUpController
 {
-    GameObject _oldGravestone;
-    GameObject _popUp;
-    private void Start()
+    private GameObject _oldGravestone;
+    private GameObject _monsterGroup;
+
+    private Color _color;
+    public override void Start()
     {
+        base.Start();
         _oldGravestone = GameObject.Find("OldGravestone");
-        _popUp = gameObject.transform.parent.gameObject;
+        _monsterGroup = GameObject.Find("MonsterGroup");
     }
+
+    public override void ChooseButton(int choose)
+    {
+        switch (choose)
+        {
+            case 0:
+                ClickRandomItem();
+                break;
+            case 1:
+                ClickCancel();
+                break;
+        }
+
+        CGlobal.popUpCancel = true;
+    }
+
     public void ClickRandomItem()
     {
-        Debug.Log("Get Item!");
-        Debug.Log("Summon Enemies");
+        GameObject item = CItemManager.instance.DropRandomItem(CCreateMap.instance.GetStageNumber(), CConstants.EQUIP_ITEM_TYPE);
+        item = Instantiate(item, _oldGravestone.transform.position, _oldGravestone.transform.rotation);
+        item.SetActive(true);
 
+        for (int i = 0; i < _monsterGroup.transform.childCount; i++)
+            _monsterGroup.transform.GetChild(i).gameObject.SetActive(true);
         CGlobal.isEvent = true; //적이 소환됬으므로 포탈 대기 상태
 
-        GameObject[] portalMom = GameObject.FindGameObjectsWithTag("PORTAL_MOM"); //포탈들 대기
-        foreach (GameObject obj in portalMom)
-            obj.SetActive(false);
+        CCreateMap.instance.NotifyPortal(); //플래그 바뀐 상태 방송하기
 
-        //추후에 몹 다잡으면 포탈 다시 돌려주는 코드 있어야함
-        foreach (GameObject obj in portalMom) //추후 삭제할 코드
-            obj.SetActive(true);
-
-        _popUp.SetActive(false);
         Destroy(_oldGravestone);
+
+        //debug
+        CMonsterCheck.instance.ForceDeadMonster();
     }
 
     public void ClickCancel()
     {
-        _popUp.SetActive(false);
+
     }
 }

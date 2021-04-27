@@ -6,27 +6,7 @@ using UnityEngine.AI;
 
 public class CEnemyNavFSM : MonoBehaviour
 {
-    //private class HostInfo
-    //{
-    //    bool sendMessage;
-    //    public HostInfo(bool send)
-    //    {
-    //        sendMessage = send;
-    //    }
-
-    //    public void SetMessageCheck(bool check)
-    //    {
-    //        sendMessage = check;
-    //    }
-
-    //    public bool GetMessageCheck()
-    //    {
-    //        return sendMessage;
-    //    }
-    //}
-    //HostInfo _hostMessage;
     public bool IsHost = true;
-
     public enum 
         CurrentState { idleEnter, idle, idleExit
             , traceEnter, trace, traceExit
@@ -34,28 +14,31 @@ public class CEnemyNavFSM : MonoBehaviour
             , skill1Enter, skill1, skill1Exit
             , skill2Enter, skill2, skill2Exit
             , skill3Enter, skill3, skill3Exit
-            , dead };
+            , hit ,dead };
     protected CurrentState curState = CurrentState.idle;
 
     protected NavMeshAgent nvAgent;
     protected CEnemyPara _myPara;
     protected Animator _anim;
-    protected AnimatorStateInfo _currentBaseState;      // 기본 레이어에 사용되는 애니메이터의 현재 상테에 대한 참조
+    // 기본 레이어에 사용되는 애니메이터의 현재 상테에 대한 참조
+    protected AnimatorStateInfo _currentBaseState;      
 
+    // 어떤 행동 뒤에 Idle 패턴으로 돌아가기 위한 변수
+    protected bool _idle = false;
+
+    [Header("기본 속성")]
     /// 추적에 필요한 속성
     [Tooltip(" 추적 사정거리 " )]
     public float _traceDist;
     protected GameObject _player;
     protected float _nearestPlayer;
+    [HideInInspector]public bool _isMove = false;
     /***************************/
-
     /* 공격에 필요한 속성 */
-    [HideInInspector]
-    public bool _isAttack = false;
-    [Tooltip(" 공격 사정거리 " )]
-    public float _attackDist;
-    [Tooltip(" 기본 공격 쿨타임 ")]
-    public float _cooltime;
+    [HideInInspector]public bool _isAttack = false;
+    [Tooltip(" 공격 사정거리 " )] public float _attackDist;
+    [Tooltip(" 기본 공격 쿨타임 ")] public float _cooltime;
+    [Tooltip("기본 공격 범위")][SerializeField] [Range(10f, 360f)] float _attackRadius = 60f;
     // 애니메이션 배속
     protected float _attackMultiply = 1f;
     [Tooltip("기본 공격 시, 멈칫 하게 하는 배수")]
@@ -65,30 +48,36 @@ public class CEnemyNavFSM : MonoBehaviour
     protected bool _actionStart = false;
 
     // 몬스터 기본 공격 Trail
-    protected CMonstermeleeChecker AttackTrail1, AttackTrail2;
-    
-    // 스킬 개수 및 스킬 쿨타임 설정
-    protected List<float> _skillCoolTime = new List<float>();
-    protected List<float> _originSkillCoolTime = new List<float>();
+    protected CMonsterAttackChecker AttackTrail1, AttackTrail2;
 
-    protected float _skillMultiply = 1f;
-    [HideInInspector]
-    public bool _isSkill1 = false;
-    protected float _skillMultiply2 = 1f;
-    [HideInInspector]
-    public bool _isSkill2 = false;
-    [Tooltip("스킬1 공격 시, 멈칫 하게 하는 배수")]
-    public float _basicSkillMultiply = .3f;
-    [Tooltip("스킬2 공격 시, 멈칫 하게 하는 배수")]
-    public float _basicSkillMultiply2 = .3f;
+    // 스킬 개수 및 스킬 쿨타임 설정
+    [System.Serializable]
+    protected class SkillProperty
+    {
+        // 스킬 오브젝트
+        public GameObject skill;
+        // 애니메이터에서 사용할 스킬 bool 값
+        [HideInInspector] public bool IsSkill;
+        // 애니메이터에서 사용할 스킬 배율
+
+        [Header("애니메이션 재생 배수")]
+        public float basicSkillMultiply;
+        [HideInInspector] public float skillMultiply;
+        // 스킬 쿨타임
+
+        [Header("스킬 쿨타임 범위")]
+        [HideInInspector] public float skillCoolTime;
+        [HideInInspector] public float originSkillCoolTime;
+        public float[] SkillCoolTimeRange = new float[2];
+    }
+
+    [Header("몬스터 스킬 속성 설정")]
+    [SerializeField] protected List<SkillProperty> _skillList = new List<SkillProperty>();
 
     // 히트 여부
-    [HideInInspector]
-    public bool _isHit = false;
+    [HideInInspector]public bool _isHit = false;
     // 사망 여부
-    [HideInInspector]
-    public bool _isDead = false;
-
+    [HideInInspector]public bool _isDead = false;
 
     // AI 정지 여부를 위해 존재하는 변수.
     protected bool _IsActiveCo = false;
@@ -119,7 +108,6 @@ public class CEnemyNavFSM : MonoBehaviour
         CMonsterManager.instance.HitEvent.AddListener(HitEvent);
         CMonsterManager.instance.SkillEvent1.AddListener(SkillEvent1);
         CMonsterManager.instance.SkillEvent2.AddListener(SkillEvent2);
-
         //CMonsterManager.instance._actionEvent.AddListener(OffCoroutine);
 
         // 호스트만 거리판별을 함.
@@ -133,26 +121,22 @@ public class CEnemyNavFSM : MonoBehaviour
             //_hostMessage = new HostInfo(false);
         }
         OnCoroutine();
-
+        SetSkillProperty();
         // 기본 값 2초
         _originCooltime = _cooltime != 0f ? _cooltime : 2f;
         _myPara.deadEvent.AddListener(CallDeadEvent);
-
-        Debug.Log(_player.name);
     }
 
-    protected void SetCoolTime(float[] Skillcooltime)
+    void SetSkillProperty()
     {
-        _originSkillCoolTime.Add(UnityEngine.Random.Range(Skillcooltime[0], Skillcooltime[1]));
-        _skillCoolTime.Add(UnityEngine.Random.Range(Skillcooltime[0], Skillcooltime[1]));
-    }
-
-    protected virtual void AttackDisabledCollider()
-    {
-        if (AttackTrail1 != null && AttackTrail1._attackedPlayer.Count > 0)
-            AttackTrail1.DiscardList();
-        if (AttackTrail2 != null && AttackTrail2._attackedPlayer.Count > 0)
-            AttackTrail2.DiscardList();
+        for (int i = 0; i < _skillList.Count; i++)
+        {
+            _skillList[i].originSkillCoolTime =
+                UnityEngine.Random.Range(_skillList[i].SkillCoolTimeRange[0], _skillList[i].SkillCoolTimeRange[1]);
+            _skillList[i].skillCoolTime =
+                UnityEngine.Random.Range(_skillList[i].SkillCoolTimeRange[0], _skillList[i].SkillCoolTimeRange[1]);
+            _skillList[i].skillMultiply = _skillList[i].basicSkillMultiply;
+        }
     }
     protected bool IsTargetInSight(float SightAngle, Transform Target)
     {
@@ -164,13 +148,29 @@ public class CEnemyNavFSM : MonoBehaviour
         if (theta <= SightAngle) return true;
         else return false;
     }
-
     protected virtual void TurnToDestination(Vector3 MyPosition, Vector3 TargetPosition)
     {
         Quaternion lookRotation = Quaternion.LookRotation(TargetPosition - MyPosition);
         transform.rotation = Quaternion.RotateTowards(transform.rotation, lookRotation, Time.deltaTime * nvAgent.angularSpeed);
     }
-
+    protected void SetOriginSkillCoolTime(int number, float seconds)
+    {
+        _skillList[number].skillCoolTime = _skillList[number].originSkillCoolTime + seconds;
+        _cooltime = _originCooltime;
+    }
+    // 몇 초 뒤에 Idle로 가는 명령
+    // 사용이유 : Idle 상태일 경우, OnCoroutine이 호출되는데
+    // 이 때, 호출할 수 있는 Idle 과, 모션만 같은 State를 하나 더주고
+    // OnCoroutine() 호출 타이밍을 조절하기 위해 작성
+    protected IEnumerator ReleaseStiffnessAfterSkill(float seconds)
+    {
+        _idle = false;
+        yield return new WaitForSeconds(seconds);
+        _idle = true;
+        yield return new WaitForSeconds(1f);
+        _idle = false;
+        yield return null;
+    }
     protected IEnumerator SelectPlayerforChase()
     {
         while (!_isDead)
@@ -191,7 +191,6 @@ public class CEnemyNavFSM : MonoBehaviour
             _nearestPlayer = SortedList[0].pDist;
         }
     }
-
     protected IEnumerator SingleCheckState()
     {
         while (!_isDead)
@@ -204,7 +203,7 @@ public class CEnemyNavFSM : MonoBehaviour
             }
             else if (_nearestPlayer <= _attackDist
                 && _cooltime < 0f
-                && IsTargetInSight(60f, _player.transform))
+                && IsTargetInSight(_attackRadius, _player.transform))
             {
                 curState = CurrentState.attackEnter;
             }
@@ -231,67 +230,34 @@ public class CEnemyNavFSM : MonoBehaviour
             switch (curState)
             {
                 case CurrentState.idleEnter:
-                    _anim.SetBool("Move", false);
-                    _anim.SetBool("Attack", false);
                     curState = CurrentState.idle;
                     break;
                 case CurrentState.idle:
-                    nvAgent.Stop();
+                    _idle = true;
+                    StopNavAgent();
                     break;
                 case CurrentState.traceEnter:
                     if (!_actionStart) _actionStart = true;
-                    _anim.SetBool("Move", true);
+                    ResetNavAgent();
                     curState = CurrentState.trace;
                     break;
                 case CurrentState.trace:
+                    _isMove = true;
                     TurnToDestination(this.transform.position, _player.transform.position);
                     nvAgent.destination = _player.transform.position;
-                    nvAgent.Resume();
                     break;
                 case CurrentState.attackEnter:
-                    nvAgent.Stop();
-                    _anim.SetBool("Move", false);
+                    StopNavAgent();
                     curState = CurrentState.attack;
                     break;
                 case CurrentState.attack:
-                    _anim.SetBool("Attack", true);
-                    break;
-                case CurrentState.attackExit:
-                    _anim.SetBool("Attack", false);
+                    StartCoroutine(BoolClicker(1));
                     break;
             }
 
             yield return null;
         }
     }
-
-    public void OnCoroutine()
-    {
-        Debug.Log("Start Coroutine");
-        if (IsHost)
-        {
-            Check1 = StartCoroutine(SingleCheckState());
-            Check2 = StartCoroutine(SingleCheckStateForAction());
-        }
-        else
-        {
-            Check1 = StartCoroutine(CheckState());
-            Check2 = StartCoroutine(CheckStateForAction());
-        }
-        _IsActiveCo = true;
-        _actionStart = true;
-    }
-
-    public void OffCoroutine()
-    {
-        Debug.Log("Stop Coroutine");
-        StopCoroutine(Check1);
-        StopCoroutine(Check2);
-        _IsActiveCo = false;
-        _actionStart = false;
-    }
-
-    protected void ResetCooltime() { _cooltime = _originCooltime; }
 
     protected IEnumerator CheckState()
     {
@@ -313,13 +279,6 @@ public class CEnemyNavFSM : MonoBehaviour
             }
         }
     }
-
-    /// <summary>
-    /// CheckState에서 정의한 현재 상태에 따른 액션
-    /// Animator의 Parameter값을 조절하여 애니메이션 출력을 함.,
-    /// 처음 진입은 무조건 ~~Enter State로 진입하여 Host의 판단 후, 본래의 State로 진입하게 함.
-    /// </summary>
-    /// <returns></returns>
     protected IEnumerator CheckStateForAction()
     {
         while (!_isDead)
@@ -373,21 +332,127 @@ public class CEnemyNavFSM : MonoBehaviour
 
     protected virtual void FixedUpdate()
     {
+        SetAnimatorBoolValue();
+        DecreaseCoolTime();
+    }
+    // Animator Bool 값 조절 만약 필요하다면 상속 클래스에서 override 해서 따로 쓰기
+    protected virtual void SetAnimatorBoolValue()
+    {
         _currentBaseState = _anim.GetCurrentAnimatorStateInfo(0);
         if (_cooltime >= 0f) _cooltime -= Time.deltaTime;
+        _anim.SetBool("Move", _isMove);
         _anim.SetFloat("AttackMultiply", _attackMultiply);
         _anim.SetBool("Hit", _isHit);
+        _anim.SetBool("Idle", _idle);
+        _anim.SetBool("Attack", _isAttack);
+        for (int i = 0; i < _skillList.Count; i++)
+        {
+            _anim.SetBool("Skill" + (i + 1).ToString(), _skillList[i].IsSkill);
+            _anim.SetFloat("SkillMultiply" + (i + 1).ToString(), _skillList[i].skillMultiply);
+        }
     }
 
-    public void ReleaseAllAnimatorBools()
+    // 기본적인 스킬 호출 프로세스
+    // Update구문에서 사용
+    protected void SkillChecker(int number, float seconds)
     {
-        _anim.SetBool("Dead", false);
-        _anim.SetBool("Move", false);
-        _anim.SetBool("Hit", false);
-        _anim.SetBool("Attack", false);
-        nvAgent.Stop();
+        if (_skillList[number].skillCoolTime <= 0f && _IsActiveCo 
+            && IsTargetInSight(_attackRadius, _player.transform))
+        {
+            OffCoroutine();
+            StopNavAgent();
+            SetOriginSkillCoolTime(number, 4f);
+            StartCoroutine(BoolClicker(number + 2));
+            StartCoroutine(ReleaseStiffnessAfterSkill(seconds));
+        }
+    }
+    protected void DecreaseCoolTime()
+    {
+        if (_actionStart && _IsActiveCo)
+        {
+            for (int i = 0; i < _skillList.Count; i++)
+            {
+                _skillList[i].skillCoolTime -= Time.deltaTime;
+            }
+        }
+    }
+    public void OnCoroutine()
+    {
+        Debug.Log("Start Coroutine");
+        if (IsHost)
+        {
+            Check1 = StartCoroutine(SingleCheckState());
+            Check2 = StartCoroutine(SingleCheckStateForAction());
+        }
+        else
+        {
+            Check1 = StartCoroutine(CheckState());
+            Check2 = StartCoroutine(CheckStateForAction());
+        }
+        _IsActiveCo = true;
+        _actionStart = true;
+    }
+    public void OffCoroutine()
+    {
+        Debug.Log("Stop Coroutine");
+        StopCoroutine(Check1);
+        StopCoroutine(Check2);
+        _IsActiveCo = false;
+        _actionStart = false;
+    }
+    // Navigator Agent 관리 미끄러지는 현상을 방지.
+    protected void StopNavAgent()
+    {
+        _isMove = false;
+        nvAgent.isStopped = true;
+        nvAgent.updatePosition = false;
+        nvAgent.updateRotation = false;
+        nvAgent.velocity = Vector3.zero;
+    }
+    protected void ResetNavAgent()
+    {
+        nvAgent.ResetPath();
+        nvAgent.isStopped = false;
+        nvAgent.updatePosition = true;
+        nvAgent.updateRotation = true;
+    }
+    protected IEnumerator BoolClicker(int Number)
+    {
+        Debug.Log("Start BoolClicker");
+        switch (Number)
+        {
+            case 1:
+                _isAttack = true;
+                yield return new WaitForSeconds(.2f);
+                _isAttack = false;
+                break;
+            case 2:
+                _skillList[0].IsSkill = true;
+                yield return new WaitForSeconds(.2f);
+                _skillList[0].IsSkill = false;
+                break;
+            case 3:
+                _skillList[1].IsSkill = true;
+                yield return new WaitForSeconds(.2f);
+                _skillList[1].IsSkill = false;
+                break;
+            case 4:
+                _skillList[2].IsSkill = true;
+                yield return new WaitForSeconds(.2f);
+                _skillList[2].IsSkill = false;
+                break;
+            case 0:
+                _isHit = true;
+                yield return new WaitForSeconds(.2f);
+                _isHit = false;
+                break;
+            default:
+                break;
+        }
+        yield return null;
     }
 
+    #region Para Event(Dead)
     protected void CallDeadEvent()
     {
         _isDead = true;
@@ -407,59 +472,37 @@ public class CEnemyNavFSM : MonoBehaviour
         Debug.Log("SetBool false");
         _anim.SetBool("Dead", false);
     }
+    #endregion
 
-    protected IEnumerator BoolClicker(int Number)
+    #region Monster Manager Call
+    public void ReleaseAllAnimatorBools()
     {
-        Debug.Log("Start BoolClicker");
-        switch(Number)
-        {
-            case 1:
-                _isAttack = true;
-                yield return new WaitForSeconds(.2f);
-                _isAttack = false;
-                break;
-            case 2:
-                _isSkill1 = true;
-                yield return new WaitForSeconds(.2f);
-                _isSkill1 = false;
-                break;
-            case 3:
-                _isSkill2 = true;
-                yield return new WaitForSeconds(.2f);
-                _isSkill2 = false;
-                break;
-            case 4:
-                _isHit = true;
-                yield return new WaitForSeconds(.2f);
-                _isHit = false;
-                break;
-            default:
-                break;
-        }
+        _isHit = false;
+        _isAttack = false;
+        _isHit = false;
+        _isMove = false;
+        _isDead = false;
+        nvAgent.Stop();
     }
+    public void AttackEvent() { StartCoroutine(BoolClicker(1)); }
+    public void SkillEvent1() { StartCoroutine(BoolClicker(2)); }
+    public void SkillEvent2() { StartCoroutine(BoolClicker(3)); }
+    public void HitEvent() { StartCoroutine(BoolClicker(4)); }
+    #endregion
 
-    public void AttackEvent()
+    #region Animator Function
+    protected virtual void AttackDisabledCollider()
     {
-        StartCoroutine(BoolClicker(1));
+        if (AttackTrail1 != null && AttackTrail1._attackedPlayer.Count > 0)
+            AttackTrail1.DiscardList();
+        if (AttackTrail2 != null && AttackTrail2._attackedPlayer.Count > 0)
+            AttackTrail2.DiscardList();
     }
-    
-    public void SkillEvent1()
-    {
-        StartCoroutine(BoolClicker(2));
-    }
-
-    public void SkillEvent2()
-    {
-        StartCoroutine(BoolClicker(3));
-    }
-
-    public void HitEvent()
-    {
-        StartCoroutine(BoolClicker(4));
-    }
-
-    void SetAttackMultiply() { _attackMultiply = _basicAttackMultiply; }
-    
-    void ReleaseAttackMultiply() { _attackMultiply = 1f; }
+    protected void ResetCooltime() { _cooltime = _originCooltime; }
+    protected void SetAttackMultiply() { _attackMultiply = _basicAttackMultiply; }
+    protected void ReleaseAttackMultiply() { _attackMultiply = 1f; }
+    protected void SetSkillMultiply(int i) { _skillList[i].skillMultiply = _skillList[i].basicSkillMultiply; }
+    protected void ReleaseSkill(int i) { _skillList[i].skillMultiply = 1f; }
+    #endregion
 
 }

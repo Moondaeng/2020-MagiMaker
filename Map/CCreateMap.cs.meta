@@ -1,0 +1,27 @@
+fileFormatVersion: 2
+guid: 71675be0f78f9cc4995dc28b2a74c5c4
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - startRoom: {fileID: 1008976351840110685, guid: 257ebc33c6ae3c840bcb3ab634a9eda5,
+      type: 3}
+  - bossRoom: {fileID: 6971190659990019987, guid: c687fdbc789bff44e9e92adfefe7c654,
+      type: 3}
+  - itemEliteRoom: {fileID: 716936246044637250, guid: d2b932bac951add488d21147a36b6c6a,
+      type: 3}
+  - skillEliteRoom: {fileID: 716936246044637250, guid: 423eb24894a8a954181f9f96b29ed07e,
+      type: 3}
+  - eventRoom: {fileID: 4459343142014141944, guid: dd1cec4d5608fc94684047a9fc86963f,
+      type: 3}
+  - shopRoom: {fileID: 1529987038143725359, guid: 3744b27c8001d254f837d14632e8450b,
+      type: 3}
+  - normalRoom: {fileID: 7487315788990306106, guid: a8ce147d269efe8498fc633587671194,
+      type: 3}
+  - portal: {fileID: 6625529865772309902, guid: 849374f10a3df6b48b518daf545d8e6b,
+      type: 3}
+  executionOrder: 100
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

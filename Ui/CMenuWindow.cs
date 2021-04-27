@@ -25,9 +25,22 @@ public class CMenuWindow : MonoBehaviour
     private void QuitToLobby()
     {
         Debug.Log("Quit to lobby");
-        // 싱글 게임이면 StartScene으로, 멀티 게임이면 Lobby로 나가져야 함
-        SceneManager.LoadScene("Start");
-        // 멀티 게임의 경우 서버 및 다른 플레이어에게 나갔음 알림을 보내야 함
-        // InvokeQuit();
+        if (Network.CTcpClient.instance.IsConnect)
+        {
+            if (CClientInfo.IsSinglePlay())
+            {
+                SceneManager.LoadScene("Lobby");
+            }
+            else
+            {
+                var message = Network.CPacketFactory.CreateReturnLobby(CClientInfo.JoinRoom.IsHost);
+
+                Network.CTcpClient.instance.Send(message.data);
+            }
+        }
+        else
+        {
+            SceneManager.LoadScene("Start");
+        }
     }
 }

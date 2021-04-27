@@ -8,11 +8,11 @@ public class CStartScene : MonoBehaviour
 {
     enum MessageCode
     {
-        LoginSuccess = 110,
-        RegisterSuccess = 111,
-        LobbySuccess = 112,
-        RegisterFail = 113,
-        LoginFail = 114,
+        LoginSuccess = 150,
+        RegisterSuccess = 151,
+        LobbySuccess = 152,
+        RegisterFail = 153,
+        LoginFail = 154,
     }
 
     [SerializeField]
@@ -89,13 +89,13 @@ public class CStartScene : MonoBehaviour
 
     private void StartTutorial()
     {
-        CClientInfo.CreateRoom(0);
+        CClientInfo.JoinRoom.CreateRoom(0);
         SceneManager.LoadScene("Tutorial");
     }
 
     private void StartSingleGame()
     {
-        CClientInfo.CreateRoom(0);
+        CClientInfo.JoinRoom.CreateRoom(0);
         SceneManager.LoadScene("Prototype");
     }
 
@@ -128,7 +128,7 @@ public class CStartScene : MonoBehaviour
         string id = LoginID.text;
         string pw = LoginPW.text;
 
-        if(id.Length == 0 || pw.Length == 0)
+        if (id.Length == 0 || pw.Length == 0)
         {
             ErrorHandling("아이디와 비밀번호를 입력해주세요!");
             return;
@@ -165,6 +165,7 @@ public class CStartScene : MonoBehaviour
         switch ((int)messageType)
         {
             case (int)MessageCode.LoginSuccess:
+                ErrorHandling("로그인 성공!");
                 InterpretLoginSuccess(packet);
                 break;
             case (int)MessageCode.RegisterSuccess:
@@ -172,6 +173,7 @@ public class CStartScene : MonoBehaviour
                 ErrorHandling("회원가입 완료");
                 break;
             case (int)MessageCode.LobbySuccess:
+                ErrorHandling("로비로 넘어갑니다");
                 InterpretLobbySuccess(packet);
                 break;
             case (int)MessageCode.RegisterFail:
@@ -206,7 +208,7 @@ public class CStartScene : MonoBehaviour
         CClientInfo.ThisUser = new CClientInfo.User(uid, id, clear);
 
         var message = Network.CPacketFactory.CreateLobbyRequest();
-        
+
         _tcpManager.Send(message.data);
     }
 

@@ -12,7 +12,7 @@ public class CWindowFacade : MonoBehaviour
     [SerializeField] private CInventoryWindow _inventoryWindow;
     [SerializeField] private CMenuWindow _menuWindow;
     [SerializeField] private CHelpWindow _helpWindow;
-    [SerializeField] private CElementObtainViewer _ObtainingElementViewer;
+    [SerializeField] private CElementWindow _elementWindow;
 
     private bool _isOtherWindowMode = false;
     private Stack<GameObject> _activedWindowStack = new Stack<GameObject>();
@@ -90,9 +90,10 @@ public class CWindowFacade : MonoBehaviour
 
     public void OpenObtainingElement(CPlayerSkill playerSkill, bool isMainElement, CPlayerSkill.ESkillElement element)
     {
-        PushActiveWindow(_ObtainingElementViewer.gameObject);
-        _ObtainingElementViewer.closeWindowCallback = CloseWindow;
-        _ObtainingElementViewer.DrawViewer(playerSkill, isMainElement, element);
+        PushActiveWindow(_elementWindow.gameObject);
+        _elementWindow.closeWindowCallback = CloseWindow;
+        _elementWindow.DrawPlayerElement(playerSkill);
+        _elementWindow.SetChangingElementState(playerSkill, isMainElement, element);
     }
 
     public void SetOtherWindowMode(bool isOtherWindow)

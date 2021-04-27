@@ -1,34 +1,53 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class CSkullButtonController : MonoBehaviour
+public class CSkullButtonController : CNPCPopUpController
 {
     GameObject _skull;
-    GameObject _popUp;
-    private void Start()
+    public override void Start()
     {
+        base.Start();
         _skull = GameObject.Find("Skull");
-        _popUp = gameObject.transform.parent.gameObject;
     }
+
+    public override void ChooseButton(int choose)
+    {
+        switch (choose)
+        {
+            case 0:
+                ClickRandomItem();
+                break;
+            case 1:
+                ClickRandomMinorElement();
+                break;
+            case 2:
+                ClickCancel();
+                break;
+        }
+
+        CGlobal.popUpCancel = true;
+    }
+
     public void ClickRandomItem()
     {
-        Debug.Log("Get Item!");
+        GameObject item = CItemManager.instance.DropRandomItem(CCreateMap.instance.GetStageNumber(), CConstants.EQUIP_ITEM_TYPE);
+        item = Instantiate(item, _skull.transform.position, _skull.transform.rotation);
+        item.SetActive(true);
+
         Debug.Log("Lose Max HP");
-        _popUp.SetActive(false);
         Destroy(_skull);
     }
-    
+
     public void ClickRandomMinorElement()
     {
         Debug.Log("Get Element!");
         Debug.Log("Lose Max HP");
-        _popUp.SetActive(false);
         Destroy(_skull);
     }
 
     public void ClickCancel()
     {
-        _popUp.SetActive(false);
     }
 }

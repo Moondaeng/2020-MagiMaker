@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class CEnemyPara : CharacterPara
 {
+    [HideInInspector]public Stack<int> _attacker = new Stack<int>();
     [System.Serializable]
     public class SkillType
     {
@@ -28,6 +29,8 @@ public class CEnemyPara : CharacterPara
         _isStunned = false;
         _isDead = false;
         _curHp = _maxHp;
+        _spawnID = 0;
+        _originPos = transform.position;
     }
     
     public void SetRespawn(GameObject respawn, int spawnID, Vector3 originPos)
@@ -39,6 +42,13 @@ public class CEnemyPara : CharacterPara
         //    + "  My originPos is : " + _originPos);
     }
 
+    // 방어력 계산식: 1000 / (950 + 10*방어력)
+    public void DamegedRegardDefence(int enemyAttack, int attackEnemy)
+    {
+        int damage = enemyAttack * 1000 / (950 + 10 * TotalDefenece);
+        _attacker.Push(attackEnemy);
+        DamagedDisregardDefence(damage);
+    }
     public void SetOffMonster()
     {
         Invoke("SetActiveFalse", 2f);

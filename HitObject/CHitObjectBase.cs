@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class CHitObjectBase : MonoBehaviour
 {
-    //[Tooltip("충돌 시 적용될 효과")]
-    //public List<CUseEffectHandle> useEffects;
+    [Tooltip("충돌 시 적용될 효과")]
+    public List<CUseEffectHandle> useEffects;
 
     [Tooltip("시작 시, 한번 재생되는 오디오 소스")]
     public AudioSource AudioSource;
@@ -231,7 +231,7 @@ public class CHitObjectBase : MonoBehaviour
         var cPara = other.GetComponent<CharacterPara>();
         if (cPara != null)
         {
-            //cPara.TakeUseEffectHandleList(useEffects);
+            cPara.TakeUseEffectHandleList(useEffects);
         }
     }
 }

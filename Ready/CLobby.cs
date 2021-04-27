@@ -11,11 +11,10 @@ public class CLobby : MonoBehaviour
 {
     public enum MessageCode
     {
-        RoomCreateAccept = 210,
-        RoomJoinAccept = 211,
-        RoomListAccept = 212,
-        RoomCountAccept = 213,
-        RoomJoinFail = 214,
+        RoomCreateAccept = 250,
+        RoomJoinAccept = 251,
+        RoomListAccept = 252,
+        RoomJoinFail = 254,
     }
 
     public bool debug; // debugMode
@@ -27,12 +26,16 @@ public class CLobby : MonoBehaviour
     public Transform RoomListTransform;
     public Button RefreshBtn;
     public Button CreateBtn;
+
+    public Button quitMessageButton;
     public Button QuitBtn;
 
     public int TotalRoomCount { get; private set; }
 
     [SerializeField] GameObject _debugPanel;
     [SerializeField] Button _debugAddRoomBtn;
+    [SerializeField] TMPro.TMP_Text _debugUserNameText;
+    [SerializeField] TMPro.TMP_Text _debugClearCountText;
 
     private int joinRoomNumber;
     private Network.CTcpClient _tcpManager;
@@ -57,7 +60,7 @@ public class CLobby : MonoBehaviour
 
     void Start()
     {
-        if(debug)
+        if (debug)
         {
             CClientInfo.ThisUser = new CClientInfo.User(1, "test", 5);
         }
@@ -86,8 +89,8 @@ public class CLobby : MonoBehaviour
         else
         {
             _debugAddRoomBtn.onClick.AddListener(AddFakeRoom);
+            UpdateUserInfo();
         }
-
 
         Debug.Log("UID : " + CClientInfo.ThisUser.uid);
     }
@@ -95,7 +98,7 @@ public class CLobby : MonoBehaviour
     // 리프레시 버튼을 눌렀을 때 방 리스트를 갱신
     public void RefreshRoom()
     {
-        if(debug)
+        if (debug)
         {
             DeleteAllRoomToListView();
 
@@ -112,7 +115,7 @@ public class CLobby : MonoBehaviour
     // 방 생성
     public void CreateRoomHandler()
     {
-        if(debug)
+        if (debug)
         {
             rooms.Add(new Room(-1, 1, "test"));
             Debug.LogFormat("Create Room : {0}", rooms.Count);
@@ -122,7 +125,7 @@ public class CLobby : MonoBehaviour
             return;
         }
 
-        var message =  Network.CPacketFactory.CreateRoomCreateRequest(CClientInfo.ThisUser.id);
+        var message = Network.CPacketFactory.CreateRoomCreateRequest(CClientInfo.ThisUser.id);
 
         _tcpManager.Send(message.data);
     }
@@ -130,24 +133,9 @@ public class CLobby : MonoBehaviour
     // 방에 들어가기
     public void JoinRoomRequest(int rid)
     {
-        if(debug)
-        {
-            int[] slot = new int[4] { 0, -1, 0, -1 };
-            var others = new List<CClientInfo.User> {
-                new CClientInfo.User(0, "abc", 10, 0),
-                new CClientInfo.User(0, "kim", 15, 2),
-                null
-            };
-            CClientInfo.ThisRoom = new CClientInfo.JoinRoom(150, slot, others, false);
-            CClientInfo.ThisUser.Slot = 1;
-            //CClientInfo.ThisUser.State = 0;
-
-            SceneManager.LoadScene("Room");
-            return;
-        }
         joinRoomNumber = rid;
 
-       var message = Network.CPacketFactory.CreateRoomJoinRequest(rid, CClientInfo.ThisUser.id);
+        var message = Network.CPacketFactory.CreateRoomJoinRequest(rid, CClientInfo.ThisUser.id);
 
         _tcpManager.Send(message.data);
     }
@@ -185,9 +173,6 @@ public class CLobby : MonoBehaviour
             case (int)MessageCode.RoomListAccept:
                 InterpretRenewRoomList(packet, (int)payloadSize);
                 break;
-            case (int)MessageCode.RoomCountAccept:
-                ErrorHandling("아이디 혹은 비밀번호가 일치하지 않습니다.");
-                break;
             case (int)MessageCode.RoomJoinFail:
                 ErrorHandling("방 접속에 실패했습니다");
                 break;
@@ -203,9 +188,9 @@ public class CLobby : MonoBehaviour
         Debug.Log("room Create");
         int rid = packet.ReadInt32();
 
-        CClientInfo.ThisRoom = new CClientInfo.JoinRoom(rid, new int[4] { 0, -1, -1, -1 }, new List<CClientInfo.User>(), true);
-        CClientInfo.ThisUser.Slot = 0;
-        
+        CClientInfo.JoinRoom.CreateRoom(rid);
+        CClientInfo.ThisUser.SlotNumber = 0;
+
         _tcpManager.DeletePacketInterpret();
         SceneManager.LoadScene("Room");
     }
@@ -215,16 +200,15 @@ public class CLobby : MonoBehaviour
     {
         Debug.Log("Renew Room");
 
-        DeleteAllRoomToListView();
         rooms.Clear();
 
-        int roomCount = payloadSize / 24;
+        int roomCount = payloadSize / CClientInfo.User.USER_DATA_SIZE;
 
-        if (payloadSize % 24 != 0)
+        if (payloadSize % CClientInfo.User.USER_DATA_SIZE != 0)
         {
             Debug.Log("Room Renew Error!");
         }
-        
+
         Debug.LogFormat("Room Count : {0}", roomCount);
 
         for (int i = 0; i < roomCount; i++)
@@ -244,12 +228,13 @@ public class CLobby : MonoBehaviour
     // 방 들어가기
     private void InterpretJoinRoom(Network.CPacket packet, int payloadSize)
     {
-        CClientInfo.ThisRoom = CClientInfo.JoinRoom.GetRoomInfo(joinRoomNumber, packet, payloadSize);
+        CClientInfo.JoinRoom.JoinToRoom(joinRoomNumber, packet, payloadSize);
 
         _tcpManager.DeletePacketInterpret();
         SceneManager.LoadScene("Room");
     }
 
+    #region UI
     // room 리스트를 읽고 현재 scrollView의 방 정보를 갱신한다
     public void RenewRoomListView()
     {
@@ -264,11 +249,9 @@ public class CLobby : MonoBehaviour
 
     private void DeleteAllRoomToListView()
     {
-        for (int i = 0; i < rooms.Count; i++)
+        for (int i = 0; i < RoomListTransform.childCount; i++)
         {
-            string name = "ReadyRoom" + i;
-            Debug.Log(name);
-            Destroy(GameObject.Find(name));
+            RoomListTransform.GetChild(i).gameObject.SetActive(false);
         }
     }
 
@@ -284,10 +267,21 @@ public class CLobby : MonoBehaviour
         roomCnt.text = rCnt + "/4";
         Button roomEnter = roomInstance.transform.Find("Enter").GetComponent<Button>();
         roomEnter.onClick.AddListener(() => JoinRoomRequest(rid));
+        roomEnter.onClick.AddListener(() => DisableButton(roomNumber));
     }
 
     private GameObject AddRoomInstance()
     {
+        for (int i = 0; i < RoomListTransform.childCount; i++)
+        {
+            GameObject notUsedRoomInstance;
+            if (!(notUsedRoomInstance = RoomListTransform.GetChild(i).gameObject).activeSelf)
+            {
+                notUsedRoomInstance.SetActive(true);
+                return notUsedRoomInstance;
+            }
+        }
+
         var roomInstance = Instantiate(roomPrefeb);
         var roomTransform = roomInstance.GetComponent<RectTransform>();
         var newPivot = new Vector2(0.5f, 1);
@@ -300,6 +294,11 @@ public class CLobby : MonoBehaviour
         return roomInstance;
     }
 
+    private void DisableButton(int roomNumber)
+    {
+        RoomListTransform.Find($"ReadyRoom" + roomNumber).gameObject.SetActive(false);
+    }
+
     private void AutoRoomListViewer(float roomInstanceHeight)
     {
         if (RoomListTransform.childCount >= 8)
@@ -310,6 +309,7 @@ public class CLobby : MonoBehaviour
             rectTransform.sizeDelta = newSize;
         }
     }
+    #endregion
 
     private void ErrorHandling(string errorMsg, string observer)
     {
@@ -331,6 +331,12 @@ public class CLobby : MonoBehaviour
     private void AddFakeRoom()
     {
         AddRoomToListView(5, "Fake", 3, RoomListTransform.childCount);
+    }
+
+    private void UpdateUserInfo()
+    {
+        _debugUserNameText.text = CClientInfo.ThisUser.id;
+        _debugClearCountText.text = CClientInfo.ThisUser.clear.ToString();
     }
     #endregion
 }

@@ -5,7 +5,10 @@ using UnityEngine.UI;
 
 public class CFadeInOut : MonoBehaviour
 {
+    [Tooltip("Fade효과 재생시간")]
     public float fadeTime = 10f; // Fade효과 재생시간
+    [Tooltip("페이드 인과 아웃 사이의 시간 거리")]
+    public float fadeTimeInterval = 3f; //페이드 인과 아웃 사이의 시간 거리
     public Image fadeImg;
     float start;
     float end;
@@ -99,7 +102,7 @@ public class CFadeInOut : MonoBehaviour
     IEnumerator FadeFlow()
     {
         yield return StartCoroutine(FadeOut());
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(fadeTimeInterval);
 
         PlayFadeIn();
     }

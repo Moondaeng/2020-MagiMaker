@@ -5,41 +5,60 @@ using UnityEngine;
 public class CEventRoomNpcClick : MonoBehaviour
 {
     private GameObject _eventRoom;
-    private GameObject _popUp;
+    public GameObject _popUp;
+    public static CEventRoomNpcClick instance = null;
+    public Stack<GameObject> _stackPopUp;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
+        if (instance == null)
+            instance = this;
+
+        instance._stackPopUp = new Stack<GameObject>();
+
         _eventRoom = gameObject.transform.parent.gameObject;
-        _popUp = _eventRoom.transform.Find("PopUp").gameObject;
+        _popUp = GameObject.Find("NPCPopUp");
         _popUp.SetActive(false);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
-            ClickNPC();
-
+#if UNITY_EDITOR
+        if (Input.GetKeyDown(KeyCode.Backspace))
+#else
         if (Input.GetKeyDown(KeyCode.Escape))
-            _popUp.SetActive(false);
-    }
-
-    void ClickNPC()
-    {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-        RaycastHit hit;
-
-        Physics.Raycast(ray, out hit);
-
-        if (hit.collider.gameObject.tag == "NPC")//마우스 가져간 대상이 상인 캐릭터인 경우
+#endif
         {
-            UseNPC();
+            CancelPopUp();
         }
     }
 
-    void UseNPC()
+    public void ChangePopUp(GameObject popUp)
+    {
+        instance._popUp = popUp;
+        instance._popUp.SetActive(false);
+    }
+
+    public void CancelPopUp()
+    {
+        Debug.Log($"{instance._stackPopUp.Count}");
+        if (instance._stackPopUp.Count != 0)
+        {
+            GameObject popUp = instance._stackPopUp.Pop();
+            popUp.SetActive(false);
+        }
+
+        if (instance._stackPopUp.Count == 0)
+        {
+            CWindowFacade.instance.SetOtherWindowMode(false);
+        }
+    }
+
+    public void UseNPC()
     {
         _popUp.SetActive(true);
+        instance._stackPopUp.Push(_popUp);
+        CWindowFacade.instance.SetOtherWindowMode(true);
     }
 }
