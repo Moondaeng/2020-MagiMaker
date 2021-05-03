@@ -210,34 +210,34 @@ public class CParitcleSkillBase : MonoBehaviour
         }
     }
 
-    protected void SwitchInType(AttackArgumentsList a, CBossPara b)
-    {
-        //damage, stun, KnockBack, Slow, Burn, Curse, Blind, DecreaseDefense, DecreaseAttack, Debuff
-        switch (a.type)
-        {
-            case AttackType.damage:
-                b.DamegedRegardDefence(_attackPower * a.arg1);
-                break;
-            case AttackType.stun:
-                break;
-            case AttackType.KnockBack:
-                break;
-            case AttackType.Slow:
-                break;
-            case AttackType.Burn:
-                break;
-            case AttackType.Curse:
-                break;
-            case AttackType.Blind:
-                break;
-            case AttackType.DecreaseDefense:
-                break;
-            case AttackType.DecreaseAttack:
-                break;
-            case AttackType.Debuff:
-                break;
-            default:
-                break;
-        }
-    }
+    //protected void SwitchInType(AttackArgumentsList a, CBossPara b)
+    //{
+    //    //damage, stun, KnockBack, Slow, Burn, Curse, Blind, DecreaseDefense, DecreaseAttack, Debuff
+    //    switch (a.type)
+    //    {
+    //        case AttackType.damage:
+    //            b.DamegedRegardDefence(_attackPower * a.arg1);
+    //            break;
+    //        case AttackType.stun:
+    //            break;
+    //        case AttackType.KnockBack:
+    //            break;
+    //        case AttackType.Slow:
+    //            break;
+    //        case AttackType.Burn:
+    //            break;
+    //        case AttackType.Curse:
+    //            break;
+    //        case AttackType.Blind:
+    //            break;
+    //        case AttackType.DecreaseDefense:
+    //            break;
+    //        case AttackType.DecreaseAttack:
+    //            break;
+    //        case AttackType.Debuff:
+    //            break;
+    //        default:
+    //            break;
+    //    }
+    //}
 }

@@ -21,6 +21,7 @@ public class CMonsterManager : MonoBehaviour
     public static int _skillWaitState3 = Animator.StringToHash("Base Layer.AnySub.SkillWait3");
     public static int _gethitState = Animator.StringToHash("Base Layer.AnySub.GetHit");
     public static int _deadState = Animator.StringToHash("Base Layer.AnySub.Dead");
+    [HideInInspector]
     public bool _IsOrder = false;
 
     private class MonsterInfo
@@ -147,10 +148,13 @@ public class CMonsterManager : MonoBehaviour
     /// <param name="playerID">몬스터의 행동</param>
     /// <param name="patternNumber">행동 대상</param>
 
-
+    [HideInInspector]
     public UnityEvent AttackEvent = new UnityEvent();
+    [HideInInspector]
     public UnityEvent SkillEvent1 = new UnityEvent();
+    [HideInInspector]
     public UnityEvent SkillEvent2 = new UnityEvent();
+    [HideInInspector]
     public UnityEvent HitEvent = new UnityEvent();
     
     public void OrderAction(int monsterID, int actionNumber)

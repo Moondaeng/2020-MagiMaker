@@ -15,7 +15,6 @@ public class CLobby : MonoBehaviour
         RoomJoinAccept = 251,
         RoomListAccept = 252,
         RoomJoinFail = 254,
-        Test = 655,
     }
 
     public bool debug; // debugMode

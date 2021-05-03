@@ -96,10 +96,10 @@ public class CParticleProjectile : CParitcleSkillBase, ICollisionHandler
             }
             else if (c.gameObject.tag == "Boss" && _skillUsingUser.tag == "Player")
             {
-                CBossPara b = c.gameObject.GetComponent<CBossPara>();
+                //CBossPara b = c.gameObject.GetComponent<CBossPara>();
                 foreach (AttackArgumentsList a in AttackArguments)
                 {
-                    SwitchInType(a, b);
+                    //SwitchInType(a, b);
                 }
             }
 

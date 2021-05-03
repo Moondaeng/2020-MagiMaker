@@ -67,7 +67,7 @@ public class CEnemyFSM : MonoBehaviour
     protected GameObject _player;                       // 가장 가까운 플레이어의 정보를 저장
     protected CPlayerPara _playerPara;                  // 가장 가가움 플레이어의 Para
     protected CEnemyPara _myPara;                       // 보스 몬스터를 제외한 Para
-    protected CBossPara _myBossPara;                    // 보스 몬스터 전용 Para
+    //protected CBossPara _myBossPara;                    // 보스 몬스터 전용 Para
     protected bool _lookAtPlayer; // 어떤 행동시에, 플레이어를 바라보게 하는 TurnToDestination을 OFF하게 하려는 목적을 가진 bool
     protected bool _coolDown;     // 평타 쿨타임 판단
     protected bool _skill1, _skill2, _skill3; // 스킬 행동의 중간단계의 동작을 관리하기 위한 bool
@@ -133,7 +133,7 @@ public class CEnemyFSM : MonoBehaviour
     {
         if (gameObject.tag == "Boss")
         {
-            _myBossPara = GetComponent<CBossPara>();
+            //_myBossPara = GetComponent<CBossPara>();
         }
         else
         {
@@ -417,7 +417,7 @@ public class CEnemyFSM : MonoBehaviour
         }
         else
         {
-            Debug.Log(_myBossPara._name + " is dead!");
+            //Debug.Log(_myBossPara._name + " is dead!");
         }
 
         Debug.Log("SetBool true");
@@ -463,7 +463,7 @@ public class CEnemyFSM : MonoBehaviour
         }
         else
         {
-            c.DamegedRegardDefence(_myBossPara.RandomAttackDamage());
+            //c.DamegedRegardDefence(_myBossPara.RandomAttackDamage());
         }
     }
 

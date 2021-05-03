@@ -173,10 +173,10 @@ public class CPortalManager : DestroyableSingleton<CPortalManager>
     {
         switch (portalTag)
         {
-            case "LEFT_PORTAL":     return 0;
-            case "PORTAL":          return 1;
-            case "RIGHT_PORTAL":    return 2;
-            default:                return -1;
+            case "LEFT_PORTAL": return 0;
+            case "PORTAL": return 1;
+            case "RIGHT_PORTAL": return 2;
+            default: return -1;
         }
     }
 

@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Text.RegularExpressions;
+
 public class CPlayerMeleecheker : MonoBehaviour
 {
     [Tooltip("충돌 시 적용될 효과")]
@@ -34,7 +36,9 @@ public class CPlayerMeleecheker : MonoBehaviour
         //    {
         //        _attackedMonster.Add(other.GetComponent<CEnemyPara>()._spawnID);
         //        var para = other.GetComponent<CEnemyPara>();
-        //        para.DamegedRegardDefence(_myPara.RandomAttackDamage());
+        //        string tempstr = Regex.Replace(transform.root.gameObject.name, @"\D", "");
+        //        int rstInt = int.Parse(tempstr);
+        //        para.DamegedRegardDefence(_myPara.RandomAttackDamage(), rstInt);
         //    }
         //}
     }

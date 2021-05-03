@@ -124,6 +124,16 @@ public class CTestController : MonoBehaviour
                 }
             }
         }
+
+        if (monsterManager == null)
+        {
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Delete))
+        {
+            monsterManager.DestroyAllMonsters();
+        }
     }
 
     private Vector3 GetHitPoint()
