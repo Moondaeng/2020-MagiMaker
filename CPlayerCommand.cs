@@ -10,6 +10,9 @@ public class CPlayerCommand : MonoBehaviour
     // 0번은 조작할 캐릭터, 나머지는 더미 캐릭터
     public List<GameObject> players = new List<GameObject>();
 
+    // 안 죽은 캐릭터 목록
+    public List<GameObject> AlivePlayers { get; private set; } = new List<GameObject>();
+
     public int ActivatedPlayersCount
     {
         get
@@ -63,6 +66,10 @@ public class CPlayerCommand : MonoBehaviour
         for (int i = 0; i < playerCount; i++)
         {
             players[i].SetActive(true);
+            if (!AlivePlayers.Exists(x => x == players[i]))
+            {
+                AlivePlayers.Add(players[i]);
+            }
         }
         _othersUiList.ActiveOtherPlayerUi(playerCount);
     }
@@ -76,6 +83,7 @@ public class CPlayerCommand : MonoBehaviour
         }
 
         players[playerNumber].SetActive(false);
+        AlivePlayers.Remove(players[playerNumber]);
         _othersUiList.DeactivateOtherPlayerUI(playerNumber);
     }
     #endregion
@@ -218,6 +226,28 @@ public class CPlayerCommand : MonoBehaviour
         //}
     }
     #endregion
+
+    /// <summary>
+    /// charID에 해당하는 캐릭터를 죽음 처리한다
+    /// isDead = true이면 살아있다 뜨는 캐릭터를 죽은 거로 처리
+    /// isDead = false이면 죽었다 뜨는 캐릭터를 산 거로 처리
+    /// </summary>
+    /// <param name="charID"></param>
+    /// <param name="isDead"></param>
+    public void SetDeadState(int charID, bool isDead)
+    {
+        if (isDead)
+        {
+            AlivePlayers.Remove(players[charID]);
+        }
+        else
+        {
+            if (!AlivePlayers.Exists(x => x == players[charID]))
+            {
+                AlivePlayers.Add(players[charID]);
+            }
+        }
+    }
 
     // 해당 캐릭터에게 데미지 주기
     public void DamageToCharacter(int charId, int damageScale)

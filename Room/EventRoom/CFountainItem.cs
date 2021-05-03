@@ -8,7 +8,7 @@ public class CFountainItem : CFountainItemTrigger
     public override void Start()
     {
         base.Start();
-        _item = CItemManager.instance.DropRandomItem(CCreateMap.instance.GetStageNumber(), CConstants.EQUIP_ITEM_TYPE);
+        _item = CItemManager.instance.DropRandomItem(CCreateMap.instance.StageNumber, CConstants.EQUIP_ITEM_TYPE);
     }
     public override void GetReward()
     {

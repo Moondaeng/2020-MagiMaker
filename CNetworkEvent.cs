@@ -95,7 +95,6 @@ namespace Network
             Debug.Log("Singleplay Mode");
             _playerCommand.SetActivePlayers(1);
             _playerCommand.SetMyCharacter(0);
-            CCreateMap.instance.CreateStage();
             CWaitingLoadViewer.Instance.FinishLoading();
         }
 
@@ -114,7 +113,7 @@ namespace Network
             // 포탈 관련
             UsePortalEvent += SendUsePortal;
             PortalVoteEvent += SendPortalVote;
-            CPortalManager.instance.EnterNextRoomEvent.AddListener(SendEnterNextRoom);
+            CPortalManager.instance.EnterNextRoom.AddListener(SendEnterNextRoom);
 
             if (CClientInfo.JoinRoom.IsHost)
             {
@@ -140,7 +139,6 @@ namespace Network
             // 몬스터 패턴 코드
             // 돈 획득
             // 방 생성
-            CCreateMap.instance.CreateRooms.AddListener(SendRoomsInfo);
         }
 
         private void AddSingleplayCode()
@@ -149,9 +147,7 @@ namespace Network
             // 돈 획득 바로하는 코드
             //EarnMoneyEvent.AddListener(_playerCommand.EarnMoneyAllCharacter);
             // 포탈 바로 이동하는 코드
-            CPortalManager.instance.EnterNextRoomEvent.AddListener(CPortalManager.instance.MoveToNextRoom);
-            // 방 생성 바로하는 코드
-            CCreateMap.instance.CreateRooms.AddListener(CCreateMap.instance.ReceiveRoomArr);
+            CPortalManager.instance.EnterNextRoom.AddListener(CPortalManager.instance.MoveToNextRoom);
         }
 
         private void SucceedHost()
@@ -225,9 +221,9 @@ namespace Network
             CTcpClient.instance.Send(packet.data);
         }
 
-        public static void SendEnterNextRoom()
+        public static void SendEnterNextRoom(int enteringRoomType, int enteringRoomNumber, int[] nextRoomTypeInfos)
         {
-            var packet = CPacketFactory.CreateEnterNextRoom();
+            var packet = CPacketFactory.CreateEnterNextRoom(enteringRoomType, enteringRoomNumber, nextRoomTypeInfos);
 
             CTcpClient.instance.Send(packet.data);
         }

@@ -42,7 +42,6 @@ namespace Network
             // 헤더 읽기
             CPacket packet = new CPacket(data);
             packet.ReadHeader(out byte payloadSize, out short messageType);
-            Debug.Log($"Header : payloadSize = {payloadSize}, messageType = {messageType}");
 
             if (_packetInterpretDict.TryGetValue((int)messageType, out var interpretFunc))
             {
@@ -50,7 +49,7 @@ namespace Network
             }
             else
             {
-                Debug.Log($"Unknown Message Type : {messageType}");
+                Debug.Log($"Unknown Header : payloadSize = {payloadSize}, messageType = {messageType}");
             }
         }
 
@@ -189,7 +188,7 @@ namespace Network
 
             id = packet.ReadInt32();
 
-            CWaitingForAccept.instance.SetActivePortalPopup(true);
+            CPortalManager.instance.SetActivePortalPopup(true);
             //playerCommander.UseSkill((int)id, (int)actionNumber, now, dest);
         }
 
@@ -205,11 +204,11 @@ namespace Network
 
             if (accept == 0)
             {
-                CWaitingForAccept.instance.SetPortalUseSelect(id, CWaitingForAccept.EAccept._accept);
+                CPortalManager.instance.SetPortalUseSelect(id, CPortalManager.EPortalVote.Accept);
             }
             else if (accept == 1)
             {
-                CWaitingForAccept.instance.SetPortalUseSelect(id, CWaitingForAccept.EAccept._cancle);
+                CPortalManager.instance.SetPortalUseSelect(id, CPortalManager.EPortalVote.Cancel);
             }
         }
 
@@ -217,49 +216,18 @@ namespace Network
         {
             Debug.Log("Enter Next Room");
 
-            CPortalManager.instance.MoveToNextRoom();
+            int enteringRoomType = packet.ReadInt32();
+            int enteringRoomNumber = packet.ReadInt32();
+            int[] nextRoomTypeInfos = new int[3];
+            nextRoomTypeInfos[0] = packet.ReadInt32();
+            nextRoomTypeInfos[1] = packet.ReadInt32();
+            nextRoomTypeInfos[2] = packet.ReadInt32();
+
+            Debug.Log($"interpret : {enteringRoomType} {enteringRoomNumber} {nextRoomTypeInfos[0]},{nextRoomTypeInfos[1]},{nextRoomTypeInfos[2]}");
+
+            CPortalManager.instance.MoveToNextRoom(enteringRoomType, enteringRoomNumber, nextRoomTypeInfos);
         }
 
-        private static void InterpretRoomTypeInfos(CPacket packet)
-        {
-            Debug.Log("Receive Room Type Infomation Packets");
-
-            int[,] rooms = new int[CConstants.ROOM_PER_STAGE, CConstants.MAX_ROAD];
-
-            for (int i = 0; i < CConstants.ROOM_PER_STAGE; i++)
-            {
-                string roomData = $"rooms type row {i} : ";
-                for (int j = 0; j < CConstants.MAX_ROAD; j++)
-                {
-                    rooms[i, j] = packet.ReadInt32();
-                    roomData += rooms[i, j];
-                }
-                Debug.Log(roomData);
-            }
-
-            CCreateMap.instance.ReceiveRoomArr(rooms);
-        }
-
-        private static void InterpretRoomNumberInfos(CPacket packet)
-        {
-            Debug.Log("Receive Room Number Infomation Packets");
-
-            int[,] rooms = new int[3, 10];
-
-            for (int i = 0; i < 3; i++)
-            {
-                string roomData = $"rooms number row {i} : ";
-                for (int j = 0; j < 10; j++)
-                {
-                    rooms[i, j] = packet.ReadInt32();
-                    roomData += rooms[i, j];
-                }
-                Debug.Log(roomData);
-            }
-
-            // Stage Number 추가 필요
-            CCreateMap.instance.NonHostRoomEnqueue(rooms, 0);
-        }
         #endregion
 
 
@@ -279,13 +247,13 @@ namespace Network
         {
             Debug.Log("All player Loading finished");
             CWaitingLoadViewer.Instance.FinishLoading();
-            if (CClientInfo.JoinRoom.IsHost)
-            {
-                CCreateMap.instance.CreateStage();
+            //if (CClientInfo.JoinRoom.IsHost)
+            //{
+            //    CCreateMap.instance.CreateStage();
 
-                var sendPacket = CPacketFactory.CreateRoomNumberInfo(CCreateMap.instance.randomRoomArray);
-                CTcpClient.instance.Send(sendPacket.data);
-            }
+            //    var sendPacket = CPacketFactory.CreateRoomNumberInfo(CCreateMap.instance.randomRoomArray);
+            //    CTcpClient.instance.Send(sendPacket.data);
+            //}
         }
         #endregion
         #endregion
@@ -314,6 +282,49 @@ namespace Network
 
             id = packet.ReadInt32();
 
+        }
+
+        [Obsolete]
+        private static void InterpretRoomTypeInfos(CPacket packet)
+        {
+            Debug.Log("Receive Room Type Infomation Packets");
+
+            int[,] rooms = new int[CConstants.ROOM_PER_STAGE, CConstants.MAX_ROAD];
+
+            for (int i = 0; i < CConstants.ROOM_PER_STAGE; i++)
+            {
+                string roomData = $"rooms type row {i} : ";
+                for (int j = 0; j < CConstants.MAX_ROAD; j++)
+                {
+                    rooms[i, j] = packet.ReadInt32();
+                    roomData += rooms[i, j];
+                }
+                Debug.Log(roomData);
+            }
+
+            //CCreateMap.instance.ReceiveRoomArr(rooms);
+        }
+
+        [Obsolete]
+        private static void InterpretRoomNumberInfos(CPacket packet)
+        {
+            Debug.Log("Receive Room Number Infomation Packets");
+
+            int[,] rooms = new int[3, 10];
+
+            for (int i = 0; i < 3; i++)
+            {
+                string roomData = $"rooms number row {i} : ";
+                for (int j = 0; j < 10; j++)
+                {
+                    rooms[i, j] = packet.ReadInt32();
+                    roomData += rooms[i, j];
+                }
+                Debug.Log(roomData);
+            }
+
+            // Stage Number 추가 필요
+            //CCreateMap.instance.NonHostRoomEnqueue(rooms, 0);
         }
         #endregion
     }

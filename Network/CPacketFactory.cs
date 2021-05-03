@@ -60,6 +60,7 @@ namespace Network
         {
             ChangePlayer = 1000,
             KickPlayer = 1001,
+            RoomTypeInfo = 1600,
         }
 
         #region Create Login Message
@@ -349,13 +350,15 @@ namespace Network
             return packet;
         }
 
-        public static CPacket CreateEnterNextRoom()
+        public static CPacket CreateEnterNextRoom(int enteringRoomType, int enteringRoomNumber, int[] nextRoomTypeInfos)
         {
-            byte messageSize = 0;
+            byte messageSize = 20;
 
             CPacket packet = new CPacket((int)messageSize);
 
             packet.WriteHeader(messageSize, (int)EMapInfo.EnterNextRoom);
+            packet.Write(enteringRoomType).Write(enteringRoomNumber)
+                .Write(nextRoomTypeInfos[0]).Write(nextRoomTypeInfos[1]).Write(nextRoomTypeInfos[2]);
 
             return packet;
         }
@@ -462,6 +465,17 @@ namespace Network
 
             packet.WriteHeader(messageSize, (int)EDebug.KickPlayer);
             packet.Write(playerNumber);
+
+            return packet;
+        }
+
+        public static CPacket CreateDebugRequsstRoomTypeInfo()
+        {
+            byte messageSize = 4;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)EDebug.RoomTypeInfo);
 
             return packet;
         }

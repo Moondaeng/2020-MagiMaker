@@ -3,27 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public enum AttackPower
-{
-    Attack,
-    Skill1,
-    Skill2,
-}
-
-public struct CrowdControl
-{
-    public bool Stun;
-    public bool Push;
-    public bool Slow;
-}
-
-public struct CrowdControlLevel
-{
-    public int Stun;
-    public int Push;
-    public int Slow;
-}
-
 public class CMonstermeleeChecker : MonoBehaviour
 {
     bool _exist;
@@ -41,10 +20,11 @@ public class CMonstermeleeChecker : MonoBehaviour
     void Start()
     {
         _mesh = GetComponent<MeshCollider>();
-        _myPara = transform.root.GetComponent<CEnemyPara>();
+        // 방 프리펩에 직접 넣으면 문제 생김
+        _myPara = GetComponentInParent<CEnemyPara>();
         if (_myPara == null)
         {
-            Debug.Log("fuck");
+            Debug.Log($"fuck - {transform.root.name}");
         }
     }
 
@@ -56,7 +36,7 @@ public class CMonstermeleeChecker : MonoBehaviour
         {
             for (int i = 0; i < _attackedPlayer.Count; i++)
             {
-                //Debug.Log(_attackedPlayer[i]);
+                Debug.Log(_attackedPlayer[i]);
                 if (other.name == _attackedPlayer[i])
                 {
                     _exist = true;

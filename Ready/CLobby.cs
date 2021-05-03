@@ -15,6 +15,7 @@ public class CLobby : MonoBehaviour
         RoomJoinAccept = 251,
         RoomListAccept = 252,
         RoomJoinFail = 254,
+        Test = 655,
     }
 
     public bool debug; // debugMode
@@ -278,6 +279,7 @@ public class CLobby : MonoBehaviour
             if (!(notUsedRoomInstance = RoomListTransform.GetChild(i).gameObject).activeSelf)
             {
                 notUsedRoomInstance.SetActive(true);
+                notUsedRoomInstance.transform.Find("Enter").GetComponent<Button>().interactable = true;
                 return notUsedRoomInstance;
             }
         }
@@ -296,7 +298,7 @@ public class CLobby : MonoBehaviour
 
     private void DisableButton(int roomNumber)
     {
-        RoomListTransform.Find($"ReadyRoom" + roomNumber).gameObject.SetActive(false);
+        RoomListTransform.Find($"ReadyRoom" + roomNumber).Find("Enter").GetComponent<Button>().interactable = false;
     }
 
     private void AutoRoomListViewer(float roomInstanceHeight)

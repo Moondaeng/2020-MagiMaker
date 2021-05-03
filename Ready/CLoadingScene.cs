@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CLoading : MonoBehaviour
+public class CLoadingScene : MonoBehaviour
 {
+    public Image progressBar;
+
     public Text loadingText;
     public string contents = "Connecting";
     public float dotInterval = 0.2f;

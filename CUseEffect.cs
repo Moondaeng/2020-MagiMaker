@@ -251,9 +251,7 @@ public class CUseEffect : CUseEffectHandle
 
         public void Enhance(int enhancePercent)
         {
-            Debug.Log($"enhancePercentRate = {enhancePercentRate}");
             enhancePercentRate = (enhancePercentRate * enhancePercent) / 100;
-            Debug.Log($"enhancePercentRate = {enhancePercentRate}");
         }
 
         public bool IsValid()

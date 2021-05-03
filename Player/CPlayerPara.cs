@@ -106,13 +106,14 @@ public class CPlayerPara : CharacterPara
         _invincibility = false;
         StopCoroutine(PowerOverwhelming());
         _obj.material.color = _originColor;
-        gameObject.layer = LayerMask.NameToLayer("DeadBody");
+        gameObject.layer = LayerMask.NameToLayer("Player");
     }
 
     public void OnInvincibility()
     {
         if (_invincibilityChecker)
         {
+            gameObject.layer = LayerMask.NameToLayer("DeadBody");
             _invincibilityChecker = false;
             StartCoroutine(PowerOverwhelming());
         }

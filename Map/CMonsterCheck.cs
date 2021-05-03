@@ -52,7 +52,7 @@ public class CMonsterCheck : MonoBehaviour
 
         if (monsters.Length == 0) //몬스터 오브젝트 없으면 이벤트 종료
         {
-            switch (CCreateMap.instance.userSelectRoom())
+            switch (CCreateMap.instance.UserSelectRoom)
             {
                 case CCreateMap.ERoomType._event:
                     CGlobal.isEvent = false;

@@ -84,6 +84,7 @@ public class CMonsterManager : MonoBehaviour
     {
         int monsterNum = CreateMonsterID();
         _monsterList.Add(new MonsterInfo(monsterNum, mon, mon.transform.position));
+        mon.GetComponent<CEnemyPara>().monsterHitEvent.AddListener(MonsterHit);
         return monsterNum;
     }
 
@@ -155,7 +156,6 @@ public class CMonsterManager : MonoBehaviour
     public void OrderAction(int monsterID, int actionNumber)
     {
 
-
     }
     public void OrderAction(int monsterID, int actionNumber, GameObject targetPlayerNumber)
     {
@@ -208,87 +208,74 @@ public class CMonsterManager : MonoBehaviour
 
     #endregion
 
-    private void Update()
+    #region Temp Function
+    public void SetOrderMode(bool isOrderMode)
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
+        for (int i = 0; i < _monsterList.Count; i++)
         {
-            for (int i = 0; i < _monsterList.Count; i++)
+            var _ = _monsterList[i].mObject.GetComponent<CEnemyNavFSM>();
+            // 몬스터 리스포너에서 몬스터의 리스트를 삭제하는 기능이 없으므로
+            // 죽은 몬스터에게 명령을 하지 않게함.
+            if (_._isDead == false)
             {
-                var _ = _monsterList[i].mObject.GetComponent<CEnemyNavFSM>();
-                // 몬스터 리스포너에서 몬스터의 리스트를 삭제하는 기능이 없으므로
-                // 죽은 몬스터에게 명령을 하지 않게함.
-                if (_._isDead == false)
+                _IsOrder = isOrderMode;
+                if (isOrderMode)
                 {
                     _.ReleaseAllAnimatorBools();
-                    _IsOrder = true;
                     _.OffCoroutine();
                 }
-            }
-        }
-
-        if (Input.GetKeyDown("2"))
-        {
-            for (int i = 0; i < _monsterList.Count; i++)
-            {
-                var _ = _monsterList[i].mObject.GetComponent<CEnemyNavFSM>();
-                if (_._isDead == false)
+                else
                 {
-                    _IsOrder = false;
                     _.OnCoroutine();
                 }
             }
         }
+    }
 
-        if (Input.GetKeyDown(KeyCode.Alpha3))
+    public void HitAllMonster()
+    {
+        for (int i = 0; i < _monsterList.Count; i++)
         {
-            for (int i = 0; i < _monsterList.Count; i++)
+            var _ = _monsterList[i].mObject.GetComponent<CEnemyNavFSM>();
+            if (_._isDead == false)
             {
-                var _ = _monsterList[i].mObject.GetComponent<CEnemyNavFSM>();
-                if (_._isDead == false)
-                {
-                    _.ReleaseAllAnimatorBools();
-                    HitEvent.Invoke();
-                }
+                _.ReleaseAllAnimatorBools();
+                HitEvent.Invoke();
             }
         }
+    }
 
-        if (Input.GetKeyDown(KeyCode.Alpha4))
+    public void AttackAllMonster()
+    {
+        for (int i = 0; i < _monsterList.Count; i++)
         {
-            for (int i = 0; i < _monsterList.Count; i++)
+            var _ = _monsterList[i].mObject.GetComponent<CEnemyNavFSM>();
+            if (_._isDead == false)
             {
-                var _ = _monsterList[i].mObject.GetComponent<CEnemyNavFSM>();
-                if (_._isDead == false)
-                {
-                    _.ReleaseAllAnimatorBools();
-                    AttackEvent.Invoke();
-                }
+                _.ReleaseAllAnimatorBools();
+                AttackEvent.Invoke();
             }
         }
+    }
 
-        if (Input.GetKeyDown(KeyCode.Alpha5))
+    public void SkillAllMonster(int skillNumber)
+    {
+        for (int i = 0; i < _monsterList.Count; i++)
         {
-            for (int i = 0; i < _monsterList.Count; i++)
+            var _ = _monsterList[i].mObject.GetComponent<CEnemyNavFSM>();
+            if (_._isDead == false)
             {
-                var _ = _monsterList[i].mObject.GetComponent<CEnemyNavFSM>();
-                if (_._isDead == false)
+                _.ReleaseAllAnimatorBools();
+                if (skillNumber == 1)
                 {
-                    _.ReleaseAllAnimatorBools();
                     SkillEvent1.Invoke();
                 }
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.Alpha6))
-        {
-            for (int i = 0; i < _monsterList.Count; i++)
-            {
-                var _ = _monsterList[i].mObject.GetComponent<CEnemyNavFSM>();
-                if (_._isDead == false)
+                else if (skillNumber == 2)
                 {
-                    _.ReleaseAllAnimatorBools();
                     SkillEvent2.Invoke();
                 }
             }
         }
     }
+    #endregion
 }

@@ -84,7 +84,6 @@ public class CMouseFollower : MonoBehaviour
     {
         if (focus)
         {
-            Debug.Log("Focus On");
             SetLockCursor(m_LockCursor);
         }
     }

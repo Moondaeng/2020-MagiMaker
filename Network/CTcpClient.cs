@@ -20,6 +20,7 @@ namespace Network
     public sealed class CTcpClient : MonoBehaviour
     {
         public const int Shutdown = 950;
+        public static readonly int CONNECT_END = 954;
 
         public delegate void PacketInterpret(byte[] buffer);
 
@@ -219,7 +220,6 @@ namespace Network
 
                 // Complete sending the data to the remote device.  
                 int bytesSent = client.EndSend(ar);
-                Debug.LogFormat("Sent {0} bytes to server.", bytesSent);
             }
             catch (Exception e)
             {
@@ -233,7 +233,7 @@ namespace Network
 
             var messageCode = System.BitConverter.ToInt16(data, messageTypePos);
 
-            if (messageCode == Shutdown)
+            if (messageCode == Shutdown || messageCode == CONNECT_END)
                 return true;
 
             return false;

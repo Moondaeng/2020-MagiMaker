@@ -392,8 +392,6 @@ public class CController : MonoBehaviour
             }
         }
 
-        Debug.Log($"rotate : {rotateY}");
-
         PlayerRollEvent?.Invoke(player.transform.position, rotateY);
     }
 

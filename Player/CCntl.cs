@@ -189,7 +189,7 @@ public class CCntl : MonoBehaviour
             if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
             {
                 //print("I'm looking at " + hit.transform.name);
-                GetComponent<CController>().hit = hit;
+                //GetComponent<CController>().hit = hit;
             }
             if (indexer == 2)
             {
@@ -425,6 +425,11 @@ public class CCntl : MonoBehaviour
     {
         _skillHand.handPoint = false;
         _skillHand._skillStartPoint = _handCollider[1].gameObject.transform.position;
+    }
+
+    private void BeginEffect()
+    {
+
     }
 
     private void AttackStart()

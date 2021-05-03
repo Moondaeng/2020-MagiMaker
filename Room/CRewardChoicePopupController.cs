@@ -17,13 +17,13 @@ public class CRewardChoicePopupController : CNPCPopUpController
     {
         base.Start();
 
-        if (CCreateMap.instance.userSelectRoom() == CCreateMap.ERoomType._elite) //유저가 보스 엘리트 중 어떤 방에 들어온 것인지 확인.
+        if (CCreateMap.instance.UserSelectRoom == CCreateMap.ERoomType._elite) //유저가 보스 엘리트 중 어떤 방에 들어온 것인지 확인.
         {
             _userSelectRoom = 0;
             isBoss[_userSelectRoom] = false;
             _elementName[_userSelectRoom] = "부원소";
         }
-        else if (CCreateMap.instance.userSelectRoom() == CCreateMap.ERoomType._boss)
+        else if (CCreateMap.instance.UserSelectRoom == CCreateMap.ERoomType._boss)
         {
             _userSelectRoom = 1;
             isBoss[_userSelectRoom] = true;
@@ -42,7 +42,7 @@ public class CRewardChoicePopupController : CNPCPopUpController
     private void MakeText()
     {
         TMPro.TextMeshProUGUI goldText = _popUp.transform.GetChild(2).GetChild(0).GetComponent<TMPro.TextMeshProUGUI>(); //골드 보상 결정
-        _gold = 300 + (100 * _userSelectRoom) + (CCreateMap.instance._stageNumber + 1) * UnityEngine.Random.Range(50, 100);
+        _gold = 300 + (100 * _userSelectRoom) + (CCreateMap.instance.StageNumber + 1) * UnityEngine.Random.Range(50, 100);
         goldText.text = _gold.ToString() + goldText.text;
 
         TMPro.TextMeshProUGUI itemText = _popUp.transform.GetChild(1).GetChild(0).GetComponent<TMPro.TextMeshProUGUI>(); //아이템 보상 텍스트
