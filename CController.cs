@@ -32,6 +32,8 @@ public class CController : MonoBehaviour
     public CharacterJumpEvent PlayerJumpEvent = new CharacterJumpEvent();
     public CharacterActionEvent PlayerAttackEvent = new CharacterActionEvent();
     public CharacterActionEvent PlayerRollEvent = new CharacterActionEvent();
+
+    public bool IsEventable = true;
     #endregion
 
     #region 컨트롤러 모드 관리
@@ -151,7 +153,7 @@ public class CController : MonoBehaviour
         {
             // 비교
             var differ = previousPlayerPos - player.transform.position;
-            if (differ.magnitude > 0.01f)
+            if (IsEventable && differ.magnitude > 0.1f)
             {
                 // 전송 - 이동 명령
                 //Debug.Log($"move character {previousPlayerPos.x}, {previousPlayerPos.y}, {previousPlayerPos.z}" +
@@ -337,6 +339,11 @@ public class CController : MonoBehaviour
 
     private void AttackAction()
     {
+        if (!IsEventable)
+        {
+            return;
+        }
+
         float rotateY = _camera.transform.rotation.eulerAngles.y + 180f;
         if (rotateY > 360f)
         {
@@ -347,6 +354,11 @@ public class CController : MonoBehaviour
 
     private void JumpAction()
     {
+        if (!IsEventable)
+        {
+            return;
+        }
+
         // 입력에 따른 보정
         float rotateY;
         bool isMoving;
@@ -376,6 +388,11 @@ public class CController : MonoBehaviour
 
     private void RollAction()
     {
+        if (!IsEventable)
+        {
+            return;
+        }
+
         // 입력에 따른 보정
         float rotateY;
 
@@ -397,6 +414,11 @@ public class CController : MonoBehaviour
 
     private void SkillAction(int actionNumber, Vector3 targetPos)
     {
+        if (!IsEventable)
+        {
+            return;
+        }
+
         gameEvent.PlayerAction(actionNumber, player.transform.position, targetPos);
     }
     #endregion

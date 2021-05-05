@@ -20,7 +20,7 @@ public abstract class CPortal : MonoBehaviour
             FadeController.transform.Find("FadeCanvas").gameObject.SetActive(false);
             CPortalManager.instance.PortalPopup.SetActive(true);
             CPortalManager.instance.SelectedPortalStr = gameObject.tag;
-            Network.CNetworkEvent.instance.UsePortalEvent?.Invoke();
+            //Network.CNetworkEvent.instance.UsePortalEvent?.Invoke();
         }
     }
 

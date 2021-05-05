@@ -51,9 +51,8 @@ namespace Network
 
         enum EMapInfo
         {
-            EnterNextRoom = 605,
-            RoomTypeInfo = 603,
-            RoomNumberInfo = 604,
+            WaitEntering = 603,
+            EnterNextRoom = 604,
         }
 
         enum EDebug
@@ -350,6 +349,17 @@ namespace Network
             return packet;
         }
 
+        public static CPacket CreateWaitEntering()
+        {
+            byte messageSize = 0;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)EMapInfo.WaitEntering);
+
+            return packet;
+        }
+
         public static CPacket CreateEnterNextRoom(int enteringRoomType, int enteringRoomNumber, int[] nextRoomTypeInfos)
         {
             byte messageSize = 20;
@@ -371,7 +381,7 @@ namespace Network
 
             CPacket packet = new CPacket((int)messageSize);
 
-            packet.WriteHeader(messageSize, (int)EMapInfo.RoomTypeInfo);
+            //packet.WriteHeader(messageSize, (int)EMapInfo.RoomTypeInfo);
             for (int i = 0; i < CConstants.ROOM_PER_STAGE; i++)
             {
                 for (int j = 0; j < CConstants.MAX_ROAD; j++)
@@ -391,7 +401,7 @@ namespace Network
 
             CPacket packet = new CPacket((int)messageSize);
 
-            packet.WriteHeader(messageSize, (int)EMapInfo.RoomNumberInfo);
+            //packet.WriteHeader(messageSize, (int)EMapInfo.RoomNumberInfo);
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 10; j++)

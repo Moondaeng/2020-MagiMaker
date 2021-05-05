@@ -28,9 +28,8 @@ namespace Network
             // 포탈, 맵
             [651] = InterpretPortalAccept,
             [652] = InterpretUsePortal,
-            [653] = InterpretRoomTypeInfos,
-            [654] = InterpretRoomNumberInfos,
-            [655] = InterpretEnterNextRoom,
+            [653] = InterpretWaitEnterNextRoom,
+            [654] = InterpretEnterNextRoom,
             // 시스템
             [951] = InterpretReturnLobby,
             [952] = InterpretQuitGame,
@@ -212,6 +211,12 @@ namespace Network
             }
         }
 
+        private static void InterpretWaitEnterNextRoom(CPacket packet)
+        {
+            Debug.Log("Wait Entering");
+            CPortalManager.instance.WaitEntering();
+        }
+
         private static void InterpretEnterNextRoom(CPacket packet)
         {
             Debug.Log("Enter Next Room");
@@ -227,7 +232,6 @@ namespace Network
 
             CPortalManager.instance.MoveToNextRoom(enteringRoomType, enteringRoomNumber, nextRoomTypeInfos);
         }
-
         #endregion
 
 

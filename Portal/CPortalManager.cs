@@ -31,6 +31,7 @@ public class CPortalManager : DestroyableSingleton<CPortalManager>
 
     public static CPortalManager instance;
 
+    public UnityEvent WaitEnterRoom = new UnityEvent();
     public EnterNextRoomEvent EnterNextRoom = new EnterNextRoomEvent();
 
     private void Awake()
@@ -109,11 +110,8 @@ public class CPortalManager : DestroyableSingleton<CPortalManager>
             {
                 Debug.Log("Go Next Room");
                 PortalPopup.SetActive(false);
-                var info = CCreateMap.instance.CreateNextRoomInfo(InvertSelectedPortalTagToInt(SelectedPortalStr));
-                Debug.Log($"{info.Item1} {info.Item2} {info.Item3[0]}, {info.Item3[1]}, {info.Item3[2]}");
-                EnterNextRoom?.Invoke(info.Item1, info.Item2, info.Item3);
 
-                //MoveToNextRoom();
+                WaitEnterRoom?.Invoke();
 
                 CPlayerCommand.instance.Teleport(0, new Vector3(0, 1, 0));
                 CPlayerCommand.instance.Teleport(1, new Vector3(0, 1, 4));
@@ -180,11 +178,33 @@ public class CPortalManager : DestroyableSingleton<CPortalManager>
         }
     }
 
+    public void WaitEntering()
+    {
+        CController.instance.IsEventable = false;
+        if (CClientInfo.JoinRoom.IsHost)
+        {
+            Invoke("ExecuteEnterNextRoom", 0.5f);
+        }
+    }
+
+    public void ExecuteEnterNextRoom()
+    {
+        var info = CCreateMap.instance.CreateNextRoomInfo(InvertSelectedPortalTagToInt(SelectedPortalStr));
+        Debug.Log($"{info.Item1} {info.Item2} {info.Item3[0]}, {info.Item3[1]}, {info.Item3[2]}");
+        EnterNextRoom?.Invoke(info.Item1, info.Item2, info.Item3);
+    }
+
     public void MoveToNextRoom(int enteringRoomType, int enteringRoomNumber, int[] nextRoomTypeInfos)
     {
+        CController.instance.IsEventable = false;
         FadeController.transform.Find("FadeCanvas").gameObject.SetActive(true);
         CFadeInOut.instance.PlayFadeFlow(); //다음 방 넘어갈 때, 페이드 아웃 방 생성 이후 페이드 인
         StartCoroutine(RefreshWorld(enteringRoomType, enteringRoomNumber, nextRoomTypeInfos));
+    }
+
+    IEnumerator WaitEnterRoomFinish()
+    {
+        yield return null;
     }
 
     public IEnumerator RefreshWorld(int enteringRoomType, int enteringRoomNumber, int[] nextRoomTypeInfos)
@@ -203,6 +223,7 @@ public class CPortalManager : DestroyableSingleton<CPortalManager>
         CPlayerCommand.instance.Teleport(1, new Vector3(0, 1, 4));
         CPlayerCommand.instance.Teleport(2, new Vector3(4, 1, 0));
         CPlayerCommand.instance.Teleport(3, new Vector3(4, 1, 4));
+        CController.instance.IsEventable = true;
     }
 
     //public IEnumerator RefreshWorld()

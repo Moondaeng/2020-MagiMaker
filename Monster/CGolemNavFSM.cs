@@ -53,6 +53,7 @@ public class CGolemNavFSM : CEnemyNavFSM
         mc._creator = gameObject;
         mc._isPenetrated = false;
     }
+    void OnHold() { }
     void OffHold() { _shooting = true; }
     void CreateWarning()
     {

@@ -113,6 +113,7 @@ namespace Network
             // 포탈 관련
             UsePortalEvent += SendUsePortal;
             PortalVoteEvent += SendPortalVote;
+            CPortalManager.instance.WaitEnterRoom.AddListener(SendWaitEntering);
             CPortalManager.instance.EnterNextRoom.AddListener(SendEnterNextRoom);
 
             if (CClientInfo.JoinRoom.IsHost)
@@ -147,6 +148,7 @@ namespace Network
             // 돈 획득 바로하는 코드
             //EarnMoneyEvent.AddListener(_playerCommand.EarnMoneyAllCharacter);
             // 포탈 바로 이동하는 코드
+            CPortalManager.instance.WaitEnterRoom.AddListener(CPortalManager.instance.WaitEntering);
             CPortalManager.instance.EnterNextRoom.AddListener(CPortalManager.instance.MoveToNextRoom);
         }
 
@@ -217,6 +219,13 @@ namespace Network
         public static void SendPortalVote(int accept)
         {
             var packet = CPacketFactory.CreatePortalVote(accept);
+
+            CTcpClient.instance.Send(packet.data);
+        }
+
+        public static void SendWaitEntering()
+        {
+            var packet = CPacketFactory.CreateWaitEntering();
 
             CTcpClient.instance.Send(packet.data);
         }

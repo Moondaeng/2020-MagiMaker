@@ -9,7 +9,7 @@ public class CGolemFSM : CEnemyFSM
     [SerializeField] GameObject _hand;
     [SerializeField] GameObject _rock;
     GameObject Rock;
-    ThrowObject RockScript;
+    CThrowObject RockScript;
     CMonstermeleeChecker AttackTrail;
     bool _holding;
     bool _shooting;
@@ -100,10 +100,10 @@ public class CGolemFSM : CEnemyFSM
     private void CreateRock()
     {
         Rock = Instantiate(_rock, _hand.transform.position, Quaternion.identity) as GameObject;
-        RockScript = Rock.GetComponent<ThrowObject>();
-        RockScript.Target = _player.transform;
-        RockScript.Projectile = Rock.transform;
-        RockScript._myTransform = _hand.transform;
+        RockScript = Rock.GetComponent<CThrowObject>();
+        RockScript._target = _player.transform;
+        //RockScript.Projectile = Rock.transform;
+        //RockScript._myTransform = _hand.transform;
     }
 
     private void OnHold()
