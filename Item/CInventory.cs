@@ -9,7 +9,8 @@ public class ChangeConsumableEvent : UnityEvent<Sprite, string, int> { }
 [System.Serializable]
 public class CInventory
 {
-    public UnityEvent addItemEvent = new UnityEvent();
+    public class AddItemEvent : UnityEvent<int> { }
+    public AddItemEvent addItemEvent = new AddItemEvent();
 
     [System.Serializable]
     public class ConsumableWithStack
@@ -61,6 +62,7 @@ public class CInventory
             return _equipAbilityIncreaseSizeArr[(int)Item.EEquipAbility.Attack];
         }
     }
+
     public int AtkPercentIncreaseSize
     {
         get
@@ -164,9 +166,9 @@ public class CInventory
         _equipItems.Add(newEquip);
         AddEquipAbility(newEquip);
 
-        addItemEvent.Invoke();
+        addItemEvent.Invoke(newEquip.ItemCode);
         Debug.Log("Success add equip");
-        Debug.Log(_inventoryUser.GetComponent<CPlayerPara>().TotalAttackMin);
+        Debug.Log(CPlayerPara.instance.TotalAttackMin);
 
         return true;
     }

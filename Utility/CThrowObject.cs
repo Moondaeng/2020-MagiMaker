@@ -54,6 +54,11 @@ public class CThrowObject : MonoBehaviour
         StartCoroutine(Dest(1f));
     }
 
+    void Explosion()
+    {
+
+    }
+
     IEnumerator Dest(float seconds)
     {
         yield return new WaitForSeconds(seconds);

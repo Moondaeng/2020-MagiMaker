@@ -41,7 +41,7 @@ namespace Item
         SkillCoolTime,
         DamageReduceRate,
         SkillRange,
-        AttackPercent,
+        AttackPercent
     }
 
     /// <summary>
@@ -61,7 +61,7 @@ namespace Item
             {EEquipAbility.SkillCoolTime, "스킬 쿨다운 감소"},
             {EEquipAbility.DamageReduceRate, "받는 데미지 감소"},
             {EEquipAbility.SkillRange, "스킬 사거리"},
-            {EEquipAbility.AttackPercent, "공격력 퍼센트"},
+            {EEquipAbility.AttackPercent, "공격력 퍼센트" }
         };
 
         /// <summary>

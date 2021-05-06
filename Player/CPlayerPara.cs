@@ -14,12 +14,18 @@ public class CPlayerPara : CharacterPara
     [SerializeField]
     public CInventory Inventory;
 
+    //debug용
+    public static CPlayerPara instance = null;
+
     // ((캐릭터 공격력 * 공격력 증가) + 장비 공격력) * 버프로 올라가는 공격력 %
     public override int TotalAttackMin
     {
         get
         {
-            return (int)((_attackMin + Inventory.EquipAtkIncreaseSize)
+            Debug.Log("AttackMin = " + (int)((_attackMin + Inventory.EquipAtkIncreaseSize + _attackMin * Inventory.AtkPercentIncreaseSize / 100)
+              * _buffCoef[(int)EBuffAbility.Attack] * _debuffCoef[(int)EBuffAbility.Attack]));
+
+            return (int)((_attackMin + Inventory.EquipAtkIncreaseSize + _attackMin * Inventory.AtkPercentIncreaseSize / 100)
               * _buffCoef[(int)EBuffAbility.Attack] * _debuffCoef[(int)EBuffAbility.Attack]);
         }
     }
@@ -27,7 +33,7 @@ public class CPlayerPara : CharacterPara
     {
         get
         {
-            return (int)((_attackMax + Inventory.EquipAtkIncreaseSize)
+            return (int)((_attackMax + Inventory.EquipAtkIncreaseSize + _attackMax * Inventory.AtkPercentIncreaseSize / 100)
               * _buffCoef[(int)EBuffAbility.Attack] * _debuffCoef[(int)EBuffAbility.Attack]);
         }
     }
@@ -47,7 +53,6 @@ public class CPlayerPara : CharacterPara
     {
         get { return (int)(Inventory.HpRegenIncreaseSize); }
     }
-
     public override int CurrentHp
     {
         protected set
@@ -61,7 +66,6 @@ public class CPlayerPara : CharacterPara
     {
         base.Awake();
         Inventory = new CInventory(gameObject);
-        
     }
 
     public override void InitPara()

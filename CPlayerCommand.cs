@@ -268,6 +268,25 @@ public class CPlayerCommand : MonoBehaviour
         //charStat.buffParameter.Buff(CBuffList.AttackBuff, buffTime, buffScale);
     }
 
+    #region 아이템 처리
+    public void EarnItem(int charID, int itemCode)
+    {
+        var character = players?[charID];
+        if (character == null) return;
+
+        var item = CItemManager.instance.GetItemInfo(itemCode);
+        Debug.Log($"player {charID} earn item {item.ItemName}");
+        if (item is Item.CEquip)
+        {
+            character.GetComponent<CPlayerPara>().Inventory.AddEquip(item as Item.CEquip);
+        }
+        else if (item is Item.CConsumable)
+        {
+            character.GetComponent<CPlayerPara>().Inventory.AddConsumableItem(item as Item.CConsumable);
+        }
+    }
+    #endregion
+
     #region 골드 처리
     public void EarnMoneyAllCharacter(int amount)
     {

@@ -55,6 +55,11 @@ namespace Network
             EnterNextRoom = 604,
         }
 
+        enum EItem
+        {
+            EarnItem = 801,
+        }
+
         enum EDebug
         {
             ChangePlayer = 1000,
@@ -414,6 +419,19 @@ namespace Network
         }
         #endregion
 
+        #region Item
+        public static CPacket CreateEarnItem(int itemCode)
+        {
+            byte messageSize = 4;
+
+            CPacket packet = new CPacket((int)messageSize);
+
+            packet.WriteHeader(messageSize, (int)EItem.EarnItem);
+            packet.Write(itemCode);
+
+            return packet;
+        }
+        #endregion
 
         public static CPacket CreateReturnLobby(bool isHost)
         {

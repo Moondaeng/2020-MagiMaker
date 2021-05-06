@@ -30,6 +30,8 @@ namespace Network
             [652] = InterpretUsePortal,
             [653] = InterpretWaitEnterNextRoom,
             [654] = InterpretEnterNextRoom,
+            // 아이템
+            [851] = EarnItem,
             // 시스템
             [951] = InterpretReturnLobby,
             [952] = InterpretQuitGame,
@@ -234,6 +236,15 @@ namespace Network
         }
         #endregion
 
+        #region Item
+        private static void EarnItem(CPacket packet)
+        {
+            Debug.Log("Interpret Earn Item");
+            int charID = packet.ReadInt32();
+            int itemCode = packet.ReadInt32();
+            CPlayerCommand.instance.EarnItem(charID, itemCode);
+        }
+        #endregion
 
         #region System
         private static void InterpretReturnLobby(CPacket packet)

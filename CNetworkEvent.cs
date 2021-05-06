@@ -255,6 +255,15 @@ namespace Network
         }
         #endregion
 
+        #region Item
+        private static void SendEarnItem(int itemCode)
+        {
+            Debug.Log("Send Earn Item");
+            var message = CPacketFactory.CreateEarnItem(itemCode);
+            CTcpClient.instance.Send(message.data);
+        }
+        #endregion
+
         private void SendLodingFinish()
         {
             Debug.Log("Send Loading Finish Message");

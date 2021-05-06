@@ -8,5 +8,6 @@ public class CRewardChoiceEventRoom0_5 : CRewardChoicePopupController
     override public void Start()
     {
         base.Start();
+        CEventRoomNpcClick.instance.ChangePopUp(gameObject);
     }
 }

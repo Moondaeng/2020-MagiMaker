@@ -197,9 +197,9 @@ public class CCreateMap : MonoBehaviour
 
         MakeNextRoomTypeInfos(_roomCount + 1);
         return new int[] {
-            (int)nextRoomTypeArr[0],  
-            (int)nextRoomTypeArr[1],  
-            (int)nextRoomTypeArr[2],  
+            (int)nextRoomTypeArr[0],
+            (int)nextRoomTypeArr[1],
+            (int)nextRoomTypeArr[2],
         };
     }
 
@@ -293,7 +293,7 @@ public class CCreateMap : MonoBehaviour
     {
         if (roomType == ERoomType._event ||
             roomType == ERoomType._elite ||
-            roomType == ERoomType._normal || 
+            roomType == ERoomType._normal ||
             roomType == ERoomType._shop)
         {
             UserSelectRoom = roomType;

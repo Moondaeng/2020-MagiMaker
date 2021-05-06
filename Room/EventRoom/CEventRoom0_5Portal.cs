@@ -12,6 +12,7 @@ public class CEventRoom0_5Portal : MonoBehaviour
     {
         _npc = GameObject.Find("NPC");
         _npcPopUp = CEventRoomNpcClick.instance._popUp;
+        Debug.Log(_npcPopUp + " = _npcPopUp");
         _presentPosition = transform.position;
         transform.position = new Vector3(1000, 1000, 1000);
     }

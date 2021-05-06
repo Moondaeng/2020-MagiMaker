@@ -60,12 +60,7 @@ public class CTestController : MonoBehaviour
             [KeyCode.M]         = () => CPortalManager.instance.SetPortalUseSelect(_selectedCharacterNumber, CPortalManager.EPortalVote.Accept),
             [KeyCode.Comma]     = () => CPortalManager.instance.SetPortalUseSelect(_selectedCharacterNumber, CPortalManager.EPortalVote.Cancel),
             // Item
-            [KeyCode.KeypadPlus] = () => CItemManager.SetItemToDropState(
-                    CItemManager.instance.PopRandomItemByGrade(CItemManager.EItemGrade.Normal, CConstants.EQUIP_ITEM_TYPE),
-                    GetHitPoint()),
-            [KeyCode.KeypadMinus] = () => CItemManager.SetItemToDropState(
-                    CItemManager.instance.PopRandomItemByGrade(CItemManager.EItemGrade.Normal, CConstants.CONSUM_ITEM_TYPE),
-                    GetHitPoint()),
+            [KeyCode.KeypadPlus] = () => commander.EarnItem(_selectedCharacterNumber, 1),
         };
 
         _monsterControlDictionary = new Dictionary<KeyCode, Action>
@@ -84,6 +79,13 @@ public class CTestController : MonoBehaviour
             [KeyCode.U] = () => CCreateMap.instance.MakePortalText(),
             [KeyCode.I] = () => CCreateMap.instance.CreateNextRoomsInfo(),
             [KeyCode.O] = () => CCreateMap.instance.PrintCurrentRoomInfo(),
+            // 아이템
+            [KeyCode.KeypadPlus] = () => CItemManager.SetItemToDropState(
+                    CItemManager.instance.PopRandomItemByGrade(CItemManager.EItemGrade.Normal, CConstants.EQUIP_ITEM_TYPE),
+                    GetHitPoint()),
+            [KeyCode.KeypadMinus] = () => CItemManager.SetItemToDropState(
+                    CItemManager.instance.PopRandomItemByGrade(CItemManager.EItemGrade.Normal, CConstants.CONSUM_ITEM_TYPE),
+                    GetHitPoint()),
         };
 
         _selectedDictionary = _characterControlDictionary;
